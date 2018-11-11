@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Share_With__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Share With</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Users</fullName>
+                <default>true</default>
+                <label>Users</label>
+            </value>
+            <value>
+                <fullName>Roles</fullName>
+                <default>false</default>
+                <label>Roles</label>
+            </value>
+            <value>
+                <fullName>Roles and Internal Subordinates</fullName>
+                <default>false</default>
+                <label>Roles and Internal Subordinates</label>
+            </value>
+            <value>
+                <fullName>Public Groups</fullName>
+                <default>false</default>
+                <label>Public Groups</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

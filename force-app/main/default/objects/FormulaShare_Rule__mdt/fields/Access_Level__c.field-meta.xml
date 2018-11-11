@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Access_Level__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Access Level</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Read</fullName>
+                <default>true</default>
+                <label>Read</label>
+            </value>
+            <value>
+                <fullName>Edit</fullName>
+                <default>false</default>
+                <label>Edit</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

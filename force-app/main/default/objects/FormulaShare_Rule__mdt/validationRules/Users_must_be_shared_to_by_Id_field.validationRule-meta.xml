@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Users_must_be_shared_to_by_Id_field</fullName>
+    <active>true</active>
+    <errorConditionFormula>ISPICKVAL(Shared_To_Field_Type__c,&#39;Name&#39;) &amp;&amp;  ISPICKVAL(Share_With__c,&#39;Users&#39;)</errorConditionFormula>
+    <errorDisplayField>Shared_To_Field_Type__c</errorDisplayField>
+    <errorMessage>Rules sharing to users must be based on a field returning the user Id (either a lookup or formula field)</errorMessage>
+</ValidationRule>

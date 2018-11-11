@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Remove_Shares_for_Standard_Objects__c</fullName>
+    <defaultValue>false</defaultValue>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>If checked, sharing on standard objects granted by FormulaShare will be revoked if no longer valid, BUT ALSO means all manual and managed sharing on these objects will be removed by FormulaShare. Use only if manual and other managed sharing not required</inlineHelpText>
+    <label>Remove Shares for Standard Objects</label>
+    <type>Checkbox</type>
+</CustomField>
