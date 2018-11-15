@@ -21,8 +21,6 @@
 
 public with sharing class FormulaShareUtilities {
 
-	public class FormulaShareException extends Exception{}
-
 
 	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, SOBjectType type) {
 		Map<String, SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
@@ -44,7 +42,7 @@ public with sharing class FormulaShareUtilities {
 		}
 		return null;	// We should have found a field with this relationship name, but return null if not
 	}
-
+	
 
 	public static SObjectType getShareObject(SObjectType type) {
 		SObjectType shareObject;
@@ -59,6 +57,15 @@ public with sharing class FormulaShareUtilities {
 		shareObject = Schema.getGlobalDescribe().get(typeName+'Share');
 		
 		return shareObject;
+	}
+
+
+	public static String get15CharacterId(Id longId) {
+		if(longId != null) {
+			String shortId = ((String) longId).left(15);
+			return shortId;
+		}
+		else return null;
 	}
 
 
@@ -142,14 +149,5 @@ public with sharing class FormulaShareUtilities {
         queryString = queryString.substringBeforeLast(',');
         return queryString;
     }
-
-
-	public static String get15CharacterId(Id longId) {
-		if(longId != null) {
-			String shortId = ((String) longId).left(15);
-			return shortId;
-		}
-		else return null;
-	}
 
 }

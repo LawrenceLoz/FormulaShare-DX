@@ -60,11 +60,10 @@ public with sharing class FormulaShareService {
 			for(SObject newRecord : newRecords.values()) {
 				SObject oldRecord = existingRecords.get((Id) newRecord.get('Id'));
 				
-				for(FormulaShare_Rule__mdt rule : fsWrapper.typeRules.rules) {
-					String sharedTo = rule.Shared_To_Field__c;
+				for(FSRule rule : fsWrapper.rules) {
 
 					// Submit to recalculate only if relevant field has changed and rule is active
-					if(oldRecord.get(sharedTo) != newRecord.get(sharedTo) && rule.Active__c) {
+					if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName) && rule.active) {
 						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
 					}
 				}
@@ -88,12 +87,12 @@ public with sharing class FormulaShareService {
 		Boolean removeExistingShares = true;
 
 		// Retrieve current record shares if type in scope is a custom object
-		if(fsWrapper.typeRules.type.getDescribe().isCustom()) {
+		if(fsWrapper.type.getDescribe().isCustom()) {
 			
 			// Get all relevant row causes (aka apex sharing reasons) used in rules
 			Set<String> rowCauseSet = new Set<String>();
-			for(FormulaShare_Rule__mdt rule : fsWrapper.typeRules.rules) {
-				rowCauseSet.add(rule.Sharing_Reason__c);
+			for(FSRule rule : fsWrapper.rules) {
+				rowCauseSet.add(rule.sharingReason);
 			}
 
 			String sharesQueryStringCustom = buildShareQueryCustom(fsWrapper, rowCauseSet);
@@ -116,7 +115,7 @@ public with sharing class FormulaShareService {
 			// Create map of all record shares with unique key
 			// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
 			for(SObject share : sharesQueryResultStandard) {
-				String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(fsWrapper.typeRules.type, share);
+				String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(fsWrapper.type, share);
 				fsWrapper.mapToDelete.put(shareKey, share);
 			}
 
@@ -155,8 +154,10 @@ public with sharing class FormulaShareService {
 
 	public static void assessRequiredShares(FormulaShareWrapper fsWrapper) {
 		
+		Set<Id> userQueryIdSet = new Set<Id>();
 		Set<Id> roleQueryIdSet = new Set<Id>();
 
+		Set<SObjectRule> userRecordRules = new Set<SObjectRule>();
 		Set<SObjectRule> roleRecordRules = new Set<SObjectRule>();
 		Set<SObjectRule> groupRecordRules = new Set<SObjectRule>();
 
@@ -165,23 +166,21 @@ public with sharing class FormulaShareService {
 
 		for(SObject record : fsWrapper.recordsMap.values()) {
 			
-			for(FormulaShare_Rule__mdt rule : fsWrapper.typeRules.rules) {
-			String sharedToString = (String) record.get(rule.Shared_To_Field__c);
+			for(FSRule rule : fsWrapper.rules) {
+			String sharedToString = (String) record.get(rule.sharedToAPIName);
 				
 				// Only need to check records where sharing field is populated and where rule is active
-				if(!String.isBlank(sharedToString) && rule.Active__c) {
+				if(!String.isBlank(sharedToString) && rule.active) {
 					try {
 
 						// Add User Id to map
-						if(rule.Share_With__c == 'Users') {
+						if(rule.shareWith == 'Users') {
 							if(FormulaShareUtilities.isValidIdType(sharedToString, Schema.User.getSObjectType())) {
-
-								// Attempt to create a share record only if user isn't the record owner
-								if((Id) sharedToString != record.get('OwnerId')) {
-									updateShareMaps(record.Id, (Id) sharedToString, rule, fsWrapper);
-								}
-
-								else system.debug('Not necessary to share record with owner');
+								userQueryIdSet.add((Id) sharedToString);
+								SObjectRule recordRule = new SObjectRule();
+								recordRule.obj = record;
+								recordRule.rule = rule;
+								userRecordRules.add(recordRule);
 							}
 							else {
 								throw new FormulaShareException();
@@ -189,12 +188,12 @@ public with sharing class FormulaShareService {
 						}
 
 						// Add Group Id to map
-						else if(rule.Share_With__c == 'Public Groups') {
-							if(rule.Shared_To_Field_Type__c == 'Id' &&
+						else if(rule.shareWith == 'Public Groups') {
+							if(rule.sharedToFieldType == 'Id' &&
 								FormulaShareUtilities.isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
 								updateShareMaps(record.Id, (Id) sharedToString, rule, fsWrapper);
 							}
-							else if(rule.Shared_To_Field_Type__c == 'Name') {
+							else if(rule.sharedToFieldType == 'Name') {
 								sharedToNamesGroups.add(sharedToString);
 								SObjectRule recordRule = new SObjectRule();
 								recordRule.obj = record;
@@ -207,12 +206,12 @@ public with sharing class FormulaShareService {
 						}
 
 						// Add Role Id to role group query set
-						else if(rule.Share_With__c == 'Roles' || rule.Share_With__c == 'Roles and Internal Subordinates') {
-							if(rule.Shared_To_Field_Type__c == 'Id' &&
+						else if(rule.shareWith == 'Roles' || rule.shareWith == 'Roles and Internal Subordinates') {
+							if(rule.sharedToFieldType == 'Id' &&
 								FormulaShareUtilities.isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
 								roleQueryIdSet.add((Id) sharedToString);
 							}
-							else if(rule.Shared_To_Field_Type__c == 'Name') {
+							else if(rule.sharedToFieldType == 'Name') {
 								sharedToNamesRoles.add(sharedToString);
 							}
 							else {
@@ -224,21 +223,26 @@ public with sharing class FormulaShareService {
 							roleRecordRules.add(recordRule);
 						}
 
-						else system.debug('Share With value ' + rule.Share_With__c + ' does not match allowed options');
+						else system.debug('Share With value ' + rule.shareWith + ' does not match allowed options');
 
 					}
 					catch(FormulaShareException e) {
-						system.debug('Expected Id entity relevant to type ' + rule.Share_With__c
-						+ ' in field ' + rule.Shared_To_Field__c
-						+ ' on object ' + rule.Shared_Object__c
+						system.debug('Expected Id entity relevant to type ' + rule.shareWith
+						+ ' in field ' + rule.sharedToAPIName
+						+ ' on object ' + rule.objectSharedAPIName
 						+ '. For record ' + record.Id
 						+ ' instead found value ' + sharedToString);
 					}
 				}
 			}
 		}
+
+		// Process user sharing
+		if(!userRecordRules.isEmpty()) {
+			assessUserSharingFromIds(userQueryIdSet, userRecordRules, fsWrapper);
+		}
 		
-		// Process group sharing from group names if needed
+		// Process group sharing
 		if(!sharedToNamesGroups.isEmpty()) {
 			assessGroupSharingFromNames(sharedToNamesGroups, groupRecordRules, fsWrapper);
 		}
@@ -253,11 +257,32 @@ public with sharing class FormulaShareService {
 			}
 		}
 
-		// Process sharing for all role and/or role and subordinate records
+		// Process role and/or role and subordinate sharing
 		if(!roleQueryIdSet.isEmpty() || !roleNamesToIdsMap.isEmpty()) {
 			assessRoleSharing(roleQueryIdSet, roleRecordRules
 				, roleNamesToIdsMap, fsWrapper);
 		}
+	}
+
+
+	public static void assessUserSharingFromIds(Set<Id> userQueryIdSet, Set<SObjectRule> userRecordRules, FormulaShareWrapper fsWrapper) {
+		
+		Set<Id> activeUsersIdSet = getActiveUsers(userQueryIdSet);
+
+		for(SObjectRule recordRule : userRecordRules) {
+			Id userId = (Id) recordRule.obj.get(recordRule.rule.sharedToAPIName);
+
+			// If user is active and not already the record owner then create sharing record
+			if(activeUsersIdSet.contains(userId) && userId != recordRule.obj.get('OwnerId')) {
+				updateShareMaps(recordRule.obj.Id, userId, recordRule.rule, fsWrapper);
+			}
+		}
+	}
+
+
+	public static Set<Id> getActiveUsers(Set<Id> userQueryIdSet) {
+		Map<Id,User> activeUserMap = new Map<Id,User>([SELECT Id FROM User WHERE Id IN :userQueryIdSet AND IsActive = TRUE]);
+		return activeUserMap.keySet();
 	}
 
 
@@ -266,7 +291,7 @@ public with sharing class FormulaShareService {
 		Map<String,Id> groupsMap = getGroupsFromNames(groupNames);
 
 		for(SObjectRule recordRule : groupRecordRules) {
-			String sharedToName = (String) recordRule.obj.get(recordRule.rule.Shared_To_Field__c);
+			String sharedToName = (String) recordRule.obj.get(recordRule.rule.sharedToAPIName);
 			Id groupId = groupsMap.get(sharedToName);
 
 			if(groupId != null) {
@@ -312,25 +337,25 @@ public with sharing class FormulaShareService {
 		// Update sharing maps to create or keep role shares
 		for(SObjectRule recordRule : roleRecordRules) {
 
-			String sharedTo = (String) recordRule.obj.get(recordRule.rule.Shared_To_Field__c);
+			String sharedTo = (String) recordRule.obj.get(recordRule.rule.sharedToAPIName);
 			Id sharedToId = null;
 			Id roleGroupId = null;
 
-			if(recordRule.rule.Shared_To_Field_Type__c == 'Name') {
+			if(recordRule.rule.sharedToFieldType == 'Name') {
 				sharedToId = roleNamesToIdsMap.get(sharedTo);
 			}
 
-			else if(recordRule.rule.Shared_To_Field_Type__c == 'Id') {
+			else if(recordRule.rule.sharedToFieldType == 'Id') {
 				sharedToId = (Id) sharedTo;
 			}
 
 			String shortSharedToId = FormulaShareUtilities.get15CharacterId(sharedToId);
 
-			if(recordRule.rule.Share_With__c == 'Roles') {
+			if(recordRule.rule.shareWith == 'Roles') {
 				roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
 			}
 
-			else if(recordRule.rule.Share_With__c == 'Roles and Internal Subordinates') {
+			else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
 				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
 			}
 
@@ -339,10 +364,10 @@ public with sharing class FormulaShareService {
 	}
 
 
-	public static void updateShareMaps(Id recordId, Id sharedTo, FormulaShare_Rule__mdt rule, FormulaShareWrapper fsWrapper) {
+	public static void updateShareMaps(Id recordId, Id sharedTo, FSRule rule, FormulaShareWrapper fsWrapper) {
 		
 		// For custom objects, check whether sharing record for this sharing reason exists at correct access level
-		if(fsWrapper.typeRules.type.getDescribe().isCustom()) {
+		if(fsWrapper.type.getDescribe().isCustom()) {
 			updateShareMapsCustom(recordId, sharedTo, rule, fsWrapper);
 		}
 
@@ -353,11 +378,11 @@ public with sharing class FormulaShareService {
 	}
 
 
-	public static void updateShareMapsCustom(Id recordId, Id sharedTo, FormulaShare_Rule__mdt rule, FormulaShareWrapper fsWrapper) {
+	public static void updateShareMapsCustom(Id recordId, Id sharedTo, FSRule rule, FormulaShareWrapper fsWrapper) {
 		String shareKey = FormulaShareUtilities.get15CharacterId(recordId)
 			 + FormulaShareUtilities.get15CharacterId(sharedTo) 
-			 + rule.Access_Level__c
-			 + rule.Sharing_Reason__c;
+			 + rule.accessLevel
+			 + rule.sharingReason;
 		
 		// If share record exists already, remove from map to be deleted
 		if(fsWrapper.mapToDelete.get(shareKey) != null) {
@@ -366,13 +391,13 @@ public with sharing class FormulaShareService {
 
 		// Otherwise add to map to be inserted
 		else {
-			SObject newShare = getShareRecordCustom(fsWrapper.typeRules.type, recordId, sharedTo, rule);
+			SObject newShare = getShareRecordCustom(fsWrapper.type, recordId, sharedTo, rule);
 			fsWrapper.setToInsert.add(newShare);
 		}
 	}
 
 
-	public static void updateShareMapsStandard(Id recordId, Id sharedTo, FormulaShare_Rule__mdt rule, FormulaShareWrapper fsWrapper) {
+	public static void updateShareMapsStandard(Id recordId, Id sharedTo, FSRule rule, FormulaShareWrapper fsWrapper) {
 
 		// Check whether we have any shares for this record already
 		String shareKeyBase = FormulaShareUtilities.get15CharacterId(recordId) + FormulaShareUtilities.get15CharacterId(sharedTo);
@@ -398,27 +423,27 @@ public with sharing class FormulaShareService {
 		else if(fsWrapper.mapToDelete.get(shareKeyRead) != null) {
 
 			// If rule's access level is Read, keep this record
-			if(rule.Access_Level__c == 'Read') {
+			if(rule.accessLevel == 'Read') {
 				fsWrapper.mapToDelete.remove(shareKeyRead);
 			}
 
 			// Otherwise add higher level share to be inserted
 			else {
-				SObject newShare = getShareRecordStandard(fsWrapper.typeRules.type, recordId, sharedTo, rule);
+				SObject newShare = getShareRecordStandard(fsWrapper.type, recordId, sharedTo, rule);
 				fsWrapper.setToInsert.add(newShare);
 			}
 		}
 
 		// If no share found, add to be created
 		else {
-				SObject newShare = getShareRecordStandard(fsWrapper.typeRules.type, recordId, sharedTo, rule);
+				SObject newShare = getShareRecordStandard(fsWrapper.type, recordId, sharedTo, rule);
 				fsWrapper.setToInsert.add(newShare);
 		}
 	}
 
 
 	public static String buildShareQueryCustom(FormulaShareWrapper fsWrapper, Set<String> rowCauseSet) {
-		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.typeRules.type);
+		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
 		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
 		String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(rowCauseSet);
 		String queryString = 'SELECT Id, UserOrGroupId, ParentId, AccessLevel, RowCause'
@@ -430,8 +455,8 @@ public with sharing class FormulaShareService {
 
 
 	public static String buildShareQueryStandard(FormulaShareWrapper fsWrapper) {
-		String objectName = fsWrapper.typeRules.type.getDescribe().getName();
-		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.typeRules.type);
+		String objectName = fsWrapper.type.getDescribe().getName();
+		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
 		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
 		String queryString = 'SELECT Id, UserOrGroupId, ' + objectName + 'Id, ' + objectName + 'AccessLevel'
 			+' FROM ' + shareObjectType
@@ -440,21 +465,21 @@ public with sharing class FormulaShareService {
 	}
 
 
-	public static SObject getShareRecordCustom(Schema.SObjectType type, Id recordId, Id sharedTo, FormulaShare_Rule__mdt rule) {
+	public static SObject getShareRecordCustom(Schema.SObjectType type, Id recordId, Id sharedTo, FSRule rule) {
 		Schema.SObjectType shareType = FormulaShareUtilities.getShareObject(type);
 		SObject newShare = shareType.newSObject();
-		newShare.put('AccessLevel',rule.Access_Level__c);
+		newShare.put('AccessLevel',rule.accessLevel);
 		newShare.put('ParentId',recordId);
-		newShare.put('RowCause',rule.Sharing_Reason__c);
+		newShare.put('RowCause',rule.sharingReason);
 		newShare.put('UserOrGroupId',sharedTo);
 		return newShare;
 	}
 
 
-	public static SObject getShareRecordStandard(Schema.SObjectType type, Id recordId, Id sharedTo, FormulaShare_Rule__mdt rule) {
+	public static SObject getShareRecordStandard(Schema.SObjectType type, Id recordId, Id sharedTo, FSRule rule) {
 		Schema.SObjectType shareType = FormulaShareUtilities.getShareObject(type);
 		SObject newShare = shareType.newSObject();
-		newShare.put(type + 'AccessLevel',rule.Access_Level__c);
+		newShare.put(type + 'AccessLevel',rule.accessLevel);
 		newShare.put(type + 'Id',recordId);
 //		newShare.put('RowCause','Manual');		// Only reason supported for standard objects is manual (set by default)
 		newShare.put('UserOrGroupId',sharedTo);
@@ -463,12 +488,11 @@ public with sharing class FormulaShareService {
 
 
 	// Used by batch job
-	public static String getFullObjectQuery(RulesForTypeWrapper typeRules) {
-		String objectName = typeRules.type.getDescribe().getName();
+	public static String getFullObjectQuery(Schema.sObjectType type, List<FSRule> rules) {
+		String objectName = type.getDescribe().getName();
 		Set<String> sharedToFieldSet = new Set<String>();
-		for(FormulaShare_Rule__mdt rule : typeRules.rules) {
-			String sharedTo = rule.Shared_To_Field__c;
-			sharedToFieldSet.add(sharedTo);
+		for(FSRule rule : rules) {
+			sharedToFieldSet.add(rule.sharedToAPIName);
 		}
 		String query = 'SELECT Id, OwnerId, ' + FormulaShareUtilities.buildStringFromSetNoQuotes(sharedToFieldSet)
 			+ ' FROM ' + objectName;
@@ -477,67 +501,41 @@ public with sharing class FormulaShareService {
 	}
 
 
-	public class FormulaShareWrapper {
-		public RulesForTypeWrapper typeRules;
-		public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
-		public Map<String,SObject> mapToDelete = new Map<String,SObject>();
-		public Set<SObject> setToInsert = new Set<SObject>();
-		public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+	public static List<FSRule> getRulesSharingObject(Schema.sObjectType type) {
 
-		// Set typeRules if provided
-		public FormulaShareWrapper(RulesForTypeWrapper typeRules) {
-			this.typeRules = typeRules;
-		}
-
-		// Or call RulesForTypeWrapper constructor if only type provided
-		public FormulaShareWrapper(Schema.SObjectType type) {
-			RulesForTypeWrapper newTypeRules = new RulesForTypeWrapper(type);
-			this.typeRules = newTypeRules;
-		}
-
-	}
-
-
-	public class RulesForTypeWrapper {
-		public Schema.SObjectType type;
-		public List<FormulaShare_Rule__mdt> rules;
-
-		// Set type and find relevant rules on creation
-		public RulesForTypeWrapper(Schema.SObjectType type) {
-			this.type = type;
-			this.rules = getRulesSharingObject(type);
-			system.debug('fsWrapper rules populated: '+rules);
-		}	
-	}
-
-
-	private class SObjectRule {
-		SObject obj;
-		FormulaShare_Rule__mdt rule;
-	}
-
-
-	public static List<FormulaShare_Rule__mdt> getRulesSharingObject(Schema.sObjectType type) {
+		List<FSRule> rulesToReturn = new List<FSRule>();
 
 		String objectName = type.getDescribe().getName();
 
 		// Create list of all jobs with relevant details for assessing scope
-		List<FormulaShare_Rule__mdt> rulesSharingObject =
-			[SELECT Id, Access_Level__c, Shared_Object__c, Shared_To_Field__c, 
+		for(FormulaShare_Rule__mdt ruleInScope :
+			[SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
 			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
 			FROM FormulaShare_Rule__mdt
-			WHERE Shared_Object__c = :objectName];
+			WHERE Object_Shared__r.QualifiedApiName = :objectName]) {
+				
+				FSRule rule = new FSRule();
+				rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
+				rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
+				rule.shareWith = ruleInScope.Share_With__c;
+				rule.accessLevel = ruleInScope.Access_Level__c;
+				rule.active = ruleInScope.Active__c;
+				rule.sharedToFieldType = ruleInScope.Shared_To_Field_Type__c;
+				rule.sharingReason = ruleInScope.Sharing_Reason__c;
+				rulesToReturn.add(rule);
+			}
 
-		system.debug('All rules sharing object: '+rulesSharingObject);
+		system.debug('All rules sharing object: '+rulesToReturn);
 
-		// If running test, return a dummy FormulaShare rule to support further processing
+		// If running test, return dummy FormulaShare rules to support further processing
 		if(Test.isRunningTest()) {
-			List<FormulaShare_Rule__mdt> testRules = setTestRules();
-			rulesSharingObject.clear();
-			rulesSharingObject.addAll(testRules);
+			List<FSRule> testRules = setTestRules();
+			rulesToReturn.clear();
+			rulesToReturn.addAll(testRules);
 		}
 
-		return rulesSharingObject;
+		return rulesToReturn;
 	}
 
 
@@ -546,13 +544,12 @@ public with sharing class FormulaShareService {
 		List<SObjectType> typesList = new List<SObjectType>();
 		Set<SObjectType> typesSet = new Set<SObjectType>();
 
-		// Loop through all rules to check whether they are impacted by changes to this object
+		// Loop through all rules and populate set of shared objects
 		for(FormulaShare_Rule__mdt rule : 
-			[SELECT Shared_Object__c
+			[SELECT Object_Shared__r.QualifiedApiName
 			FROM FormulaShare_Rule__mdt
 			]) {
-			// Check whether rule shares this object
-			String objName = rule.Shared_Object__c;
+			String objName = rule.Object_Shared__r.QualifiedApiName;
 			SObjectType type = Schema.getGlobalDescribe().get(objName);
 			typesSet.add(type);
 			}
@@ -582,46 +579,86 @@ public with sharing class FormulaShareService {
 
 
 	// Return a list of dummy rules to use in test methods
-	private static List<FormulaShare_Rule__mdt> setTestRules() {
-		List<FormulaShare_Rule__mdt> testRules = new List<FormulaShare_Rule__mdt>();
+	private static List<FSRule> setTestRules() {
+		List<FSRule> testRules = new List<FSRule>();
 
-		FormulaShare_Rule__mdt testRule1 = new FormulaShare_Rule__mdt();
-		testRule1.Access_Level__c = 'Edit';
-		testRule1.Shared_Object__c = 'Contact';
-		testRule1.Shared_To_Field__c = 'FirstName';		// Will add a sharing record for the user who created the Contact
-		testRule1.Share_With__c = 'Roles';
-		testRule1.Active__c = true;
-		testRule1.Shared_To_Field_Type__c = 'Name';
+		FSRule testRule1 = new FSRule();
+		testRule1.accessLevel = 'Edit';
+		testRule1.objectSharedAPIName = 'Contact';
+		testRule1.sharedToAPIName = 'FirstName';		// Will add a sharing record for the role group for the role name in FirstName field
+		testRule1.shareWith = 'Roles';
+		testRule1.active = true;
+		testRule1.sharedToFieldType = 'Name';
 		testRules.add(testRule1);
 	
-		FormulaShare_Rule__mdt testRule2 = new FormulaShare_Rule__mdt();
-		testRule2.Access_Level__c = 'Edit';
-		testRule2.Shared_Object__c = 'Contact';
-		testRule2.Shared_To_Field__c = 'LastName';		// Will add a sharing record for the user who created the Contact
-		testRule2.Share_With__c = 'Roles and Internal Subordinates';
-		testRule2.Active__c = true;
-		testRule2.Shared_To_Field_Type__c = 'Id';
+		FSRule testRule2 = new FSRule();
+		testRule2.accessLevel = 'Edit';
+		testRule2.objectSharedAPIName = 'Contact';
+		testRule2.sharedToAPIName = 'LastName';		// Will add a sharing record for the role and subordinates group for the role Id in LastName field
+		testRule2.shareWith = 'Roles and Internal Subordinates';
+		testRule2.active = true;
+		testRule2.sharedToFieldType = 'Id';
 		testRules.add(testRule2);
 	
-		FormulaShare_Rule__mdt testRule3 = new FormulaShare_Rule__mdt();
-		testRule3.Access_Level__c = 'Edit';
-		testRule3.Shared_Object__c = 'Contact';
-		testRule3.Shared_To_Field__c = 'Description';		// Will add a sharing record for the user who created the Contact
-		testRule3.Share_With__c = 'Public Groups';
-		testRule3.Active__c = true;
-		testRule3.Shared_To_Field_Type__c = 'Name';
+		FSRule testRule3 = new FSRule();
+		testRule3.accessLevel = 'Edit';
+		testRule3.objectSharedAPIName = 'Contact';
+		testRule3.sharedToAPIName = 'Description';		// Will add a sharing record for the group name used in Description field
+		testRule3.shareWith = 'Public Groups';
+		testRule3.active = true;
+		testRule3.sharedToFieldType = 'Name';
 		testRules.add(testRule3);
 
-		FormulaShare_Rule__mdt testRule4 = new FormulaShare_Rule__mdt();
-		testRule4.Access_Level__c = 'Edit';
-		testRule4.Shared_Object__c = 'Contact';
-		testRule4.Shared_To_Field__c = 'AssistantName';		// Will add a sharing record for the user who created the Contact
-		testRule4.Share_With__c = 'Users';
-		testRule4.Active__c = true;
-		testRule4.Shared_To_Field_Type__c = 'Id';
+		FSRule testRule4 = new FSRule();
+		testRule4.accessLevel = 'Edit';
+		testRule4.objectSharedAPIName = 'Contact';
+		testRule4.sharedToAPIName = 'AssistantName';		// Will add a sharing record for Id of a user added in AssistantName field
+		testRule4.shareWith = 'Users';
+		testRule4.active = true;
+		testRule4.sharedToFieldType = 'Id';
 		testRules.add(testRule4);
 
 		return testRules;
+	}
+
+
+	// Core wrapper class passed to methods inside and outside the class
+	public class FormulaShareWrapper {
+		public Schema.SObjectType type;
+		public List<FSRule> rules;
+		public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
+		public Map<String,SObject> mapToDelete = new Map<String,SObject>();
+		public Set<SObject> setToInsert = new Set<SObject>();
+		public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+
+		// Set type and rules if provided on creation
+		public FormulaShareWrapper(Schema.SObjectType type, List<FSRule> rules) {
+			this.type = type;
+			this.rules = rules;
+		}
+
+		// Or get rules if only type provided
+		public FormulaShareWrapper(Schema.SObjectType type) {
+			this.type = type;
+			this.rules = getRulesSharingObject(type);
+		}
+	}
+
+	// Wrapper for FormulaShare rules - primitive types only so this can be populated by test classes
+	public class FSRule {
+		String objectSharedAPIName;
+		String sharedToAPIName;
+		String shareWith;
+		String accessLevel;
+		Boolean active;
+		String sharedToFieldType;
+		String sharingReason;
+	}
+
+	// Warpper for a record and a rule sharing this record
+	private class SObjectRule {
+		SObject obj;
+		FSRule rule;
 	}
 
 }

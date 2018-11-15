@@ -22,26 +22,5 @@
 @isTest
 public with sharing class FormulaShareServiceTest {
 	
-	@isTest
-	public static void recalculateAllTest() {
 
-		UserRole roleForTest = [SELECT Id, DeveloperName FROM UserRole LIMIT 1][0];
-
-		Contact con = new Contact();
-
-		// Set fields which have test rules created within apex class
-		con.FirstName = roleForTest.DeveloperName;	// Share with role (name)
-		con.LastName = roleForTest.Id;				// Share with role and subordinates (Id)
-		con.Description = 'AllInternalUsers';		// Share with group (name)
-		con.AssistantName = UserInfo.getUserId();	// Share with user (Id)
-		insert con;
-
-		test.startTest();
-		FormulaShareService.recalculateAll();
-		test.stopTest();
-
-//		contactRequery = [SELECT Id FROM Contact WHERE Id = :con.Id][0];
-		List<ContactShare> shares = [SELECT Id FROM ContactShare WHERE Id = :con.Id];
-		system.debug('SharesFound:'+shares.size());
-	}
 }

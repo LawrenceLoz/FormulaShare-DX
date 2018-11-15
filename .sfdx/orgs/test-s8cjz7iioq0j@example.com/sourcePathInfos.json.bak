@@ -1,8 +1,8 @@
 [
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541877909019,
@@ -15,9 +15,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541877909019,
@@ -30,9 +30,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541956315174,
@@ -43,9 +43,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\aura",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\aura",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\aura",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\aura",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541877909019,
@@ -58,9 +58,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541945793375,
@@ -73,9 +73,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls",
             "isDirectory": false,
             "size": 253,
             "modifiedTime": 1541946303374,
@@ -88,9 +88,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareProcessSchedulable.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878112998,
@@ -103,23 +103,23 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
         {
-            "state": "u",
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
             "isDirectory": false,
+            "size": 21911,
+            "modifiedTime": 1541962597320,
+            "changeTime": 1541962597320,
+            "contentHash": "2d46b3ef66d0ec5336fd67acbb561fbfff41a8a3",
             "isMetadataFile": false,
-            "size": 21839,
-            "modifiedTime": 1541962507485,
-            "changeTime": 1541962507485,
-            "isWorkspace": false,
-            "contentHash": "cd50838ff42d9fa3167a5469c1e6a5be873760fd"
+            "state": "u",
+            "isWorkspace": false
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113008,
@@ -132,9 +132,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls",
             "isDirectory": false,
             "size": 868,
             "modifiedTime": 1541961879100,
@@ -146,9 +146,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareServiceTest.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113025,
@@ -161,9 +161,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls",
             "isDirectory": false,
             "size": 750,
             "modifiedTime": 1541878113036,
@@ -176,9 +176,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareSettings.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113032,
@@ -191,9 +191,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls",
             "isDirectory": false,
             "size": 4173,
             "modifiedTime": 1541878113043,
@@ -206,9 +206,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareUtilities.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113040,
@@ -221,9 +221,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls",
             "isDirectory": false,
             "size": 1625,
             "modifiedTime": 1541878113050,
@@ -236,9 +236,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareBatch.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113047,
@@ -251,9 +251,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls",
             "isDirectory": false,
             "size": 373,
             "modifiedTime": 1541878113058,
@@ -266,9 +266,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\ProcessFormulaShareQueueable.cls-meta.xml",
             "isDirectory": false,
             "size": 174,
             "modifiedTime": 1541878113055,
@@ -281,9 +281,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113071,
@@ -296,9 +296,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Rule__mdt-FormulaShare Rule Layout.layout-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Rule__mdt-FormulaShare Rule Layout.layout-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Rule__mdt-FormulaShare Rule Layout.layout-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Rule__mdt-FormulaShare Rule Layout.layout-meta.xml",
             "isDirectory": false,
             "size": 3215,
             "modifiedTime": 1541878113068,
@@ -311,9 +311,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Settings__mdt-FormulaShare Settings Layout.layout-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Settings__mdt-FormulaShare Settings Layout.layout-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Settings__mdt-FormulaShare Settings Layout.layout-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\layouts\\FormulaShare_Settings__mdt-FormulaShare Settings Layout.layout-meta.xml",
             "isDirectory": false,
             "size": 2653,
             "modifiedTime": 1541878113073,
@@ -326,9 +326,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113170,
@@ -341,9 +341,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113135,
@@ -356,9 +356,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113130,
@@ -371,9 +371,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Access_Level__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Access_Level__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Access_Level__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Access_Level__c.field-meta.xml",
             "isDirectory": false,
             "size": 827,
             "modifiedTime": 1541878113100,
@@ -386,9 +386,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Active__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Active__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Active__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Active__c.field-meta.xml",
             "isDirectory": false,
             "size": 341,
             "modifiedTime": 1541878113105,
@@ -401,9 +401,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_Object__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_Object__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_Object__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_Object__c.field-meta.xml",
             "isDirectory": false,
             "size": 395,
             "modifiedTime": 1541878113117,
@@ -416,9 +416,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field_Type__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field_Type__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field_Type__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field_Type__c.field-meta.xml",
             "isDirectory": false,
             "size": 840,
             "modifiedTime": 1541878113125,
@@ -431,9 +431,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Shared_To_Field__c.field-meta.xml",
             "isDirectory": false,
             "size": 399,
             "modifiedTime": 1541878113130,
@@ -446,9 +446,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Share_With__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Share_With__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Share_With__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Share_With__c.field-meta.xml",
             "isDirectory": false,
             "size": 1219,
             "modifiedTime": 1541878113112,
@@ -461,9 +461,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Sharing_Reason__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Sharing_Reason__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Sharing_Reason__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\fields\\Sharing_Reason__c.field-meta.xml",
             "isDirectory": false,
             "size": 671,
             "modifiedTime": 1541878113135,
@@ -476,9 +476,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\FormulaShare_Rule__mdt.object-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\FormulaShare_Rule__mdt.object-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\FormulaShare_Rule__mdt.object-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\FormulaShare_Rule__mdt.object-meta.xml",
             "isDirectory": false,
             "size": 241,
             "modifiedTime": 1541878113094,
@@ -491,9 +491,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113142,
@@ -506,9 +506,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Groups_must_be_shared_to_by_Name_field.validationRule-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Groups_must_be_shared_to_by_Name_field.validationRule-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Groups_must_be_shared_to_by_Name_field.validationRule-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Groups_must_be_shared_to_by_Name_field.validationRule-meta.xml",
             "isDirectory": false,
             "size": 549,
             "modifiedTime": 1541878113141,
@@ -521,9 +521,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Users_must_be_shared_to_by_Id_field.validationRule-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Users_must_be_shared_to_by_Id_field.validationRule-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Users_must_be_shared_to_by_Id_field.validationRule-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Rule__mdt\\validationRules\\Users_must_be_shared_to_by_Id_field.validationRule-meta.xml",
             "isDirectory": false,
             "size": 568,
             "modifiedTime": 1541878113149,
@@ -536,9 +536,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113177,
@@ -551,9 +551,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541878113191,
@@ -566,9 +566,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Active__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Active__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Active__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Active__c.field-meta.xml",
             "isDirectory": false,
             "size": 429,
             "modifiedTime": 1541878113184,
@@ -581,9 +581,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Recalculation_Batch_Size__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Recalculation_Batch_Size__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Recalculation_Batch_Size__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Recalculation_Batch_Size__c.field-meta.xml",
             "isDirectory": false,
             "size": 604,
             "modifiedTime": 1541878113191,
@@ -596,9 +596,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Remove_Shares_for_Standard_Objects__c.field-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Remove_Shares_for_Standard_Objects__c.field-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Remove_Shares_for_Standard_Objects__c.field-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\fields\\Remove_Shares_for_Standard_Objects__c.field-meta.xml",
             "isDirectory": false,
             "size": 689,
             "modifiedTime": 1541878113196,
@@ -611,9 +611,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\FormulaShare_Settings__mdt.object-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\FormulaShare_Settings__mdt.object-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\FormulaShare_Settings__mdt.object-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\objects\\FormulaShare_Settings__mdt\\FormulaShare_Settings__mdt.object-meta.xml",
             "isDirectory": false,
             "size": 248,
             "modifiedTime": 1541878113176,
@@ -626,9 +626,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541948325758,
@@ -641,9 +641,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles\\topRole.role-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles\\topRole.role-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles\\topRole.role-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles\\topRole.role-meta.xml",
             "isDirectory": false,
             "size": 340,
             "modifiedTime": 1541956315155,
@@ -654,9 +654,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger-meta.xml",
             "isDirectory": false,
             "size": 178,
             "modifiedTime": 1541956315162,
@@ -667,9 +667,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers\\ContractTrigger.trigger",
             "isDirectory": false,
             "size": 180,
             "modifiedTime": 1541956315167,
@@ -680,9 +680,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Rule.Share_Contacts_with_Group.md-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Rule.Share_Contacts_with_Group.md-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Rule.Share_Contacts_with_Group.md-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Rule.Share_Contacts_with_Group.md-meta.xml",
             "isDirectory": false,
             "size": 1118,
             "modifiedTime": 1541956315178,
@@ -693,9 +693,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Settings.Default.md-meta.xml",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Settings.Default.md-meta.xml",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Settings.Default.md-meta.xml",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata\\FormulaShare_Settings.Default.md-meta.xml",
             "isDirectory": false,
             "size": 660,
             "modifiedTime": 1541956315183,
@@ -706,9 +706,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\roles",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541956315153,
@@ -719,9 +719,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\triggers",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541956315166,
@@ -732,9 +732,9 @@
         }
     ],
     [
-        "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata",
+        "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata",
         {
-            "sourcePath": "c:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata",
+            "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\customMetadata",
             "isDirectory": true,
             "size": 0,
             "modifiedTime": 1541956315182,

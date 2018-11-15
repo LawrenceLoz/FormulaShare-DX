@@ -13,6 +13,8 @@
     "sourceApiVersion": "44.0",
     "packageAliases": {
         "FormulaShare": "0Ho1n0000004C9wCAE",
-        "FormulaShare@0.1.0-1": "04t1n000002NXeOAAW"
+        "FormulaShare@0.1.0-1": "04t1n000002NXeOAAW",
+        "FormulaShare@0.1.0-2": "04t1n000002NXlQAAW",
+        "FormulaShare@0.1.0-3": "04t1n000002NXlVAAW"
     }
 }
