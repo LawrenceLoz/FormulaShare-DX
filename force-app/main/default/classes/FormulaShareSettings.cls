@@ -35,14 +35,12 @@ public with sharing class FormulaShareSettings {
 	}
 
 	private static FormulaShare_Settings__mdt queryFormulaShareSettings() {
-		
-		List<FormulaShare_Settings__mdt> settingsList =
-			[SELECT DeveloperName, Recalculation_Batch_Size__c, Remove_Shares_for_Standard_Objects__c
-			FROM FormulaShare_Settings__mdt WHERE Active__c = true];
 
-		if(!settingsList.isEmpty()) {
+		FormulaShare_Settings__mdt settings = new FormulaShareSettingsSelector().selectActiveSettings();
+
+		if(settings != null) {
 			// Return the first active setting
-			return settingsList[0];
+			return settings;
 		}
 
 		else throw new FormulaShareException();

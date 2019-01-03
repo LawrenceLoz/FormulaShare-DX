@@ -23,20 +23,12 @@
                 <field>Active__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>Shared_To_Field__c</field>
-            </layoutItems>
-            <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Sharing_Reason__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
                 <field>Share_With__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Shared_Object__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
