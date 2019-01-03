@@ -134,14 +134,14 @@ public with sharing class FormulaShareService {
 		// Remove sharing which is no longer needed
 		if(removeExistingShares) {
 			System.debug('Sharing to be removed: '+fsWrapper.mapToDelete.values());
-			delete fsWrapper.mapToDelete.values();
+			FormulaShareDMLService.deleteShares(fsWrapper.mapToDelete.values());
 		}
 
 		// Insert new object share records
 		System.debug('Sharing to be inserted: '+fsWrapper.setToInsert);
+		List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
 		try {
-			List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
-			insert sharesToInsertList;
+			FormulaShareDMLService.insertShares(sharesToInsertList);
 		}
 
 		// Revert to prior state if exceptions after deletion
@@ -646,13 +646,13 @@ public with sharing class FormulaShareService {
 
 	// Wrapper for FormulaShare rules - primitive types only so this can be populated by test classes
 	public class FSRule {
-		String objectSharedAPIName;
-		String sharedToAPIName;
-		String shareWith;
-		String accessLevel;
-		Boolean active;
-		String sharedToFieldType;
-		String sharingReason;
+		public String objectSharedAPIName;
+		public String sharedToAPIName;
+		public String shareWith;
+		public String accessLevel;
+		public Boolean active;
+		public String sharedToFieldType;
+		public String sharingReason;
 	}
 
 	// Warpper for a record and a rule sharing this record
