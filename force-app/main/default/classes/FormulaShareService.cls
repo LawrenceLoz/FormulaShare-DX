@@ -23,6 +23,8 @@ public with sharing class FormulaShareService {
 
 	public class FormulaShareException extends Exception{}
 
+	static FormulaShare_Settings__mdt settings;
+
 	public static void triggerHandler() {
 
 		// Process inserts and updates only (delete and undelete of shared object won't need changes)
@@ -95,8 +97,11 @@ public with sharing class FormulaShareService {
 				rowCauseSet.add(rule.sharingReason);
 			}
 
-			String sharesQueryStringCustom = buildShareQueryCustom(fsWrapper, rowCauseSet);
-			List<SObject> sharesQueryResultCustom = Database.query(sharesQueryStringCustom);
+//			String sharesQueryStringCustom = buildShareQueryCustom(fsWrapper, rowCauseSet);
+//			List<SObject> sharesQueryResultCustom = Database.query(sharesQueryStringCustom);
+
+			List<SObject> sharesQueryResultCustom = queryCustomObjectShares(fsWrapper, rowCauseSet);
+
 			system.debug('Share query result: '+sharesQueryResultCustom);
 
 			// Create map of shareQueryResults with record shares unique key
@@ -108,8 +113,11 @@ public with sharing class FormulaShareService {
 
 		// Retrieve current record shares if type in scope is a standard object
 		else {
-			String sharesQueryStringStandard = buildShareQueryStandard(fsWrapper);
-			List<SObject> sharesQueryResultStandard = Database.query(sharesQueryStringStandard);
+//			String sharesQueryStringStandard = buildShareQueryStandard(fsWrapper);
+//			List<SObject> sharesQueryResultStandard = Database.query(sharesQueryStringStandard);
+
+			List<SObject> sharesQueryResultStandard = queryStandardObjectShares(fsWrapper);
+
 			system.debug('Share query result: '+sharesQueryResultStandard);
 
 			// Create map of all record shares with unique key
@@ -134,14 +142,14 @@ public with sharing class FormulaShareService {
 		// Remove sharing which is no longer needed
 		if(removeExistingShares) {
 			System.debug('Sharing to be removed: '+fsWrapper.mapToDelete.values());
-			FormulaShareDMLService.deleteShares(fsWrapper.mapToDelete.values());
+			new DMLProcessing().deleteShares(fsWrapper.mapToDelete.values());
 		}
 
 		// Insert new object share records
 		System.debug('Sharing to be inserted: '+fsWrapper.setToInsert);
 		List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
 		try {
-			FormulaShareDMLService.insertShares(sharesToInsertList);
+			new DMLProcessing().insertShares(sharesToInsertList);
 		}
 
 		// Revert to prior state if exceptions after deletion
@@ -441,7 +449,7 @@ public with sharing class FormulaShareService {
 		}
 	}
 
-
+/*
 	public static String buildShareQueryCustom(FormulaShareWrapper fsWrapper, Set<String> rowCauseSet) {
 		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
 		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
@@ -462,6 +470,28 @@ public with sharing class FormulaShareService {
 			+' FROM ' + shareObjectType
 			+' WHERE ' + objectName + 'Id IN (' + parentIdsString + ') AND RowCause = \'Manual\'';
 		return queryString;
+	}
+*/
+
+	public static List<SObject> queryStandardObjectShares(FormulaShareWrapper fsWrapper) {
+//		String objectName = fsWrapper.type.getDescribe().getName();
+		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
+		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
+
+		// Query for relevant share records via selector
+		FormulaShareSObjectSharesStdSelector sharesSelector = new FormulaShareSObjectSharesStdSelector(true, shareObjectType, fsWrapper.type);
+		return sharesSelector.selectByParentIds(parentIdsString);
+	}
+
+
+	public static List<SObject> queryCustomObjectShares(FormulaShareWrapper fsWrapper, Set<String> rowCauseSet) {
+		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
+		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
+		String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(rowCauseSet);
+
+		// Query for relevant share records via selector
+		FormulaShareSObjectSharesCustomSelector sharesSelector = new FormulaShareSObjectSharesCustomSelector(true, shareObjectType);
+		return sharesSelector.selectByParentIdsAndRowCauses(parentIdsString, rowCausesString);
 	}
 
 
@@ -486,7 +516,7 @@ public with sharing class FormulaShareService {
 		return newShare;
 	}
 
-
+/*
 	// Used by batch job
 	public static String getFullObjectQuery(Schema.sObjectType type, List<FSRule> rules) {
 		String objectName = type.getDescribe().getName();
@@ -499,6 +529,22 @@ public with sharing class FormulaShareService {
 		System.debug('Full object query: ' + query);
 		return query;
 	}
+*/
+
+	// Used by batch job to retrieve query locator from selector
+	public static Database.QueryLocator getFullObjectQueryLocator(Schema.sObjectType type, List<FSRule> rules) {
+
+		Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
+        Map<String, SObjectField> fieldMap = type.getDescribe().fields.getMap();
+
+        for(FSRule rule : rules) {
+            Schema.SObjectField field = fieldMap.get(rule.sharedToAPIName);
+            fieldsSet.add(field);
+        }
+
+		Database.QueryLocator objectLocator = new FormulaShareSObjectsSelector(true,type,fieldsSet).selectAllLocator();
+		return objectLocator;
+	}
 
 
 	public static List<FSRule> getRulesSharingObject(Schema.sObjectType type) {
@@ -508,6 +554,7 @@ public with sharing class FormulaShareService {
 		String objectName = type.getDescribe().getName();
 
 		// Create list of all jobs with relevant details for assessing scope
+
 		for(FormulaShare_Rule__mdt ruleInScope :
 			[SELECT Id, Access_Level__c, 
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
@@ -525,6 +572,21 @@ public with sharing class FormulaShareService {
 				rule.sharingReason = ruleInScope.Sharing_Reason__c;
 				rulesToReturn.add(rule);
 			}
+/*
+		for(FormulaShare_Rule__mdt ruleInScope :
+			new FormulaShareRulesSelector().selectRules(objectName)) {
+				
+				FSRule rule = new FSRule();
+				rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
+				rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
+				rule.shareWith = ruleInScope.Share_With__c;
+				rule.accessLevel = ruleInScope.Access_Level__c;
+				rule.active = ruleInScope.Active__c;
+				rule.sharedToFieldType = ruleInScope.Shared_To_Field_Type__c;
+				rule.sharingReason = ruleInScope.Sharing_Reason__c;
+				rulesToReturn.add(rule);
+			}
+*/
 
 		system.debug('All rules sharing object: '+rulesToReturn);
 
@@ -545,10 +607,7 @@ public with sharing class FormulaShareService {
 		Set<SObjectType> typesSet = new Set<SObjectType>();
 
 		// Loop through all rules and populate set of shared objects
-		for(FormulaShare_Rule__mdt rule : 
-			[SELECT Object_Shared__r.QualifiedApiName
-			FROM FormulaShare_Rule__mdt
-			]) {
+		for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
 			String objName = rule.Object_Shared__r.QualifiedApiName;
 			SObjectType type = Schema.getGlobalDescribe().get(objName);
 			typesSet.add(type);
@@ -575,6 +634,16 @@ public with sharing class FormulaShareService {
 		Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 		List<Schema.SObjectType> types = getSharedObjectTypes();
 		Id batchJobId = Database.executeBatch(new ProcessFormulaShareBatch(types, batchSize), batchSize);
+	}
+
+
+	public static FormulaShare_Settings__mdt getFormulaShareSettings() {
+
+		if(settings == null) {
+			settings = new FormulaShareSettingsSelector().selectActiveSettings();
+		}
+
+		return settings;
 	}
 
 
@@ -621,6 +690,19 @@ public with sharing class FormulaShareService {
 		return testRules;
 	}
 
+
+	// Inner class designated as without sharing to ensure that object share records can be 
+	// created / updated when code is run in user context (necessary for triggers updates)
+	public without sharing class DMLProcessing {
+
+		public void insertShares(List<SObject> sharesToInsertList) {
+			insert sharesToInsertList;
+		}
+
+		public void deleteShares(List<SObject> sharesToDeleteList) {
+			delete sharesToDeleteList;
+		}
+	}
 
 	// Core wrapper class passed to methods inside and outside the class
 	public class FormulaShareWrapper {

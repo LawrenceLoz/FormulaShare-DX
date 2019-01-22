@@ -140,7 +140,7 @@ public with sharing class FormulaShareUtilities {
         return queryString;
     }
 
-
+/*
     public static String buildStringFromSetNoQuotes(Set<String> stringSet) {
         String queryString = '';
         for (String value : stringSet) {
@@ -149,5 +149,6 @@ public with sharing class FormulaShareUtilities {
         queryString = queryString.substringBeforeLast(',');
         return queryString;
     }
+*/
 
 }
