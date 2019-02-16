@@ -24,6 +24,7 @@ public with sharing class FormulaShareService {
 	public class FormulaShareException extends Exception{}
 
 	static FormulaShare_Settings__mdt settings;
+	static List<sObjectType> objectsRun = new List<sObjectType>();
 
 	public static void triggerHandler() {
 
@@ -34,7 +35,24 @@ public with sharing class FormulaShareService {
 			List<sObject> recordsChanged = Trigger.new;
 			sObjectType type = recordsChanged[0].getSObjectType();
 
-			handleShareChanges(type, Trigger.oldMap, Trigger.newMap);
+			// Continue if we haven't processed for this object
+			if(!objectsRun.contains(type)) {
+
+				// Add object type to prevent future runs (protects against calling in a loop)
+				objectsRun.add(type);
+
+				// Check whether we're already at the maximum number of queueable jobs allowed for the transaction
+				Boolean atMaxQueueableJobsSynch = !System.isBatch() && Limits.getQueueableJobs() == 50;
+				Boolean atMaxQueueableJobsBatch = System.isBatch() && Limits.getQueueableJobs() == 1;
+
+				if(!atMaxQueueableJobsSynch && !atMaxQueueableJobsBatch) {
+					handleShareChanges(type, Trigger.oldMap, Trigger.newMap);
+				}
+
+				else {
+					system.debug('At max allowed queueable jobs in transaction');
+				}
+			}
 		}
 	}
 
@@ -367,7 +385,13 @@ public with sharing class FormulaShareService {
 				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
 			}
 
-			updateShareMaps(recordRule.obj.Id, roleGroupId, recordRule.rule, fsWrapper);
+			if(roleGroupId != null) {
+				updateShareMaps(recordRule.obj.Id, roleGroupId, recordRule.rule, fsWrapper);
+			}
+
+			else {
+				system.debug('Invalid role for sharing ' + recordRule.obj.get(recordRule.rule.sharedToAPIName) + ' specified on record ' + recordRule.obj.Id);
+			}
 		}
 	}
 
