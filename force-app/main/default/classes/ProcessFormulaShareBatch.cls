@@ -19,12 +19,13 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public class ProcessFormulaShareBatch implements Database.Batchable<sObject> {
+public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Database.Stateful {
 	
 	List<Schema.SObjectType> types;
 	Integer batchSize;
 	Schema.SObjectType typeInThisBatch;
 	List<FormulaShareService.FSRule> rulesForType;
+	List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
 	public ProcessFormulaShareBatch(List<Schema.SObjectType> types, Integer batchSize) {
@@ -40,7 +41,21 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject> {
 //		String query = FormulaShareService.getFullObjectQuery(typeInThisBatch, rulesForType);
 //		return Database.getQueryLocator(query);
 
-		return FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
+		Database.QueryLocator ql = FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
+
+		FormulaShare_Log__c log = new FormulaShare_Log__c();
+		logsList = new List<FormulaShare_Log__c>();
+		logsList.add(log);
+		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+
+		fsLogs.setContext('ProcessFormulaShareBatch', null, 'Batch');
+		String typeInScope = typeInThisBatch.getDescribe().getName();
+		Integer noRules = rulesForType.size();
+		String query = ql.getQuery();
+		fsLogs.setBatchDetails(batchSize, typeInScope, noRules, ql.getQuery());
+		logsList = fsLogs.upsertLogs();
+
+		return ql;
 	}
 
    	public void execute(Database.BatchableContext BC, List<sObject> scope) {
@@ -53,10 +68,18 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject> {
 		system.debug('scope: '+scope);
 
 		FormulaShareService.processFormulaShares(fsWrapper);
+
+		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+		fsLogs.incrementBatches();
+		logsList = fsLogs.upsertLogs();
 	}
 	
 	public void finish(Database.BatchableContext BC) {
 		
+		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+		fsLogs.setBatchProcessingComplete();
+		logsList = fsLogs.upsertLogs();
+
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {
 			types.remove(0);

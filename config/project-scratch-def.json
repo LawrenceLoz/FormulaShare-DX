@@ -1,7 +1,10 @@
 {
-    "orgName": "Demo Company",
+    "orgName": "MyCompany",
     "edition": "Developer",
-    "orgPreferences" : {
-        "enabled": ["S1DesktopEnabled"]
+    
+    "settings": {
+     "orgPreferenceSettings": {
+         "s1DesktopEnabled": true
+        }
     }
 }
