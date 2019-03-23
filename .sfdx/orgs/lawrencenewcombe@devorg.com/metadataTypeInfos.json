@@ -96,6 +96,28 @@
             },
             "hasVirtualSubtypes": false
         },
+        "ExperienceBundle": {
+            "metadataName": "ExperienceBundle",
+            "isAddressable": true,
+            "isSourceTracked": true,
+            "hasContent": true,
+            "defaultDirectory": "experiences",
+            "nameForMsgs": "Experience Bundle",
+            "nameForMsgsPlural": "Experience Bundles",
+            "contentIsBinary": false,
+            "hasStandardMembers": false,
+            "deleteSupported": true,
+            "decompositionConfig": {
+                "strategy": "nonDecomposed",
+                "workspaceStrategy": "nonDecomposed",
+                "commitStrategy": "fineGrainTracking",
+                "metadataName": "ExperienceBundle",
+                "useSparseComposition": false,
+                "decompositions": [],
+                "contentStrategy": "nonDecomposedContent"
+            },
+            "hasVirtualSubtypes": false
+        },
         "Certificate": {
             "metadataName": "Certificate",
             "isAddressable": true,
@@ -148,7 +170,7 @@
             "isSourceTracked": true,
             "ext": "lightningcomponentbundle",
             "hasContent": true,
-            "defaultDirectory": "lightningcomponents",
+            "defaultDirectory": "lwc",
             "nameForMsgs": "Lightning Component Bundle",
             "nameForMsgsPlural": "Lightning Component Bundles",
             "contentIsBinary": false,

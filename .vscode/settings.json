@@ -9,7 +9,7 @@
         "SFDX_SET_CLIENT_IDS": "sfdx-vscode"
     },
     "salesforcedx-vscode-core.show-cli-success-msg": false,
-    "eslint.nodePath": "c:\\Users\\lawre\\.vscode\\extensions\\salesforce.salesforcedx-vscode-lwc-45.2.0\\node_modules",
+    "eslint.nodePath": "c:\\Users\\lawre\\.vscode\\extensions\\salesforce.salesforcedx-vscode-lwc-45.6.0\\node_modules",
     "html.suggest.angular1": false,
     "html.suggest.ionic": false
 }

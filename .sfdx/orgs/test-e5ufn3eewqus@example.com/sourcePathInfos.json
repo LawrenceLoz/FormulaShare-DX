@@ -137,15 +137,15 @@
     [
         "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
         {
-            "state": "u",
             "sourcePath": "C:\\Users\\lawre\\Documents\\devorgdx\\FormulaShare\\force-app\\main\\default\\classes\\FormulaShareService.cls",
             "isDirectory": false,
-            "isMetadataFile": false,
             "size": 24511,
             "modifiedTime": 1542291657585,
             "changeTime": 1542291657585,
-            "isWorkspace": false,
-            "contentHash": "2972ae677e6156ad48e4d0888302eab14ecce89e"
+            "contentHash": "2972ae677e6156ad48e4d0888302eab14ecce89e",
+            "isMetadataFile": false,
+            "state": "u",
+            "isWorkspace": false
         }
     ],
     [

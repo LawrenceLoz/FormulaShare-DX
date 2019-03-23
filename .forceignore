@@ -2,4 +2,7 @@
 # More information: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_exclude_source.htm
 #
 
+# GLOBAL IGNORE
+**profiles
+AppSwitcher.appMenu
 package.xml

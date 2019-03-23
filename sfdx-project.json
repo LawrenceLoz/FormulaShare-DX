@@ -1,11 +1,28 @@
 {
     "packageDirectories": [
         {
-            "path": "force-app",
-            "default": true,
+            "path": "fs-core",
+            "default": false,
             "package": "FormulaShare",
             "versionName": "ver 0.1",
             "versionNumber": "0.1.0.NEXT"
+        },
+        {
+            "path": "fs-sample-app",
+            "default": true
+        },
+        {
+            "path": "./fs-sample-app",
+            "package": "FS-Sample-App",
+            "versionName": "ver 0.1",
+            "versionNumber": "0.1.0.NEXT",
+            "default": false,
+            "dependencies": [
+                {
+                    "package": "FormulaShare",
+                    "versionNumber": "0.1.0.LATEST"
+                }
+            ]
         }
     ],
     "namespace": "",
@@ -15,6 +32,10 @@
         "FormulaShare": "0Ho1n0000004C9wCAE",
         "FormulaShare@0.1.0-1": "04t1n000002NXeOAAW",
         "FormulaShare@0.1.0-2": "04t1n000002NXlQAAW",
-        "FormulaShare@0.1.0-3": "04t1n000002NXlVAAW"
+        "FormulaShare@0.1.0-3": "04t1n000002NXlVAAW",
+        "FormulaShare@0.1.0-5": "04t1n000001YUaKAAW",
+        "FormulaShare@0.1.0-6": "04t1n000001YUaPAAW",
+        "FS-Sample-App": "0Ho1n000000TN2NCAW",
+        "FS-Sample-App@0.1.0-1": "04t1n000001YUaUAAW"
     }
 }

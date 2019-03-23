@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>Donation__c</defaultLandingTab>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <label>FormulaShare NGO Programme Management</label>
+    <tabs>Donation__c</tabs>
+    <tabs>Programme__c</tabs>
+    <tabs>Country__c</tabs>
+    <tabs>Theme__c</tabs>
+    <tabs>FormulaShare_Log__c</tabs>
+</CustomApplication>
