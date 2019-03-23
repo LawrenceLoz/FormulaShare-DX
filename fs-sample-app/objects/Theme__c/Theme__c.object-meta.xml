@@ -43,6 +43,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -61,6 +62,9 @@
         <customTabListAdditionalFields>Thematic_Area_Coordination_Public_Group__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>CREATEDBY_USER</customTabListAdditionalFields>
         <customTabListAdditionalFields>UPDATEDBY_USER</customTabListAdditionalFields>
+        <searchResultsAdditionalFields>Thematic_Area_Coordination_Public_Group__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>CREATEDBY_USER</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>UPDATEDBY_USER</searchResultsAdditionalFields>
     </searchLayouts>
     <sharingModel>Read</sharingModel>
     <visibility>Public</visibility>

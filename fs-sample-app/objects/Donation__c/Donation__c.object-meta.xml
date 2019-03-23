@@ -43,6 +43,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -68,6 +69,15 @@
         <customTabListAdditionalFields>Thematic_Area_Coordination_Group__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>CREATEDBY_USER</customTabListAdditionalFields>
         <customTabListAdditionalFields>UPDATEDBY_USER</customTabListAdditionalFields>
+        <searchResultsAdditionalFields>Amount__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Donor_Name__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Major_Donation_true_if_over_500__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Programme_to_Support__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Finance_Manager_in_Country__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Major_Donor_Relationship_Manager_Id__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Thematic_Area_Coordination_Group__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>CREATEDBY_USER</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>UPDATEDBY_USER</searchResultsAdditionalFields>
     </searchLayouts>
     <sharingModel>Private</sharingModel>
     <visibility>Public</visibility>

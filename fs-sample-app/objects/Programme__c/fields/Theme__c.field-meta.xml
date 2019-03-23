@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Theme__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
+    <deprecated>false</deprecated>
     <externalId>false</externalId>
     <label>Theme</label>
     <referenceTo>Theme__c</referenceTo>

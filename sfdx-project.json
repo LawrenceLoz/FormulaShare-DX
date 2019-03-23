@@ -8,15 +8,11 @@
             "versionNumber": "0.1.0.NEXT"
         },
         {
-            "path": "fs-sample-app",
-            "default": true
-        },
-        {
             "path": "./fs-sample-app",
             "package": "FS-Sample-App",
             "versionName": "ver 0.1",
             "versionNumber": "0.1.0.NEXT",
-            "default": false,
+            "default": true,
             "dependencies": [
                 {
                     "package": "FormulaShare",

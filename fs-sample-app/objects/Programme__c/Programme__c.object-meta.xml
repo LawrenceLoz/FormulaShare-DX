@@ -43,6 +43,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -65,6 +66,12 @@
         <customTabListAdditionalFields>Major_Donor_Relationship_Manager__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>CREATEDBY_USER</customTabListAdditionalFields>
         <customTabListAdditionalFields>UPDATEDBY_USER</customTabListAdditionalFields>
+        <searchResultsAdditionalFields>Description__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Country__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Theme__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Major_Donor_Relationship_Manager__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>CREATEDBY_USER</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>UPDATEDBY_USER</searchResultsAdditionalFields>
     </searchLayouts>
     <sharingModel>Read</sharingModel>
     <visibility>Public</visibility>

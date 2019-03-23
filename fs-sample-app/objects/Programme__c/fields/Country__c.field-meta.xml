@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Country__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
+    <deprecated>false</deprecated>
     <externalId>false</externalId>
     <label>Country</label>
     <referenceTo>Country__c</referenceTo>

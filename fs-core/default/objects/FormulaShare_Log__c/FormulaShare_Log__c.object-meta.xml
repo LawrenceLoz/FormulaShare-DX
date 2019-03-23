@@ -43,6 +43,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -58,7 +59,18 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>FormulaShare Logs</pluralLabel>
-    <searchLayouts/>
+    <searchLayouts>
+        <customTabListAdditionalFields>Class_Name__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Type_In_Scope__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Query__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Processing_Started__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Processing_Finished__c</customTabListAdditionalFields>
+        <searchResultsAdditionalFields>Class_Name__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Type_In_Scope__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Query__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Processing_Started__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Processing_Finished__c</searchResultsAdditionalFields>
+    </searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
