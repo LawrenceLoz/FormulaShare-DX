@@ -564,6 +564,12 @@ public with sharing class FormulaShareService {
         for(FSRule rule : rules) {
             Schema.SObjectField field = fieldMap.get(rule.sharedToAPIName);
             fieldsSet.add(field);
+
+			// Also add the OwnerId field if rule shares to users (required for later comparisons)
+			if(rule.shareWith == 'Users') {
+				Schema.SObjectField ownerIdField = fieldMap.get('OwnerId');
+				fieldsSet.add(ownerIdField);
+			}
         }
 
 		Database.QueryLocator objectLocator = new FormulaShareSObjectsSelector(true,type,fieldsSet).selectAllLocator();
