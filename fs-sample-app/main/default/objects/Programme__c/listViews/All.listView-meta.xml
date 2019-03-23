@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Country__c</columns>
+    <columns>Description__c</columns>
+    <columns>Major_Donor_Relationship_Manager__c</columns>
+    <columns>Theme__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>UPDATEDBY_USER</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

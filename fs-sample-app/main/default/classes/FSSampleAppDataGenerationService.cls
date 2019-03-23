@@ -1,0 +1,84 @@
+/**
+*Copyright 2019 Lawrence Newcombe
+*
+*Permission is hereby granted, free of charge, to any person obtaining a copy 
+*of this software and associated documentation files (the "Software"), to deal 
+*in the Software without restriction, including without limitation the rights 
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+*of the Software, and to permit persons to whom the Software is furnished to do 
+*so, subject to the following conditions:
+*
+*The above copyright notice and this permission notice shall be included in all 
+*copies or substantial portions of the Software.
+*
+*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+public with sharing class FSSampleAppDataGenerationService {
+    
+    public static void run() {
+        List<Country__c> countries = new List<Country__c>();
+        Map<String,Id> countriesMap = new Map<String,Id>();
+        List<Theme__c> themes = new List<Theme__c>();
+        Map<String,Id> themesMap = new Map<String,Id>();
+        List<Programme__c> progs = new List<Programme__c>();
+        List<Donation__c> donations = new List<Donation__c>();
+
+        // insert countries
+        for(FS_Sample_App_Country__mdt countryMeta : [SELECT DeveloperName, Finance_Manager_Role__c FROM FS_Sample_App_Country__mdt]) {
+            Country__c c = new Country__c();
+            c.Name = countryMeta.DeveloperName;
+            c.Finance_Manager_Role__c = countryMeta.Finance_Manager_Role__c;
+            countries.add(c);
+        }
+        insert countries;
+        for(Country__c c : countries) {
+            countriesMap.put(c.Name,c.Id);
+        }
+
+        // insert themes
+        for(FS_Sample_App_Theme__mdt themeMeta : [SELECT DeveloperName, Thematic_Area_Coordination_Public_Group__c FROM FS_Sample_App_Theme__mdt]) {
+            Theme__c t = new Theme__c();
+            t.Name = themeMeta.DeveloperName;
+            t.Thematic_Area_Coordination_Public_Group__c = themeMeta.Thematic_Area_Coordination_Public_Group__c;
+            themes.add(t);
+        }
+        insert themes;
+        for(Theme__c t : themes) {
+            themesMap.put(t.Name,t.Id);
+        }
+
+        // insert programmes
+        for(FS_Sample_App_Programme__mdt progMeta : [SELECT DeveloperName, Country__r.DeveloperName, Theme__r.DeveloperName, Description__c FROM FS_Sample_App_Programme__mdt]) {
+            Programme__c p = new Programme__c();
+            p.Description__c = progMeta.DeveloperName;
+            p.Country__c = countriesMap.get(progMeta.Country__r.DeveloperName);
+            p.Theme__c = themesMap.get(progMeta.Theme__r.DeveloperName);
+            progs.add(p);
+        }
+        insert progs;
+
+        // insert donations
+        for(FS_Sample_App_First_Name__mdt firstNameMeta : [SELECT DeveloperName FROM FS_Sample_App_First_Name__mdt]) {
+            for(FS_Sample_App_Surname__mdt surnameMeta : [SELECT DeveloperName FROM FS_Sample_App_Surname__mdt]) {
+                Donation__c d = new Donation__c();
+
+                Integer randomAmount = Math.Round(Math.Random() * 1000);
+                Integer randomIndex = Math.Round(Math.Random() * (progs.size() - 1));  
+                system.debug('this random index: '+randomIndex);
+
+                d.Donor_Name__c = firstNameMeta.DeveloperName + ' ' + surnameMeta.DeveloperName;
+                d.Amount__c = randomAmount;
+                d.Programme_to_Support__c = progs[randomIndex].Id;
+                donations.add(d);
+            }
+        }
+        insert donations;
+
+    }
+}

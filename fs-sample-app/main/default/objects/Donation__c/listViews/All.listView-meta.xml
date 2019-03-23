@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>Date__c</columns>
+    <columns>Donor_Name__c</columns>
+    <columns>Finance_Manager_in_Country__c</columns>
+    <columns>Major_Donation_true_if_over_500__c</columns>
+    <columns>Major_Donor_Relationship_Manager_Id__c</columns>
+    <columns>Programme_to_Support__c</columns>
+    <columns>Thematic_Area_Coordination_Group__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>UPDATEDBY_USER</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>
