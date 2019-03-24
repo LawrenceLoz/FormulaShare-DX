@@ -115,9 +115,6 @@ public with sharing class FormulaShareService {
 				rowCauseSet.add(rule.sharingReason);
 			}
 
-//			String sharesQueryStringCustom = buildShareQueryCustom(fsWrapper, rowCauseSet);
-//			List<SObject> sharesQueryResultCustom = Database.query(sharesQueryStringCustom);
-
 			List<SObject> sharesQueryResultCustom = queryCustomObjectShares(fsWrapper, rowCauseSet);
 
 			system.debug('Share query result: '+sharesQueryResultCustom);
@@ -131,9 +128,6 @@ public with sharing class FormulaShareService {
 
 		// Retrieve current record shares if type in scope is a standard object
 		else {
-//			String sharesQueryStringStandard = buildShareQueryStandard(fsWrapper);
-//			List<SObject> sharesQueryResultStandard = Database.query(sharesQueryStringStandard);
-
 			List<SObject> sharesQueryResultStandard = queryStandardObjectShares(fsWrapper);
 
 			system.debug('Share query result: '+sharesQueryResultStandard);
@@ -473,29 +467,6 @@ public with sharing class FormulaShareService {
 		}
 	}
 
-/*
-	public static String buildShareQueryCustom(FormulaShareWrapper fsWrapper, Set<String> rowCauseSet) {
-		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
-		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
-		String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(rowCauseSet);
-		String queryString = 'SELECT Id, UserOrGroupId, ParentId, AccessLevel, RowCause'
-			+' FROM '+shareObjectType
-			+' WHERE ParentId IN (' + parentIdsString + ') AND RowCause IN (' + rowCausesString + ')';
-		system.debug('Share query: ' + queryString);
-		return queryString;
-	}
-
-
-	public static String buildShareQueryStandard(FormulaShareWrapper fsWrapper) {
-		String objectName = fsWrapper.type.getDescribe().getName();
-		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(fsWrapper.type);
-		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(fsWrapper.recordsMap.keySet());
-		String queryString = 'SELECT Id, UserOrGroupId, ' + objectName + 'Id, ' + objectName + 'AccessLevel'
-			+' FROM ' + shareObjectType
-			+' WHERE ' + objectName + 'Id IN (' + parentIdsString + ') AND RowCause = \'Manual\'';
-		return queryString;
-	}
-*/
 
 	public static List<SObject> queryStandardObjectShares(FormulaShareWrapper fsWrapper) {
 //		String objectName = fsWrapper.type.getDescribe().getName();
@@ -540,20 +511,6 @@ public with sharing class FormulaShareService {
 		return newShare;
 	}
 
-/*
-	// Used by batch job
-	public static String getFullObjectQuery(Schema.sObjectType type, List<FSRule> rules) {
-		String objectName = type.getDescribe().getName();
-		Set<String> sharedToFieldSet = new Set<String>();
-		for(FSRule rule : rules) {
-			sharedToFieldSet.add(rule.sharedToAPIName);
-		}
-		String query = 'SELECT Id, OwnerId, ' + FormulaShareUtilities.buildStringFromSetNoQuotes(sharedToFieldSet)
-			+ ' FROM ' + objectName;
-		System.debug('Full object query: ' + query);
-		return query;
-	}
-*/
 
 	// Used by batch job to retrieve query locator from selector
 	public static Database.QueryLocator getFullObjectQueryLocator(Schema.sObjectType type, List<FSRule> rules) {
@@ -584,25 +541,6 @@ public with sharing class FormulaShareService {
 		String objectName = type.getDescribe().getName();
 
 		// Create list of all jobs with relevant details for assessing scope
-
-		for(FormulaShare_Rule__mdt ruleInScope :
-			[SELECT Id, Access_Level__c, 
-			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
-			FROM FormulaShare_Rule__mdt
-			WHERE Object_Shared__r.QualifiedApiName = :objectName]) {
-				
-				FSRule rule = new FSRule();
-				rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
-				rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
-				rule.shareWith = ruleInScope.Share_With__c;
-				rule.accessLevel = ruleInScope.Access_Level__c;
-				rule.active = ruleInScope.Active__c;
-				rule.sharedToFieldType = ruleInScope.Shared_To_Field_Type__c;
-				rule.sharingReason = ruleInScope.Sharing_Reason__c;
-				rulesToReturn.add(rule);
-			}
-/*
 		for(FormulaShare_Rule__mdt ruleInScope :
 			new FormulaShareRulesSelector().selectRules(objectName)) {
 				
@@ -616,7 +554,6 @@ public with sharing class FormulaShareService {
 				rule.sharingReason = ruleInScope.Sharing_Reason__c;
 				rulesToReturn.add(rule);
 			}
-*/
 
 		system.debug('All rules sharing object: '+rulesToReturn);
 
@@ -637,7 +574,7 @@ public with sharing class FormulaShareService {
 		Set<SObjectType> typesSet = new Set<SObjectType>();
 
 		// Loop through all rules and populate set of shared objects
-		for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
+		for(FormulaShare_Rule__mdt rule : new FormulaShareRulesSelector().selectAllRules()) {
 			String objName = rule.Object_Shared__r.QualifiedApiName;
 			SObjectType type = Schema.getGlobalDescribe().get(objName);
 			typesSet.add(type);

@@ -38,8 +38,6 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 	public Database.QueryLocator start(Database.BatchableContext BC) {
 		system.debug('FormulaShare batch job started. Type in scope: '+typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
-//		String query = FormulaShareService.getFullObjectQuery(typeInThisBatch, rulesForType);
-//		return Database.getQueryLocator(query);
 
 		Database.QueryLocator ql = FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
 
