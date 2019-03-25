@@ -2,7 +2,7 @@
     "packageDirectories": [
         {
             "path": "fs-core",
-            "default": false,
+            "default": true,
             "package": "FormulaShare",
             "versionName": "ver 0.1",
             "versionNumber": "0.1.0.NEXT"
@@ -12,7 +12,7 @@
             "package": "FS-Sample-App",
             "versionName": "ver 0.1",
             "versionNumber": "0.1.0.NEXT",
-            "default": true,
+            "default": false,
             "dependencies": [
                 {
                     "package": "FormulaShare",
