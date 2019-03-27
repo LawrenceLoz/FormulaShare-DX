@@ -32,7 +32,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		this.types = types;
 		this.batchSize = batchSize;
 		this.typeInThisBatch = types[0];
-		this.rulesForType = FormulaShareService.getRulesSharingObject(typeInThisBatch);
+		this.rulesForType = FormulaShareRulesSelector.construct().getRulesSharingObject(typeInThisBatch);
 	}
 	
 	public Database.QueryLocator start(Database.BatchableContext BC) {

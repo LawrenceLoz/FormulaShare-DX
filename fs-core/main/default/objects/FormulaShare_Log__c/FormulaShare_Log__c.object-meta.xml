@@ -71,6 +71,6 @@
         <searchResultsAdditionalFields>Processing_Started__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Processing_Finished__c</searchResultsAdditionalFields>
     </searchLayouts>
-    <sharingModel>ReadWrite</sharingModel>
+    <sharingModel>Private</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

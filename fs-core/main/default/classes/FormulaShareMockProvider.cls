@@ -49,7 +49,51 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             settings.Remove_Shares_for_Standard_Objects__c = true;
             return settings;
         }
-        
+
+        if (stubbedMethodName == 'getRulesSharingObject') {
+            List<FormulaShareService.FSRule> rules = new List<FormulaShareService.FSRule>();
+
+            FormulaShareService.FSRule roleSubRule = new FormulaShareService.FSRule();
+            roleSubRule.objectSharedAPIName = 'FormulaShare_Log__c';
+            roleSubRule.sharingReason = 'FormulaShare_Log_Share__c';
+            roleSubRule.active = true;
+            roleSubRule.sharedToFieldType = 'Name';
+            roleSubRule.accessLevel = 'Read';
+            roleSubRule.sharedToAPIName = 'Context__c';
+            roleSubRule.shareWith = 'Roles and Internal Subordinates';
+            rules.add(roleSubRule);
+
+            FormulaShareService.FSRule roleRule = new FormulaShareService.FSRule();
+            roleRule.objectSharedAPIName = 'FormulaShare_Log__c';
+            roleRule.sharingReason = 'FormulaShare_Log_Share__c';
+//            roleRule.sharingReason = 'FormulaShare_Roles_Test__c';
+            roleRule.active = true;
+            roleRule.sharedToFieldType = 'Id';
+            roleRule.accessLevel = 'Edit';
+            roleRule.sharedToAPIName = 'Class_Name__c';
+            roleRule.shareWith = 'Roles';
+            rules.add(roleRule);
+
+            FormulaShareService.FSRule groupRule = new FormulaShareService.FSRule();
+            groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
+//            groupRule.sharingReason = 'FormulaShare_Groups_Test__c';
+            groupRule.sharingReason = 'FormulaShare_Log_Share__c';
+            groupRule.active = true;
+            groupRule.sharedToFieldType = 'Name';
+            groupRule.accessLevel = 'Edit';
+            groupRule.sharedToAPIName = 'Type_In_Scope__c';
+            groupRule.shareWith = 'Public Groups';
+            rules.add(groupRule);
+
+            return rules;
+        }
+
+        if (stubbedMethodName == 'selectObjectsWithRules') {
+            List<String> objNames = new List<String>();
+            objNames.add('FormulaShare_Log__c');
+            return objNames;
+        }
+
         else return null;
     }
 }

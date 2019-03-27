@@ -19,13 +19,60 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRulesSelector {
+public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSelector {
 
+    public static FormulaShareRulesSelector mock;
+    public static FormulaShareRulesSelector construct() {
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+        else {
+            return new FormulaShareRulesSelector();
+        }
+    }
+
+    public Schema.SObjectType getSObjectType() {
+        return FormulaShare_Rule__mdt.sObjectType;
+    }
+
+    public List<Schema.SObjectField> getSObjectFieldList() {
+        return new List<Schema.SObjectField> {
+            FormulaShare_Rule__mdt.DeveloperName};
+    }
+    
 // fflib selector patter isn't used because it fails for metadata relationship fields.
 // The basic queries below are sufficient for now - FLS and sharing checks aren't needed 
 // since custom metadata does not support either.
 
-    public List<FormulaShare_Rule__mdt> selectRules(String objectName) {
+    // Returns a list of wrapper objects rather than custom metadata objects, which is necessary   
+    // to support unit tests since custom metadata relationships can't be mocked
+    public List<FormulaShareService.FSRule> getRulesSharingObject(Schema.sObjectType type) {
+
+		List<FormulaShareService.FSRule> rulesToReturn = new List<FormulaShareService.FSRule>();
+		String objectName = type.getDescribe().getName();
+
+		// Create list of all jobs with relevant details for assessing scope
+		for(FormulaShare_Rule__mdt ruleInScope : [SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
+			FROM FormulaShare_Rule__mdt
+			WHERE Object_Shared__r.QualifiedApiName = :objectName]) {
+            
+			FormulaShareService.FSRule rule = new FormulaShareService.FSRule();
+			rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
+			rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
+			rule.shareWith = ruleInScope.Share_With__c;
+			rule.accessLevel = ruleInScope.Access_Level__c;
+			rule.active = ruleInScope.Active__c;
+			rule.sharedToFieldType = ruleInScope.Shared_To_Field_Type__c;
+			rule.sharingReason = ruleInScope.Sharing_Reason__c;
+			rulesToReturn.add(rule);
+		}
+
+		return rulesToReturn;        
+    }
+/*
+    private List<FormulaShare_Rule__mdt> selectRules(String objectName) {
 
         List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
@@ -34,10 +81,13 @@ public inherited sharing class FormulaShareRulesSelector {
 			WHERE Object_Shared__r.QualifiedApiName = :objectName];
         return rules;
     }
-
-    public List<FormulaShare_Rule__mdt> selectAllRules() {
-        List<FormulaShare_Rule__mdt> rules  = [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt];
-        return rules;
+*/
+    public List<String> selectObjectsWithRules() {
+        List<String> objNames = new List<String>();
+        for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
+            objNames.add(rule.Object_Shared__r.QualifiedApiName);
+        }
+        return objNames;
     }
 
 }

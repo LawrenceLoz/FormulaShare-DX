@@ -184,6 +184,9 @@ public with sharing class FormulaShareService {
 		Set<String> sharedToNamesGroups = new Set<String>();
 		Set<String> sharedToNamesRoles = new Set<String>();
 
+		system.debug('Records to be assessed: '+fsWrapper.recordsMap);
+		system.debug('Rules to be assessed: '+fsWrapper.rules);
+
 		for(SObject record : fsWrapper.recordsMap.values()) {
 			
 			for(FSRule rule : fsWrapper.rules) {
@@ -533,7 +536,7 @@ public with sharing class FormulaShareService {
 		return objectLocator;
 	}
 
-
+/*
 	public static List<FSRule> getRulesSharingObject(Schema.sObjectType type) {
 
 		List<FSRule> rulesToReturn = new List<FSRule>();
@@ -542,7 +545,7 @@ public with sharing class FormulaShareService {
 
 		// Create list of all jobs with relevant details for assessing scope
 		for(FormulaShare_Rule__mdt ruleInScope :
-			new FormulaShareRulesSelector().selectRules(objectName)) {
+			FormulaShareRulesSelector.construct().selectRules(objectName)) {
 				
 				FSRule rule = new FSRule();
 				rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
@@ -566,7 +569,7 @@ public with sharing class FormulaShareService {
 
 		return rulesToReturn;
 	}
-
+*/
 
 	public static List<SObjectType> getSharedObjectTypes() {
 
@@ -574,11 +577,10 @@ public with sharing class FormulaShareService {
 		Set<SObjectType> typesSet = new Set<SObjectType>();
 
 		// Loop through all rules and populate set of shared objects
-		for(FormulaShare_Rule__mdt rule : new FormulaShareRulesSelector().selectAllRules()) {
-			String objName = rule.Object_Shared__r.QualifiedApiName;
+		for(String objName : FormulaShareRulesSelector.construct().selectObjectsWithRules()) {
 			SObjectType type = Schema.getGlobalDescribe().get(objName);
 			typesSet.add(type);
-			}
+		}
 
 		if(!Test.isRunningTest()) {
 			for(SObjectType type : typesSet) {
@@ -586,9 +588,9 @@ public with sharing class FormulaShareService {
 			}
 		}
 
-		// If running test return list with contact to enable execution of other code
+		// If running test return list with FSRule to enable execution of other code
 		else {
-			typesList.add(Contact.SobjectType);
+			typesList.add(FormulaShare_Log__c.SobjectType);
 		}
 
 		return typesList;
@@ -613,7 +615,7 @@ public with sharing class FormulaShareService {
 		return settings;
 	}
 
-
+/*
 	// Return a list of dummy rules to use in test methods
 	private static List<FSRule> setTestRules() {
 		List<FSRule> testRules = new List<FSRule>();
@@ -656,7 +658,7 @@ public with sharing class FormulaShareService {
 
 		return testRules;
 	}
-
+*/
 
 	// Inner class designated as without sharing to ensure that object share records can be 
 	// created / updated when code is run in user context (necessary for triggers updates)
@@ -689,7 +691,7 @@ public with sharing class FormulaShareService {
 		// Or get rules if only type provided
 		public FormulaShareWrapper(Schema.SObjectType type) {
 			this.type = type;
-			this.rules = getRulesSharingObject(type);
+			this.rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
 		}
 	}
 
