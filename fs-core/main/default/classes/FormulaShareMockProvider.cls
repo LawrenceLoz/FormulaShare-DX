@@ -42,7 +42,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         
 
         // FormulaShareSettingsSelector.selectActiveSettings() mock
-        if (stubbedMethodName == 'selectActiveSettings' && returnType.getName() == 'FormulaShare_Settings__mdt') {
+        if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == 'FormulaShare_Settings__mdt') {
             FormulaShare_Settings__mdt settings = new FormulaShare_Settings__mdt();
             settings.DeveloperName = 'Mocked Settings';
             settings.Recalculation_Batch_Size__c = 100;
@@ -50,9 +50,10 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return settings;
         }
 
-        if (stubbedMethodName == 'getRulesSharingObject') {
+        if(stubbedMethodName == 'getRulesSharingObject') {
             List<FormulaShareService.FSRule> rules = new List<FormulaShareService.FSRule>();
 
+            // Will add a sharing record for the role and subordinates group for the role name in Context__c field
             FormulaShareService.FSRule roleSubRule = new FormulaShareService.FSRule();
             roleSubRule.objectSharedAPIName = 'FormulaShare_Log__c';
             roleSubRule.sharingReason = 'FormulaShare_Log_Share__c';
@@ -63,10 +64,10 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             roleSubRule.shareWith = 'Roles and Internal Subordinates';
             rules.add(roleSubRule);
 
+            // Will add a sharing record for the role group for the role id in Class_Name__c field
             FormulaShareService.FSRule roleRule = new FormulaShareService.FSRule();
             roleRule.objectSharedAPIName = 'FormulaShare_Log__c';
             roleRule.sharingReason = 'FormulaShare_Log_Share__c';
-//            roleRule.sharingReason = 'FormulaShare_Roles_Test__c';
             roleRule.active = true;
             roleRule.sharedToFieldType = 'Id';
             roleRule.accessLevel = 'Edit';
@@ -74,9 +75,9 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             roleRule.shareWith = 'Roles';
             rules.add(roleRule);
 
+            // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
             FormulaShareService.FSRule groupRule = new FormulaShareService.FSRule();
             groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
-//            groupRule.sharingReason = 'FormulaShare_Groups_Test__c';
             groupRule.sharingReason = 'FormulaShare_Log_Share__c';
             groupRule.active = true;
             groupRule.sharedToFieldType = 'Name';
@@ -85,13 +86,28 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             groupRule.shareWith = 'Public Groups';
             rules.add(groupRule);
 
+            // Will add a sharing record for the user with the user id in Method_Name__c field
+            FormulaShareService.FSRule userRule = new FormulaShareService.FSRule();
+            userRule.objectSharedAPIName = 'FormulaShare_Log__c';
+            userRule.sharingReason = 'FormulaShare_Log_Share__c';
+            userRule.active = true;
+            userRule.sharedToFieldType = 'Id';
+            userRule.accessLevel = 'Edit';
+            userRule.sharedToAPIName = 'Method_Name__c';
+            userRule.shareWith = 'Users';
+            rules.add(userRule);
+
             return rules;
         }
 
-        if (stubbedMethodName == 'selectObjectsWithRules') {
+        if(stubbedMethodName == 'selectObjectsWithRules') {
             List<String> objNames = new List<String>();
             objNames.add('FormulaShare_Log__c');
             return objNames;
+        }
+
+        if(stubbedMethodName == 'get15CharacterIdInstance') {
+            return '123';    // Return a string (only used as a string key by mocked method)
         }
 
         else return null;

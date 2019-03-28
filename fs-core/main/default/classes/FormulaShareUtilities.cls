@@ -21,6 +21,15 @@
 
 public with sharing class FormulaShareUtilities {
 
+    public static FormulaShareUtilities mock;
+    public static FormulaShareUtilities construct() {
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+        else {
+            return new FormulaShareUtilities();
+        }
+    }
 
 	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, SOBjectType type) {
 		Map<String, SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
@@ -66,6 +75,11 @@ public with sharing class FormulaShareUtilities {
 			return shortId;
 		}
 		else return null;
+	}
+	
+	// Instance implementation for mocking
+	public String get15CharacterIdInstance(Id longId) {
+		return get15CharacterId(longId);
 	}
 
 
@@ -139,16 +153,5 @@ public with sharing class FormulaShareUtilities {
         queryString = queryString.substringBeforeLast(',');
         return queryString;
     }
-
-/*
-    public static String buildStringFromSetNoQuotes(Set<String> stringSet) {
-        String queryString = '';
-        for (String value : stringSet) {
-            queryString += value + ',';
-        }
-        queryString = queryString.substringBeforeLast(',');
-        return queryString;
-    }
-*/
 
 }

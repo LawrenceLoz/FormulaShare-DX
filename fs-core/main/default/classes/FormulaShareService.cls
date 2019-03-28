@@ -19,90 +19,15 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareService {
+global inherited sharing class FormulaShareService {
 
 	public class FormulaShareException extends Exception{}
 
 	static FormulaShare_Settings__mdt settings;
-	static List<sObjectType> objectsRun = new List<sObjectType>();
-
-	public static void triggerHandler() {
-
-		// Process inserts and updates only (delete and undelete of shared object won't need changes)
-		if(Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate)) {
-
-			// Get SObject type
-			List<sObject> recordsChanged = Trigger.new;
-			sObjectType type = recordsChanged[0].getSObjectType();
-
-			// Continue if we haven't processed for this object
-			if(!objectsRun.contains(type)) {
-
-				// Add object type to prevent future runs (protects against calling in a loop)
-				objectsRun.add(type);
-
-				// Check whether we're already at the maximum number of queueable jobs allowed for the transaction
-				Boolean atMaxQueueableJobsSynch = !System.isBatch() && Limits.getQueueableJobs() == 50;
-				Boolean atMaxQueueableJobsBatch = System.isBatch() && Limits.getQueueableJobs() == 1;
-
-				if(!atMaxQueueableJobsSynch && !atMaxQueueableJobsBatch) {
-					handleShareChanges(type, Trigger.oldMap, Trigger.newMap);
-				}
-
-				else {
-					system.debug('At max allowed queueable jobs in transaction');
-				}
-			}
-		}
-	}
 
 
-	public static void handleShareChanges(Schema.SObjectType type, Map<Id, SObject> existingRecords, Map<Id, SObject> newRecords) {
-
-		ProcessFormulaShareQueueable job;
-		FormulaShareWrapper fsWrapper = new FormulaShareWrapper(type);
-
-		Boolean isUpdate = existingRecords != null ? true : false;
-
-		// If insert, submit all records
-		if(!isUpdate) {
-			fsWrapper.recordsMap = newRecords;
-
-			// Queue job for processing relevant records
-			job = new ProcessFormulaShareQueueable(fsWrapper);
-			ID formulaShareInsertJobID = System.enqueueJob(job);
-		}
-
-		// If update, submit those where one or more share to formula field has changed
-		else {
-			Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
-
-			for(SObject newRecord : newRecords.values()) {
-				SObject oldRecord = existingRecords.get((Id) newRecord.get('Id'));
-				
-				for(FSRule rule : fsWrapper.rules) {
-
-					// Submit to recalculate only if relevant field has changed and rule is active
-					if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName) && rule.active) {
-						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
-					}
-				}
-			}
-
-			if(!recordsWithSharingChanges.isEmpty()) {
-				fsWrapper.recordsMap = recordsWithSharingChanges;
-
-				// Queue job for processing relevant records
-				job = new ProcessFormulaShareQueueable(fsWrapper);
-				ID formulaShareUpdateJobID = System.enqueueJob(job);
-			}
-		}
-
-	}
-
-
-	// Core method called from trigger and batch context
-	public static void processFormulaShares(FormulaShareWrapper fsWrapper) {
+	// Core method called from trigger and batch context - returns a wrapper with all details needed to make updates
+	public static FormulaShareWrapper processFormulaShares(FormulaShareWrapper fsWrapper) {
 
 		Boolean removeExistingShares = true;
 
@@ -140,7 +65,7 @@ public with sharing class FormulaShareService {
 			}
 
 			// Ensure shares are not deleted if settings do not allow this
-			FormulaShare_Settings__mdt settings = FormulaShareSettings.getFormulaShareSettings();
+			FormulaShare_Settings__mdt settings = getFormulaShareSettings();
 			if(!settings.Remove_Shares_for_Standard_Objects__c) {
 				removeExistingShares = false;
 			}
@@ -149,26 +74,12 @@ public with sharing class FormulaShareService {
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares(fsWrapper);
 
-		Savepoint sp = Database.setSavepoint();
-
-		// Remove sharing which is no longer needed
+		// Clear deletion map if removal of standard sharing is not permitted
 		if(removeExistingShares) {
-			System.debug('Sharing to be removed: '+fsWrapper.mapToDelete.values());
-			new DMLProcessing().deleteShares(fsWrapper.mapToDelete.values());
+			fsWrapper.mapToDelete.clear();
 		}
 
-		// Insert new object share records
-		System.debug('Sharing to be inserted: '+fsWrapper.setToInsert);
-		List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
-		try {
-			new DMLProcessing().insertShares(sharesToInsertList);
-		}
-
-		// Revert to prior state if exceptions after deletion
-		catch(Exception e) {
-			Database.rollback(sp);
-			throw e;
-		}
+		return fsWrapper;
 	}
 
 
@@ -190,6 +101,7 @@ public with sharing class FormulaShareService {
 		for(SObject record : fsWrapper.recordsMap.values()) {
 			
 			for(FSRule rule : fsWrapper.rules) {
+			system.debug('this rule: '+rule);
 			String sharedToString = (String) record.get(rule.sharedToAPIName);
 				
 				// Only need to check records where sharing field is populated and where rule is active
@@ -297,6 +209,7 @@ public with sharing class FormulaShareService {
 
 			// If user is active and not already the record owner then create sharing record
 			if(activeUsersIdSet.contains(userId) && userId != recordRule.obj.get('OwnerId')) {
+				system.debug('adding to map for insert');
 				updateShareMaps(recordRule.obj.Id, userId, recordRule.rule, fsWrapper);
 			}
 		}
@@ -409,7 +322,7 @@ public with sharing class FormulaShareService {
 
 	public static void updateShareMapsCustom(Id recordId, Id sharedTo, FSRule rule, FormulaShareWrapper fsWrapper) {
 		String shareKey = FormulaShareUtilities.get15CharacterId(recordId)
-			 + FormulaShareUtilities.get15CharacterId(sharedTo) 
+			 + FormulaShareUtilities.get15CharacterId(sharedTo)
 			 + rule.accessLevel
 			 + rule.sharingReason;
 		
@@ -428,8 +341,10 @@ public with sharing class FormulaShareService {
 
 	public static void updateShareMapsStandard(Id recordId, Id sharedTo, FSRule rule, FormulaShareWrapper fsWrapper) {
 
+		FormulaShareUtilities fsUtil = FormulaShareUtilities.construct();
+
 		// Check whether we have any shares for this record already
-		String shareKeyBase = FormulaShareUtilities.get15CharacterId(recordId) + FormulaShareUtilities.get15CharacterId(sharedTo);
+		String shareKeyBase = fsUtil.get15CharacterIdInstance(recordId) + fsUtil.get15CharacterIdInstance(sharedTo);
 		String shareKeyAll = shareKeyBase + 'All';
 		String shareKeyEdit = shareKeyBase + 'Edit';
 		String shareKeyRead = shareKeyBase + 'Read';
@@ -599,7 +514,7 @@ public with sharing class FormulaShareService {
 
 	// Submits batch recalculation of all sharing
 	public static void recalculateAll() {
-		FormulaShare_Settings__mdt settings = FormulaShareSettings.getFormulaShareSettings();
+		FormulaShare_Settings__mdt settings = getFormulaShareSettings();
 		Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 		List<Schema.SObjectType> types = getSharedObjectTypes();
 		Id batchJobId = Database.executeBatch(new ProcessFormulaShareBatch(types, batchSize), batchSize);
@@ -615,66 +530,9 @@ public with sharing class FormulaShareService {
 		return settings;
 	}
 
-/*
-	// Return a list of dummy rules to use in test methods
-	private static List<FSRule> setTestRules() {
-		List<FSRule> testRules = new List<FSRule>();
-
-		FSRule testRule1 = new FSRule();
-		testRule1.accessLevel = 'Edit';
-		testRule1.objectSharedAPIName = 'Contact';
-		testRule1.sharedToAPIName = 'FirstName';		// Will add a sharing record for the role group for the role name in FirstName field
-		testRule1.shareWith = 'Roles';
-		testRule1.active = true;
-		testRule1.sharedToFieldType = 'Name';
-		testRules.add(testRule1);
-	
-		FSRule testRule2 = new FSRule();
-		testRule2.accessLevel = 'Edit';
-		testRule2.objectSharedAPIName = 'Contact';
-		testRule2.sharedToAPIName = 'LastName';		// Will add a sharing record for the role and subordinates group for the role Id in LastName field
-		testRule2.shareWith = 'Roles and Internal Subordinates';
-		testRule2.active = true;
-		testRule2.sharedToFieldType = 'Id';
-		testRules.add(testRule2);
-	
-		FSRule testRule3 = new FSRule();
-		testRule3.accessLevel = 'Edit';
-		testRule3.objectSharedAPIName = 'Contact';
-		testRule3.sharedToAPIName = 'Description';		// Will add a sharing record for the group name used in Description field
-		testRule3.shareWith = 'Public Groups';
-		testRule3.active = true;
-		testRule3.sharedToFieldType = 'Name';
-		testRules.add(testRule3);
-
-		FSRule testRule4 = new FSRule();
-		testRule4.accessLevel = 'Edit';
-		testRule4.objectSharedAPIName = 'Contact';
-		testRule4.sharedToAPIName = 'AssistantName';		// Will add a sharing record for Id of a user added in AssistantName field
-		testRule4.shareWith = 'Users';
-		testRule4.active = true;
-		testRule4.sharedToFieldType = 'Id';
-		testRules.add(testRule4);
-
-		return testRules;
-	}
-*/
-
-	// Inner class designated as without sharing to ensure that object share records can be 
-	// created / updated when code is run in user context (necessary for triggers updates)
-	public without sharing class DMLProcessing {
-
-		public void insertShares(List<SObject> sharesToInsertList) {
-			insert sharesToInsertList;
-		}
-
-		public void deleteShares(List<SObject> sharesToDeleteList) {
-			delete sharesToDeleteList;
-		}
-	}
 
 	// Core wrapper class passed to methods inside and outside the class
-	public class FormulaShareWrapper {
+	global class FormulaShareWrapper {
 		public Schema.SObjectType type;
 		public List<FSRule> rules;
 		public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
@@ -689,14 +547,14 @@ public with sharing class FormulaShareService {
 		}
 
 		// Or get rules if only type provided
-		public FormulaShareWrapper(Schema.SObjectType type) {
+		global FormulaShareWrapper(Schema.SObjectType type) {
 			this.type = type;
 			this.rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
 		}
 	}
 
 	// Wrapper for FormulaShare rules - primitive types only so this can be populated by test classes
-	public class FSRule {
+	global class FSRule {
 		public String objectSharedAPIName;
 		public String sharedToAPIName;
 		public String shareWith;
@@ -706,7 +564,7 @@ public with sharing class FormulaShareService {
 		public String sharingReason;
 	}
 
-	// Warpper for a record and a rule sharing this record
+	// Wrapper for a record and a rule sharing this record
 	private class SObjectRule {
 		SObject obj;
 		FSRule rule;

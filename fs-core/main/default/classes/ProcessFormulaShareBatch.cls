@@ -65,7 +65,8 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		}
 		system.debug('scope: '+scope);
 
-		FormulaShareService.processFormulaShares(fsWrapper);
+		FormulaShareService.FormulaShareWrapper updatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapper);
+		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(updatedFsWrapper);		// Placeholder until domain class written
 
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();

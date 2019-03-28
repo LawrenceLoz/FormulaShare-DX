@@ -21,14 +21,16 @@
 
 public with sharing class ProcessFormulaShareQueueable implements Queueable {
 
-	private FormulaShareService.FormulaShareWrapper fsWrapper;
+	private FormulaShareService.FormulaShareWrapper fsWrapperReceived;
+	private FormulaShareService.FormulaShareWrapper updatedFsWrapper;
 
 	public ProcessFormulaShareQueueable(FormulaShareService.FormulaShareWrapper fsWrapper) {
-		this.fsWrapper = fsWrapper;
+		this.fsWrapperReceived = fsWrapper;
 	}
 
 	public void execute(QueueableContext context) {
-		FormulaShareService.processFormulaShares(fsWrapper);
+		updatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapperReceived);
+		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(updatedFsWrapper);
 	}
 
 }

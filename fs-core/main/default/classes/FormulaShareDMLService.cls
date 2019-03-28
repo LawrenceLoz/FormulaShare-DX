@@ -22,7 +22,7 @@
 // Class designated as without sharing to ensure that object share records can be 
 // created / updated when code is run in user context
 public without sharing class FormulaShareDMLService {
-
+/*
     public static void insertShares(List<SObject> sharesToInsertList) {
         insert sharesToInsertList;
     }
@@ -30,5 +30,5 @@ public without sharing class FormulaShareDMLService {
     public static void deleteShares(List<SObject> sharesToDeleteList) {
         delete sharesToDeleteList;
     }
-
+*/
 }
