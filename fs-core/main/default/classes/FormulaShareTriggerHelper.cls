@@ -21,6 +21,8 @@
 
 global with sharing class FormulaShareTriggerHelper {
 
+	public class FormulaShareException extends Exception{}
+
 	static List<sObjectType> objectsRun = new List<sObjectType>();
 
 	global static void run() {
@@ -126,5 +128,107 @@ global with sharing class FormulaShareTriggerHelper {
         }
 	}
 
+
+
+	Map<sObjectType, FormulaShareService.FormulaShareWrapper> populatedFsWrapperMap = new Map<sObjectType, FormulaShareService.FormulaShareWrapper>();
+
+	// Constructor to assess sharing
+	global FormulaShareTriggerHelper() {
+
+		// Process inserts and updates only (delete and undelete of shared object won't need changes)
+		if(Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate)) {
+
+			// Get SObject type
+			List<sObject> recordsChanged = Trigger.new;
+			sObjectType type = recordsChanged[0].getSObjectType();
+
+			// Continue if we haven't processed for this object
+			if(!objectsRun.contains(type)) {
+
+				// Add object type to prevent future runs (protects against calling in a loop)
+				objectsRun.add(type);
+
+				handleChanges(type, Trigger.oldMap, Trigger.newMap);
+			}
+		}
+	}
+
+
+	private void handleChanges(Schema.SObjectType type, Map<Id, SObject> existingRecords, Map<Id, SObject> newRecords) {
+
+		ProcessFormulaShareQueueable job;
+		FormulaShareService.FormulaShareWrapper fsWrapper = new FormulaShareService.FormulaShareWrapper(type);
+
+		Boolean isInsert = existingRecords != null ? false : true;
+
+		// If insert, submit all records
+		if(isInsert) {
+			fsWrapper.recordsMap = newRecords;
+
+			// Assess sharing and populate map
+			FormulaShareService.FormulaShareWrapper populatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapper);
+			populatedFsWrapperMap.put(type, populatedFsWrapper);
+		}
+
+		// If update, submit those where one or more share to formula field has changed
+		else {
+			Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
+
+			for(SObject newRecord : newRecords.values()) {
+				SObject oldRecord = existingRecords.get((Id) newRecord.get('Id'));
+				
+				for(FormulaShareService.FSRule rule : fsWrapper.rules) {
+
+					// Submit to recalculate only if relevant field has changed and rule is active
+					if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName) && rule.active) {
+						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
+					}
+				}
+			}
+
+			if(!recordsWithSharingChanges.isEmpty()) {
+				fsWrapper.recordsMap = recordsWithSharingChanges;
+
+				// Assess sharing and populate map
+				FormulaShareService.FormulaShareWrapper populatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapper);
+				populatedFsWrapperMap.put(type, populatedFsWrapper);
+			}
+		}
+	}
+
+
+	global List<SObject> getSharesToDelete() {
+
+		if(populatedFsWrapperMap.size() == 1 && populatedFsWrapperMap.values()[0].mapToDelete != null) {
+			FormulaShareService.FormulaShareWrapper thisFSWrapper = populatedFsWrapperMap.values()[0];
+			List<SObject> sharesToDelete = thisFSWrapper.mapToDelete.values();
+			return sharesToDelete;
+		}
+
+		else if(populatedFsWrapperMap.size() > 1) {
+			throw new FormulaShareException('More than one object in scope - call getSharesToDelete with object name instead');
+		}
+
+		else {
+			throw new FormulaShareException('Map not popualted as expected');
+		}
+	}
+
+	global List<SObject> getSharesToInsert() {
+
+		if(populatedFsWrapperMap.size() == 1 && populatedFsWrapperMap.values()[0].setToInsert != null) {
+			FormulaShareService.FormulaShareWrapper thisFSWrapper = populatedFsWrapperMap.values()[0];
+			List<SObject> sharesToInsert = new List<SObject>(thisFSWrapper.setToInsert);
+			return sharesToInsert;
+		}
+
+		else if(populatedFsWrapperMap.size() > 1) {
+			throw new FormulaShareException('More than one object in scope - call getSharesToInsert with object name instead');
+		}
+
+		else {
+			throw new FormulaShareException('Map not popualted as expected');
+		}
+	}
 
 }

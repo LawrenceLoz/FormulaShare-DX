@@ -74,8 +74,8 @@ global inherited sharing class FormulaShareService {
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares(fsWrapper);
 
-		// Clear deletion map if removal of standard sharing is not permitted
-		if(removeExistingShares) {
+		// Clear deletion map if object is standard and removal of standard sharing is not permitted
+		if(removeExistingShares && !fsWrapper.type.getDescribe().isCustom()) {
 			fsWrapper.mapToDelete.clear();
 		}
 

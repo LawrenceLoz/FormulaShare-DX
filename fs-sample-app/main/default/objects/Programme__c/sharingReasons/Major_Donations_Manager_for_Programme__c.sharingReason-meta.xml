@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SharingReason xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Major_Donations_Manager_for_Programme__c</fullName>
+    <label>Major Donations Manager for Programme</label>
+</SharingReason>
