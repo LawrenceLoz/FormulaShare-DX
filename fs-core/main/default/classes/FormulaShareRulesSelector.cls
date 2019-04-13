@@ -40,15 +40,15 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
             FormulaShare_Rule__mdt.DeveloperName};
     }
     
-// fflib selector patter isn't used because it fails for metadata relationship fields.
-// The basic queries below are sufficient for now - FLS and sharing checks aren't needed 
+// fflib selector pattern isn't used because it fails for metadata relationship fields.
+// The basic queries below are sufficient - FLS and sharing checks aren't needed 
 // since custom metadata does not support either.
 
     // Returns a list of wrapper objects rather than custom metadata objects, which is necessary   
     // to support unit tests since custom metadata relationships can't be mocked
-    public List<FormulaShareService.FSRule> getRulesSharingObject(Schema.sObjectType type) {
+    public List<FormulaShareRule> getRulesSharingObject(Schema.sObjectType type) {
 
-		List<FormulaShareService.FSRule> rulesToReturn = new List<FormulaShareService.FSRule>();
+		List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 		String objectName = type.getDescribe().getName();
 
 		// Create list of all jobs with relevant details for assessing scope
@@ -58,7 +58,7 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
 			FROM FormulaShare_Rule__mdt
 			WHERE Object_Shared__r.QualifiedApiName = :objectName]) {
             
-			FormulaShareService.FSRule rule = new FormulaShareService.FSRule();
+			FormulaShareRule rule = new FormulaShareRule();
 			rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
 			rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
 			rule.shareWith = ruleInScope.Share_With__c;

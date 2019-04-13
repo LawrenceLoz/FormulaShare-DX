@@ -51,10 +51,10 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         if(stubbedMethodName == 'getRulesSharingObject') {
-            List<FormulaShareService.FSRule> rules = new List<FormulaShareService.FSRule>();
+            List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
             // Will add a sharing record for the role and subordinates group for the role name in Context__c field
-            FormulaShareService.FSRule roleSubRule = new FormulaShareService.FSRule();
+            FormulaShareRule roleSubRule = new FormulaShareRule();
             roleSubRule.objectSharedAPIName = 'FormulaShare_Log__c';
             roleSubRule.sharingReason = 'FormulaShare_Log_Share__c';
             roleSubRule.active = true;
@@ -65,7 +65,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             rules.add(roleSubRule);
 
             // Will add a sharing record for the role group for the role id in Class_Name__c field
-            FormulaShareService.FSRule roleRule = new FormulaShareService.FSRule();
+            FormulaShareRule roleRule = new FormulaShareRule();
             roleRule.objectSharedAPIName = 'FormulaShare_Log__c';
             roleRule.sharingReason = 'FormulaShare_Log_Share__c';
             roleRule.active = true;
@@ -76,7 +76,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             rules.add(roleRule);
 
             // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
-            FormulaShareService.FSRule groupRule = new FormulaShareService.FSRule();
+            FormulaShareRule groupRule = new FormulaShareRule();
             groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
             groupRule.sharingReason = 'FormulaShare_Log_Share__c';
             groupRule.active = true;
@@ -87,7 +87,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             rules.add(groupRule);
 
             // Will add a sharing record for the user with the user id in Method_Name__c field
-            FormulaShareService.FSRule userRule = new FormulaShareService.FSRule();
+            FormulaShareRule userRule = new FormulaShareRule();
             userRule.objectSharedAPIName = 'FormulaShare_Log__c';
             userRule.sharingReason = 'FormulaShare_Log_Share__c';
             userRule.active = true;

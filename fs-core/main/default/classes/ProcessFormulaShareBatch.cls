@@ -24,8 +24,9 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 	List<Schema.SObjectType> types;
 	Integer batchSize;
 	Schema.SObjectType typeInThisBatch;
-	List<FormulaShareService.FSRule> rulesForType;
+	List<FormulaShareRule> rulesForType;
 	List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
+
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
 	public ProcessFormulaShareBatch(List<Schema.SObjectType> types, Integer batchSize) {
@@ -35,6 +36,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		this.rulesForType = FormulaShareRulesSelector.construct().getRulesSharingObject(typeInThisBatch);
 	}
 	
+
 	public Database.QueryLocator start(Database.BatchableContext BC) {
 		system.debug('FormulaShare batch job started. Type in scope: '+typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
@@ -56,23 +58,30 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		return ql;
 	}
 
+
    	public void execute(Database.BatchableContext BC, List<sObject> scope) {
-		FormulaShareService.FormulaShareWrapper fsWrapper = new FormulaShareService.FormulaShareWrapper(typeInThisBatch, rulesForType);
+		FormulaShareService fsService = new FormulaShareService(typeInThisBatch, rulesForType);
 		
 		// Populate records in batch scope into wrapper
 		for(SObject obj : scope) {
-			fsWrapper.recordsMap.put(obj.Id, obj);
+			fsService.recordsMap.put(obj.Id, obj);
 		}
 		system.debug('scope: '+scope);
 
-		FormulaShareService.FormulaShareWrapper updatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapper);
-		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(updatedFsWrapper);		// Placeholder until domain class written
+		fsService.processFormulaShares();
+//		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(fsService);		// Placeholder until domain class written
+
+		FormulaShareSObjectShares fsSharesToInsert = new FormulaShareSObjectShares(fsService.getSharesToInsert(), fsService.type);
+		FormulaShareSObjectShares fsSharesToDelete = new FormulaShareSObjectShares(fsService.getSharesToDelete(), fsService.type);
+		fsSharesToInsert.insertShares();
+		fsSharesToDelete.deleteShares();
 
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
 		logsList = fsLogs.upsertLogs();
 	}
 	
+
 	public void finish(Database.BatchableContext BC) {
 		
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);

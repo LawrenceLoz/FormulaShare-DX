@@ -19,18 +19,22 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
+
+
+// Now deprecated - triggered changes now managed through synchronous updates
+
 public with sharing class ProcessFormulaShareQueueable implements Queueable {
 
-	private FormulaShareService.FormulaShareWrapper fsWrapperReceived;
-	private FormulaShareService.FormulaShareWrapper updatedFsWrapper;
+	private FormulaShareService fsService;
 
-	public ProcessFormulaShareQueueable(FormulaShareService.FormulaShareWrapper fsWrapper) {
-		this.fsWrapperReceived = fsWrapper;
+	public ProcessFormulaShareQueueable(FormulaShareService fsService) {
+		this.fsService = fsService;
 	}
 
 	public void execute(QueueableContext context) {
-		updatedFsWrapper = FormulaShareService.processFormulaShares(fsWrapperReceived);
-		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(updatedFsWrapper);
+		fsService.processFormulaShares();
+		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(fsService);
 	}
+
 
 }

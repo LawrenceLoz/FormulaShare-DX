@@ -22,7 +22,7 @@
 public class FormulaShareServiceTest {
 
 //  public static List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
-//	public static List<FormulaShareService.FSRule> fsRulePrims = new List<FormulaShareService.FSRule>();
+//	public static List<FormulaShareRule> fsRulePrims = new List<FormulaShareRule>();
 
     @testSetup
     public static void setup() {
@@ -60,17 +60,18 @@ public class FormulaShareServiceTest {
     }
 
     //--------------------------------- Test utility methods ------------------------------------------------
-    public static FormulaShareService.FormulaShareWrapper callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
+    public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
         Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
-        List<FormulaShareService.FSRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
-		FormulaShareService.FormulaShareWrapper fsWrapper = new FormulaShareService.FormulaShareWrapper(fsLogType, fsRules);
+        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
+		FormulaShareService fsService = new FormulaShareService(fsLogType, fsRules);
 		for(FormulaShare_Log__c log : fsLogs) {
-            fsWrapper.recordsMap.put(log.Id, log);
+            fsService.recordsMap.put(log.Id, log);
         }
-		return FormulaShareService.processFormulaShares(fsWrapper);
+		fsService.processFormulaShares();
+        return fsService;
     }
 
-    public static FormulaShareService.FormulaShareWrapper callProcessForLogRecord(FormulaShare_Log__c log) {
+    public static FormulaShareService callProcessForLogRecord(FormulaShare_Log__c log) {
         List<FormulaShare_Log__c> fsLogs = new List<FormulaShare_Log__c>();
         fsLogs.add(log);
         return callProcessForLogRecords(fsLogs);
@@ -103,15 +104,15 @@ public class FormulaShareServiceTest {
         log.Class_Name__c = role.Id;  // Share with role (id)
         insert log;
 
-        FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecord(log);
+        FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Get relevant id we expect to be in share records
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
 
-        // Check that fsWrapper response is as expected
-        System.assertEquals(fsWrapper.recordsMap.get(log.Id), log, 'New record not included in map');
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
+        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -130,15 +131,15 @@ public class FormulaShareServiceTest {
         log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
         insert log;
 
-        FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecord(log);
+        FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Get relevant id we expect to be in share records
         Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinates'][0];
 
-        // Check that fsWrapper response is as expected
-        System.assertEquals(fsWrapper.recordsMap.get(log.Id), log, 'New record not included in map');
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
+        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role and subordinates group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role and subordinates group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -156,15 +157,15 @@ public class FormulaShareServiceTest {
         log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
         insert log;
 
-        FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecord(log);
+        FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Get relevant id we expect to be in share records
         Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
-        // Check that fsWrapper response is as expected
-        System.assertEquals(fsWrapper.recordsMap.get(log.Id), log, 'New record not included in map');
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
+        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this public group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this public group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -186,12 +187,12 @@ public class FormulaShareServiceTest {
         log.OwnerId = UserInfo.getUserId();     // Make sure owner is a different user
         insert log;
 
-        FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecord(log);
+        FormulaShareService fsService = callProcessForLogRecord(log);
 
-        // Check that fsWrapper response is as expected
-        System.assertEquals(fsWrapper.recordsMap.get(log.Id), log, 'New record not included in map');
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
+        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -226,15 +227,15 @@ public class FormulaShareServiceTest {
         log.Class_Name__c = roles[1].Id;
         update log;
 
-        FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecord(log);
+        FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Get relevant id we expect to be in share records
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :roles[1].Id AND Type = 'Role'][0];
 
-        // Check that fsWrapper response is as expected
-        System.assertEquals(fsWrapper.recordsMap.get(log.Id), log, 'New record not included in map');
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsWrapper.setToInsert);
+        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -253,11 +254,11 @@ public class FormulaShareServiceTest {
         Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('Contact');
 
         // Check when no records were present in the map that a new record to insert is populated
-        FormulaShareService.FormulaShareWrapper fsWrapper = new FormulaShareService.FormulaShareWrapper(fsLogType);
-        FormulaShareService.FSRule rule = new FormulaShareService.FSRule();
+        FormulaShareService fsService = new FormulaShareService(fsLogType);
+        FormulaShareRule rule = new FormulaShareRule();
 
         // Find a FSRule object with access level of Read
-        for(FormulaShareService.FSRule r : fsWrapper.rules) {
+        for(FormulaShareRule r : fsService.rules) {
             if(r.accessLevel == 'Read') {
                 rule = r;
                 break;
@@ -265,11 +266,11 @@ public class FormulaShareServiceTest {
         }
 
         // Add an element to the delete map. Any SObject is OK so long as the key matches the mock
-        fsWrapper.mapToDelete.put('123123Read', new FormulaShare_Log__c());
+        fsService.mapToDelete.put('123123Read', new FormulaShare_Log__c());
 
-        FormulaShareService.updateShareMapsStandard(anyValidId, anyValidId, rule, fsWrapper);
-        system.assert(fsWrapper.setToInsert.isEmpty(), 'Record to insert which shouldnt be there');
-        system.assert(fsWrapper.mapToDelete.isEmpty(), 'Record to delete has not been removed');
+        fsService.updateShareMapsStandard(anyValidId, anyValidId, rule);
+        system.assert(fsService.setToInsert.isEmpty(), 'Record to insert which shouldnt be there');
+        system.assert(fsService.mapToDelete.isEmpty(), 'Record to delete has not been removed');
     }
 
 
@@ -280,13 +281,13 @@ public class FormulaShareServiceTest {
         insert log;
         
         Schema.SObjectType ContactType = Schema.getGlobalDescribe().get('Contact');
-        FormulaShareService.FormulaShareWrapper fsWrapper = new FormulaShareService.FormulaShareWrapper(ContactType);
-        fsWrapper.recordsMap.put(log.Id, log);
+        FormulaShareService fsService = new FormulaShareService(ContactType);
+        fsService.recordsMap.put(log.Id, log);
 
-        FormulaShareService.FormulaShareWrapper fsWrapperUpdated = FormulaShareService.processFormulaShares(fsWrapper);
+        fsService.processFormulaShares();
 
-        // Check that no records returned
-        system.assert(fsWrapper.mapToDelete.isEmpty());
+        // Check that no records included in the deletion map
+        system.assert(fsService.mapToDelete.isEmpty());
     }
 
 
