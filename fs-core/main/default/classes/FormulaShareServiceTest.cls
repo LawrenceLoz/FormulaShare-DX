@@ -18,6 +18,7 @@
 *IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
+
 @isTest
 public class FormulaShareServiceTest {
 
@@ -112,7 +113,7 @@ public class FormulaShareServiceTest {
         // Check that fsService response is as expected
         System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -139,7 +140,7 @@ public class FormulaShareServiceTest {
         // Check that fsService response is as expected
         System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role and subordinates group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role and subordinates group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -165,7 +166,7 @@ public class FormulaShareServiceTest {
         // Check that fsService response is as expected
         System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this public group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this public group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -192,7 +193,7 @@ public class FormulaShareServiceTest {
         // Check that fsService response is as expected
         System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -235,7 +236,7 @@ public class FormulaShareServiceTest {
         // Check that fsService response is as expected
         System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
 
-        List<SObject> sharesToInsertList = new List<SObject>(fsService.setToInsert);
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
         System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
@@ -258,7 +259,7 @@ public class FormulaShareServiceTest {
         FormulaShareRule rule = new FormulaShareRule();
 
         // Find a FSRule object with access level of Read
-        for(FormulaShareRule r : fsService.rules) {
+        for(FormulaShareRule r : fsService.getRules()) {
             if(r.accessLevel == 'Read') {
                 rule = r;
                 break;
@@ -269,8 +270,8 @@ public class FormulaShareServiceTest {
         fsService.mapToDelete.put('123123Read', new FormulaShare_Log__c());
 
         fsService.updateShareMapsStandard(anyValidId, anyValidId, rule);
-        system.assert(fsService.setToInsert.isEmpty(), 'Record to insert which shouldnt be there');
-        system.assert(fsService.mapToDelete.isEmpty(), 'Record to delete has not been removed');
+        system.assert(fsService.getSharesToInsert().isEmpty(), 'Record to insert which shouldnt be there');
+        system.assert(fsService.getSharesToDelete().isEmpty(), 'Record to delete has not been removed');
     }
 
 
@@ -287,7 +288,7 @@ public class FormulaShareServiceTest {
         fsService.processFormulaShares();
 
         // Check that no records included in the deletion map
-        system.assert(fsService.mapToDelete.isEmpty());
+        system.assert(fsService.getSharesToDelete().isEmpty());
     }
 
 

@@ -60,7 +60,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 
 
    	public void execute(Database.BatchableContext BC, List<sObject> scope) {
-		FormulaShareService fsService = new FormulaShareService(typeInThisBatch, rulesForType);
+		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
 		
 		// Populate records in batch scope into wrapper
 		for(SObject obj : scope) {
@@ -68,13 +68,25 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		}
 		system.debug('scope: '+scope);
 
+		// Assess sharing for this object
 		fsService.processFormulaShares();
-//		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(fsService);		// Placeholder until domain class written
 
+		// Insert and remove sharing if required
 		FormulaShareSObjectShares fsSharesToInsert = new FormulaShareSObjectShares(fsService.getSharesToInsert(), fsService.type);
 		FormulaShareSObjectShares fsSharesToDelete = new FormulaShareSObjectShares(fsService.getSharesToDelete(), fsService.type);
+
+		Savepoint sp = Database.setSavepoint();
 		fsSharesToInsert.insertShares();
-		fsSharesToDelete.deleteShares();
+
+		try {
+			fsSharesToDelete.deleteShares();
+		}
+
+        // Revert to prior state if exceptions after deletion
+        catch(Exception e) {
+            Database.rollback(sp);
+            throw e;
+        }
 
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();

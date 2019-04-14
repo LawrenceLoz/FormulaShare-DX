@@ -24,14 +24,13 @@ global with sharing class FormulaShareTriggerHelper {
 	public class FormulaShareException extends Exception{}
 
 	static List<sObjectType> objectsRun = new List<sObjectType>();
-	Map<sObjectType, FormulaShareService> populatedFsServiceMap = new Map<sObjectType, FormulaShareService>();
-
+	@TestVisible Map<sObjectType,FormulaShareService> populatedFsServiceMap = new Map<sObjectType, FormulaShareService>();
 
 	// Constructor to assess sharing
 	global FormulaShareTriggerHelper() {
 
 		// Process inserts and updates only (delete and undelete of shared object won't need changes)
-		if(Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate)) {
+		if(Trigger.isExecuting && (Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate))) {
 
 			// Get SObject type
 			List<sObject> recordsChanged = Trigger.new;
@@ -49,44 +48,50 @@ global with sharing class FormulaShareTriggerHelper {
 	}
 
 
-	private void handleChanges(Schema.SObjectType type, Map<Id, SObject> existingRecords, Map<Id, SObject> newRecords) {
+	@TestVisible
+	private void handleChanges(Schema.SObjectType type, Map<Id,SObject> existingRecords, Map<Id,SObject> newRecords) {
 
-		FormulaShareService fsService = new FormulaShareService(type);
+		FormulaShareService fsService = FormulaShareService.construct(type);
+		List<FormulaShareRule> rules = fsService.getRules();
+
+		Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
 
 		Boolean isInsert = existingRecords != null ? false : true;
 
-		// If insert, submit all records
+		// If insert, submit records where one or more share to formula field is populated
 		if(isInsert) {
-			fsService.recordsMap = newRecords;
-
-			// Assess sharing and populate map
-			fsService.processFormulaShares();
-			populatedFsServiceMap.put(type, fsService);
+			for(SObject newRecord : newRecords.values()) {
+				for(FormulaShareRule rule : rules) {
+					
+					// Submit to recalculate only if relevant field is populated and rule is active
+					if(newRecord.get(rule.sharedToAPIName) != null && rule.active) {
+						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
+					}
+				}
+			}
 		}
 
 		// If update, submit those where one or more share to formula field has changed
 		else {
-			Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
-
 			for(SObject newRecord : newRecords.values()) {
 				SObject oldRecord = existingRecords.get((Id) newRecord.get('Id'));
-				
-				for(FormulaShareRule rule : fsService.rules) {
-
+				for(FormulaShareRule rule : rules) {
+					
 					// Submit to recalculate only if relevant field has changed and rule is active
 					if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName) && rule.active) {
 						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
 					}
 				}
 			}
+		}
 
-			if(!recordsWithSharingChanges.isEmpty()) {
-				fsService.recordsMap = recordsWithSharingChanges;
+		// Submit relevant records if sharing changes might be needed
+		if(!recordsWithSharingChanges.isEmpty()) {
+			fsService.recordsMap = recordsWithSharingChanges;
 
-				// Assess sharing and populate map
-				fsService.processFormulaShares();
-				populatedFsServiceMap.put(type, fsService);
-			}
+			// Assess sharing and populate map
+			fsService.processFormulaShares();
+			populatedFsServiceMap.put(type, fsService);
 		}
 	}
 
@@ -126,34 +131,4 @@ global with sharing class FormulaShareTriggerHelper {
 		}
 	}
 
-
-	// Inner class designated as without sharing to ensure that object share records can be 
-	// created / updated when code is run in user context (necessary for triggers updates)
-	public without sharing class DMLProcessing {
-
-		public void makeChanges(FormulaShareService fsService) {
-            
-            Savepoint sp = Database.setSavepoint();
-
-            // Remove sharing which is no longer needed
-			List<SObject> sharesToDelete = fsService.getSharesToDelete();
-            if(!sharesToDelete.isEmpty()) {
-                System.debug('Sharing to be removed: '+sharesToDelete);
-                delete sharesToDelete;
-            }
-
-            // Insert new object share records
-			List<SObject> sharesToInsert = fsService.getSharesToInsert();
-            System.debug('Sharing to be inserted: '+sharesToInsert);
-            try {
-                insert sharesToInsert;
-            }
-
-            // Revert to prior state if exceptions after deletion
-            catch(Exception e) {
-                Database.rollback(sp);
-                throw e;
-            }
-        }
-	}
 }

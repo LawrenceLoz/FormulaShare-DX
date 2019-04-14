@@ -41,7 +41,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         System.debug('parameter(s) sent into the mocked call: ' + listOfArgs);
         
 
-        // FormulaShareSettingsSelector.selectActiveSettings() mock
+        // -------------------------- FormulaShareSettingsSelector Mocks ----------------------------- //
+
         if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == 'FormulaShare_Settings__mdt') {
             FormulaShare_Settings__mdt settings = new FormulaShare_Settings__mdt();
             settings.DeveloperName = 'Mocked Settings';
@@ -50,7 +51,9 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return settings;
         }
 
-        if(stubbedMethodName == 'getRulesSharingObject') {
+        // -------------------------- FormulaShareRulesSelector Mocks ----------------------------- //
+
+        else if(stubbedMethodName == 'getRulesSharingObject') {
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
             // Will add a sharing record for the role and subordinates group for the role name in Context__c field
@@ -100,14 +103,81 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return rules;
         }
 
-        if(stubbedMethodName == 'selectObjectsWithRules') {
+        else if(stubbedMethodName == 'selectObjectsWithRules') {
             List<String> objNames = new List<String>();
             objNames.add('FormulaShare_Log__c');
             return objNames;
         }
 
-        if(stubbedMethodName == 'get15CharacterIdInstance') {
+        // -------------------------- FormulaShareUtilities Mocks ----------------------------- //
+
+        else if(stubbedMethodName == 'get15CharacterIdInstance') {
             return '123';    // Return a string (only used as a string key by mocked method)
+        }
+
+        // -------------------------- FormulaShareService Mocks ----------------------------- //
+
+        else if(stubbedMethodName == 'processFormulaShares') {
+            return null;    // No return type, but carry out no processing
+        }
+
+        else if(stubbedMethodName == 'getRules') {
+            system.debug('getRules stub');
+            List<FormulaShareRule> rules = new List<FormulaShareRule>();
+
+           // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
+            FormulaShareRule groupRule = new FormulaShareRule();
+            groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
+            groupRule.sharingReason = 'FormulaShare_Log_Share__c';
+            groupRule.active = true;
+            groupRule.sharedToFieldType = 'Name';
+            groupRule.accessLevel = 'Edit';
+            groupRule.sharedToAPIName = 'Type_In_Scope__c';
+            groupRule.shareWith = 'Public Groups';
+            rules.add(groupRule);
+
+            return rules;
+        }
+
+        else if(stubbedMethodName == 'getSharesToInsert') {
+            List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
+
+            // Insert log object against which a share record could be inserted
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+//            log.Exception_Type__c = 'log with share to insert';  // So we can identify in test class
+            insert log;
+
+            // Create sharing table record linked to this log
+            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+            share.AccessLevel = 'Edit';
+            share.ParentId = log.Id;      // Any valid id is fine
+            share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
+            share.RowCause = 'FormulaShare_Log_Share__c';
+            shares.add(share);
+
+            return shares;
+        }
+
+        else if(stubbedMethodName == 'getSharesToDelete') {
+            List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
+
+            // Insert log object which we'll create a share record for
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+//            log.Exception_Type__c = 'log with share to delete';  // So we can identify in test class
+            insert log;
+
+            // Create sharing table record linked to this log
+            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+            share.AccessLevel = 'Edit';
+            share.ParentId = log.Id;      // Any valid id is fine
+            share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
+            share.RowCause = 'FormulaShare_Log_Share__c';
+
+            // Insert share so it can be deleted by calling methods
+            insert share;
+
+            shares.add(share);
+            return shares;
         }
 
         else return null;

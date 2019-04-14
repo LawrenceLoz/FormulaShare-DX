@@ -21,32 +21,28 @@
 
 public inherited sharing class FormulaShareService {
 
-	public class FormulaShareException extends Exception{}
+    public static FormulaShareService mock;
 
-	static FormulaShare_Settings__mdt settings;
-	public Schema.SObjectType type;
-	public List<FormulaShareRule> rules;
-	public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
-	private Map<String,SObject> mapToDelete = new Map<String,SObject>();
-	private Set<SObject> setToInsert = new Set<SObject>();
-	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+	// Set type and rules if provided on creation
+    public static FormulaShareService construct(Schema.SObjectType type, List<FormulaShareRule> rules) {
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+		else {
+			FormulaShareService fsService = new FormulaShareService();
+			fsService.type = type;
+			fsService.rules = rules;
+			return fsService;
+		}
+    }
 
-	// Wrapper for a record and a rule sharing this record
-	private class SObjectRule {
-		SObject obj;
-		FormulaShareRule rule;
+	// Or get rules if only type provided
+	public static FormulaShareService construct(Schema.SObjectType type) {
+		List<FormulaShareRule> rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
+		return construct(type, rules);
 	}
 
-	public class FSRule {
-		public String objectSharedAPIName;
-		public String sharedToAPIName;
-		public String shareWith;
-		public String accessLevel;
-		public Boolean active;
-		public String sharedToFieldType;
-		public String sharingReason;
-	}
-
+/*
 	// Set type and rules if provided on creation
 	public FormulaShareService(Schema.SObjectType type, List<FormulaShareRule> rules) {
 		this.type = type;
@@ -58,14 +54,36 @@ public inherited sharing class FormulaShareService {
 		this.type = type;
 		this.rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
 	}
+*/
+
+	public class FormulaShareException extends Exception{}
+
+	static FormulaShare_Settings__mdt settings;
+	public Schema.SObjectType type;
+	private List<FormulaShareRule> rules;
+	public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
+	@TestVisible private Map<String,SObject> mapToDelete = new Map<String,SObject>();
+	private Set<SObject> setToInsert = new Set<SObject>();
+	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+
+	// Wrapper for a record and a rule sharing this record
+	private class SObjectRule {
+		SObject obj;
+		FormulaShareRule rule;
+	}
 	
 
+	// Getter methods to access variables needed by calling classes. Methods are mocked for test classes
 	public List<SObject> getSharesToInsert() {
 		return new List<SObject>(setToInsert);
 	}
 
 	public List<SOBject> getSharesToDelete() {
 		return mapToDelete.values();
+	}
+
+	public List<FormulaShareRule> getRules() {
+		return rules;
 	}
 
 	// Used by batch job to retrieve query locator from selector

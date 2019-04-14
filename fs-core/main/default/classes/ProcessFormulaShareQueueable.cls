@@ -33,7 +33,10 @@ public with sharing class ProcessFormulaShareQueueable implements Queueable {
 
 	public void execute(QueueableContext context) {
 		fsService.processFormulaShares();
-		new FormulaShareTriggerHelper.DMLProcessing().makeChanges(fsService);
+		FormulaShareSObjectShares fsSharesToInsert = new FormulaShareSObjectShares(fsService.getSharesToInsert(), fsService.type);
+		FormulaShareSObjectShares fsSharesToDelete = new FormulaShareSObjectShares(fsService.getSharesToDelete(), fsService.type);
+		fsSharesToInsert.insertShares();
+		fsSharesToDelete.deleteShares();
 	}
 
 
