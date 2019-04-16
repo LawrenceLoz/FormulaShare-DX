@@ -71,17 +71,8 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
 
 		return rulesToReturn;        
     }
-/*
-    private List<FormulaShare_Rule__mdt> selectRules(String objectName) {
 
-        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
-			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
-			FROM FormulaShare_Rule__mdt
-			WHERE Object_Shared__r.QualifiedApiName = :objectName];
-        return rules;
-    }
-*/
+
     public List<String> selectObjectsWithRules() {
         List<String> objNames = new List<String>();
         for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {

@@ -23,6 +23,16 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
 
 	public class FormulaShareSettingsSelectorException extends Exception{}
 
+    public static FormulaShareSettingsSelector mock;
+    public static FormulaShareSettingsSelector construct() {
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+        else {
+            return new FormulaShareSettingsSelector();
+        }
+    }
+    
     public List<Schema.SObjectField> getSObjectFieldList() {
         return new List<Schema.SObjectField> {
             FormulaShare_Settings__mdt.DeveloperName,

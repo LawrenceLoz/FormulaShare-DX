@@ -143,14 +143,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
 
             // Insert log object against which a share record could be inserted
-            FormulaShare_Log__c log = new FormulaShare_Log__c();
+//            FormulaShare_Log__c log = new FormulaShare_Log__c();
 //            log.Exception_Type__c = 'log with share to insert';  // So we can identify in test class
-            insert log;
+//            insert log;
 
-            // Create sharing table record linked to this log
+            // Create sharing table record
             FormulaShare_Log__Share share = new FormulaShare_Log__Share();
             share.AccessLevel = 'Edit';
-            share.ParentId = log.Id;      // Any valid id is fine
+//            share.ParentId = log.Id;
+            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
             share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
             share.RowCause = 'FormulaShare_Log_Share__c';
             shares.add(share);
@@ -162,23 +163,46 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
 
             // Insert log object which we'll create a share record for
-            FormulaShare_Log__c log = new FormulaShare_Log__c();
+//            FormulaShare_Log__c log = new FormulaShare_Log__c();
 //            log.Exception_Type__c = 'log with share to delete';  // So we can identify in test class
-            insert log;
+//            insert log;
 
             // Create sharing table record linked to this log
             FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-            share.AccessLevel = 'Edit';
-            share.ParentId = log.Id;      // Any valid id is fine
+            share.AccessLevel = 'Read';
+//            share.ParentId = log.Id;
+            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
             share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
             share.RowCause = 'FormulaShare_Log_Share__c';
 
             // Insert share so it can be deleted by calling methods
-            insert share;
+//            insert share;
 
             shares.add(share);
             return shares;
         }
+
+        else if(stubbedMethodName == 'getFullObjectQueryLocator') {
+            Database.QueryLocator locator = Database.getQueryLocator(
+                'SELECT Id, Context__c, Class_Name__c, Type_In_Scope, Method_Name__c FROM FormulaShare_Log__c');
+            return locator;
+        }
+
+        else if(stubbedMethodName == 'getType') {
+            Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+            return fsLogType;
+        }
+
+        // -------------------------- FormulaShareService Mocks ----------------------------- //
+
+        else if(stubbedMethodName == 'insertShares') {
+            return null;
+        }
+
+        else if(stubbedMethodName == 'deleteShares') {
+            return null;
+        }
+
 
         else return null;
     }

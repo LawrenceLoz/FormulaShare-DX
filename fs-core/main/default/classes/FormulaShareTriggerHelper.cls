@@ -23,8 +23,9 @@ global with sharing class FormulaShareTriggerHelper {
 
 	public class FormulaShareException extends Exception{}
 
-	static List<sObjectType> objectsRun = new List<sObjectType>();
 	@TestVisible Map<sObjectType,FormulaShareService> populatedFsServiceMap = new Map<sObjectType, FormulaShareService>();
+	@TestVisible private Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
+	private static List<sObjectType> objectsRun = new List<sObjectType>();
 
 	// Constructor to assess sharing
 	global FormulaShareTriggerHelper() {
@@ -51,10 +52,11 @@ global with sharing class FormulaShareTriggerHelper {
 	@TestVisible
 	private void handleChanges(Schema.SObjectType type, Map<Id,SObject> existingRecords, Map<Id,SObject> newRecords) {
 
+		// Clear map in case populated from previous object in same transaction
+		recordsWithSharingChanges.clear();
+
 		FormulaShareService fsService = FormulaShareService.construct(type);
 		List<FormulaShareRule> rules = fsService.getRules();
-
-		Map<Id,SObject> recordsWithSharingChanges = new Map<Id,SObject>();
 
 		Boolean isInsert = existingRecords != null ? false : true;
 
@@ -87,7 +89,7 @@ global with sharing class FormulaShareTriggerHelper {
 
 		// Submit relevant records if sharing changes might be needed
 		if(!recordsWithSharingChanges.isEmpty()) {
-			fsService.recordsMap = recordsWithSharingChanges;
+			fsService.setRecordsMap(recordsWithSharingChanges);
 
 			// Assess sharing and populate map
 			fsService.processFormulaShares();

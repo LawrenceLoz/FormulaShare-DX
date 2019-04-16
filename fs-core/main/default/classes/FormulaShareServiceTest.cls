@@ -64,7 +64,7 @@ public class FormulaShareServiceTest {
     public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
         Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
-		FormulaShareService fsService = new FormulaShareService(fsLogType, fsRules);
+		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
 		for(FormulaShare_Log__c log : fsLogs) {
             fsService.recordsMap.put(log.Id, log);
         }
@@ -84,6 +84,9 @@ public class FormulaShareServiceTest {
 
         FormulaShareUtilities mockFSShareUtiities = (FormulaShareUtilities) FormulaShareMockUtil.createMock(FormulaShareUtilities.class);
         FormulaShareUtilities.mock = mockFSShareUtiities;
+
+        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
     }
 
     public static UserRole getOneRole() {
@@ -255,7 +258,7 @@ public class FormulaShareServiceTest {
         Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('Contact');
 
         // Check when no records were present in the map that a new record to insert is populated
-        FormulaShareService fsService = new FormulaShareService(fsLogType);
+        FormulaShareService fsService = FormulaShareService.construct(fsLogType);
         FormulaShareRule rule = new FormulaShareRule();
 
         // Find a FSRule object with access level of Read
@@ -277,12 +280,13 @@ public class FormulaShareServiceTest {
 
     @isTest
     public static void testQueryingStandardObjectShares() {
+        setMocks();
 
         FormulaShare_Log__c log = new FormulaShare_Log__c();
         insert log;
         
         Schema.SObjectType ContactType = Schema.getGlobalDescribe().get('Contact');
-        FormulaShareService fsService = new FormulaShareService(ContactType);
+        FormulaShareService fsService = FormulaShareService.construct(ContactType);
         fsService.recordsMap.put(log.Id, log);
 
         fsService.processFormulaShares();
@@ -295,7 +299,6 @@ public class FormulaShareServiceTest {
     // ------------------------- Integration test of batch job -------------------------------
     @isTest
     public static void testInsertSharing() {
-        setMocks();
 
         // Given
 //        fflib_ApexMocks mocks = new fflib_ApexMocks();
@@ -309,6 +312,8 @@ public class FormulaShareServiceTest {
 //        mocks.stopStubbing();
 //        FormulaShareApplication.Selector.setMock(mockFSSettingsSelector);
 
+        setMocks();
+
         UserRole role = getOneRole();
 
         // Create log object and set fields which have test rules created within apex class
@@ -320,8 +325,6 @@ public class FormulaShareServiceTest {
         log.Method_Name__c = UserInfo.getUserId();  // Share with user (Id)
         insert log;
         fsLogs.add(log);
-
-        //FormulaShareService.FormulaShareWrapper fsWrapper = callProcessForLogRecords(fsLogs);
 
         // Call recalculate method to set sharing
         test.startTest();

@@ -42,29 +42,16 @@ public inherited sharing class FormulaShareService {
 		return construct(type, rules);
 	}
 
-/*
-	// Set type and rules if provided on creation
-	public FormulaShareService(Schema.SObjectType type, List<FormulaShareRule> rules) {
-		this.type = type;
-		this.rules = rules;
-	}
-
-	// Or get rules if only type provided
-	public FormulaShareService(Schema.SObjectType type) {
-		this.type = type;
-		this.rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
-	}
-*/
 
 	public class FormulaShareException extends Exception{}
 
 	static FormulaShare_Settings__mdt settings;
-	public Schema.SObjectType type;
-	private List<FormulaShareRule> rules;
-	public Map<Id,SObject> recordsMap = new Map<Id,SObject>();
+	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+	@TestVisible private Map<Id,SObject> recordsMap = new Map<Id,SObject>();
 	@TestVisible private Map<String,SObject> mapToDelete = new Map<String,SObject>();
 	private Set<SObject> setToInsert = new Set<SObject>();
-	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
+	private Schema.SObjectType type;
+	private List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
 	// Wrapper for a record and a rule sharing this record
 	private class SObjectRule {
@@ -84,6 +71,14 @@ public inherited sharing class FormulaShareService {
 
 	public List<FormulaShareRule> getRules() {
 		return rules;
+	}
+
+	public Schema.SObjectType getType() {
+		return type;
+	}
+
+	public void setRecordsMap(Map<Id,SObject> recordsMap) {
+		this.recordsMap = recordsMap;
 	}
 
 	// Used by batch job to retrieve query locator from selector
@@ -525,7 +520,7 @@ public inherited sharing class FormulaShareService {
 	private static FormulaShare_Settings__mdt getFormulaShareSettings() {
 
 		if(settings == null) {
-			settings = new FormulaShareSettingsSelector().selectActiveSettings();
+			settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 		}
 
 		return settings;

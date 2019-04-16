@@ -61,32 +61,38 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 
    	public void execute(Database.BatchableContext BC, List<sObject> scope) {
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
-		
+		Map<Id,SObject> recordsMap = new Map<Id,SObject>();
+
 		// Populate records in batch scope into wrapper
 		for(SObject obj : scope) {
-			fsService.recordsMap.put(obj.Id, obj);
+			recordsMap.put(obj.Id, obj);
 		}
-		system.debug('scope: '+scope);
+		fsService.setRecordsMap(recordsMap);
 
 		// Assess sharing for this object
 		fsService.processFormulaShares();
+		Schema.SObjectType type = fsService.getType();
 
 		// Insert and remove sharing if required
-		FormulaShareSObjectShares fsSharesToInsert = new FormulaShareSObjectShares(fsService.getSharesToInsert(), fsService.type);
-		FormulaShareSObjectShares fsSharesToDelete = new FormulaShareSObjectShares(fsService.getSharesToDelete(), fsService.type);
-
-		Savepoint sp = Database.setSavepoint();
-		fsSharesToInsert.insertShares();
-
-		try {
-			fsSharesToDelete.deleteShares();
+		if(!fsService.getSharesToInsert().isEmpty()) {
+			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(fsService.getSharesToInsert(), type);
+			fsSharesToInsert.insertShares();
 		}
 
-        // Revert to prior state if exceptions after deletion
-        catch(Exception e) {
-            Database.rollback(sp);
-            throw e;
-        }
+		Savepoint sp = Database.setSavepoint();
+
+		if(!fsService.getSharesToDelete().isEmpty()) {
+			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(fsService.getSharesToDelete(), type);
+			try {
+				fsSharesToDelete.deleteShares();
+			}
+
+			// Revert to prior state if exceptions after deletion
+			catch(Exception e) {
+				Database.rollback(sp);
+				throw e;
+			}
+		}
 
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
