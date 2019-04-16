@@ -46,7 +46,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == 'FormulaShare_Settings__mdt') {
             FormulaShare_Settings__mdt settings = new FormulaShare_Settings__mdt();
             settings.DeveloperName = 'Mocked Settings';
-            settings.Recalculation_Batch_Size__c = 100;
+            settings.Recalculation_Batch_Size__c = 200;
             settings.Remove_Shares_for_Standard_Objects__c = true;
             return settings;
         }
