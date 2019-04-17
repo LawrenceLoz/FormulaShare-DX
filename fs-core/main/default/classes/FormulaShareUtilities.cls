@@ -45,7 +45,6 @@ public with sharing class FormulaShareUtilities {
 
 			// For joining objects, check whether relationship name of this field is the same as the portion of the lookup we're evaluating
 			if(field.getDescribe().getRelationshipName() == fieldRelatedNameString) {
-				system.debug('Found related field: '+field);
 				return field;
 			}
 		}
