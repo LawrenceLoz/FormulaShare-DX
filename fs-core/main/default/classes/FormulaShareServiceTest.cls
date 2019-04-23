@@ -19,13 +19,13 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-@isTest
+@IsTest
 public class FormulaShareServiceTest {
 
 //  public static List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
 //	public static List<FormulaShareRule> fsRulePrims = new List<FormulaShareRule>();
 
-    @testSetup
+    @TestSetup
     public static void setup() {
     
         // Insert 3 user roles
@@ -98,7 +98,7 @@ public class FormulaShareServiceTest {
 
 
     //------------------ Positive testing of record insertion for supported rule types ----------------------
-    @isTest
+    @IsTest
     public static void testCreateRoleSharingNewRecord() {
         setMocks();
         UserRole role = getOneRole();
@@ -125,7 +125,7 @@ public class FormulaShareServiceTest {
         System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
-    @isTest
+    @IsTest
     public static void testCreateRoleAndSubordinatesSharingNewRecord() {
         setMocks();
         UserRole role = getOneRole();
@@ -152,7 +152,7 @@ public class FormulaShareServiceTest {
         System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
-    @isTest
+    @IsTest
     public static void testCreatePublicGroupSharingNewRecord() {
         setMocks();
 
@@ -178,7 +178,7 @@ public class FormulaShareServiceTest {
         System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
-    @isTest
+    @IsTest
     public static void testCreateUserSharingNewRecord() {
         setMocks();
 
@@ -207,7 +207,7 @@ public class FormulaShareServiceTest {
 
 
     // ------------------ Testing updates to sharing -------------------------
-    @isTest
+    @IsTest
     public static void testUpdateRoleSharingToNewRole() {
 
         setMocks();
@@ -250,7 +250,7 @@ public class FormulaShareServiceTest {
 
 
     // ----------------------------- Unit testing hard to test methods ----------------------------
-    @isTest
+    @IsTest
     public static void testUpdatingShareMapsStandard() {
         setMocks();
 
@@ -278,7 +278,7 @@ public class FormulaShareServiceTest {
     }
 
 
-    @isTest
+    @IsTest
     public static void testQueryingStandardObjectShares() {
         setMocks();
 
@@ -297,7 +297,7 @@ public class FormulaShareServiceTest {
 
 
     // ------------------------- Integration test of batch job -------------------------------
-    @isTest
+    @IsTest
     public static void testInsertSharing() {
 
         // Given

@@ -22,33 +22,31 @@
 @isTest
 public with sharing class FormulaShareProcessSchedulableTest {
 
+    public static void setMocks() {
+        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
+        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+
+        FormulaShareUtilities mockFSShareUtiities = (FormulaShareUtilities) FormulaShareMockUtil.createMock(FormulaShareUtilities.class);
+        FormulaShareUtilities.mock = mockFSShareUtiities;
+
+        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
+    }
+
 	@isTest
 	public static void testScheduling() {
-
-		UserRole roleForTest = [SELECT Id, DeveloperName FROM UserRole LIMIT 1][0];
-
-		Contact con = new Contact();
-
-		// Set fields which have test rules created within apex class
-		con.FirstName = roleForTest.DeveloperName;	// Share with role (name)
-		con.LastName = roleForTest.Id;				// Share with role and subordinates (Id)
-		con.Description = 'AllInternalUsers';		// Share with group (name)
-		con.AssistantName = UserInfo.getUserId();	// Share with user (Id)
-		insert con;
+		setMocks();
 
         String CRON_EXP = '0 0 23 * * ?';
 
+		// Schedule the recalculation job
         Test.startTest();
-
         String jobId = System.schedule('Test FormulaShare Scheduling', CRON_EXP, new FormulaShareProcessSchedulable());
+        Test.stopTest();
 
+		// Check that cron trigger set correctly
         CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime FROM CronTrigger WHERE id = :jobId];
         System.assertEquals(CRON_EXP, ct.CronExpression);
         System.assertEquals(0, ct.TimesTriggered);
-
-        Test.stopTest();
-
-		List<ContactShare> shares = [SELECT Id FROM ContactShare WHERE Id = :con.Id];
-		system.debug('SharesFound:'+shares.size());
 	}
 }

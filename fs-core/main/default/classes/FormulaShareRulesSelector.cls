@@ -51,12 +51,25 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
 		List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 		String objectName = type.getDescribe().getName();
 
-		// Create list of all jobs with relevant details for assessing scope
-		for(FormulaShare_Rule__mdt ruleInScope : [SELECT Id, Access_Level__c, 
+        List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
+
+        // If test, populate list with a fake rule so we can test logic of method (can't otherwise guarantee rules exist)
+        if(Test.isRunningTest()) {
+            FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
+            rule.Sharing_Reason__c = 'Test reason';
+            rules.add(rule);
+        }
+
+        else {
+        rules = [SELECT Id, Access_Level__c, 
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
 			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
 			FROM FormulaShare_Rule__mdt
-			WHERE Object_Shared__r.QualifiedApiName = :objectName]) {
+			WHERE Object_Shared__r.QualifiedApiName = :objectName];
+        }
+        
+		// Create list of all jobs with relevant details for assessing scope
+		for(FormulaShare_Rule__mdt ruleInScope : rules) {
             
 			FormulaShareRule rule = new FormulaShareRule();
 			rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
@@ -75,9 +88,18 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
 
     public List<String> selectObjectsWithRules() {
         List<String> objNames = new List<String>();
-        for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
-            objNames.add(rule.Object_Shared__r.QualifiedApiName);
+
+        // If test, populate list with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
+        if(Test.isRunningTest()) {
+            objNames.add('Test object');
         }
+        
+        else {
+            for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
+                objNames.add(rule.Object_Shared__r.QualifiedApiName);
+            }
+        }
+
         return objNames;
     }
 
