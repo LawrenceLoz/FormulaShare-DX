@@ -66,7 +66,7 @@ global with sharing class FormulaShareTriggerHelper {
 				for(FormulaShareRule rule : rules) {
 					
 					// Submit to recalculate only if relevant field is populated and rule is active
-					if(newRecord.get(rule.sharedToAPIName) != null && rule.active) {
+					if(rule.sharedToAPIName != null && newRecord.get(rule.sharedToAPIName) != null && rule.active) {
 						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
 					}
 				}
