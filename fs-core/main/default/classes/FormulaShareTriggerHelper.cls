@@ -110,8 +110,9 @@ global with sharing class FormulaShareTriggerHelper {
 			throw new FormulaShareException('More than one object in scope - call getSharesToDelete with object name instead');
 		}
 
+		// Return an empty list if we hadn't initialised fsService (implies changes didn't require sharing updates)
 		else {
-			throw new FormulaShareException('Map not populated as expected');
+			return new List<SObject>();
 		}
 	}
 
@@ -129,7 +130,8 @@ global with sharing class FormulaShareTriggerHelper {
 		}
 
 		else {
-			throw new FormulaShareException('Map not populated as expected');
+			// Return an empty list if we hadn't initialised fsService (implies changes didn't require sharing updates)
+			return new List<SObject>();
 		}
 	}
 

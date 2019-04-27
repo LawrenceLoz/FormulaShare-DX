@@ -28,6 +28,9 @@ public with sharing class ProcessFormulaShareBatchTest {
 
         FormulaShareSObjectShares mockFSSObjectShares = (FormulaShareSObjectShares) FormulaShareMockUtil.createMock(FormulaShareSObjectShares.class);
         FormulaShareSObjectShares.mock = mockFSSObjectShares;
+
+        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
+        FormulaShareRulesSelector.mock = mockFSRulesSelector;
     }
 
     @IsTest
@@ -58,7 +61,6 @@ public with sharing class ProcessFormulaShareBatchTest {
 
         system.assert(!insertedLogs.isEmpty(), 'No log record created for batch process');
         system.assertEquals(1, insertedLogs.size(), 'Only one log expected, but more than one created');
-        system.assertEquals('SELECT Id FROM FormulaShare_Log__c ORDER BY Name ASC NULLS FIRST', insertedLogs[0].Query__c);
         system.assertEquals(1, insertedLogs[0].Batches_Processed__c);
     }
 

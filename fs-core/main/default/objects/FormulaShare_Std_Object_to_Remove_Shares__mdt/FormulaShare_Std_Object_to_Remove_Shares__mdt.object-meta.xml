@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>If a record is set up here for a standard object, any sharing on this object which is granted by FormulaShare will be revoked when no longer valid. However, this ALSO means any manual and non-FormulaShare managed sharing on these objects will be removed too.
+If a record isn&#39;t set here for a standard object, sharing set up by FormulaShare will remain even if the conditions which led to this sharing no longer apply.
+Custom object sharing is always removed when no longer valid - this consideration is only needed for standard objects.</description>
+    <label>FormulaShare Std Object to Remove Shares</label>
+    <pluralLabel>FormulaShare Std Objcts to Remove Shares</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

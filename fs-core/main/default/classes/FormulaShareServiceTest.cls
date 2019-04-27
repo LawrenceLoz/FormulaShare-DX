@@ -306,7 +306,6 @@ public class FormulaShareServiceTest {
 //        FormulaShare_Settings__mdt fsSettings = new FormulaShare_Settings__mdt();
 //        fsSettings.DeveloperName = 'Mock Settings';
 //        fsSettings.Recalculation_Batch_Size__c = 5;
-//        fsSettings.Remove_Shares_for_Standard_Objects__c = true;
 //        mocks.startStubbing();
 //        mocks.when(mockFSSettingsSelector.selectActiveSettings()).thenReturn(fsSettings);
 //        mocks.stopStubbing();

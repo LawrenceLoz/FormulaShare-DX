@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Standard_Object_to_Remove_Sharing__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Standard Object to Remove Sharing</label>
+    <referenceTo>EntityDefinition</referenceTo>
+    <relationshipLabel>FormulaShare_Std_Objcts_to_Remove_Shares</relationshipLabel>
+    <relationshipName>FormulaShare_Std_Objcts_to_Remove_Shares</relationshipName>
+    <required>false</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

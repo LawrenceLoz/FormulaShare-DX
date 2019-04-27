@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSelector {
+public inherited sharing class FormulaShareRulesSelector {
 
     public static FormulaShareRulesSelector mock;
     public static FormulaShareRulesSelector construct() {
@@ -31,18 +31,9 @@ public inherited sharing class FormulaShareRulesSelector extends fflib_SObjectSe
         }
     }
 
-    public Schema.SObjectType getSObjectType() {
-        return FormulaShare_Rule__mdt.sObjectType;
-    }
-
-    public List<Schema.SObjectField> getSObjectFieldList() {
-        return new List<Schema.SObjectField> {
-            FormulaShare_Rule__mdt.DeveloperName};
-    }
-    
-// fflib selector pattern isn't used because it fails for metadata relationship fields.
-// The basic queries below are sufficient - FLS and sharing checks aren't needed 
-// since custom metadata does not support either.
+    // fflib selector pattern isn't used because it fails for metadata relationship fields.
+    // The basic queries below are sufficient - FLS and sharing checks aren't needed 
+    // since custom metadata does not support either.
 
     // Returns a list of wrapper objects rather than custom metadata objects, which is necessary   
     // to support unit tests since custom metadata relationships can't be mocked

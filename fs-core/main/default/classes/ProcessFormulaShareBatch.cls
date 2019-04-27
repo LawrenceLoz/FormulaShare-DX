@@ -41,21 +41,26 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		system.debug('FormulaShare batch job started. Type in scope: '+typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
 
-		Database.QueryLocator ql = FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
+		if(!rulesForType.isEmpty()) {
+			Database.QueryLocator ql = FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
 
-		FormulaShare_Log__c log = new FormulaShare_Log__c();
-		logsList = new List<FormulaShare_Log__c>();
-		logsList.add(log);
-		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+			FormulaShare_Log__c log = new FormulaShare_Log__c();
+			logsList = new List<FormulaShare_Log__c>();
+			logsList.add(log);
+			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 
-		fsLogs.setContext('ProcessFormulaShareBatch', null, 'Batch');
-		String typeInScope = typeInThisBatch.getDescribe().getName();
-		Integer noRules = rulesForType.size();
-		String query = ql.getQuery();
-		fsLogs.setBatchDetails(batchSize, typeInScope, noRules, ql.getQuery());
-		logsList = fsLogs.upsertLogs();
+			fsLogs.setContext('ProcessFormulaShareBatch', null, 'Batch');
+			String typeInScope = typeInThisBatch.getDescribe().getName();
+			Integer noRules = rulesForType.size();
+			String query = ql.getQuery();
+			fsLogs.setBatchDetails(batchSize, typeInScope, noRules, query);
+			logsList = fsLogs.upsertLogs();
+			return ql;
+		}
 
-		return ql;
+		else {
+			return null;
+		}
 	}
 
 

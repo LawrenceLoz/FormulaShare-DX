@@ -150,9 +150,8 @@ public inherited sharing class FormulaShareService {
 				mapToDelete.put(shareKey, share);
 			}
 
-			// Ensure shares are not deleted if settings do not allow this
-			FormulaShare_Settings__mdt settings = getFormulaShareSettings();
-			if(!settings.Remove_Shares_for_Standard_Objects__c) {
+			List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLines = FormulaShareRemoveSharesSelector.construct().getRemovalLinesForType(type);
+			if(!removalLines.isEmpty()) {
 				removeExistingShares = false;
 			}
 		}
