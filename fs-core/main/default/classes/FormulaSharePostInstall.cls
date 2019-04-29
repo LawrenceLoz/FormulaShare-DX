@@ -1,5 +1,5 @@
 /**
-*Copyright 2018 Lawrence Newcombe
+*Copyright 2019 Lawrence Newcombe
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy 
 *of this software and associated documentation files (the "Software"), to deal 
@@ -19,14 +19,24 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareProcessSchedulable implements Schedulable {
+global class FormulaSharePostInstall implements InstallHandler {
 
-    // Generic implementation to call submitter class
-    // Avoids issues deploying changes when batch jobs are scheduled
-    public void execute(SchedulableContext SC) {
-		System.Type submitterType = Type.forName('FormulaShareSchedulableSubmitter');
-		Schedulable submitter = (Schedulable) submitterType.newInstance();
-		submitter.execute(SC);
+    global void onInstall(InstallContext context) {
+
+        // Schedule batch job on first install
+        if(context.previousVersion() == null) {
+
+            // Schedule to run job daily at 11pm
+            String sch = '0 0 23 * * ?';
+            String jobId = System.schedule('FormulaShare full recalculation', sch, new FormulaShareProcessSchedulable());
+
+            // Create log record
+			FormulaShare_Log__c log = new FormulaShare_Log__c();
+			List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
+			logsList.add(log);
+			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+			fsLogs.setContext('FormulaSharePostInstall', 'onInstall', 'Batch recalculation job scheduled for 11pm each day');
+            fsLogs.upsertLogs();
+        }
     }
-
 }

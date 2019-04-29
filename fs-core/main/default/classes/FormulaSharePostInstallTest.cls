@@ -1,5 +1,5 @@
 /**
-*Copyright 2018 Lawrence Newcombe
+*Copyright 2019 Lawrence Newcombe
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy 
 *of this software and associated documentation files (the "Software"), to deal 
@@ -19,14 +19,18 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareProcessSchedulable implements Schedulable {
+@IsTest
+public with sharing class FormulaSharePostInstallTest {
+    
+    @IsTest
+    static void testJobScheduledOnFirstInstall() {
 
-    // Generic implementation to call submitter class
-    // Avoids issues deploying changes when batch jobs are scheduled
-    public void execute(SchedulableContext SC) {
-		System.Type submitterType = Type.forName('FormulaShareSchedulableSubmitter');
-		Schedulable submitter = (Schedulable) submitterType.newInstance();
-		submitter.execute(SC);
+        FormulaSharePostInstall postInstall = new FormulaSharePostInstall();
+        Test.testInstall(postInstall, null);
+
+		// Check that cron job created correctly
+        List<CronJobDetail> cjd = [SELECT Id, Name, JobType FROM CronJobDetail WHERE Name = 'FormulaShare full recalculation'];
+        System.assert(cjd.size() == 1);
+        System.assertEquals('7', cjd[0].JobType);
     }
-
 }
