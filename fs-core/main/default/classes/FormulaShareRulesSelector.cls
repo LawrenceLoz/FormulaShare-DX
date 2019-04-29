@@ -30,6 +30,7 @@ public inherited sharing class FormulaShareRulesSelector {
             return new FormulaShareRulesSelector();
         }
     }
+    @TestVisible Boolean isUnitTest = false;
 
     // fflib selector pattern isn't used because it fails for metadata relationship fields.
     // The basic queries below are sufficient - FLS and sharing checks aren't needed 
@@ -45,7 +46,7 @@ public inherited sharing class FormulaShareRulesSelector {
         List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
 
         // If test, populate list with a fake rule so we can test logic of method (can't otherwise guarantee rules exist)
-        if(Test.isRunningTest()) {
+        if(isUnitTest) {
             FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
             rule.Sharing_Reason__c = 'Test reason';
             rules.add(rule);
@@ -81,7 +82,7 @@ public inherited sharing class FormulaShareRulesSelector {
         List<String> objNames = new List<String>();
 
         // If test, populate list with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
-        if(Test.isRunningTest()) {
+        if(isUnitTest) {
             objNames.add('Test object');
         }
         

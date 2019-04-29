@@ -25,6 +25,7 @@ public with sharing class FormulaShareRulesSelectorTest {
     @IsTest
     public static void testGetRulesSharingObject() {
         FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
+        selector.isUnitTest = true;
         Schema.SObjectType fsLogShareType = Schema.getGlobalDescribe().get('FormulaShare_Log__Share');
 
         List<FormulaShareRule> rules = selector.getRulesSharingObject(fsLogShareType);
@@ -34,6 +35,7 @@ public with sharing class FormulaShareRulesSelectorTest {
     @IsTest
     public static void testSelectObjectsWithRules() {
         FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
+        selector.isUnitTest = true;
 
         List<String> objectsWithRules = selector.selectObjectsWithRules();
         System.assertEquals('Test object', objectsWithRules[0]);
