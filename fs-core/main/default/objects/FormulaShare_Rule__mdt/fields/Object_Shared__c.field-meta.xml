@@ -7,7 +7,7 @@
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>FormulaShare_Rules</relationshipLabel>
     <relationshipName>FormulaShare_Rules</relationshipName>
-    <required>false</required>
+    <required>true</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>

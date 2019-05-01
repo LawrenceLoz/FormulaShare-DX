@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Groups_must_be_shared_to_by_Name_field</fullName>
-    <active>true</active>
-    <errorConditionFormula>ISPICKVAL(Shared_To_Field_Type__c,&#39;Id&#39;) &amp;&amp;  ISPICKVAL(Share_With__c,&#39;Public Groups&#39;)</errorConditionFormula>
-    <errorDisplayField>Shared_To_Field_Type__c</errorDisplayField>
-    <errorMessage>Rules sharing to public groups must be based on a field returning group name</errorMessage>
-</ValidationRule>
