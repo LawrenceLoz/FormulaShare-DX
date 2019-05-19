@@ -10,8 +10,4 @@
         <field>Recalculation_Batch_Size__c</field>
         <value xsi:type="xsd:double">2.0</value>
     </values>
-    <values>
-        <field>Remove_Shares_for_Standard_Objects__c</field>
-        <value xsi:type="xsd:boolean">true</value>
-    </values>
 </CustomMetadata>

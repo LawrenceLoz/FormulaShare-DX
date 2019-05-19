@@ -16,10 +16,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Remove_Shares_for_Standard_Objects__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Recalculation_Batch_Size__c</field>
             </layoutItems>
             <layoutItems>

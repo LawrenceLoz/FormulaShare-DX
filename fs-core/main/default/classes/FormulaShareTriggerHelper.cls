@@ -78,10 +78,13 @@ global with sharing class FormulaShareTriggerHelper {
 			for(SObject newRecord : newRecords.values()) {
 				SObject oldRecord = existingRecords.get((Id) newRecord.get('Id'));
 				for(FormulaShareRule rule : rules) {
-					
-					// Submit to recalculate only if relevant field has changed and rule is active
-					if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName) && rule.active) {
-						recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
+					if(rule.active) {
+
+						// Submit to recalculate only if relevant field has changed
+						if(oldRecord.get(rule.sharedToAPIName) != newRecord.get(rule.sharedToAPIName)
+							|| (oldRecord.get('OwnerId') != newRecord.get('OwnerId') && !type.getDescribe().isCustom()) ) {
+							recordsWithSharingChanges.put((Id) newRecord.get('Id'), newRecord);
+						}
 					}
 				}
 			}

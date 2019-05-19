@@ -4011,6 +4011,29 @@
             },
             "hasVirtualSubtypes": false
         },
+        "CommandAction": {
+            "metadataName": "CommandAction",
+            "isAddressable": true,
+            "isSourceTracked": true,
+            "ext": "commandaction",
+            "hasContent": false,
+            "defaultDirectory": "commandActions",
+            "nameForMsgs": "Command Action",
+            "nameForMsgsPlural": "Command Actions",
+            "contentIsBinary": false,
+            "hasStandardMembers": false,
+            "deleteSupported": true,
+            "decompositionConfig": {
+                "strategy": "nonDecomposed",
+                "workspaceStrategy": "nonDecomposed",
+                "commitStrategy": "fineGrainTracking",
+                "metadataName": "CommandAction",
+                "useSparseComposition": false,
+                "decompositions": [],
+                "contentStrategy": "nonDecomposedContent"
+            },
+            "hasVirtualSubtypes": false
+        },
         "CustomField": {
             "parent": {
                 "metadataName": "CustomObject",
