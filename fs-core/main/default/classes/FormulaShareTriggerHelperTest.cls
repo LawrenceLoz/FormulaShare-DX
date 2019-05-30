@@ -31,7 +31,7 @@ public with sharing class FormulaShareTriggerHelperTest {
     @IsTest
     public static void testShareRecordsOnInsert() {
         setMocks();
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
 
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
@@ -65,7 +65,7 @@ public with sharing class FormulaShareTriggerHelperTest {
     @IsTest
     public static void testShareRecordsIdentifiedOnUpdate() {
         setMocks();
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
@@ -112,7 +112,7 @@ public with sharing class FormulaShareTriggerHelperTest {
     @IsTest
     public static void testGetSharesToInsert() {
         FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
         helper.populatedFsServiceMap.put(fsLogType, mockFSService);
@@ -127,7 +127,7 @@ public with sharing class FormulaShareTriggerHelperTest {
     @IsTest
     public static void testGetSharesToDelete() {
         FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
         helper.populatedFsServiceMap.put(fsLogType, mockFSService);
@@ -144,11 +144,11 @@ public with sharing class FormulaShareTriggerHelperTest {
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
         FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         helper.populatedFsServiceMap.put(fsLogType, mockFSService);
 
         // Add another entry to the FS Service map
-        Schema.SObjectType contactType = Schema.getGlobalDescribe().get('Contact');
+        Schema.SObjectType contactType = Contact.SObjectType;
         helper.populatedFsServiceMap.put(contactType, mockFSService);     // Add another pair to the map
 
         try {

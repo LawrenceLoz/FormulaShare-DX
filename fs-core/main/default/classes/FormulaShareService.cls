@@ -512,7 +512,7 @@ public inherited sharing class FormulaShareService {
 
 		// If running test return list with FormulaShareRule to enable execution of other code
 		else {
-			typesList.add(FormulaShare_Log__c.SobjectType);
+			typesList.add(FormulaShare_Log__c.SObjectType);
 		}
 
 		return typesList;

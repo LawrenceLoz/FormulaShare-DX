@@ -57,6 +57,7 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         List<SObject> shares = Records;
 
         try {
+            // Check that object can be created by current or requesting user (or bypass if this is a test run)
             if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
                 insert shares;
             }
@@ -71,6 +72,7 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         List<SObject> shares = Records;
 
         try {
+            // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
             if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
                 delete shares;
             }

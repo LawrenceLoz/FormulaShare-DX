@@ -26,13 +26,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames, 
         List<Object> listOfArgs) {
 
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+
         // You can use the method name and return type to determine which method was called.
         System.debug('Name of stubbed method: ' + stubbedMethodName);
         System.debug('Return type of stubbed method: ' + returnType.getName());
         
         for (integer i =0; i < listOfParamNames.size(); i++) {
             System.debug('parameter name: ' + listOfParamNames.get(i));
-            System.debug('  parameter type: ' + listOfParamTypes.get(i).getName());
+            System.debug('parameter type: ' + listOfParamTypes.get(i).getName());
         }
         
         // This shows the actual parameter values passed into the stubbed method at runtime.
@@ -43,7 +45,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
         // -------------------------- FormulaShareSettingsSelector Mocks ----------------------------- //
 
-        if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == 'FormulaShare_Settings__mdt') {
+        if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == prefix + 'FormulaShare_Settings__mdt') {
             FormulaShare_Settings__mdt settings = new FormulaShare_Settings__mdt();
             settings.DeveloperName = 'Mocked Settings';
             settings.Recalculation_Batch_Size__c = 200;
@@ -57,45 +59,45 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
             // Will add a sharing record for the role and subordinates group for the role name in Context__c field
             FormulaShareRule roleSubRule = new FormulaShareRule();
-            roleSubRule.objectSharedAPIName = 'FormulaShare_Log__c';
-            roleSubRule.sharingReason = 'FormulaShare_Log_Share__c';
+            roleSubRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            roleSubRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             roleSubRule.active = true;
             roleSubRule.sharedToFieldType = 'Name';
             roleSubRule.accessLevel = 'Read';
-            roleSubRule.sharedToAPIName = 'Context__c';
+            roleSubRule.sharedToAPIName = prefix + 'Context__c';
             roleSubRule.shareWith = 'Roles and Internal Subordinates';
             rules.add(roleSubRule);
 
             // Will add a sharing record for the role group for the role id in Class_Name__c field
             FormulaShareRule roleRule = new FormulaShareRule();
-            roleRule.objectSharedAPIName = 'FormulaShare_Log__c';
-            roleRule.sharingReason = 'FormulaShare_Log_Share__c';
+            roleRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            roleRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             roleRule.active = true;
             roleRule.sharedToFieldType = 'Id';
             roleRule.accessLevel = 'Edit';
-            roleRule.sharedToAPIName = 'Class_Name__c';
+            roleRule.sharedToAPIName = prefix + 'Class_Name__c';
             roleRule.shareWith = 'Roles';
             rules.add(roleRule);
 
             // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
             FormulaShareRule groupRule = new FormulaShareRule();
-            groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
-            groupRule.sharingReason = 'FormulaShare_Log_Share__c';
+            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             groupRule.active = true;
             groupRule.sharedToFieldType = 'Name';
             groupRule.accessLevel = 'Edit';
-            groupRule.sharedToAPIName = 'Type_In_Scope__c';
+            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
             groupRule.shareWith = 'Public Groups';
             rules.add(groupRule);
 
             // Will add a sharing record for the user with the user id in Method_Name__c field
             FormulaShareRule userRule = new FormulaShareRule();
-            userRule.objectSharedAPIName = 'FormulaShare_Log__c';
-            userRule.sharingReason = 'FormulaShare_Log_Share__c';
+            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             userRule.active = true;
             userRule.sharedToFieldType = 'Id';
             userRule.accessLevel = 'Edit';
-            userRule.sharedToAPIName = 'Method_Name__c';
+            userRule.sharedToAPIName = prefix + 'Method_Name__c';
             userRule.shareWith = 'Users';
             rules.add(userRule);
 
@@ -104,7 +106,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
         else if(stubbedMethodName == 'selectObjectsWithRules') {
             List<String> objNames = new List<String>();
-            objNames.add('FormulaShare_Log__c');
+            objNames.add(prefix + 'FormulaShare_Log__c');
             return objNames;
         }
 
@@ -126,12 +128,12 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
            // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
             FormulaShareRule groupRule = new FormulaShareRule();
-            groupRule.objectSharedAPIName = 'FormulaShare_Log__c';
-            groupRule.sharingReason = 'FormulaShare_Log_Share__c';
+            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             groupRule.active = true;
             groupRule.sharedToFieldType = 'Name';
             groupRule.accessLevel = 'Edit';
-            groupRule.sharedToAPIName = 'Type_In_Scope__c';
+            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
             groupRule.shareWith = 'Public Groups';
             rules.add(groupRule);
 
@@ -152,7 +154,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 //            share.ParentId = log.Id;
             share.ParentId = UserInfo.getUserId();      // Any valid id is fine
             share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
-            share.RowCause = 'FormulaShare_Log_Share__c';
+            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
             shares.add(share);
 
             return shares;
@@ -172,7 +174,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 //            share.ParentId = log.Id;
             share.ParentId = UserInfo.getUserId();      // Any valid id is fine
             share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
-            share.RowCause = 'FormulaShare_Log_Share__c';
+            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
 
             // Insert share so it can be deleted by calling methods
 //            insert share;
@@ -182,13 +184,20 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         else if(stubbedMethodName == 'getFullObjectQueryLocator') {
-            Database.QueryLocator locator = Database.getQueryLocator(
-                'SELECT Id, Context__c, Class_Name__c, Type_In_Scope, Method_Name__c FROM FormulaShare_Log__c');
+            String query = 'SELECT '
+                + prefix + 'Id, '
+                + prefix + 'Context__c, '
+                + prefix + 'Class_Name__c, '
+                + prefix + 'Type_In_Scope, '
+                + prefix + 'Method_Name__c '
+                + 'FROM '
+                + prefix + 'FormulaShare_Log__c';
+            Database.QueryLocator locator = Database.getQueryLocator(query);
             return locator;
         }
 
         else if(stubbedMethodName == 'getType') {
-            Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
             return fsLogType;
         }
 

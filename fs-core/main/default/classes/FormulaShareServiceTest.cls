@@ -22,8 +22,7 @@
 @IsTest
 public class FormulaShareServiceTest {
 
-//  public static List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
-//	public static List<FormulaShareRule> fsRulePrims = new List<FormulaShareRule>();
+    static String reason = FormulaShareTestUtils.getNamespacePrefix() + 'FormulaShare_Log_Share__c';
 
     @TestSetup
     public static void setup() {
@@ -62,7 +61,7 @@ public class FormulaShareServiceTest {
 
     //--------------------------------- Test utility methods ------------------------------------------------
     public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
 		for(FormulaShare_Log__c log : fsLogs) {
@@ -122,7 +121,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
         System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
     @IsTest
@@ -149,7 +148,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
         System.assertEquals(roleSubordinatesGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
         System.assertEquals('Read', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
     @IsTest
@@ -175,7 +174,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
         System.assertEquals(publicGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
     @IsTest
@@ -202,7 +201,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
         System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
 
@@ -245,7 +244,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
         System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals('FormulaShare_Log_Share__c', sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
 

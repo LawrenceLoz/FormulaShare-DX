@@ -44,7 +44,7 @@ public with sharing class ProcessFormulaShareBatchTest {
         insert log;
 
         List<Schema.SObjectType> types = new List<Schema.SObjectType>();
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         types.add(fsLogType);
         ProcessFormulaShareBatch batchObj = new ProcessFormulaShareBatch(types, 1);
 
@@ -55,7 +55,7 @@ public with sharing class ProcessFormulaShareBatchTest {
 
         // Check one log has been inserted for process
         List<FormulaShare_Log__c> insertedLogs = [SELECT Query__c, Batches_Processed__c, Exception_Type__c 
-            FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'FormulaShare_Log__c'];
+            FROM FormulaShare_Log__c WHERE Type_In_Scope__c LIKE '%FormulaShare_Log__c'];
 
         system.debug('*** inserted logs: '+insertedLogs);
 

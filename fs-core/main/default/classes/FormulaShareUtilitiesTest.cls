@@ -26,11 +26,11 @@ public with sharing class FormulaShareUtilitiesTest {
     public static void testGetSObjectFieldFromName() {
 
         // Check we can get a token for the field Class_Name__c on FormulaShare_Log__c
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
-        SObjectField classNameField = FormulaShareUtilities.getSObjectFieldFromName('Class_Name__c', fsLogType);
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+        String fieldNameWithPrefix = FormulaShareTestUtils.getNamespacePrefix() + 'Class_Name__c';
+        SObjectField classNameField = FormulaShareUtilities.getSObjectFieldFromName(fieldNameWithPrefix, fsLogType);
 
-		Map<String, SObjectField> fieldsMapByName = fsLogType.getDescribe().fields.getMap();
-		SObjectField sObjField = fieldsMapByName.get('Class_Name__c');
+		SObjectField sObjField = FormulaShare_Log__c.Class_Name__c.getDescribe().getSObjectField();
 
         system.assertEquals(sObjField, classNameField);
     }
@@ -40,11 +40,10 @@ public with sharing class FormulaShareUtilitiesTest {
     public static void testGetSObjectFieldFromRelatedName() {
 
         // Look for the field on Contact with the relationship name "Account" (this should be the AccountId field)
-        Schema.SObjectType conType = Schema.getGlobalDescribe().get('Contact');
+        Schema.SObjectType conType = Contact.SObjectType;
         SObjectField accuontFieldOnContact = FormulaShareUtilities.getSObjectFieldFromRelatedName('Account', conType);
 
-		Map<String, SObjectField> fieldsMapByName = conType.getDescribe().fields.getMap();
-		SObjectField sObjField = fieldsMapByName.get('AccountId');
+		SObjectField sObjField = Contact.AccountId.getDescribe().getSObjectField();
 
         system.assertEquals(sObjField, accuontFieldOnContact);
     }

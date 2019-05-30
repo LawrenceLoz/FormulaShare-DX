@@ -20,25 +20,23 @@
 **/
 
 @IsTest
-public with sharing class FormulaShareRulesSelectorTest {
+public inherited sharing class FormulaShareTestUtils {
 
-    @IsTest
-    public static void testGetRulesSharingObject() {
-        FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
-        selector.isUnitTest = true;
-        Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
+    static String classInPackage = 'FormulaShareService';
+    static String namespacePrefix = '';
+    static Boolean hasRun = false;
 
-        List<FormulaShareRule> rules = selector.getRulesSharingObject(fsLogShareType);
-        System.assertEquals('Test reason', rules[0].sharingReason);
-    }
-
-    @IsTest
-    public static void testSelectObjectsWithRules() {
-        FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
-        selector.isUnitTest = true;
-
-        List<String> objectsWithRules = selector.selectObjectsWithRules();
-        System.assertEquals('Test object', objectsWithRules[0]);
+    // Method returns the namespace of the package with underscores appended
+    // Used to determine what to add to object and field names
+    public static String getNamespacePrefix() {
+        if(!hasRun) {
+            ApexClass cs = [SELECT NamespacePrefix from ApexClass where Name = :classInPackage LIMIT 1][0];
+            if(!String.isBlank(cs.NamespacePrefix)) {
+                namespacePrefix = cs.NamespacePrefix + '__';
+            }
+            hasRun = true;
+        }
+        return namespacePrefix;
     }
 
 }

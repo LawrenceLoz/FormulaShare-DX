@@ -232,7 +232,7 @@ public with sharing class FormulaShareServiceBulkTest {
         insert fsLogs;
 
         // Carry out processing to share records (we won't use a batch as only one can be called per test)
-        Schema.SObjectType fsLogType = Schema.getGlobalDescribe().get('FormulaShare_Log__c');
+        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
 		for(FormulaShare_Log__c log : fsLogs) {
