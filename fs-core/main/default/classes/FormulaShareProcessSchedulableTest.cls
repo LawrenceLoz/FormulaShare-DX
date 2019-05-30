@@ -35,16 +35,15 @@ public with sharing class FormulaShareProcessSchedulableTest {
 
 	@isTest
 	public static void testScheduling() {
-		setMocks();
-
+        setMocks();
         String CRON_EXP = '0 0 23 * * ?';
 
-		// Schedule the recalculation job
+        // Schedule the recalculation job
         Test.startTest();
         String jobId = System.schedule('Test FormulaShare Scheduling', CRON_EXP, new FormulaShareProcessSchedulable());
         Test.stopTest();
 
-		// Check that cron trigger set correctly
+        // Check that cron trigger set correctly
         CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime FROM CronTrigger WHERE id = :jobId];
         System.assertEquals(CRON_EXP, ct.CronExpression);
         System.assertEquals(0, ct.TimesTriggered);

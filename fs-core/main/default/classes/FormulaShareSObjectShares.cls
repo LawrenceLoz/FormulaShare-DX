@@ -31,9 +31,11 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         }
     }
 
+    public Schema.SObjectType type;
 
     public FormulaShareSObjectShares(List<SObject> sObjectList, Schema.SObjectType type) {
         super(sObjectList, type);
+        this.type = type;
     }
 
     public class Constructor implements fflib_SObjectDomain.IConstructable2 {
@@ -53,8 +55,11 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
     // To insert sharing records identified by FormulaShare as being required
     public void insertShares() {
         List<SObject> shares = Records;
+
         try {
-            insert shares;
+            if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
+                insert shares;
+            }
         }
         catch(Exception e) {
             system.debug('Insert of share records failed. Message from Salesforce: '+e.getMessage());
@@ -64,8 +69,11 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
     // To remove sharing identified by FormulaShareService as no longer being required
     public void deleteShares() {
         List<SObject> shares = Records;
+
         try {
-            delete shares;
+            if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
+                delete shares;
+            }
         }
         catch(Exception e) {
             system.debug('Deletion of share records failed. Message from Salesforce: '+e.getMessage());

@@ -21,12 +21,12 @@
 
 public inherited sharing class FormulaShareProcessSchedulable implements Schedulable {
 
-    // Generic implementation to call submitter class
-    // Avoids issues deploying changes when batch jobs are scheduled
-    public void execute(SchedulableContext SC) {
-		System.Type submitterType = Type.forName('FormulaShareSchedulableSubmitter');
-		Schedulable submitter = (Schedulable) submitterType.newInstance();
-		submitter.execute(SC);
-    }
+  // Generic implementation to call submitter class
+  // Avoids issues deploying changes when batch jobs are scheduled
+  public void execute(SchedulableContext SC) {
+    System.Type submitterType = Type.forName('FormulaShareSchedulableSubmitter');
+    Schedulable submitter = (Schedulable) submitterType.newInstance();
+    submitter.execute(SC);
+  }
 
 }

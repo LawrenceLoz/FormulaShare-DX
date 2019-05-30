@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public class FormulaShareLogs extends fflib_SObjectDomain {
+public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
 
     public FormulaShareLogs(List<FormulaShare_Log__c> sObjectList) {
         super(sObjectList);

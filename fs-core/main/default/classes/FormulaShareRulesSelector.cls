@@ -87,7 +87,7 @@ public inherited sharing class FormulaShareRulesSelector {
         }
         
         else {
-            for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt]) {
+            for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt LIMIT 50000]) {
                 objNames.add(rule.Object_Shared__r.QualifiedApiName);
             }
         }
