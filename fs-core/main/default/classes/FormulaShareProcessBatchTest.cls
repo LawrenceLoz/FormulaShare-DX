@@ -20,7 +20,7 @@
 **/
 
 @IsTest
-public with sharing class ProcessFormulaShareBatchTest {
+public with sharing class FormulaShareProcessBatchTest {
 
     static void setMocks() {
         FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
@@ -46,7 +46,7 @@ public with sharing class ProcessFormulaShareBatchTest {
         List<Schema.SObjectType> types = new List<Schema.SObjectType>();
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         types.add(fsLogType);
-        ProcessFormulaShareBatch batchObj = new ProcessFormulaShareBatch(types, 1);
+        FormulaShareProcessBatch batchObj = new FormulaShareProcessBatch(types, 1);
 
         // Call recalculate method to set sharing (mocks are set so only DML should be the log record itself)
         test.startTest();

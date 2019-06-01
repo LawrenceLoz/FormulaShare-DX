@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Assign this to the user who will schedule the ProcessFormulaShareBatch job to give appropriate permissions. This user must also have a profile giving full access to all objects, fields and records to be shared, for example System Administrator</description>
+    <description>Assign this to the user who will schedule the FormulaShareProcessBatch job to give appropriate permissions. This user must also have a profile giving full access to all objects, fields and records to be shared, for example System Administrator</description>
     <fieldPermissions>
         <editable>true</editable>
         <field>FormulaShare_Log__c.Batch_Finish_Complete__c</field>

@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Database.Stateful {
+public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Database.Stateful {
 	
 	List<Schema.SObjectType> types;
 	Integer batchSize;
@@ -29,7 +29,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
-	public ProcessFormulaShareBatch(List<Schema.SObjectType> types, Integer batchSize) {
+	public FormulaShareProcessBatch(List<Schema.SObjectType> types, Integer batchSize) {
 		this.types = types;
 		this.batchSize = batchSize;
 		this.typeInThisBatch = types[0];
@@ -49,7 +49,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 			logsList.add(log);
 			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 
-			fsLogs.setContext('ProcessFormulaShareBatch', null, 'Batch');
+			fsLogs.setContext('FormulaShareProcessBatch', null, 'Batch');
 			String typeInScope = typeInThisBatch.getDescribe().getName();
 			Integer noRules = rulesForType.size();
 			String query = ql.getQuery();
@@ -114,7 +114,7 @@ public class ProcessFormulaShareBatch implements Database.Batchable<sObject>, Da
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {
 			types.remove(0);
-			Id batchJobId = Database.executeBatch(new ProcessFormulaShareBatch(types, batchSize), batchSize);
+			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
 			system.debug('Submitted next batch, Id = ' + batchJobId);
 		}
 

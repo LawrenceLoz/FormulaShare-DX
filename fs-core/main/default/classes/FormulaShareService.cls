@@ -111,7 +111,7 @@ public inherited sharing class FormulaShareService {
 		FormulaShare_Settings__mdt settings = getFormulaShareSettings();
 		Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 		List<Schema.SObjectType> types = getSharedObjectTypes();
-		Id batchJobId = Database.executeBatch(new ProcessFormulaShareBatch(types, batchSize), batchSize);
+		Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
 	}
 	
 
