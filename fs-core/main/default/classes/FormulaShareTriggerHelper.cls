@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-global with sharing class FormulaShareTriggerHelper {
+public with sharing class FormulaShareTriggerHelper implements FormulaShareIHelper {
 
 	public class FormulaShareException extends Exception{}
 
@@ -28,7 +28,7 @@ global with sharing class FormulaShareTriggerHelper {
 	private static List<sObjectType> objectsRun = new List<sObjectType>();
 
 	// Constructor to assess sharing
-	global FormulaShareTriggerHelper() {
+	public FormulaShareTriggerHelper() {
 
 		// Process inserts and updates only (delete and undelete of shared object won't need changes)
 		if(Trigger.isExecuting && (Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate))) {
@@ -101,7 +101,7 @@ global with sharing class FormulaShareTriggerHelper {
 	}
 
 
-	global List<SObject> getSharesToDelete() {
+	public List<SObject> getSharesToDelete() {
 
 		if(populatedFsServiceMap.size() == 1 && populatedFsServiceMap.values()[0].getSharesToDelete() != null) {
 			FormulaShareService thisFsService = populatedFsServiceMap.values()[0];
@@ -120,7 +120,7 @@ global with sharing class FormulaShareTriggerHelper {
 	}
 
 
-	global List<SObject> getSharesToInsert() {
+	public List<SObject> getSharesToInsert() {
 
 		if(populatedFsServiceMap.size() == 1 && populatedFsServiceMap.values()[0].getSharesToInsert() != null) {
 			FormulaShareService thisFsService = populatedFsServiceMap.values()[0];

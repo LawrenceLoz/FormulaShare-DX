@@ -36,7 +36,8 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
     public List<Schema.SObjectField> getSObjectFieldList() {
         return new List<Schema.SObjectField> {
             FormulaShare_Settings__mdt.DeveloperName,
-            FormulaShare_Settings__mdt.Recalculation_Batch_Size__c};
+            FormulaShare_Settings__mdt.Recalculation_Batch_Size__c,
+            FormulaShare_Settings__mdt.Trigger_Helper_Class_Override__c};
     }
 
     public Schema.SObjectType getSObjectType() {
