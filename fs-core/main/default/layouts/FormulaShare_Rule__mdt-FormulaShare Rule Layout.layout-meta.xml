@@ -70,7 +70,7 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>Sharing Required</label>
+        <label>Sharing required</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -110,7 +110,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h26000000Q3LT</masterLabel>
+        <masterLabel>00h7E000000peP5</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

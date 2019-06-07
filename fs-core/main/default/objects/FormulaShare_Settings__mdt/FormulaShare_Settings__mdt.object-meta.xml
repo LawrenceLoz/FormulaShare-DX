@@ -3,5 +3,5 @@
     <description>Org-wide configuration settings for FormulaShare</description>
     <label>FormulaShare Settings</label>
     <pluralLabel>FormulaShare Settings</pluralLabel>
-    <visibility>Protected</visibility>
+    <visibility>Public</visibility>
 </CustomObject>
