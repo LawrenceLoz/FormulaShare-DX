@@ -26,10 +26,16 @@ public with sharing class FormulaSharePostInstallTest {
     static void testJobScheduledOnFirstInstall() {
 
         FormulaSharePostInstall postInstall = new FormulaSharePostInstall();
+
+        // Use a different job name so unit tests not affected by existing scheduled jobs
+        String jobName = 'Apex unit test FormulaShare Full Recal';
+        postInstall.jobName = jobName;
+
+        // Carry out a mock installation
         Test.testInstall(postInstall, null);
 
 		// Check that cron job created correctly
-        List<CronJobDetail> cjd = [SELECT Id, Name, JobType FROM CronJobDetail WHERE Name = 'FormulaShare full recalculation'];
+        List<CronJobDetail> cjd = [SELECT Id, Name, JobType FROM CronJobDetail WHERE Name = :jobName];
         System.assert(cjd.size() == 1);
         System.assertEquals('7', cjd[0].JobType);
     }

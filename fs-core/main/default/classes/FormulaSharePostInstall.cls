@@ -21,22 +21,33 @@
 
 global class FormulaSharePostInstall implements InstallHandler {
 
+    @TestVisible private String jobName = 'FormulaShare full recalculation';
+
     global void onInstall(InstallContext context) {
 
         // Schedule batch job on first install
         if(context.previousVersion() == null) {
 
             // Schedule to run job daily at 11pm
-            String sch = '0 0 23 * * ?';
-            String jobId = System.schedule('FormulaShare full recalculation', sch, new FormulaShareProcessSchedulable());
+            String sch = '0 0 23 ? * *';
 
             // Create log record
 			FormulaShare_Log__c log = new FormulaShare_Log__c();
 			List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
 			logsList.add(log);
 			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
-			fsLogs.setContext('FormulaSharePostInstall', 'onInstall', 'Batch recalculation job scheduled for 11pm each day');
-            fsLogs.upsertLogs();
+
+            try {
+                String jobId = System.schedule(jobName, sch, new FormulaShareProcessSchedulable());
+                fsLogs.setContext('FormulaSharePostInstall', 'onInstall', 'Batch recalculation job scheduled for 11pm each day');
+            }
+            catch(Exception e) {
+                fsLogs.setContext('FormulaSharePostInstall', 'onInstall', 'Batch recalculation job could not be scheduled, see exception details');
+                fsLogs.logException(e);
+            }
+            finally {
+                fsLogs.upsertLogs();
+            }
         }
     }
 }
