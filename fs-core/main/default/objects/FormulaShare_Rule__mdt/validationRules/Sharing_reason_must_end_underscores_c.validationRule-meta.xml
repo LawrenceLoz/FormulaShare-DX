@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sharing_reason_must_end_underscores_c</fullName>
+    <active>true</active>
+    <errorConditionFormula>!ISBLANK( Sharing_Reason__c ) &amp;&amp;  RIGHT( Sharing_Reason__c , 3) != &#39;__c&#39;</errorConditionFormula>
+    <errorDisplayField>Sharing_Reason__c</errorDisplayField>
+    <errorMessage>Sharing reasons must be appended with &quot;__c&quot;</errorMessage>
+</ValidationRule>
