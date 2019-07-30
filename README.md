@@ -84,6 +84,13 @@ From the Setup menu, type "Custom Metadata Types" and click "Manage Records" for
 
 Create a record in the shared object. As a system admin, the easiest way to check that the sharing is set up is to use the "Sharing" button from the record detail page (Classic interface only). The summary should include a share record for the user, role, role and subordinates or public group which is linked through the shared to field.
 
+### Limitations
+
+There are some known limitations to be aware of:
+* 10000 DML rows per transaction: This Salesforce limit prevents synchronous transactions from creating, deleting or updating more than 10000 records in a single transaction. If data changes cause triggers for shared objects using the FormulaShare trigger code to attempt to process very substantial sharing changes (over 10000 records), this could result in failed transactions. This is only likely to occur if parent object updates cause cascading updates to very large numbers of child objects.
+* 50 million records per object: The FormulaShare batch recalculation assesses whether sharing changes are needed on every record in each shared object. To do this, for each object is constructs a query locator and cycles through the results, checking every record in the object. Due to a Salesforce limitation, the maximum number of records that can be returned in a batch query locator is 50 million, so to work correctly FormulaShare can only be used on objects with less than this number of records in total.
+
+
 ## Areas for future development
 
 The project is now launched, and the app approved and published on the Salesforce AppExchange. The following is a list of features and areas which may be worked on in future:
