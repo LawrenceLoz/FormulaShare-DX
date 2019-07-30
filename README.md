@@ -1,13 +1,13 @@
 # FormulaShare, apex sharing for admins
 
-Click-and-configure rules to share records based on related data.
+Click-and-configure rules to share records based on related data. Now published as a free managed package on the AppExchange! https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1
 
 Salesforce provides great in-platform options for sharing records - ownership based, criteria based, manual sharing and apex sharing.
 But there's a key feature missing - sharing to users identified through related data.
 
 FormulaShare let's you do that and more without resorting to complex development!
 
-* Records are shared to a user, role or group specified in a formula or lookup field
+* Records are shared to a user, role or group specified in a formula, lookup or text field
 * Sharing changes are assessed in real time as shared records are created and modified
 * Records can be shared with Read or Edit levels of access
 * Rules are custom metadata, so can be managed by admins and packaged for deployment
@@ -15,7 +15,7 @@ FormulaShare let's you do that and more without resorting to complex development
 * Works with Classic and Lightning
 * Powered by Salesforce apex / managed sharing
 
-(note this repo is in DX metadata format)
+This repo is in DX metadata format - a metadata API format repo is also maintained.
 
 ## Example applications
 
@@ -40,7 +40,7 @@ Once established, the rule will recalculate relevant sharing in real time when o
 
 ## Design approach
 
-Real time sharing calculation if needed is kicked off from apex triggers, but only one line of code needs to the trigger or handler class needs to be added to make sure this happens. Processing is delegated to a queueable apex method to preserve performance and governer limits - no additional synchronous SOQL is called within the trigger transaction.
+A batch job is scheduled in the subscriber org to assess all record sharing on a regular basis. Real time assessment of sharing if needed is kicked off from apex triggers - just 3 lines of code need to be added to a trigger or handler class.
 
 Apex sharing is notoriously difficult to implement well - FormulaShare processes the core scenarios where real time recalculation is needed (for example creation of records and changes to formula field values), and handles all other changes which in a catch-up batch job (this includes changes to parent objects referenced in the formula field).
 
@@ -48,7 +48,13 @@ Apex sharing is notoriously difficult to implement well - FormulaShare processes
 
 Once code from the repo is implemented, two key steps are needed to set up FormulaShare:
 
-* **Call FormulaShareService from shared object triggers** One line of code is needed to call FormulaShare. Add this line to any triggers or any handler code called by your triggers: `FormulaShareService.triggerHandler();` This calls a method to assesses whether changes are needed for created or modified records when the trigger is called. If you use a trigger framework with a central delegating handler, the line can be added in this class instead of each object's trigger.
+* **Call FormulaShareService from shared object triggers** The following code can be added to any trigger or trigger handler code to manage sharing changes for this object:
+```
+sdfs.FormulaShareHelper helper = new FormulaShareHelper();
+insert helper.getSharesToInsert();
+delete helper.getSharesToDelete();
+```
+If you use a trigger framework with a central delegating handler, the code can be added in the delegating class instead of each object's trigger.
 
 * **Schedule batch recalculation of FormulaShare rules** [Schedule the apex class](https://help.salesforce.com/articleView?id=code_schedule_batch_apex.htm&type=5) FormulaShareProcessSchedulable to recalculate all rules on a regular basis
 
@@ -67,9 +73,9 @@ For standard objects, sharing reasons aren't available. As an alternative, Formu
 ### Create FormulaShare rule record
 From the Setup menu, type "Custom Metadata Types" and click "Manage Records" for FormulaShare Rule. Each of the custom metadata records are the settings for a single rule. The following fields define the setup of each rule:
 * **Name** and **Label**: Add something to distinguish this rule from others
-* **Shared Object**: The API name (including "__c") of the object with records to be shared. Object must be set to Private (for Read or Edit access levels) or Public Read Only (for Edit access level), and must support sharing - child objects in a master-detail relationship and some standard objects do not support independent sharing rules
-* **Shared To Field**: The API name (including "__c") of the field on the object above which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
-* **Shared_To_Field_Type__c**: Either "Id" or "Name", depending on return type of the Shared To Field
+* **Shared Object**: Select the object with records to be shared. Object must be set to Private (for Read or Edit access levels) or Public Read Only (for Edit access level), and must support sharing - child objects in a master-detail relationship and some standard objects do not support independent sharing rules
+* **Shared To Field**: Select the field on the object which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
+* **Shared_To_Field_Type**: Either "Id" or "Name", depending on return type of the Shared To Field
 * **Share With**: The type of entity this rule should share with. Options are "Users", "Roles", "Roles and Internal Subordinates" and "Public Groups"
 * **Sharing Reason**: For custom objects, the "Reason Name" of the sharing reason related to the rule
 * **Access Level**: Set to Read or Edit
@@ -80,15 +86,10 @@ Create a record in the shared object. As a system admin, the easiest way to chec
 
 ## Areas for future development
 
-The project is currently in beta. Code provided should work but no promises! The following is a list of areas which will be worked on in due course:
-* Apex unit tests for all code
-* Automated deployment of triggers and sharing reasons using metadata API (a la the wonderful [DeclareativeLookupRollupSummary](https://github.com/afawcett/declarative-lookup-rollup-summaries))
-* Full adoption of the Enterprise Apex Pattern design approach (abstracting of selector layer)
-* Packaging and publication on AppExchange
-* Managed scheduling of batch job and configuration parameters in managed package setup
+The project is now launched, and the app approved and published on the Salesforce AppExchange. The following is a list of features and areas which may be worked on in future:
 * Lightning interface for metadata rule configuration
-* Improved error handling and validation
-* Ability to process standard object sharing as either additive or fully managed
+* Automated deployment of triggers and sharing reasons using metadata API (a la the wonderful [DeclareativeLookupRollupSummary](https://github.com/afawcett/declarative-lookup-rollup-summaries))
+* Managed scheduling of batch job and configuration parameters in managed package setup
 * Support for account teams and territory groups
 * Support for assessing user roles directly without a formula field being needed
 
