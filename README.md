@@ -1,6 +1,6 @@
 # FormulaShare, apex sharing for admins
 
-Click-and-configure rules to share records based on related data. Now published as a free managed package on the AppExchange! https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1
+Click-and-configure rules to share records based on related data. Now published as a free managed package on the AppExchange: https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1
 
 Salesforce provides great in-platform options for sharing records - ownership based, criteria based, manual sharing and apex sharing.
 But there's a key feature missing - sharing to users identified through related data.
