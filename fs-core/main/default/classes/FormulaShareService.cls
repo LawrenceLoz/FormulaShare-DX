@@ -81,6 +81,7 @@ public inherited sharing class FormulaShareService {
 		this.recordsMap = recordsMap;
 	}
 
+
 	// Used by batch job to retrieve query locator from selector
 	public static Database.QueryLocator getFullObjectQueryLocator(Schema.sObjectType type, List<FormulaShareRule> rules) {
 
@@ -108,10 +109,12 @@ public inherited sharing class FormulaShareService {
 
 	// Submits batch recalculation of all sharing
 	public static void recalculateAll() {
-		FormulaShare_Settings__mdt settings = getFormulaShareSettings();
-		Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 		List<Schema.SObjectType> types = getSharedObjectTypes();
-		Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+		if(!types.isEmpty()) {
+			FormulaShare_Settings__mdt settings = getFormulaShareSettings();
+			Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
+			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+		}
 	}
 	
 
