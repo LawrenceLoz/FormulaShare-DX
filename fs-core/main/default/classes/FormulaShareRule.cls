@@ -32,7 +32,10 @@ public inherited sharing class FormulaShareRule {
 	public Boolean active;
 	public String sharedToFieldType;
 	public String sharingReason;
-
+    public String childObjectWithSharedToFieldAPIName;
+    public String childObjectLookupFieldAPIName;
+    public String childObjectSharedToFieldAPIName;
+    public String childObjectSharedToFieldType;
 
     // Return a populated share record with appropriate values for this rule and a record and user combination
 	public SObject getShareRecord(Schema.SObjectType type, Id recordId, Id sharedTo) {
@@ -57,5 +60,68 @@ public inherited sharing class FormulaShareRule {
 
 		return newShare;
 	}
+
+    public String type {
+        get {
+            if(childObjectWithSharedToFieldAPIName != null) {
+                return 'child';
+            }
+            else {
+                return 'standard';
+            }
+        }
+    }
+
+    public String sharedToAPINameForType {
+        get {
+            if(type == 'child') {
+                return childObjectSharedToFieldAPIName;
+            }
+            else {
+                return sharedToAPIName;
+            }
+        }
+    }
+
+    public String sharedToFieldTypeForRuleType {
+        get {
+            if(type == 'child') {
+                return childObjectSharedToFieldType;
+            }
+            else {
+                return sharedToFieldType;
+            }
+        }
+    }
+
+    public Boolean isValid {
+        get {
+            if(type == 'child'
+                && childObjectWithSharedToFieldAPIName != null
+                && childObjectLookupFieldAPIName != null
+                && childObjectSharedToFieldAPIName != null
+                && childObjectSharedToFieldType != null
+                && passesBasicValidation()) {
+                return true;
+            }
+
+            else if(type == 'standard'
+                && sharedToAPIName != null
+                && sharedToFieldType != null) {
+                return true;
+            }
+
+            else return false;
+        }
+    }
+
+    private Boolean passesBasicValidation() {
+        if(objectSharedAPIName != null
+            && shareWith != null
+            && accessLevel != null) {
+            return true;
+        }
+        else return false;
+    }
 
 }

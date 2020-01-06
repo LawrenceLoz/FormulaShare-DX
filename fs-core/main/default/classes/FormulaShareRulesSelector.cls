@@ -55,7 +55,9 @@ public inherited sharing class FormulaShareRulesSelector {
         else {
         rules = [SELECT Id, Access_Level__c, 
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
+            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
 			FROM FormulaShare_Rule__mdt
 			WHERE Object_Shared__r.QualifiedApiName = :objectName];
         }
@@ -71,6 +73,11 @@ public inherited sharing class FormulaShareRulesSelector {
 			rule.active = ruleInScope.Active__c;
 			rule.sharedToFieldType = ruleInScope.Shared_To_Field_Type__c;
 			rule.sharingReason = ruleInScope.Sharing_Reason__c;
+            rule.childObjectWithSharedToFieldAPIName = ruleInScope.Child_Object_with_Shared_To_Field__r.QualifiedApiName;
+            rule.childObjectLookupFieldAPIName = ruleInScope.Child_Object_Lookup_Field__r.QualifiedApiName;
+            rule.childObjectSharedToFieldAPIName = ruleInScope.Child_Object_Shared_To_Field__r.QualifiedApiName;
+            rule.childObjectSharedToFieldType = ruleInScope.Child_Object_Shared_To_Field_Type__c;
+
 			rulesToReturn.add(rule);
 		}
 

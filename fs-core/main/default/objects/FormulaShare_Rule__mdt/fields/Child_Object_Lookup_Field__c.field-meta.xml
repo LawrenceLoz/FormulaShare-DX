@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Child_Object_Lookup_Field__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>If sharing is based on the contents of a field in a related child object, provide the field on the child object which is a lookup to the object to be shared</inlineHelpText>
+    <label>Child Object Lookup Field</label>
+    <metadataRelationshipControllingField>FormulaShare_Rule__mdt.Child_Object_with_Shared_To_Field__c</metadataRelationshipControllingField>
+    <referenceTo>FieldDefinition</referenceTo>
+    <relationshipLabel>FormulaShare_Rules2</relationshipLabel>
+    <relationshipName>FormulaShare_Rules2</relationshipName>
+    <required>false</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

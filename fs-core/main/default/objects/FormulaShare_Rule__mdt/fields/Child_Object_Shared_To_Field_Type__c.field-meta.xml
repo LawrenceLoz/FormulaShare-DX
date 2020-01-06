@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Shared_To_Field_Type__c</fullName>
+    <fullName>Child_Object_Shared_To_Field_Type__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>&quot;Shared To Field&quot; can contain either the 15 or 18 digit record id of the user, group or role to find the right users (select &quot;Id&quot; if so), or can contain the relevant Role Name or Group Name (select &quot;Name&quot; if this is the case)</inlineHelpText>
-    <label>Shared To Field Type</label>
+    <inlineHelpText>If sharing is based on the contents of a field in a related child object, indicate whether the Child Object Shared To field contains the record id or name of the entity to share with</inlineHelpText>
+    <label>Child Object Shared To Field Type</label>
     <required>false</required>
     <type>Picklist</type>
     <valueSet>

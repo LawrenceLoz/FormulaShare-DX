@@ -101,6 +101,20 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             userRule.shareWith = 'Users';
             rules.add(userRule);
 
+            // Will add a sharing record for the user with the user id in Method_Name__c field for all related log records
+            FormulaShareRule childUserRule = new FormulaShareRule();
+            childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            childUserRule.active = true;
+            childUserRule.sharedToFieldType = 'Id';
+            childUserRule.accessLevel = 'Edit';
+            childUserRule.shareWith = 'Users';
+            childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
+            childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
+            childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
+            childUserRule.childObjectSharedToFieldType = 'Id';
+            rules.add(childUserRule);
+
             return rules;
         }
 

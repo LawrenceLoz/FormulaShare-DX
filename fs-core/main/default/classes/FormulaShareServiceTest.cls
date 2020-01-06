@@ -64,9 +64,30 @@ public class FormulaShareServiceTest {
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
+        List<Id> logIds = new List<Id>();
 		for(FormulaShare_Log__c log : fsLogs) {
+            logIds.add(log.Id);
             fsService.recordsMap.put(log.Id, log);
         }
+
+        String query = 'SELECT '
+            + prefix + 'Id, '
+            + prefix + 'Context__c, '
+            + prefix + 'Class_Name__c, '
+            + prefix + 'Type_In_Scope, '
+            + prefix + 'Method_Name__c '
+            + '(SELECT '
+                + prefix + 'Id, '
+                + prefix + 'Context__c, '
+                + prefix + 'Class_Name__c, '
+                + prefix + 'Type_In_Scope, '
+                + prefix + 'Method_Name__c '            
+                + 'FROM FormulaShare_Logs__r)'
+            + 'FROM '
+            + prefix + 'FormulaShare_Log__c '
+            + 'WHERE Id IN:'
+        List<Log__c> logsWithRelated = Database.query(query);
+
 		fsService.processFormulaShares();
         return fsService;
     }
@@ -95,7 +116,7 @@ public class FormulaShareServiceTest {
         return role;
     }
 
-
+/*
     //------------------ Positive testing of record insertion for supported rule types ----------------------
     @IsTest
     public static void testCreateRoleSharingNewRecord() {
@@ -176,7 +197,43 @@ public class FormulaShareServiceTest {
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
         System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
+*/
+    @IsTest
+    public static void testRelatedCreateUserSharingNewRecord() {
+        setMocks();
 
+        // Get the inserted user to share record to
+        User u = [SELECT Id FROM User WHERE Firstname = 'FormulaShareTestUser' AND LastName = 'OnlyForUnitTests'][0];
+
+        // Create parent log object and set fields which have test rules created within apex class
+        FormulaShare_Log__c parentLog = new FormulaShare_Log__c();
+        parentLog.OwnerId = UserInfo.getUserId();     // Make sure owner is different to the user we want to share with
+        insert parentLog;
+
+        FormulaShare_Log__c childLog = new FormulaShare_Log__c();
+        childLog.Method_Name__c = u.Id;  // Share with user (Id)
+        childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
+        insert childLog;
+
+        FormulaShare_Log__c childLog2 = new FormulaShare_Log__c();
+        childLog2.Method_Name__c = u.Id;  // Share with user (Id)
+        childLog2.Related_Log_Required_for_Test_Class__c = parentLog.Id;
+        insert childLog2;
+
+        FormulaShareService fsService = callProcessForLogRecord(parentLog);
+
+        // Check that fsService response is as expected
+        System.assertEquals(fsService.recordsMap.get(parentLog.Id), parentLog, 'New record not included in map');
+
+        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
+        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
+        System.assertEquals(parentLog.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+        System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
+        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+    }
+/*
     @IsTest
     public static void testCreateUserSharingNewRecord() {
         setMocks();
@@ -203,7 +260,6 @@ public class FormulaShareServiceTest {
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
         System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
-
 
     // ------------------ Testing updates to sharing -------------------------
     @IsTest
@@ -356,5 +412,5 @@ public class FormulaShareServiceTest {
         System.assert(foundCorrectUserShare);
         System.assert(foundCorrectGroupShare);
     }
-
+*/
 }
