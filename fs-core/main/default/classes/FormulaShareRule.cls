@@ -72,6 +72,17 @@ public inherited sharing class FormulaShareRule {
         }
     }
 
+    public Boolean sharedObjectIsCustom {
+        get {
+            if(FormulaShareUtilities.describe(objectSharedAPIName).isCustom()) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
     public String sharedToAPINameForType {
         get {
             if(type == 'child') {
@@ -118,7 +129,8 @@ public inherited sharing class FormulaShareRule {
     private Boolean passesBasicValidation() {
         if(objectSharedAPIName != null
             && shareWith != null
-            && accessLevel != null) {
+            && accessLevel != null
+            && (!sharedObjectIsCustom || sharingReason != null)) {
             return true;
         }
         else return false;

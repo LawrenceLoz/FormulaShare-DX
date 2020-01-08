@@ -106,7 +106,44 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
             childUserRule.active = true;
-            childUserRule.sharedToFieldType = 'Id';
+            childUserRule.accessLevel = 'Edit';
+            childUserRule.shareWith = 'Users';
+            childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
+            childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
+            childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
+            childUserRule.childObjectSharedToFieldType = 'Id';
+            rules.add(childUserRule);
+
+            return rules;
+        }
+
+        else if(stubbedMethodName == 'getStandardRulesThisObjectControls') {
+            system.debug('getStandardRulesThisObjectControls stub');
+            List<FormulaShareRule> rules = new List<FormulaShareRule>();
+
+           // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
+            FormulaShareRule groupRule = new FormulaShareRule();
+            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            groupRule.active = true;
+            groupRule.sharedToFieldType = 'Name';
+            groupRule.accessLevel = 'Edit';
+            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
+            groupRule.shareWith = 'Public Groups';
+            rules.add(groupRule);
+
+            return rules;
+        }
+
+        else if(stubbedMethodName == 'getChildRulesThisObjectControls') {
+            system.debug('getChildRulesThisObjectControls stub');
+            List<FormulaShareRule> rules = new List<FormulaShareRule>();
+
+           // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
+            FormulaShareRule childUserRule = new FormulaShareRule();
+            childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            childUserRule.active = true;
             childUserRule.accessLevel = 'Edit';
             childUserRule.shareWith = 'Users';
             childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
@@ -134,24 +171,6 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
         else if(stubbedMethodName == 'processFormulaShares') {
             return null;    // No return type, but carry out no processing
-        }
-
-        else if(stubbedMethodName == 'getRules') {
-            system.debug('getRules stub');
-            List<FormulaShareRule> rules = new List<FormulaShareRule>();
-
-           // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
-            FormulaShareRule groupRule = new FormulaShareRule();
-            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            groupRule.active = true;
-            groupRule.sharedToFieldType = 'Name';
-            groupRule.accessLevel = 'Edit';
-            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
-            groupRule.shareWith = 'Public Groups';
-            rules.add(groupRule);
-
-            return rules;
         }
 
         else if(stubbedMethodName == 'getSharesToInsert') {
@@ -197,17 +216,25 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return shares;
         }
 
-        else if(stubbedMethodName == 'getFullObjectQueryLocator') {
-            String query = 'SELECT '
+        else if(stubbedMethodName == 'getSObjectsWithFields') {
+            String queryString = 'SELECT '
                 + prefix + 'Id, '
                 + prefix + 'Context__c, '
                 + prefix + 'Class_Name__c, '
                 + prefix + 'Type_In_Scope, '
-                + prefix + 'Method_Name__c '
-                + 'FROM '
+                + prefix + 'Method_Name__c, '
+                + '(SELECT '
+                    + prefix + 'Id, '
+                    + prefix + 'Context__c, '
+                    + prefix + 'Class_Name__c, '
+                    + prefix + 'Type_In_Scope, '
+                    + prefix + 'Method_Name__c '
+                    + 'FROM '
+                    + prefix + ' FormulaShare_Logs__r '
+                + ') FROM '
                 + prefix + 'FormulaShare_Log__c';
-            Database.QueryLocator locator = Database.getQueryLocator(query);
-            return locator;
+            List<SObject> records = Database.query(queryString);
+            return records;
         }
 
         else if(stubbedMethodName == 'getType') {

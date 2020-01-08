@@ -30,7 +30,7 @@ global with sharing class FormulaShareHelper implements FormulaShareIHelper {
     global FormulaShareHelper() {
 
         // Check that helper is called in a supported context
-        if((!Trigger.isExecuting || (!Trigger.isAfter || (!Trigger.isInsert && !Trigger.isUpdate))) && !System.Test.isRunningTest()) {
+        if((!Trigger.isExecuting || (!Trigger.isAfter)) && !System.Test.isRunningTest()) {
 			throw new FormulaShareException('Helper can only be called from an after insert or update trigger');
         }
 

@@ -27,7 +27,7 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
     }
 
 
-    public List<SObject> selectWithFieldsForObjectList(List<RelatedObjectDetails> rodList, List<SObject> sharedObjList) {
+    public List<SObject> selectWithFieldsForObjectList(List<RelatedObjectDetails> rodList, Set<Id> sharedObjIdSet) {
         fflib_QueryFactory sharedObjQueryFactory = newQueryFactory();
 
         // If child object sharing is required, add relationship sub-selects for fields on related objects
@@ -52,10 +52,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 //            relatedObjQueryFactory.setCondition(condition);
         }
         
-        Set<Id> sharedObjIdSet = new Set<Id>();
-        for(SObject obj : sharedObjList) {
-            sharedObjIdSet.add((Id) obj.get('Id'));
-        }
         String sharedObjIdsString = FormulaShareUtilities.buildStringFromSetQuotes(sharedObjIdSet);
 
         system.debug('query as soql: '+sharedObjQueryFactory.setCondition('Id IN (' + sharedObjIdsString + ')').toSOQL());
@@ -66,7 +62,7 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
             .toSOQL()
         );
     }
-ó
+
 
     public Database.QueryLocator selectAllSharedObjectsLocator() {
         fflib_QueryFactory sharedObjQueryFactory = newQueryFactory();

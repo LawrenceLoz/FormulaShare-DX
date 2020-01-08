@@ -64,29 +64,16 @@ public class FormulaShareServiceTest {
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
-        List<Id> logIds = new List<Id>();
+
+        Set<Id> logIdsSet = new Set<Id>();
 		for(FormulaShare_Log__c log : fsLogs) {
-            logIds.add(log.Id);
-            fsService.recordsMap.put(log.Id, log);
+            logIdsSet.add(log.Id);
         }
 
-        String query = 'SELECT '
-            + prefix + 'Id, '
-            + prefix + 'Context__c, '
-            + prefix + 'Class_Name__c, '
-            + prefix + 'Type_In_Scope, '
-            + prefix + 'Method_Name__c '
-            + '(SELECT '
-                + prefix + 'Id, '
-                + prefix + 'Context__c, '
-                + prefix + 'Class_Name__c, '
-                + prefix + 'Type_In_Scope, '
-                + prefix + 'Method_Name__c '            
-                + 'FROM FormulaShare_Logs__r)'
-            + 'FROM '
-            + prefix + 'FormulaShare_Log__c '
-            + 'WHERE Id IN:'
-        List<Log__c> logsWithRelated = Database.query(query);
+        List<SObject> records = FormulaShareService.getSObjectsWithFields(fsLogType, fsRules, logIdsSet);
+        for(SObject record : records) {
+            fsService.recordsMap.put((Id) record.get('Id'), record);
+        }
 
 		fsService.processFormulaShares();
         return fsService;
@@ -116,7 +103,7 @@ public class FormulaShareServiceTest {
         return role;
     }
 
-/*
+
     //------------------ Positive testing of record insertion for supported rule types ----------------------
     @IsTest
     public static void testCreateRoleSharingNewRecord() {
@@ -134,7 +121,7 @@ public class FormulaShareServiceTest {
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
+        System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
@@ -161,7 +148,7 @@ public class FormulaShareServiceTest {
         Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinates'][0];
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
+        System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role and subordinates group');
@@ -187,7 +174,7 @@ public class FormulaShareServiceTest {
         Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
+        System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this public group');
@@ -197,7 +184,7 @@ public class FormulaShareServiceTest {
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
         System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
-*/
+
     @IsTest
     public static void testRelatedCreateUserSharingNewRecord() {
         setMocks();
@@ -223,7 +210,8 @@ public class FormulaShareServiceTest {
         FormulaShareService fsService = callProcessForLogRecord(parentLog);
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(parentLog.Id), parentLog, 'New record not included in map');
+        FormulaShare_Log__c fsLog = (FormulaShare_Log__c) fsService.recordsMap.get(parentLog.Id);
+        System.assert(fsService.recordsMap.containsKey(parentLog.Id), 'Record differs from one expected');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
@@ -233,7 +221,7 @@ public class FormulaShareServiceTest {
         System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
         System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
-/*
+
     @IsTest
     public static void testCreateUserSharingNewRecord() {
         setMocks();
@@ -250,7 +238,7 @@ public class FormulaShareServiceTest {
         FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
+        System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
@@ -292,7 +280,7 @@ public class FormulaShareServiceTest {
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :roles[1].Id AND Type = 'Role'][0];
 
         // Check that fsService response is as expected
-        System.assertEquals(fsService.recordsMap.get(log.Id), log, 'New record not included in map');
+        System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
 
         List<SObject> sharesToInsertList = fsService.getSharesToInsert();
         System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
@@ -317,7 +305,7 @@ public class FormulaShareServiceTest {
         FormulaShareRule rule = new FormulaShareRule();
 
         // Find a FSRule object with access level of Read
-        for(FormulaShareRule r : fsService.getRules()) {
+        for(FormulaShareRule r : fsService.rules) {
             if(r.accessLevel == 'Read') {
                 rule = r;
                 break;
@@ -412,5 +400,5 @@ public class FormulaShareServiceTest {
         System.assert(foundCorrectUserShare);
         System.assert(foundCorrectGroupShare);
     }
-*/
+
 }

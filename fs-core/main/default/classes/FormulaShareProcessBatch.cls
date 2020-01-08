@@ -68,18 +68,18 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
    	public void execute(Database.BatchableContext BC, List<SObject> scope) {
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
-		Map<Id,SObject> recordsMap = new Map<Id,SObject>();
 
 		system.debug('*** batch scope : '+ scope);
 
-		// Re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
-		List<SObject> records = FormulaShareService.getObjectsWithFields(typeInThisBatch, rulesForType, scope);
+		// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
+		Set<Id> sharedObjIdSet = new Set<Id>();
+        for(SObject obj : scope) {
+            sharedObjIdSet.add((Id) obj.get('Id'));
+        }
+		List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
 
 		// Populate records in batch scope into wrapper
-		for(SObject record : records) {
-			recordsMap.put(record.Id, record);
-		}
-		fsService.setRecordsMap(recordsMap);
+		fsService.addToRecordsMap(records);
 
 		// Assess sharing for this object
 		fsService.processFormulaShares();

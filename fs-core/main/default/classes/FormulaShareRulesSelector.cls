@@ -36,13 +36,12 @@ public inherited sharing class FormulaShareRulesSelector {
     // The basic queries below are sufficient - FLS and sharing checks aren't needed 
     // since custom metadata does not support either.
 
+    // Method returns list of wrapped rules with the 
     // Returns a list of wrapper objects rather than custom metadata objects, which is necessary   
     // to support unit tests since custom metadata relationships can't be mocked
     public List<FormulaShareRule> getRulesSharingObject(Schema.sObjectType type) {
 
-		List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 		String objectName = type.getDescribe().getName();
-
         List<FormulaShare_Rule__mdt> rules = new List<FormulaShare_Rule__mdt>();
 
         // If test, populate list with a fake rule so we can test logic of method (can't otherwise guarantee rules exist)
@@ -63,8 +62,55 @@ public inherited sharing class FormulaShareRulesSelector {
         }
         
 		// Create list of all jobs with relevant details for assessing scope
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+
+		return rulesToReturn;
+    }
+
+
+    // Returns rules where the shared object and shared to field are the object in scope
+    // Used by trigger helper to get rules which might be affected by object DML
+    public List<FormulaShareRule> getStandardRulesThisObjectControls(String objectName) {
+
+        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
+            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
+			FROM FormulaShare_Rule__mdt
+			WHERE Child_Object_with_Shared_To_Field__c = null
+            AND Object_Shared__r.QualifiedApiName = :objectName];
+
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+
+		return rulesToReturn;
+    }
+
+
+    // Returns rules where type in scope is the child object in a child object rule
+    // Used by trigger helper to get rules which might be affected by object DML
+    public List<FormulaShareRule> getChildRulesThisObjectControls(String objectName) {
+
+        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
+            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
+			FROM FormulaShare_Rule__mdt
+			WHERE Child_Object_with_Shared_To_Field__c != null 
+            AND Child_Object_with_Shared_To_Field__r.QualifiedApiName = :objectName];
+
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+
+		return rulesToReturn;
+    }
+
+
+
+    private List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> rules) {
+        List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
+
 		for(FormulaShare_Rule__mdt ruleInScope : rules) {
-            
 			FormulaShareRule rule = new FormulaShareRule();
 			rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
 			rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
@@ -81,7 +127,7 @@ public inherited sharing class FormulaShareRulesSelector {
 			rulesToReturn.add(rule);
 		}
 
-		return rulesToReturn;        
+		return rulesToReturn;                
     }
 
 
