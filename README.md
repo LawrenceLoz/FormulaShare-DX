@@ -38,6 +38,8 @@ We can even reference parents or grandparent objects of object A - up to 5 level
 
 Once established, the rule will recalculate relevant sharing in real time when object B records are created or changed, and catch up on any other changes with scheduled batch jobs.
 
+UPDATE: It's also now possible to use a field on a child object to influence sharing on the parent object. In the example above, imagine that object A (the country) should be shared with all users specified in a field on object B (the job opportunity). This sharing configuration is now supported through the Child Object fields on the FormulaShare Rule custom metadata type.
+
 ## Design approach
 
 A batch job is scheduled in the subscriber org to assess all record sharing on a regular basis. Real time assessment of sharing if needed is kicked off from apex triggers - just 3 lines of code need to be added to a trigger or handler class.
@@ -72,13 +74,25 @@ For standard objects, sharing reasons aren't available. As an alternative, Formu
 
 ### Create FormulaShare rule record
 From the Setup menu, type "Custom Metadata Types" and click "Manage Records" for FormulaShare Rule. Each of the custom metadata records are the settings for a single rule. The following fields define the setup of each rule:
+
+#### General setup
 * **Name** and **Label**: Add something to distinguish this rule from others
 * **Shared Object**: Select the object with records to be shared. Object must be set to Private (for Read or Edit access levels) or Public Read Only (for Edit access level), and must support sharing - child objects in a master-detail relationship and some standard objects do not support independent sharing rules
-* **Shared To Field**: Select the field on the object which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
-* **Shared_To_Field_Type**: Either "Id" or "Name", depending on return type of the Shared To Field
 * **Share With**: The type of entity this rule should share with. Options are "Users", "Roles", "Roles and Internal Subordinates" and "Public Groups"
 * **Sharing Reason**: For custom objects, the "Reason Name" of the sharing reason related to the rule
 * **Access Level**: Set to Read or Edit
+
+#### Fields to use when shared to field is on the shared object
+If the object being shared includes the reference to the user, group or role needing access, set the fields below:
+* **Shared To Field**: Select the field on the object which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
+* **Shared To Field Type**: Either "Id" or "Name", depending on return type of the Shared To Field
+
+#### Fields to use when shared to field is on a child object
+If the reference to the user, group or role needing access is on a child object of the object to be shared, set these fields:
+* **Child Object with Shared To Field**: Select the object which includes the reference
+* **Child Object Lookup Field**: The field associating the child object to the object to be shared
+* **Child Object Shared To Field**: The field which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
+* **Child Object Shared To Field Type**: Either "Id" or "Name", depending on return type of the Child OBject Shared To Field
 
 ### Test configuration
 
@@ -95,7 +109,6 @@ There are some known limitations to be aware of:
 
 The project is now launched, and the app approved and published on the Salesforce AppExchange. The following is a list of features and areas which may be worked on in future:
 * Lightning interface for metadata rule configuration
-* Automated deployment of triggers and sharing reasons using metadata API (a la the wonderful [DeclareativeLookupRollupSummary](https://github.com/afawcett/declarative-lookup-rollup-summaries))
 * Managed scheduling of batch job and configuration parameters in managed package setup
 * Support for account teams and territory groups
 * Support for assessing user roles directly without a formula field being needed
