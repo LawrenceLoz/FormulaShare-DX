@@ -70,7 +70,7 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>Field on shared object with user, role or group</label>
+        <label>Field on shared record with user, role or group</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -89,7 +89,7 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>Field on child objects with user, role or group</label>
+        <label>Field on child records with user, role or group</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -137,7 +137,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h26000000b3wA</masterLabel>
+        <masterLabel>00h26000000UE2P</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>
