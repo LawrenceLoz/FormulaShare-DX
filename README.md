@@ -82,34 +82,34 @@ From the Setup menu, type "Custom Metadata Types" and click "Manage Records" for
 * **Sharing Reason**: For custom objects, the "Reason Name" of the sharing reason related to the rule
 * **Access Level**: Set to Read or Edit
 
-#### Fields to use when shared to field is on the shared object
+#### Fields to use when shared to field is on the same object
 If the object being shared includes the reference to the user, group or role needing access, set the fields below:
 * **Shared To Field**: Select the field on the object which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
 * **Shared To Field Type**: Either "Id" or "Name", depending on return type of the Shared To Field
 
-#### Fields to use when shared to field is on a child object
-If the reference to the user, group or role needing access is on a child object of the object to be shared, set these fields:
+#### Fields to use when shared to field is on a related object
+If the reference to the user, group or role needing access is on a child object related to the object to be shared, set these fields:
 * **Child Object with Shared To Field**: Select the object which includes the reference
 * **Child Object Lookup Field**: The field associating the child object to the object to be shared
 * **Child Object Shared To Field**: The field which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
-* **Child Object Shared To Field Type**: Either "Id" or "Name", depending on return type of the Child OBject Shared To Field
+* **Child Object Shared To Field Type**: Either "Id" or "Name", depending on return type of the Child Object Shared To Field
 
 ### Test configuration
 
-Create a record in the shared object. As a system admin, the easiest way to check that the sharing is set up is to use the "Sharing" button from the record detail page (Classic interface only). The summary should include a share record for the user, role, role and subordinates or public group which is linked through the shared to field.
+After creating a FormulaShare rule, create a record in the shared object. As a system admin, the easiest way to check that sharing is applied is to click the "Sharing" button from the record detail page (Classic interface only). The summary should include a share record for the user, role, role and subordinates or public group which is linked through the shared to field.
 
 ### Limitations
 
 There are some known limitations to be aware of:
-* 10000 DML rows per transaction: This Salesforce limit prevents synchronous transactions from creating, deleting or updating more than 10000 records in a single transaction. If data changes cause triggers for shared objects using the FormulaShare trigger code to attempt to process very substantial sharing changes (over 10000 records), this could result in failed transactions. This is only likely to occur if parent object updates cause cascading updates to very large numbers of child objects.
+* 10000 DML rows per transaction: This Salesforce limit prevents synchronous transactions from creating, deleting or updating more than 10000 records in a single transaction. If data changes cause triggers for shared objects using the FormulaShare trigger code to attempt to process very substantial sharing changes (over 10000 records), this could result in failed transactions. This is only likely to occur if an automated process triggers updates to very large numbers records which themselves result in sharing changes.
 * 50 million records per object: The FormulaShare batch recalculation assesses whether sharing changes are needed on every record in each shared object. To do this, for each object is constructs a query locator and cycles through the results, checking every record in the object. Due to a Salesforce limitation, the maximum number of records that can be returned in a batch query locator is 50 million, so to work correctly FormulaShare can only be used on objects with less than this number of records in total.
 
 
 ## Areas for future development
 
 The project is now launched, and the app approved and published on the Salesforce AppExchange. The following is a list of features and areas which may be worked on in future:
-* Lightning interface for metadata rule configuration
-* Managed scheduling of batch job and configuration parameters in managed package setup
+* Lightning interface for metadata rule configuration and batch job scheduling
+* Configuration of batch job schedule in managed package setup
 * Support for account teams and territory groups
 * Support for assessing user roles directly without a formula field being needed
 
