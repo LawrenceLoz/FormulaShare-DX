@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>FormulaShare_Rule__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>FormulaShare_Settings__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>FormulaShare_Std_Object_to_Remove_Shares__mdt</name>
+    </customMetadataTypeAccesses>
     <description>Assign this to users who require access to FormulaShare Logs and aren&#39;t already full System Administrators in the org</description>
     <fieldPermissions>
         <editable>true</editable>
