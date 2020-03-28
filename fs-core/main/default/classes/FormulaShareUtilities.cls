@@ -31,6 +31,50 @@ public with sharing class FormulaShareUtilities {
         }
     }
 
+	// Cache global describe for performance
+	public static Map<String, SObjectType> globalDescribe {
+		get {
+			if(globalDescribe == null) {
+				globalDescribe = Schema.getGlobalDescribe();
+			}
+			return globalDescribe;
+		}
+	}
+
+	public static Map<String,DescribeSObjectResult> cachedDescribes = new Map<String,DescribeSObjectResult>();
+	public static Map<String,Map<String, SObjectField>> cachedFieldMaps = new Map<String,Map<String, SObjectField>>();
+
+	// Get describe result and maintain cache
+	public static DescribeSObjectResult describe(String objectAPIName) {
+		if(cachedDescribes.containsKey(objectAPIName)) {
+			return cachedDescribes.get(objectAPIName);
+		}
+		else {
+			SObjectType objType = globalDescribe.get(objectAPIName);
+			DescribeSObjectResult describe = objType.getDescribe();
+			cachedDescribes.put(objectAPIName, describe);
+			return describe;
+		}
+	}
+
+	// Get an object's field map and maintain cache
+	public static Map<String,SObjectField> getFieldMap(String objectAPIName) {
+		if(cachedFieldMaps.containsKey(objectAPIName)) {
+			return cachedFieldMaps.get(objectAPIName);
+		}
+		else {
+			Map<String,SObjectField> fieldMap = describe(objectAPIName).fields.getMap();
+			cachedFieldMaps.put(objectAPIName, fieldMap);
+			return fieldMap;
+		}
+	}
+
+	public static Map<String,SObjectField> getFieldMap(Schema.SObjectType type) {
+		String objectAPIName = type.getDescribe().getName();
+		return getFieldMap(objectAPIName);
+	}
+
+
 	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, SOBjectType type) {
 		Map<String, SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
 		SObjectField sObjField = fieldsMapByName.get(fieldNameString.toLowerCase());
@@ -49,6 +93,25 @@ public with sharing class FormulaShareUtilities {
 			}
 		}
 		return null;	// We should have found a field with this relationship name, but return null if not
+	}
+
+
+	public static String getRelationshipName(String parentObjectAPIName, String childObjectAPIName, String lookupFieldAPIName) {
+		String relationshipName;
+
+		// Find the relationship name for the lookup field
+		Schema.SObjectField lookupField = getFieldMap(childObjectAPIName).get(lookupFieldAPIName);
+
+		// Iterate through relationships on the parent object to check which one matches the lookup field
+		Schema.DescribeSObjectResult parentObjDescribe = describe(parentObjectAPIName);
+		for(Schema.ChildRelationship cr : parentObjDescribe.getChildRelationships()) {
+			if(cr.getField() == lookupField) {
+				relationshipName = cr.getRelationshipName();
+				break;
+			}
+		}
+
+		return relationshipName;
 	}
 	
 

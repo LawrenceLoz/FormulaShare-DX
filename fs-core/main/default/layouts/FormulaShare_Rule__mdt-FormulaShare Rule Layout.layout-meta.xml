@@ -43,15 +43,15 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>What to share and who to share to</label>
+        <label>Sharing required</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
                 <field>Object_Shared__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>Shared_To__c</field>
+                <behavior>Edit</behavior>
+                <field>Sharing_Reason__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
@@ -61,6 +61,25 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
+                <field>Access_Level__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsLeftToRight</style>
+    </layoutSections>
+    <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Field on shared record with user, role or group</label>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Shared_To__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Shared_To_Field_Type__c</field>
             </layoutItems>
         </layoutColumns>
@@ -70,17 +89,25 @@
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
-        <label>Sharing required</label>
+        <label>Field on child records with user, role or group</label>
         <layoutColumns>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>Access_Level__c</field>
+                <behavior>Edit</behavior>
+                <field>Child_Object_with_Shared_To_Field__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Child_Object_Shared_To_Field__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Sharing_Reason__c</field>
+                <field>Child_Object_Lookup_Field__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Child_Object_Shared_To_Field_Type__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
@@ -110,7 +137,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h7E000000peP5</masterLabel>
+        <masterLabel>00h26000000UE2P</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

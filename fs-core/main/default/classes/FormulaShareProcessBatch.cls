@@ -42,7 +42,9 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		system.debug('Rules for this object: '+rulesForType);
 
 		if(!rulesForType.isEmpty()) {
-			Database.QueryLocator ql = FormulaShareService.getFullObjectQueryLocator(typeInThisBatch, rulesForType);
+			Database.QueryLocator ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
+
+			system.debug('query locator: ' + ql);
 
 			FormulaShare_Log__c log = new FormulaShare_Log__c();
 			logsList = new List<FormulaShare_Log__c>();
@@ -51,9 +53,9 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 			fsLogs.setContext('FormulaShareProcessBatch', null, 'Batch');
 			String typeInScope = typeInThisBatch.getDescribe().getName();
-			Integer noRules = rulesForType.size();
+//			Integer noRules = rulesForType.size();
 			String query = ql.getQuery();
-			fsLogs.setBatchDetails(batchSize, typeInScope, noRules, query);
+			fsLogs.setBatchDetails(batchSize, typeInScope, 0, query);	// need to fix this
 			logsList = fsLogs.upsertLogs();
 			return ql;
 		}
@@ -64,15 +66,20 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	}
 
 
-   	public void execute(Database.BatchableContext BC, List<sObject> scope) {
+   	public void execute(Database.BatchableContext BC, List<SObject> scope) {
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
-		Map<Id,SObject> recordsMap = new Map<Id,SObject>();
+
+		system.debug('*** batch scope : '+ scope);
+
+		// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
+		Set<Id> sharedObjIdSet = new Set<Id>();
+        for(SObject obj : scope) {
+            sharedObjIdSet.add((Id) obj.get('Id'));
+        }
+		List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
 
 		// Populate records in batch scope into wrapper
-		for(SObject obj : scope) {
-			recordsMap.put(obj.Id, obj);
-		}
-		fsService.setRecordsMap(recordsMap);
+		fsService.addToRecordsMap(records);
 
 		// Assess sharing for this object
 		fsService.processFormulaShares();
