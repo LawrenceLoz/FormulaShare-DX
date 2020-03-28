@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <logo>FS_Logoimage01</logo>
+        <logoVersion>1</logoVersion>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Manage FormulaShare rules and configuration</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <label>FormulaShare</label>
+    <navType>Standard</navType>
+    <tabs>FormulaShare_Rules</tabs>
+    <tabs>FormulaShare_Log__c</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>FormulaShare_UtilityBar</utilityBar>
+</CustomApplication>

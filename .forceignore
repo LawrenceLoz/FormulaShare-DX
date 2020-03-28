@@ -6,3 +6,6 @@
 **profiles
 AppSwitcher.appMenu
 package.xml
+**/jsconfig.json
+
+**/.eslintrc.json
