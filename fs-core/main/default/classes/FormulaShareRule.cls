@@ -25,17 +25,24 @@
 
 public inherited sharing class FormulaShareRule {
 
-	public String objectSharedAPIName;
+    public String objectSharedAPIName;
+    public String objectSharedLabel;
 	public String sharedToAPIName;
+	public String sharedToLabel;
+	public String sharedToFieldToken;
+	public String sharedToFieldType;
 	public String shareWith;
 	public String accessLevel;
 	public Boolean active;
-	public String sharedToFieldType;
 	public String sharingReason;
     public String childObjectWithSharedToFieldAPIName;
+    public String childObjectWithSharedToFieldLabel;
     public String childObjectLookupFieldAPIName;
     public String childObjectSharedToFieldAPIName;
+    public String childObjectSharedToFieldLabel;
+    public String childObjectSharedToFieldToken;
     public String childObjectSharedToFieldType;
+    public String label;
 
     // Return a populated share record with appropriate values for this rule and a record and user combination
 	public SObject getShareRecord(Schema.SObjectType type, Id recordId, Id sharedTo) {
@@ -91,6 +98,27 @@ public inherited sharing class FormulaShareRule {
             else {
                 return sharedToAPIName;
             }
+        }
+    }
+
+    public String controllingObjectLabelForRuleType {
+        get {
+            if(type == 'child') {
+                return childObjectWithSharedToFieldLabel;
+            }
+            else {
+                return objectSharedLabel;
+            }
+        }
+    }
+    public String sharedToTokenForRuleType {
+        get {
+            return type == 'child' ? childObjectSharedToFieldToken : sharedToFieldToken;
+        }
+    }
+    public String sharedToLabelRuleType {
+        get {
+            return type == 'child' ? childObjectSharedToFieldLabel : sharedToLabel;
         }
     }
 

@@ -15,6 +15,12 @@ export default class TreeGrid extends LightningElement {
         },
         {
             type: 'text',
+            fieldName: 'controllingObject',
+            label: 'Shared To Field On',
+            initialWidth: 150
+        },
+        {
+            type: 'text',
             fieldName: 'label',
             label: 'Rule Description',
             initialWidth: 300

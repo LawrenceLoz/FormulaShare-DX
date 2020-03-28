@@ -56,7 +56,10 @@ public inherited sharing class FormulaShareRulesSelector {
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
 			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
             Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
+            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
+            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel
 			FROM FormulaShare_Rule__mdt
 			WHERE Object_Shared__r.QualifiedApiName = :objectName];
         }
@@ -76,7 +79,10 @@ public inherited sharing class FormulaShareRulesSelector {
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
 			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
             Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
+            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
+            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel
 			FROM FormulaShare_Rule__mdt
 			WHERE Child_Object_with_Shared_To_Field__c = null
             AND Object_Shared__r.QualifiedApiName = :objectName];
@@ -95,7 +101,10 @@ public inherited sharing class FormulaShareRulesSelector {
 			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
 			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
             Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
+            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
+            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel
 			FROM FormulaShare_Rule__mdt
 			WHERE Child_Object_with_Shared_To_Field__c != null 
             AND Child_Object_with_Shared_To_Field__r.QualifiedApiName = :objectName];
@@ -105,6 +114,24 @@ public inherited sharing class FormulaShareRulesSelector {
 		return rulesToReturn;
     }
 
+    // Returns rules where type in scope is the child object in a child object rule
+    // Used by trigger helper to get rules which might be affected by object DML
+    public List<FormulaShareRule> getAllRules() {
+
+        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
+            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
+            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
+            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel
+			FROM FormulaShare_Rule__mdt];
+
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+
+		return rulesToReturn;
+    }    
 
 
     private List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> rules) {
@@ -123,6 +150,13 @@ public inherited sharing class FormulaShareRulesSelector {
             rule.childObjectLookupFieldAPIName = ruleInScope.Child_Object_Lookup_Field__r.QualifiedApiName;
             rule.childObjectSharedToFieldAPIName = ruleInScope.Child_Object_Shared_To_Field__r.QualifiedApiName;
             rule.childObjectSharedToFieldType = ruleInScope.Child_Object_Shared_To_Field_Type__c;
+            rule.sharedToFieldToken = ruleInScope.Shared_To__c;
+            rule.childObjectSharedToFieldToken = ruleInScope.Child_Object_Shared_To_Field__c;
+            rule.objectSharedLabel = ruleInScope.Object_Shared__r.MasterLabel;
+            rule.childObjectWithSharedToFieldLabel = ruleInScope.Child_Object_with_Shared_To_Field__r.MasterLabel;
+            rule.sharedToLabel = ruleInScope.Shared_To__r.MasterLabel;
+            rule.childObjectSharedToFieldLabel = ruleInScope.Child_Object_Shared_To_Field__r.MasterLabel;
+            rule.label = ruleInScope.MasterLabel;
 
 			rulesToReturn.add(rule);
 		}

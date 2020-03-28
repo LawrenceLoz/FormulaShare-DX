@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <applicationVisibilities>
+        <application>FormulaShare</application>
+        <visible>true</visible>
+    </applicationVisibilities>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>FormulaShare_Rule__mdt</name>
@@ -111,6 +115,10 @@
     </objectPermissions>
     <tabSettings>
         <tab>FormulaShare_Log__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>FormulaShare_Rules</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

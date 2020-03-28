@@ -2,7 +2,7 @@
 <FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
     <flexiPageRegions>
         <componentInstances>
-            <componentName>rulesListView</componentName>
+            <componentName>formulaShareRulesListView</componentName>
         </componentInstances>
         <name>main</name>
         <type>Region</type>

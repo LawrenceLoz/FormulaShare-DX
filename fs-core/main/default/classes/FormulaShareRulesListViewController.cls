@@ -23,17 +23,14 @@ public with sharing class FormulaShareRulesListViewController {
     
     @AuraEnabled(cacheable=true)
     public static List<ObjectRulesWrapper> getTreeGridData(){
-        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Object_Shared__c, Shared_To__c, Object_Shared__r.QualifiedAPIName, Object_Shared__r.MasterLabel, Active__c, MasterLabel, 
-            Share_With__c, Shared_To__r.QualifiedAPIName, Shared_To__r.MasterLabel, Sharing_Reason__c, Access_Level__c 
-            FROM FormulaShare_Rule__mdt];
 
+        List<FormulaShareRule> rules = FormulaShareRulesSelector.construct().getAllRules();
 
         Map<String, List<RuleWrapper>> objectsWithRulesMap = new Map<String, List<RuleWrapper>>();
-        for(FormulaShare_Rule__mdt rule : rules){
-            system.debug('Object_Shared__c: '+rule.Object_Shared__c);
-            system.debug('Shared_To__c: '+rule.Shared_To__c);
+        for(FormulaShareRule rule : rules){
+            system.debug('Shared_To__c: '+rule.sharedToFieldToken);
 
-            String objectName = rule.Object_Shared__r.MasterLabel;
+            String objectName = rule.objectSharedLabel;
             List<RuleWrapper> rwList;
 
             if(objectsWithRulesMap.containsKey(objectName)) {
@@ -44,19 +41,20 @@ public with sharing class FormulaShareRulesListViewController {
             }
 
             RuleWrapper rw = new RuleWrapper();
-            rw.name = rule.Object_Shared__r.MasterLabel;
-            rw.label = rule.MasterLabel;
-            rw.shareWith = rule.Share_With__c;
-            rw.sharingReason = rule.Sharing_Reason__c;
-            rw.accessLevel = rule.Access_Level__c;
-            rw.active = rule.Active__c;
+            rw.name = rule.objectSharedLabel;
+            rw.controllingObject = rule.controllingObjectLabelForRuleType;
+            rw.label = rule.label;
+            rw.shareWith = rule.shareWith;
+            rw.sharingReason = rule.sharingReason;
+            rw.accessLevel = rule.accessLevel;
+            rw.active = rule.active;
 
             // Set URL for shared to field if populated
-            if(!String.isBlank(rule.Shared_To__c) && rule.Shared_To__c.contains('.')) {
-                Integer sharedToPoint = rule.Shared_To__c.indexOf('.');
-                String sharedToSplit = rule.Shared_To__c.mid(sharedToPoint + 1, 15);
+            if(!String.isBlank(rule.sharedToTokenForRuleType) && rule.sharedToTokenForRuleType.contains('.')) {
+                Integer sharedToPoint = rule.sharedToTokenForRuleType.indexOf('.');
+                String sharedToSplit = rule.sharedToTokenForRuleType.mid(sharedToPoint + 1, 15);
                 rw.sharedToLink = URL.getSalesforceBaseUrl().toExternalForm() + '/' + sharedToSplit;
-                rw.sharedToLinkLabel = rule.Shared_To__r.MasterLabel;
+                rw.sharedToLinkLabel = rule.sharedToLabelRuleType;
             }
 
             rwList.add(rw);
@@ -88,6 +86,8 @@ public with sharing class FormulaShareRulesListViewController {
     public Class RuleWrapper{
         @AuraEnabled
         public String name {get;set;}
+        @AuraEnabled
+        public String controllingObject {get;set;}
         @AuraEnabled
         public String label {get;set;}
         @AuraEnabled
