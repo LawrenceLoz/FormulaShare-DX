@@ -55,8 +55,22 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			String typeInScope = typeInThisBatch.getDescribe().getName();
 //			Integer noRules = rulesForType.size();
 			String query = ql.getQuery();
-			fsLogs.setBatchDetails(batchSize, typeInScope, 0, query);	// need to fix this
+			fsLogs.setBatchDetails(batchSize, typeInScope, rulesForType, query);	// need to fix this
 			logsList = fsLogs.upsertLogs();
+
+			log = logsList[0];
+
+			List<FormulaShare_Rule_in_Batch__c> ribList = new List<FormulaShare_Rule_in_Batch__c>();
+			for(FormulaShareRule rule : rulesForType) {
+				FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
+				rib.FormulaShare_Log__c = log.Id;
+				rib.FormulaShare_Rule_Name__c = rule.developerName;
+				ribList.add(rib);
+			}
+
+			FormulaShareRulesInBatch fsRibs = new FormulaShareRulesInBatch(ribList);
+			fsRibs.insertRulesInBatch();
+
 			return ql;
 		}
 

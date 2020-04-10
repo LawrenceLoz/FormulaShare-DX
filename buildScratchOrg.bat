@@ -17,8 +17,8 @@ call sfdx force:org:create -f config/project-scratch-def.json -a %orgName% --set
 echo Created org with default username %orgName%
 call sfdx force:source:push
 echo Pushed source
-call sfdx force:apex:execute -f config/runApexOnInstallation.apex
-echo Created test data
 call sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
 call sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
 echo Assigned permissions
+call sfdx force:apex:execute -f config/runApexOnInstallation.apex
+echo Created test data

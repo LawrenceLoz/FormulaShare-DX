@@ -43,11 +43,11 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
         }
     }
 
-    public void setBatchDetails(Integer batchSize, String typeInScope, Integer noRules, String query) {
+    public void setBatchDetails(Integer batchSize, String typeInScope, List<FormulaShareRule> rulesForType, String query) {
 
         for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
             log.Type_In_Scope__c = typeInScope;
-            log.Number_Of_Rules__c = noRules;
+            log.Number_Of_Rules__c = rulesForType.size();
             log.Query__c = query;
             log.Batches_Processed__c = 0;
 
@@ -74,7 +74,7 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
 
     public void incrementBatches() {
         for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
-            log.Batches_Processed__c++;
+            log.Batches_Processed__c = log.Batches_Processed__c + 1;
         }
     }
 

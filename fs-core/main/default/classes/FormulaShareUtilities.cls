@@ -57,6 +57,14 @@ public with sharing class FormulaShareUtilities {
 		}
 	}
 
+
+	// Return SObjectType token from API name
+	public static Schema.SObjectType getSObjectTypeFromName(String objectAPIName) {
+		Schema.SObjectType type = describe(objectAPIName).getSobjectType();
+		return type;
+	}
+
+	
 	// Get an object's field map and maintain cache
 	public static Map<String,SObjectField> getFieldMap(String objectAPIName) {
 		if(cachedFieldMaps.containsKey(objectAPIName)) {
@@ -154,12 +162,12 @@ public with sharing class FormulaShareUtilities {
 
 		else {
 			
-			// Check we can cast to an Id
+			// Check Id is valid
 			Id idValueToCheck;
-			try {
+			if(isValidIdType(candidateId)) {
 				idValueToCheck = (Id) candidateId;
 			}
-			catch(Exception e) {
+			else {
 				return false;
 			}
 
@@ -173,6 +181,18 @@ public with sharing class FormulaShareUtilities {
 		}
 	}
 
+	public static Boolean isValidIdType(String candidateId) {
+		
+		// Check we can cast to an Id
+		Id idValueToCheck;
+		try {
+			idValueToCheck = (Id) candidateId;
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return true;
+	}
 
 	public static String getShareRecordKeyStandard(SOBjectType type, SObject shareRecord) {
 		Id parentId = (Id) shareRecord.get(type + 'Id');
@@ -216,4 +236,12 @@ public with sharing class FormulaShareUtilities {
         return queryString;
     }
 
+	// Used by controller to build links to setup menu items
+	public static String getLightningDomain(){
+        return getMyDomain() + '.lightning.force.com';
+    }
+
+    public static String getMyDomain(){
+        return URL.getOrgDomainUrl().getHost().split('\\.')[0].toLowerCase();
+    }
 }
