@@ -7,7 +7,7 @@
             "enableS1DesktopEnabled": true
         },
         "mobileSettings": {
-            "s1EncryptedStoragePref2" : false
+            "enableS1EncryptedStoragePref2" : false
         }
     }
 }
