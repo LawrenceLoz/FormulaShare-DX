@@ -1,11 +1,12 @@
 <template>
     <template if:true={rule}>
 
-        <h3 class="slds-section-title--divider ">Rule name {rule.DeveloperName.value}</h3>
+        <h3 class="slds-section-title--divider ">Rule name</h3>
         <c-formula-share-rule-detail-name-label
-            rule-name={rule.DeveloperName.value}
+            rule-name={ruleName}
             rule-label={ruleLabel}
             rule-description={ruleDescription}
+            rule-active={ruleActive}
             onlabelchange={handleLabelChange}
             onnamechange={handleNameChange}
             ondescriptionchange={handleDescriptionChange}
@@ -22,7 +23,7 @@
         </template>
 
         <template if:true={sharedObject}>
-                <div class="slds-p-top_medium">
+            <div class="slds-p-top_medium">
                 <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
                 <c-formula-share-rule-detail-location 
                     rule-type={ruleType} 
@@ -34,6 +35,18 @@
                 </c-formula-share-rule-detail-location>
             </div>
         </template>
+
+        <h3 class="slds-section-title--divider">Users to share with</h3>
+        <c-formula-share-rule-detail-field 
+            object-with-share-field={objectWithShareField}
+            share-with={shareWith}
+            share-field={shareField}
+            share-field-type={shareFieldType}
+            onsharewithchange={handleShareWithChange}
+            onsharefieldchange={handleShareFieldChange}
+            onsharefieldtypechange={handleShareFieldTypeChange}>
+        </c-formula-share-rule-detail-field>
+
     </template>
 </template>
 

@@ -1,0 +1,64 @@
+<template>
+    <div class="slds-grid slds-gutters">
+        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+            <span>
+                <div class="slds-form slds-form_stacked">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                   <!--         <lightning-combobox
+                                name="shareWith"
+                                label="Share With"
+                                value={_shareWith}
+                                placeholder="Select Entity"
+                                options={shareWithOptions}
+                                onchange={handleShareWithChange}
+                                required >
+                            </lightning-combobox>   -->
+
+                            <lightning-radio-group name="shareWith"
+                                label="Share With"
+                                options={shareWithOptions}
+                                value={_shareWith}
+                                onchange={handleShareWithChange}
+                                type="radio"
+                                required>
+                            </lightning-radio-group>                            
+                        </div>
+                    </div>
+                </div>
+            </span>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+            <span>
+                <div class="slds-form slds-form_stacked">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <template if:true={fieldOptions}>
+                                <lightning-combobox
+                                    name="shareField"
+                                    label="Specified in Field"
+                                    value={shareField}
+                                    placeholder="Select Field"
+                                    options={fieldOptions}
+                                    onchange={handleShareFieldChange}
+                                    required >
+                                </lightning-combobox>
+                            </template>
+
+                            <lightning-combobox
+                                name="shareFieldType"
+                                label="Containing Type"
+                                value={shareFieldType}
+                                placeholder="Select"
+                                options={shareFieldTypeOptions}
+                                onchange={handleShareFieldTypeChange}
+                                required >
+                            </lightning-combobox>
+                        </div>
+                    </div>
+                </div>
+            </span>
+        </div>
+    </div>
+</template>
