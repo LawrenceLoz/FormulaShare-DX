@@ -18,11 +18,6 @@
     </customMetadataTypeAccesses>
     <description>Assign this to users who require access to FormulaShare Logs and aren&#39;t already full System Administrators in the org</description>
     <fieldPermissions>
-        <editable>false</editable>
-        <field>Account.test_customer__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <editable>true</editable>
         <field>FormulaShare_Log__c.Batch_Finish_Complete__c</field>
         <readable>true</readable>
@@ -110,6 +105,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>FormulaShare_Rule_in_Batch__c.FormulaShare_Rule_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Rule_in_Batch__c.Rule_Active_for_Batch_Run__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>

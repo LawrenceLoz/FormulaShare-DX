@@ -25,6 +25,7 @@
 
 public inherited sharing class FormulaShareRule {
 
+    public Id ruleId;
     public String objectSharedAPIName;
     public String objectSharedLabel;
 	public String sharedToAPIName;

@@ -1,0 +1,10 @@
+<template>
+    <template if:true={sharedObjectApiName}>
+        <lightning-combobox
+        name="objectShared"
+        value={sharedObjectApiName}
+        placeholder="Select Object"
+        options={shareableObjectOptions}
+        onchange={handleSharedObjectChange}></lightning-combobox>
+    </template>
+</template>

@@ -138,7 +138,8 @@ public inherited sharing class FormulaShareRulesSelector {
         List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 
 		for(FormulaShare_Rule__mdt ruleInScope : rules) {
-			FormulaShareRule rule = new FormulaShareRule();
+            FormulaShareRule rule = new FormulaShareRule();
+            rule.ruleId = ruleInScope.Id;
 			rule.objectSharedAPIName = ruleInScope.Object_Shared__r.QualifiedApiName;
 			rule.sharedToAPIName = ruleInScope.Shared_To__r.QualifiedApiName;
 			rule.shareWith = ruleInScope.Share_With__c;

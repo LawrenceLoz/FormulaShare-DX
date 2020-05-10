@@ -1,0 +1,85 @@
+<template>
+    <fieldset class="slds-form-element">
+        <div class="slds-form-element__control">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+
+                    <div class="slds-visual-picker">
+
+                        <input 
+                            type="radio" 
+                            id="standard" 
+                            value="standard" 
+                            name="ruleType" 
+                            checked={isStandard} 
+                            onchange={handleSelectedStandard} />
+                        <label for="standard">
+                            <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+
+                                <div class="slds-media slds-media_center">
+                                    <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">     
+                                        <lightning-icon icon-name="standard:contact_list" alternative-text="Standard" title="Standard" size="medium"></lightning-icon>
+                                    </span>
+                                    <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
+                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {sharedObject.objectLabel} Object</h2>
+                                        <p class="slds-m-top_small">{sharedObject.pluralLabel} will be shared to the user, role or group specified in a field on the object</p>
+                                    </span>
+                                </div>
+
+                            </span>
+                            <span class="slds-icon_container slds-visual-picker__text-check">
+                                <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
+                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+                                </svg>
+                            </span>
+
+                        </label>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+                    <div class="slds-visual-picker">
+                        <input 
+                            type="radio" 
+                            id="child" 
+                            value="child" 
+                            name="ruleType" 
+                            checked={isChild} 
+                            onchange={handleSelectedChild} />
+                        <label for="child">
+                            <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+
+                                <div class="slds-media slds-media_center">
+                                    <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">
+                                        <lightning-icon icon-name="standard:hierarchy" alternative-text="Related" title="Related" size="medium"></lightning-icon>
+                                    </span>
+                                    <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
+                                        <h2 class="slds-truncate slds-text-heading_small" title="A Related Object">A Related Object</h2>
+                                        <p class="slds-m-top_small">{sharedObject.pluralLabel} will be shared to the users, roles or groups specified on records related to the {sharedObject.pluralLabel}</p>
+                                    </span>
+                                </div>
+
+                            </span>
+                            <span class="slds-icon_container slds-visual-picker__text-check">
+                                <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
+                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+                                </svg>
+                            </span>
+
+                        </label>
+                    </div>
+
+                    <template if:true={isChild}>
+                        <lightning-combobox
+                            name="objectShared"
+                            placeholder="Select Object"
+                            options={relatedObjectOptions}
+                            value={relatedObjectSelected}
+                            onchange={handleRelatedObjectChange}></lightning-combobox>
+                    </template>
+
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</template>

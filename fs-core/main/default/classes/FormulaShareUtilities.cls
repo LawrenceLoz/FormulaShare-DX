@@ -32,7 +32,7 @@ public with sharing class FormulaShareUtilities {
     }
 
 	// Cache global describe for performance
-	public static Map<String, SObjectType> globalDescribe {
+	public static Map<String, Schema.SObjectType> globalDescribe {
 		get {
 			if(globalDescribe == null) {
 				globalDescribe = Schema.getGlobalDescribe();
@@ -41,19 +41,24 @@ public with sharing class FormulaShareUtilities {
 		}
 	}
 
-	public static Map<String,DescribeSObjectResult> cachedDescribes = new Map<String,DescribeSObjectResult>();
-	public static Map<String,Map<String, SObjectField>> cachedFieldMaps = new Map<String,Map<String, SObjectField>>();
+	public static Map<String,Schema.DescribeSObjectResult> cachedDescribes = new Map<String,Schema.DescribeSObjectResult>();
+	public static Map<String,Map<String, Schema.SObjectField>> cachedFieldMaps = new Map<String,Map<String, Schema.SObjectField>>();
 
 	// Get describe result and maintain cache
-	public static DescribeSObjectResult describe(String objectAPIName) {
+	public static Schema.DescribeSObjectResult describe(String objectAPIName) {
 		if(cachedDescribes.containsKey(objectAPIName)) {
 			return cachedDescribes.get(objectAPIName);
 		}
 		else {
-			SObjectType objType = globalDescribe.get(objectAPIName);
-			DescribeSObjectResult describe = objType.getDescribe();
-			cachedDescribes.put(objectAPIName, describe);
-			return describe;
+			if(globalDescribe.containsKey(objectAPIName)) {
+				Schema.SObjectType objType = globalDescribe.get(objectAPIName);
+				Schema.DescribeSObjectResult describe = objType.getDescribe();
+				cachedDescribes.put(objectAPIName, describe);
+				return describe;
+			}
+			else {
+				return null;
+			}
 		}
 	}
 
@@ -66,26 +71,26 @@ public with sharing class FormulaShareUtilities {
 
 	
 	// Get an object's field map and maintain cache
-	public static Map<String,SObjectField> getFieldMap(String objectAPIName) {
+	public static Map<String,Schema.SObjectField> getFieldMap(String objectAPIName) {
 		if(cachedFieldMaps.containsKey(objectAPIName)) {
 			return cachedFieldMaps.get(objectAPIName);
 		}
 		else {
-			Map<String,SObjectField> fieldMap = describe(objectAPIName).fields.getMap();
+			Map<String,Schema.SObjectField> fieldMap = describe(objectAPIName).fields.getMap();
 			cachedFieldMaps.put(objectAPIName, fieldMap);
 			return fieldMap;
 		}
 	}
 
-	public static Map<String,SObjectField> getFieldMap(Schema.SObjectType type) {
+	public static Map<String,Schema.SObjectField> getFieldMap(Schema.SObjectType type) {
 		String objectAPIName = type.getDescribe().getName();
 		return getFieldMap(objectAPIName);
 	}
 
 
-	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, SOBjectType type) {
-		Map<String, SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
-		SObjectField sObjField = fieldsMapByName.get(fieldNameString.toLowerCase());
+	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, Schema.SOBjectType type) {
+		Map<String, Schema.SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
+		Schema.SObjectField sObjField = fieldsMapByName.get(fieldNameString.toLowerCase());
 		return sObjField;
 	}
 
@@ -121,10 +126,73 @@ public with sharing class FormulaShareUtilities {
 
 		return relationshipName;
 	}
-	
 
-	public static SObjectType getShareObject(SObjectType type) {
-		SObjectType shareObject;
+
+	public static List<ChildRelationshipDetails> getChildRelationships(String parentObjectAPIName) {
+		List<ChildRelationshipDetails> crdList = new List<ChildRelationshipDetails>();
+		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
+
+		// Iterate all child relationships for object
+		for(Schema.ChildRelationship cr : parentObjDesc.getChildRelationships()) {
+			
+			if(cr.getRelationshipName() != null) {
+				Schema.DescribeSObjectResult childObjDesc = cr.getChildSObject().getDescribe();
+
+				if(childObjDesc.isSearchable()) {
+					Schema.DescribeFieldResult childObjFieldDesc = cr.getField().getDescribe();
+					ChildRelationshipDetails crd = new ChildRelationshipDetails();
+					crd.childObjectLabel = childObjFieldDesc.getLabel();
+					crd.childFieldApiName = childObjFieldDesc.getName();
+					crd.childObjectApiName = childObjDesc.getName();
+					crd.childObjectLabel = childObjDesc.getLabel();
+					crdList.add(crd);
+				
+					system.debug(childObjDesc.getName() + ' ' + childObjDesc.isAccessible());
+				}
+			}
+		}
+
+		return crdList;
+	}
+
+
+	public static List<Schema.SObjectField> getShareFields(String objectApiName) {
+		List<Schema.SObjectField> shareFields = new List<Schema.SObjectField>();
+		
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(objectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+			
+			// Check whether field could contain information for sharing 
+			if(fieldType == Schema.DisplayType.STRING
+				|| fieldType == Schema.DisplayType.PICKLIST
+				|| fieldType == Schema.DisplayType.COMBOBOX) {
+				shareFields.add(field);
+			}
+
+			// If it's a lookup field, check whether the lookup object is user (only lookup type which could control sharing)
+			else if(fieldType == Schema.DisplayType.REFERENCE) {
+				for(SObjectType parentObjType : fieldDesc.getReferenceTo()) {
+					String parentObj = parentObjType.getDescribe().getName();
+					if(parentObj == 'User') {
+						shareFields.add(field);
+					}
+				}
+			}
+
+			// Only return record ID if object is User
+			else if(objectApiName == 'User' && fieldType == Schema.DisplayType.ID) {
+				shareFields.add(field);
+			}
+		}
+
+		return shareFields;
+	}
+
+
+	public static Schema.SObjectType getShareObject(Schema.SObjectType type) {
+		Schema.SObjectType shareObject;
 		String typeName = type.getDescribe().getName();
 		
 		// For custom objects, remove the final "c" from the __c suffix
@@ -144,7 +212,9 @@ public with sharing class FormulaShareUtilities {
 			String shortId = ((String) longId).left(15);
 			return shortId;
 		}
-		else return null;
+		else {
+			return null;
+		}
 	}
 	
 	// Instance implementation for mocking
@@ -194,7 +264,7 @@ public with sharing class FormulaShareUtilities {
 		return true;
 	}
 
-	public static String getShareRecordKeyStandard(SOBjectType type, SObject shareRecord) {
+	public static String getShareRecordKeyStandard(Schema.SOBjectType type, SObject shareRecord) {
 		Id parentId = (Id) shareRecord.get(type + 'Id');
 		Id userOrGroupId = (Id) shareRecord.get('UserOrGroupId');
 		String parentId15 = get15CharacterId(parentId);
@@ -243,5 +313,21 @@ public with sharing class FormulaShareUtilities {
 
     public static String getMyDomain(){
         return URL.getOrgDomainUrl().getHost().split('\\.')[0].toLowerCase();
-    }
+	}
+
+    public class ChildRelationshipDetails {
+        @AuraEnabled
+        public String childObjectLabel {get;set;}
+        @AuraEnabled
+        public String childObjectApiName {get;set;}
+        @AuraEnabled
+        public String childObjectId {get;set;}
+        @AuraEnabled
+        public String childFieldLabel {get;set;}
+        @AuraEnabled
+        public String childFieldApiName {get;set;}
+        @AuraEnabled
+        public String childFieldId {get;set;}
+    }	
+
 }

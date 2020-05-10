@@ -42,6 +42,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		system.debug('Rules for this object: '+rulesForType);
 
 		if(!rulesForType.isEmpty()) {
+
 			Database.QueryLocator ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
 
 			system.debug('query locator: ' + ql);
@@ -53,7 +54,6 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 			fsLogs.setContext('FormulaShareProcessBatch', null, 'Batch');
 			String typeInScope = typeInThisBatch.getDescribe().getName();
-//			Integer noRules = rulesForType.size();
 			String query = ql.getQuery();
 			fsLogs.setBatchDetails(batchSize, typeInScope, rulesForType, query);	// need to fix this
 			logsList = fsLogs.upsertLogs();
@@ -65,6 +65,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
 				rib.FormulaShare_Log__c = log.Id;
 				rib.FormulaShare_Rule_Name__c = rule.developerName;
+				rib.Rule_Active_for_Batch_Run__c = rule.active;
 				ribList.add(rib);
 			}
 
@@ -81,6 +82,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 
    	public void execute(Database.BatchableContext BC, List<SObject> scope) {
+		
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
 
 		system.debug('*** batch scope : '+ scope);
@@ -131,6 +133,15 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.setBatchProcessingComplete();
 		logsList = fsLogs.upsertLogs();
+
+		// Publish event to update FormulaShare Rules list in real time
+		List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
+		FormulaShare_List_Update__e updateEvent = new FormulaShare_List_Update__e();
+		updateEvent.Type__c = 'recalculation';
+		updateEvent.Object_Label__c = typeInThisBatch.getDescribe().getLabel();
+		eventsList.add(updateEvent);
+		system.debug('eventsList 2Size '+ eventsList.size() );
+		List<Database.SaveResult> results = EventBus.publish(eventsList);
 
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {

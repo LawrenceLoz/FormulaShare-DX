@@ -21,7 +21,6 @@
 
 public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SObjectSelector {
 
-//    public Schema.SObjectType type;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
 
     public FormulaShareRuleInBatchSelector(Boolean enforceObjectAndFieldSecurity) {
@@ -29,7 +28,6 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
             , enforceObjectAndFieldSecurity // Enforce field security if requested
             , enforceObjectAndFieldSecurity // Enforce object security if requested
             );
-//        this.type = type;
     }
 
     public List<Schema.SObjectField> getSObjectFieldList() {
@@ -45,8 +43,10 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
         for(FormulaShare_Rule_in_Batch__c rib : Database.query(
             newQueryFactory(false).
             selectField(FormulaShare_Rule_in_Batch__c.FormulaShare_Rule_Name__c).
+            selectField(FormulaShare_Rule_in_Batch__c.Rule_Active_for_Batch_Run__c).
             selectField('FormulaShare_Log__r.Processing_Started__c').
             selectField('FormulaShare_Log__r.Processing_Finished__c').
+            selectField('FormulaShare_Log__r.Batch_Finish_Complete__c').
             setCondition('FormulaShare_Rule_Name__c IN :ruleNames').
             toSOQL())) {
                 rrDetails.add(new RuleRunDetail(rib));
@@ -59,8 +59,10 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
         public FormulaShare_Rule_in_Batch__c rib;
         public RuleRunDetail(FormulaShare_Rule_in_Batch__c rib) { this.rib = rib; }
         public String developerName { get { return rib.FormulaShare_Rule_Name__c; } }
+        public Boolean ruleActive { get { return rib.Rule_Active_for_Batch_Run__c; } }
         public Datetime processingStarted { get { return rib.FormulaShare_Log__r.Processing_Started__c; } }
         public Datetime processingFinished { get { return rib.FormulaShare_Log__r.Processing_Finished__c; } }
+        public Boolean batchFinishComplete { get { return rib.FormulaShare_Log__r.Batch_Finish_Complete__c; } }
     }
 
 }
