@@ -55,13 +55,16 @@ public with sharing class FormulaShareRuleDetailController {
         List<ShareableObject> soListCustom = new List<ShareableObject>();
 
         for(EntityDefinition ed : entityDefs) {
-            if(ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read') {
+            if(ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read'
+                || ed.ExternalSharingModel == 'Private' || ed.ExternalSharingModel == 'Read') {
                 ShareableObject so = new ShareableObject();
                 so.objectApiName = ed.QualifiedApiName;
                 so.objectLabel = ed.Label;
                 so.objectId = ed.DurableId;
                 so.detailUrl = ed.DetailUrl;
                 so.pluralLabel = ed.PluralLabel;
+                so.internalSharingModel = ed.InternalSharingModel;
+                so.externalSharingModel = ed.ExternalSharingModel;
 
                 Schema.DescribeSObjectResult objType = FormulaShareUtilities.describe(ed.QualifiedApiName);
                 if(objType != null && objType.isSearchable()) {
@@ -122,6 +125,10 @@ public with sharing class FormulaShareRuleDetailController {
         public String objectId {get;set;}
         @AuraEnabled
         public String detailUrl {get;set;}
+        @AuraEnabled
+        public String internalSharingModel {get;set;}
+        @AuraEnabled
+        public String externalSharingModel {get;set;}
         @AuraEnabled
         public List<FormulaShareUtilities.ChildRelationshipDetails> childRelationships {get;set;}
     }

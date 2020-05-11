@@ -462,7 +462,7 @@ public inherited sharing class FormulaShareService {
 		for(Group grp : [SELECT Id, RelatedId, Type 
 			FROM Group 
 			WHERE (RelatedId IN :roleQueryIdSet OR RelatedId IN :roleNamesToIdsMap.values())
-			AND (Type = 'Role' OR Type = 'RoleAndSubordinates')
+			AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal')
 			]) {
 
 			String shortRelatedToId = FormulaShareUtilities.get15CharacterId(grp.RelatedId);
@@ -494,7 +494,7 @@ public inherited sharing class FormulaShareService {
 			}
 
 			else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
-				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
 			}
 
 			if(roleGroupId != null) {

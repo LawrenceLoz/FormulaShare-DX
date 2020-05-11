@@ -145,7 +145,7 @@ public class FormulaShareServiceTest {
         FormulaShareService fsService = callProcessForLogRecord(log);
 
         // Get relevant id we expect to be in share records
-        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinates'][0];
+        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinatesInternal'][0];
 
         // Check that fsService response is as expected
         System.assert(fsService.recordsMap.containsKey(log.Id), 'New record not included in map');
@@ -378,7 +378,7 @@ public class FormulaShareServiceTest {
 
         // Get relevant ids we expect to be in share records
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
-        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinates'][0];
+        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinatesInternal'][0];
         Id userId = UserInfo.getUserId();
         Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
