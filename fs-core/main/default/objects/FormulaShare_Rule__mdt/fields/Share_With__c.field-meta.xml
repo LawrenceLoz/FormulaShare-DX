@@ -26,6 +26,11 @@
                 <label>Roles and Internal Subordinates</label>
             </value>
             <value>
+                <fullName>Roles, Internal and Portal Subordinates</fullName>
+                <default>false</default>
+                <label>Roles, Internal and Portal Subordinates</label>
+            </value>
+            <value>
                 <fullName>Public Groups</fullName>
                 <default>false</default>
                 <label>Public Groups</label>

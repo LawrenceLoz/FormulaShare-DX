@@ -296,7 +296,7 @@ public inherited sharing class FormulaShareService {
 					}
 
 					// Add Role Id to role group query set
-					else if(rule.shareWith == 'Roles' || rule.shareWith == 'Roles and Internal Subordinates') {
+					else if(rule.shareWith == 'Roles' || rule.shareWith == 'Roles and Internal Subordinates' || rule.shareWith == 'Roles, Internal and Portal Subordinates') {
 						if(rule.sharedToFieldTypeForRuleType == 'Id' &&
 							FormulaShareUtilities.isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
 							roleQueryIdSet.add((Id) sharedToString);
@@ -462,7 +462,7 @@ public inherited sharing class FormulaShareService {
 		for(Group grp : [SELECT Id, RelatedId, Type 
 			FROM Group 
 			WHERE (RelatedId IN :roleQueryIdSet OR RelatedId IN :roleNamesToIdsMap.values())
-			AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal')
+			AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal' OR Type = 'RoleAndSubordinates')
 			]) {
 
 			String shortRelatedToId = FormulaShareUtilities.get15CharacterId(grp.RelatedId);
@@ -495,6 +495,10 @@ public inherited sharing class FormulaShareService {
 
 			else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
 				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
+			}
+
+			else if(recordRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
+				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
 			}
 
 			if(roleGroupId != null) {
