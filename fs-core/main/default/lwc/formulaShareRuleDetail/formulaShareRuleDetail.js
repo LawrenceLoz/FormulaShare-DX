@@ -1,3 +1,24 @@
+/**
+*Copyright 2020 Lawrence Newcombe
+*
+*Permission is hereby granted, free of charge, to any person obtaining a copy 
+*of this software and associated documentation files (the "Software"), to deal 
+*in the Software without restriction, including without limitation the rights 
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+*of the Software, and to permit persons to whom the Software is furnished to do 
+*so, subject to the following conditions:
+*
+*The above copyright notice and this permission notice shall be included in all 
+*copies or substantial portions of the Software.
+*
+*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
 import { LightningElement, track, wire, api } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
 import getObjectApiNames from '@salesforce/apex/FormulaShareRuleDetailController.getObjectApiNames';
@@ -38,6 +59,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @track shareField;
     @track shareWith;
     @track shareFieldType;
+    @track accessLevel;
+    @track sharingReason;
 
     @track objectWithShareField;
 
@@ -52,6 +75,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 this.ruleDescription = this.rule.Description__c.value;
                 this.ruleActive = this.rule.Active__c.value;
                 this.shareWith = this.rule.Share_With__c.value;
+                this.accessLevel = this.rule.Access_Level__c.value;
+                this.sharingReason = this.rule.Sharing_Reason__c.value;
 
                 // Create array of objects to query for details
                 var objectsToCheck = [];
@@ -197,4 +222,14 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.shareFieldType = event.detail;
     }
 
+    //--------------------- Event handlers for Access component ---------------------// 
+
+    handleAccessLevelChange(event) {
+        this.accessLevel = event.detail;
+    }
+
+    handleSharingReasonChange(event) {
+        this.sharingReason = event.detail;
+    }
+    
 }

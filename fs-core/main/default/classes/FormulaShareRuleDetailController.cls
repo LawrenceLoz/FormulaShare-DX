@@ -66,6 +66,11 @@ public with sharing class FormulaShareRuleDetailController {
                 so.internalSharingModel = ed.InternalSharingModel;
                 so.externalSharingModel = ed.ExternalSharingModel;
 
+                // Identify custom objects from API name
+                if(ed.QualifiedApiName.right(3) == '__c') {
+                    so.isCustom = true;
+                }
+
                 Schema.DescribeSObjectResult objType = FormulaShareUtilities.describe(ed.QualifiedApiName);
                 if(objType != null && objType.isSearchable()) {
                     if(objType.isCustom()) {
@@ -129,6 +134,8 @@ public with sharing class FormulaShareRuleDetailController {
         public String internalSharingModel {get;set;}
         @AuraEnabled
         public String externalSharingModel {get;set;}
+        @AuraEnabled
+        public Boolean isCustom {get;set;}
         @AuraEnabled
         public List<FormulaShareUtilities.ChildRelationshipDetails> childRelationships {get;set;}
     }

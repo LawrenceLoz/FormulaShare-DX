@@ -1,3 +1,24 @@
+/**
+*Copyright 2020 Lawrence Newcombe
+*
+*Permission is hereby granted, free of charge, to any person obtaining a copy 
+*of this software and associated documentation files (the "Software"), to deal 
+*in the Software without restriction, including without limitation the rights 
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+*of the Software, and to permit persons to whom the Software is furnished to do 
+*so, subject to the following conditions:
+*
+*The above copyright notice and this permission notice shall be included in all 
+*copies or substantial portions of the Software.
+*
+*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
 import { LightningElement, api, track, wire } from 'lwc';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 
@@ -20,7 +41,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     _objectWithShareField;
 
-    @api shareWith;
+    @api
     get shareWith() {
         return this._shareWith;
     }
@@ -34,18 +55,51 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     _shareWith;
 
+    @api
+    get internalSharingModel() {
+        return this._internalSharingModel;
+    }
+    set internalSharingModel(value) {
+        this._internalSharingModel = value;
+        this.updateShareWithOptions();
+    }
+    _internalSharingModel;
+
+    @api
+    get externalSharingModel() {
+        return this._externalSharingModel;
+    }
+    set externalSharingModel(value) {
+        this._externalSharingModel = value;
+        this.updateShareWithOptions();
+    }
+    _externalSharingModel;
+    
     @api shareField;
     @api shareFieldType;
     fullFieldList = [];
     namesOnlyFieldList = [];
 
-    get shareWithOptions() {
-        return [
+    @track shareWithOptions;
+    updateShareWithOptions() {
+        var optionsList = [
             { label: 'Users', value: 'Users' },
             { label: 'Roles', value: 'Roles' },
-            { label: 'Roles and Internal Subordinates', value: 'Roles and Internal Subordinates' },
-            { label: 'Public Groups', value: 'Public Groups' },
         ];
+
+        // If object is private or public read-only for internal, include roles and internal subordinates sharing
+        if(this._internalSharingModel === 'Private' || this.internalSharingModel === 'Read') {
+            optionsList.push( { label: 'Roles and Internal Subordinates', value: 'Roles and Internal Subordinates' } );
+        }
+
+        // If object is private or public read-only for external, include roles and internal subordinates sharing
+        if(this._externalSharingModel === 'Private' || this.externalSharingModel === 'Read') {
+            optionsList.push( { label: 'Roles, Internal and Portal Subordinates', value: 'Roles, Internal and Portal Subordinates' } );
+        }
+
+        optionsList.push( { label: 'Public Groups', value: 'Public Groups' } );
+
+        this.shareWithOptions = optionsList;
     }
 
     handleShareWithChange(event) {
@@ -83,6 +137,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 });
 
                 this.setFieldOptions();
+                this.updateShareWithOptions();
             }
             else if(error) {
                 console.log('Error getting fields for object ',JSON.stringify(error));
@@ -130,6 +185,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 break;
             case 'Roles':
             case 'Roles and Internal Subordinates':
+            case 'Roles, Internal and Portal Subordinates':
                 console.log('updated to roles');
                 this.shareFieldTypeOptions = [
                     { label: 'Id of role', value: 'Id' },
@@ -144,6 +200,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             detail: this.shareFieldType
         });
         this.dispatchEvent(evt);        
-    }          
+    }
     
 }
