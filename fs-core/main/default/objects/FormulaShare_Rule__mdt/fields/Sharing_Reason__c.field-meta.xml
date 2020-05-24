@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Sharing_Reason__c</fullName>
-    <caseSensitive>false</caseSensitive>
     <description>Sharing reason associated with this rule (for custom objects only). An Apex Sharing Reason will be created on the shared object, and all records shared through this rule will be shared with this reason</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
@@ -9,5 +8,5 @@
     <length>255</length>
     <required>false</required>
     <type>Text</type>
-    <unique>true</unique>
+    <unique>false</unique>
 </CustomField>

@@ -5,7 +5,7 @@
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>&quot;Shared To Field&quot; can contain either the 15 or 18 digit record id of the user, group or role to find the right users (select &quot;Id&quot; so), or can contain the relevant Role Name or Group Name (select &quot;Name&quot; if this is the case)</inlineHelpText>
     <label>Shared To Field Type</label>
-    <required>true</required>
+    <required>false</required>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>
