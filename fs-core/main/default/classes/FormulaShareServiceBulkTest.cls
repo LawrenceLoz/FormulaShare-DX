@@ -113,7 +113,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
         // Get relevant ids we expect to be in share records
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
-        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinatesInternal'][0];
+        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND (Type = 'RoleAndSubordinates' OR Type = 'RoleAndSubordinatesInternal') ORDER BY Type Desc][0];
         Id userId = UserInfo.getUserId();
         Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
@@ -288,7 +288,7 @@ public with sharing class FormulaShareServiceBulkTest {
         // Get relevant ids we expect to be in share records
         Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
         Group roleGroup2 = [SELECT Id FROM Group WHERE RelatedId = :role2.Id AND Type = 'Role'][0];
-        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'RoleAndSubordinatesInternal'][0];
+        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND (Type = 'RoleAndSubordinates' OR Type = 'RoleAndSubordinatesInternal') ORDER BY Type Desc][0];
         Id userId = UserInfo.getUserId();
         Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
