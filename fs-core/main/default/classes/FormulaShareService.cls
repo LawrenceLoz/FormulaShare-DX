@@ -489,17 +489,30 @@ public inherited sharing class FormulaShareService {
 
 			String shortSharedToId = FormulaShareUtilities.get15CharacterId(sharedToId);
 
-			if(recordRule.rule.shareWith == 'Roles') {
-				roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
-			}
+            // Get group for Roles sharing
+            if(recordRule.rule.shareWith == 'Roles') {
+                roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
+            }
 
-			else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
-				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
-			}
+            // Get group for Roles and Internal Subordinates sharing
+            else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
 
-			else if(recordRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
-				roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
-			}
+                // If role and subordinates internal group exists, use this
+                if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
+                    roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
+                }
+
+                // If no role and subordinates internal group exists, use the role and subordinates group
+                // This will be the case when communities are not enabled
+                else {
+                    roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+                }
+            }
+
+            // Get group for Roles, Internal and Portal Subordinates sharing
+            else if(recordRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
+                roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+            }
 
 			if(roleGroupId != null) {
 				updateShareMaps(recordRule.recordToShare.Id, roleGroupId, recordRule.rule);
