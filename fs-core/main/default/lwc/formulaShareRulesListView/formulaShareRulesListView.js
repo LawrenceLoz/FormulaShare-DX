@@ -70,7 +70,11 @@ export default class TreeGrid extends LightningElement {
     refreshReason;
     refreshObjectLabel;
     provisionedValue;
+    firstLoad = true;
     @track treeItems;
+    @track currentExpanded;
+
+
     @wire(getTreeGridData)
     wireTreeData(value) {
         const { data, error } = value;
@@ -79,42 +83,17 @@ export default class TreeGrid extends LightningElement {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
+            console.log('this.treeItems: '+JSON.stringify(this.treeItems));
             console.log('loading data');
 
-            // If running for the first time, subscribe to event channel
-            if(!this.refreshReason) {
-                this.manageRefreshEvents();
+            if(this.firstLoad) {
+                this.expandAllRows(tempjson);
+                this.manageRefreshEvents();     // Subscribe to event channel
+                this.firstLoad = false;
             }
-            
-            // Otherwise notify what's updated based on refresh reason
+
             else {
-                console.log('refreshReason : '+ this.refreshReason);
-
-                // Set a message to show for activation changes
-                let message;
-                switch (this.refreshReason) {
-                    case 'activate':
-                        message = 'Rule activated';
-                    case 'deactivate':
-                        message = 'Rule deactivated';
-                    case 'recalculation':
-                        message = 'Full sharing calculation for ' + this.refreshObjectLabel + ' complete';
-                }
-                
-                // Display toast if message is populated
-                console.log('message :'+ message);
-                if(message) {
-                    console.log('message :'+ message);
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: message,
-                            variant: 'success'
-                        })
-                    );
-                }
-
-                this.refreshReason = null;
-                this.refreshObjectLabel = null;
+                this.notifyDataUpdates();   // Pop toast with details of update
             }
         }
 
@@ -124,6 +103,52 @@ export default class TreeGrid extends LightningElement {
         }
     }
 
+    // Populate keys into currentExpanded to expand all
+    expandAllRows(tempjson) {
+        this.currentExpanded = [];
+        for(var i = 0; i < tempjson.length; i++) {
+            this.currentExpanded.push(tempjson[i].key);
+
+            var children = tempjson[i]._children;
+            for(var j = 0; j < children.length; j++) {
+                this.currentExpanded.push(children[j].key);
+            }
+        }
+    }
+
+    // Pop notification on data load with what's updated (from refresh reason)
+    notifyDataUpdates() {
+        console.log('refreshReason : '+ this.refreshReason);
+
+        // Set a message to show for activation changes
+        let message;
+        switch (this.refreshReason) {
+            case 'activate':
+                message = 'Rule activated';
+                break;
+            case 'deactivate':
+                message = 'Rule deactivated';
+                break;
+            case 'recalculation':
+                message = 'Full sharing calculation for ' + this.refreshObjectLabel + ' complete';
+                break;
+        }
+        
+        // Display toast if message is populated
+        console.log('message :'+ message);
+        if(message) {
+            console.log('message :'+ message);
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: message,
+                    variant: 'success'
+                })
+            );
+        }
+
+        this.refreshReason = null;
+        this.refreshObjectLabel = null;
+    }
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
     @track channelName = '/event/FormulaShare_List_Update__e';

@@ -131,7 +131,26 @@ public inherited sharing class FormulaShareRulesSelector {
 		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
 
 		return rulesToReturn;
-    }    
+    }
+
+
+    // Returns details of a single rule matching a supplied id
+    // Used by FormulaShareRuleDetail LWC
+    @AuraEnabled(cacheable=true)
+    public static FormulaShare_Rule__mdt getSpecificRule(Id ruleId) {
+
+        FormulaShare_Rule__mdt rule = [SELECT Id, Access_Level__c, 
+			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
+			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
+            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
+            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
+            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
+            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+			FROM FormulaShare_Rule__mdt WHERE Id = :ruleId WITH SECURITY_ENFORCED LIMIT 1];
+
+		return rule;
+    }
 
 
     private List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> rules) {

@@ -5,7 +5,8 @@
             columns={columns} 
             key-field="key" 
             hide-checkbox-column = "true" 
-            onrowaction={handleRowAction}>
+            onrowaction={handleRowAction}
+            expanded-rows={currentExpanded}>
         </lightning-tree-grid>
 <!--    </div>      -->
     <template if:true={openModal}>
