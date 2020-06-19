@@ -33,10 +33,13 @@ public inherited sharing class FormulaShareSObjectSharesStdSelector extends ffli
 
     // Query by Ids of shared records
     public List<SObject> selectByParentIds(String parentIdsString) {
-        return Database.query(
-            newQueryFactory().
-            setCondition(objectName + 'Id IN (' + parentIdsString + ') AND RowCause = \'Manual\'').
-            toSOQL());
+        String condition = objectName + 'Id IN (' + parentIdsString + ') AND RowCause = \'Manual\'';
+        String query = newQueryFactory().setCondition(condition).toSOQL();
+        system.debug('query : '+query);
+
+        List<SObject> results = Database.query(query);
+        system.debug('results: '+results);
+        return results;
     }
 
 }
