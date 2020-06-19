@@ -29,12 +29,12 @@ import getFieldApiNames from '@salesforce/apex/FormulaShareRuleDetailController.
 export default class FormulaShareRuleDetail extends LightningElement {
     @api ruleId = 'm05260000008f4XAAQ';
 
-    @track rule;
+    @track rule = {"Id":"m057E0000005OHSQA2","Access_Level__c":"Edit","Object_Shared__c":"01I7E00000108uj","Shared_To__c":"01I7E00000108uj.00N7E000009M1fs","Share_With__c":"Public Groups","Sharing_Reason__c":"Thematic_Area_Coordination_Group__c","Active__c":true,"Shared_To_Field_Type__c":"Name","Child_Object_Shared_To_Field_Type__c":"Id","MasterLabel":"Share to Theme Coordination Group","DeveloperName":"Share_to_Theme_Coordination_Group","Object_Shared__r":{"QualifiedApiName":"Donation__c","MasterLabel":"Donation","Id":"000000000000000AAA","DurableId":"01I7E00000108uj"},"Shared_To__r":{"QualifiedApiName":"Thematic_Area_Coordination_Group__c","MasterLabel":"Thematic Area Coordination Group","Id":"000000000000000AAA","DurableId":"01I7E00000108uj.00N7E000009M1fs"}};
     @track ruleLabel;
     @track ruleName;
     @track ruleDescription;
     @track ruleActive;
-    @track sharedObjectApiName;
+    @track sharedObjectApiName = "Donation__c";
     @track sharedObject;
     @track ruleType;
     @track relatedObjectSelected;   // Holds object|lookupField
@@ -51,7 +51,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @wire(getSpecificRule, { ruleId : '$ruleId'} )
         ruleDetails({ error, data }) {
             if(data) {
-                console.log('retrieved rule: '+data);
+                console.log('retrieved rule: '+JSON.stringify(data));
                 this.rule = data;
                 this.ruleLabel = data.MasterLabel;
                 this.ruleName = data.DeveloperName;
@@ -125,6 +125,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
                                 console.log('this.relatedObjectSelected: '+this.relatedObjectSelected);
                             }
                         }
+
+                        this.fireEventWithRule();
                     })
                     .catch(error => {
                         console.log('Error building field map ',JSON.stringify(error));
@@ -140,20 +142,48 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 this.showError(error, 'Error retrieving rule details from Salesforce');
             }
         }
+    
+    
+    // Fire event with all details in rule
+    fireEventWithRule() {
+
+        var ruleDetails = {
+            "ruleLabel" : this.ruleLabel,
+            "ruleName" : this.ruleName,
+            "ruleDescription" : this.ruleDescription,
+            "ruleActive" : this.ruleActive,
+            "sharedObjectApiName" : this.sharedObjectApiName,
+            "sharedObject" : this.sharedObject,
+            "ruleType" : this.ruleType,
+            "relatedObjectSelected" : this.relatedObjectSelected,
+            "shareField" : this.shareField,
+            "shareWith" : this.shareWith,
+            "shareFieldType" : this.shareFieldType,
+            "accessLevel" : this.accessLevel,
+            "sharingReason" : this.sharingReason
+        }
+
+        const evt = new CustomEvent('ruledetail', { detail: ruleDetails });
+        this.dispatchEvent(evt);
+    }
 
     //--------------------- Event handlers for NameLabel component --------------------// 
 
     handleLabelChange(event) {
         this.ruleLabel = event.detail;
+        this.fireEventWithRule();
     }
     handleNameChange(event) {
         this.ruleName = event.detail;
+        this.fireEventWithRule();
     }
     handleDescriptionChange(event) {
         this.ruleDescription = event.detail;
+        this.fireEventWithRule();
     }
     handleActiveChange(event) {
         this.ruleActive = event.detail;
+        this.fireEventWithRule();
     }
 
     //-------------------- Event handlers for SharedObject component ---------------------// 
@@ -163,6 +193,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         console.log('handling handleSetSharedObjectDetail event ',event.detail);
         this.sharedObject = event.detail;
         this.sharedObjectApiName = this.sharedObject.objectApiName;
+        this.fireEventWithRule();
     }
 
     handleSharedObjectChange(event) {
@@ -172,6 +203,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.ruleType = 'standard';
         this.objectWithShareField = this.sharedObjectApiName;
         this.relatedObjectSelected = null;
+        this.fireEventWithRule();
     }
 
     //--------------------- Event handlers for Location component ---------------------// 
@@ -186,35 +218,42 @@ export default class FormulaShareRuleDetail extends LightningElement {
         else if(this.ruleType === 'child') {
             this.objectWithShareField = this.relatedObjectApiName;  // Will be null unless pre-selected from previous action
         }
+        this.fireEventWithRule();
     }
 
     handleRelatedObjectChange(event) {
         this.relatedObjectSelected = event.detail.relatedObjectSelected;
         this.relatedObjectApiName = event.detail.relatedObjectApiName;
         this.objectWithShareField = this.relatedObjectApiName;
+        this.fireEventWithRule();
     }
 
     //--------------------- Event handlers for Field component ---------------------// 
 
     handleShareFieldChange(event) {
         this.shareField = event.detail;
+        this.fireEventWithRule();
     }
     handleShareWithChange(event) {
         console.log('sharewith change');
         this.shareWith = event.detail;
+        this.fireEventWithRule();
     }
     handleShareFieldTypeChange(event) {
         this.shareFieldType = event.detail;
+        this.fireEventWithRule();
     }
 
     //--------------------- Event handlers for Access component ---------------------// 
 
     handleAccessLevelChange(event) {
         this.accessLevel = event.detail;
+        this.fireEventWithRule();
     }
 
     handleSharingReasonChange(event) {
         this.sharingReason = event.detail;
+        this.fireEventWithRule();
     }
 
     

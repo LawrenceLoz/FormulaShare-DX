@@ -165,6 +165,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     
     @track shareFieldTypeOptions;
+    @track fieldTypeIsReadOnly;
     updateShareFieldTypeOptions() {
         console.log('this._shareWith ',this._shareWith);
         switch (this._shareWith) {
@@ -174,6 +175,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     { label: 'Id of user', value: 'Id' }
                 ];
                 this.shareFieldType = 'Id';
+                this.fieldTypeIsReadOnly = true;
                 console.log('this.shareFieldType ',this.shareFieldType);
                 break;
             case 'Public Groups':
@@ -182,6 +184,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     { label: 'Id of public group', value: 'Id' },
                     { label: 'Name of public group', value: 'Name' },
                 ];
+                this.fieldTypeIsReadOnly = false;
                 break;
             case 'Roles':
             case 'Roles and Internal Subordinates':
@@ -191,6 +194,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     { label: 'Id of role', value: 'Id' },
                     { label: 'Name of role', value: 'Name' },
                 ];
+                this.fieldTypeIsReadOnly = false;
         }
     }
 

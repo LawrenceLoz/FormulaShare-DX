@@ -69,6 +69,7 @@ public inherited sharing class FormulaShareService {
 	}
 
 	public List<SOBject> getSharesToDelete() {
+		system.debug('Shares to delete: '+mapToDelete.values());
 		return mapToDelete.values();
 	}
 

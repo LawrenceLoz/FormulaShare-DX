@@ -307,8 +307,14 @@ public with sharing class FormulaShareUtilities {
     }
 
 	// Used by controller to build links to setup menu items
+	@AuraEnabled(cacheable=true)
 	public static String getLightningDomain(){
         return getMyDomain() + '.lightning.force.com';
+    }
+
+	@AuraEnabled(cacheable=true)
+	public static String getClassicDomain(){
+        return URL.getSalesforceBaseUrl().toExternalForm();
     }
 
     public static String getMyDomain(){

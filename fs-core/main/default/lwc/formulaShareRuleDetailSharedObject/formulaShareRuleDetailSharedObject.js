@@ -1,5 +1,6 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import getShareableObjects from '@salesforce/apex/FormulaShareRuleDetailController.getShareableObjects';
+import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
 
 export default class FormulaShareRuleDetailSharedObject extends LightningElement {
 
@@ -16,6 +17,21 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
     }
     @track _sharedObjectApiName;
     @track sharedObject;
+
+    @track owdHelpText = false;
+    toggleOwdHelpText() {
+        this.owdHelpText ? this.owdHelpText = false : this.owdHelpText = true;
+    }
+
+    // Build sharing settings setup menu link
+    setupSharingSettings;
+    connectedCallback() {
+        getLightningDomain()
+            .then((domainName) => {
+                this.setupSharingSettings = domainName + '/lightning/setup/SecuritySharing/home';
+            });
+    }
+
 
     // Set details of the object selected to be shared and fire event
     // Method should only progress if the shared object API name is set

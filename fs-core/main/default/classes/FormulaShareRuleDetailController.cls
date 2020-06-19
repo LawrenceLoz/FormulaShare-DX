@@ -1,14 +1,33 @@
+/**
+*Copyright 2020 Lawrence Newcombe
+*
+*Permission is hereby granted, free of charge, to any person obtaining a copy 
+*of this software and associated documentation files (the "Software"), to deal 
+*in the Software without restriction, including without limitation the rights 
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+*of the Software, and to permit persons to whom the Software is furnished to do 
+*so, subject to the following conditions:
+*
+*The above copyright notice and this permission notice shall be included in all 
+*copies or substantial portions of the Software.
+*
+*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+
 public with sharing class FormulaShareRuleDetailController {
 
     public static List<ShareableObject> shareableObjects = new List<ShareableObject>();
 
     @AuraEnabled(cacheable=true)
     public static Map<String,String> getObjectApiNames(List<String> objectEntityIds) {
-        List<EntityDefinition> entityDefs = [
-            SELECT QualifiedApiName, DurableId
-            FROM EntityDefinition
-            WHERE DurableId IN :objectEntityIds
-            WITH SECURITY_ENFORCED];
+
+        List<EntityDefinition> entityDefs = FormulaShareEntityDefinitionSelector.construct().getEntitiesForIds(objectEntityIds);
         
         Map<String,String> objectApiNamesMap = new Map<String,String>();
         for(EntityDefinition ed : entityDefs) {
@@ -38,18 +57,7 @@ public with sharing class FormulaShareRuleDetailController {
     public static List<ShareableObject> getShareableObjects() {
         system.debug('getting all objects');
 
-        List<EntityDefinition> entityDefs = [
-            SELECT QualifiedApiName, Label, PluralLabel
-            , InternalSharingModel, ExternalSharingModel 
-            , DetailUrl, DurableId
-            FROM EntityDefinition
-            WHERE 
-            IsCustomSetting = FALSE
-            AND IsApexTriggerable = TRUE
-            AND IsCustomizable = TRUE
-            WITH SECURITY_ENFORCED
-            ORDER BY Label
-        ];
+        List<EntityDefinition> entityDefs = FormulaShareEntityDefinitionSelector.construct().getAllShareable();
 
         List<ShareableObject> soListStandard = new List<ShareableObject>();
         List<ShareableObject> soListCustom = new List<ShareableObject>();
@@ -72,7 +80,7 @@ public with sharing class FormulaShareRuleDetailController {
                 }
 
                 Schema.DescribeSObjectResult objType = FormulaShareUtilities.describe(ed.QualifiedApiName);
-                if(objType != null && objType.isSearchable()) {
+                if(objType != null) {
                     if(objType.isCustom()) {
                         soListCustom.add(so);
                     }

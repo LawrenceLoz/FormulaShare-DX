@@ -1,6 +1,6 @@
 <template>
     <div class="slds-grid slds-gutters">
-        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+        <div class="slds-col slds-size_5-of-12 slds-var-p-around_medium">
             <span>
                 <div class="slds-form slds-form_stacked">
                     <div class="slds-form-element">
@@ -30,7 +30,7 @@
             </span>
         </div>
 
-        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+        <div class="slds-col slds-size_7-of-12 slds-var-p-around_medium">
             <span>
                 <div class="slds-form slds-form_stacked">
                     <div class="slds-form-element">
@@ -54,6 +54,7 @@
                                 placeholder="Select"
                                 options={shareFieldTypeOptions}
                                 onchange={handleShareFieldTypeChange}
+                                read-only={fieldTypeIsReadOnly}
                                 required >
                             </lightning-combobox>
                         </div>

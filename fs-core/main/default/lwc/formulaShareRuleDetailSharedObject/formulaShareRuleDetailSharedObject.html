@@ -7,4 +7,16 @@
         options={shareableObjectOptions}
         onchange={handleSharedObjectChange}></lightning-combobox>
     </template>
+
+    <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleOwdHelpText}>
+        Object not listed?
+    </div>
+    <template if:true={owdHelpText}>
+        <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_small">
+            Only objects with an internal or external Organization-Wide Default (OWD) sharing setting of Private or Public Read Only can be shared.
+            <lightning-formatted-url value={setupSharingSettings} label=" Click here " target="_blank"></lightning-formatted-url>
+            to check or modify sharing settings in a new tab
+        </div>
+    </template>
+    
 </template>

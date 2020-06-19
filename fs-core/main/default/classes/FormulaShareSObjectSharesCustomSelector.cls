@@ -33,13 +33,14 @@ public inherited sharing class FormulaShareSObjectSharesCustomSelector extends f
 
     // Query by Ids of shared records and row causes (apex sharing reasons)
     public List<SObject> selectByParentIdsAndRowCauses(String parentIdsString, String rowCausesString) {
-        system.debug('parentIdsString: ' + parentIdsString);
-        system.debug('rowCausesString: ' + rowCausesString);
-        return Database.query(
-            newQueryFactory().
-            setCondition('ParentId IN (' + parentIdsString + ')').
-            setCondition('RowCause IN (' + rowCausesString + ')').
-            toSOQL());
+        String condition = 'RowCause IN (' + rowCausesString 
+            + ') AND ParentId IN (' + parentIdsString + ')';
+        String query = newQueryFactory().setCondition(condition).toSOQL();
+        system.debug('query : '+query);
+
+        List<SObject> results = Database.query(query);
+        system.debug('results: '+results);
+        return results;
     }
 
 }

@@ -1,6 +1,6 @@
 <template>
     <div class="slds-grid slds-gutters">
-        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+        <div class="slds-col slds-size_5-of-12 slds-var-p-around_medium">
             <span>
                 <div class="slds-form slds-form_stacked">
                     <div class="slds-form-element">
@@ -13,6 +13,8 @@
                                 options={accessLevelOptions}
                                 placeholder="Select"
                                 onchange={handleAccessLevelChange}
+                                read-only={accessLevelIsReadOnly}
+                                field-level-help={accessLevelHelpText}
                                 required>
                             </lightning-combobox>
                         </div>
@@ -21,7 +23,7 @@
             </span>
         </div>
 
-        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+        <div class="slds-col slds-size_7-of-12 slds-var-p-around_medium">
             <span>
                 <div class="slds-form slds-form_stacked">
                     <div class="slds-form-element">
@@ -33,8 +35,24 @@
                                     label="Sharing Reason" 
                                     value={sharingReason}
                                     onchange={handleSharingReasonChange}
+                                    field-level-help="Add the API name of an Apex Sharing Reason on this object"
                                     required>
                                 </lightning-input>
+                                
+                                <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleSharingReasonsHelpBox}>
+                                    Check or create Apex Sharing Reasons
+                                </div>
+                                <template if:true={sharingReasonsHelpBox}>
+                                    <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_medium">
+                                    Sharing reasons can be used in both Lightning and Classic, but must be created
+                                         from the object's setup page in Salesforce Classic. 
+                                        <lightning-formatted-url 
+                                            value={sharingReasonsSetupLink} 
+                                            label=" Click here " 
+                                            target="_blank"></lightning-formatted-url>
+                                        to open the Apex Sharing Reasons related list for {_sharedObjectLabel} in a new tab
+                                    </div>
+                                </template>
                             </template>
                         </div>
                     </div>

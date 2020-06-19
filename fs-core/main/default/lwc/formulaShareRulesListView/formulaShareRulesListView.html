@@ -1,32 +1,17 @@
 <template>
-<!--    <div style="slds-col slds-size_2-of-8">     -->
-        <lightning-tree-grid 
-            data={treeItems} 
-            columns={columns} 
-            key-field="key" 
-            hide-checkbox-column = "true" 
-            onrowaction={handleRowAction}
-            expanded-rows={currentExpanded}>
-        </lightning-tree-grid>
-<!--    </div>      -->
-    <template if:true={openModal}>
-        <div class="demo-only" style="height: 640px;">
-            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit FormulaShare Rule</h2>
-                    </header>
-                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                        <c-formula-share-rule-detail rule-id={rowRuleId}></c-formula-share-rule-detail>
-                    </div>
-                    <footer class="slds-modal__footer">
-                        <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
-                        <lightning-button label="Save" variant="brand" onclick={saveMethod}></lightning-button>
-                    </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>    
-        </div>
-    </template>
+    <lightning-tree-grid 
+        data={treeItems} 
+        columns={columns} 
+        key-field="key" 
+        hide-checkbox-column = "true" 
+        onrowaction={handleRowAction}
+        expanded-rows={currentExpanded}>
+    </lightning-tree-grid>
 
+    <template if:true={openModal}>
+        <c-formula-share-rule-edit 
+            rule-id={rowRuleId}
+            onclose={closeModal}>
+        </c-formula-share-rule-edit>
+    </template>
 </template>

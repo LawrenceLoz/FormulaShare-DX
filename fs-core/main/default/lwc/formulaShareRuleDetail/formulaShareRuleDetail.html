@@ -57,6 +57,8 @@
                 internal-sharing-model={sharedObject.internalSharingModel}
                 external-sharing-model={sharedObject.externalSharingModel}
                 is-custom={sharedObject.isCustom}
+                shared-object-id={sharedObject.objectId}
+                shared-object-label={sharedObject.objectLabel}
                 access-level={accessLevel}
                 sharing-reason={sharingReason}
                 onaccesslevelchange={handleAccessLevelChange}
@@ -66,91 +68,3 @@
 
     </template>
 </template>
-
-<!--
-<div class="slds-grid slds-gutters">
-            <div class="slds-col">
-                <span>
-                    <div class="slds-form slds-form_stacked">
-                        <div class="slds-form-element">
-                            <div class="slds-form-element__control">
-                                <lightning-combobox
-                                    name="objectShared"
-                                    label="Shared Object"
-                                    value={sharedObjectApiName}
-                                    placeholder="Select Object"
-                                    options={shareableObjectOptions}
-                                    onchange={handleSharedObjectChange}
-                                    required ></lightning-combobox>
-
-                                    <h3 class="slds-section-title--divider">Section Information 2</h3>
-
-                                <template if:true={renderRuleType}>
-                                    <lightning-radio-group name="radioGroup"
-                                        label="Location of field determining sharing"
-                                        options={ruleTypeOptions}
-                                        value={ruleType}
-                                        onchange={handleRuleTypeChange}
-                                        required
-                                        type="radio"></lightning-radio-group>
-                                </template>
-
-                                <template if:true={showRelatedObjectSelection}>
-                                    <lightning-combobox
-                                        name="objectShared"
-                                        label="Related Object"
-                                        placeholder="Select Object"
-                                        options={relatedObjectOptions}
-                                        value={relatedObjectSelected}
-                                        onchange={handleRelatedObjectChange}></lightning-combobox>
-                                </template>
-                                
-                                <template if:true={renderShareField}>
-                                    <lightning-combobox
-                                        name="shareField"
-                                        label="Field with User, Role or Group to Share To"
-                                        value={shareField}
-                                        placeholder="Select Field"
-                                        options={fieldOptions}
-                                        onchange={handleShareFieldChange}
-                                        disabled={shareFieldDisabled}
-                                        required ></lightning-combobox>
-                                </template>
-
-                                <template if:true={renderShareFieldType}>
-                                    <lightning-combobox
-                                        name="shareFieldType"
-                                        label="Contents of Field"
-                                        value={shareFieldType}
-                                        placeholder="Select"
-                                        options={shareFieldTypeOptions}
-                                        onchange={handleShareFieldTypeChange}
-                                        disabled={shareFieldTypeDisabled}
-                                        required ></lightning-combobox>
-                                </template>
-
-                                <template if:true={renderShareWith}>
-                                    <lightning-combobox
-                                        name="shareWith"
-                                        label="Share With"
-                                        value={shareWith}
-                                        placeholder="Select Entity"
-                                        options={shareWithOptions}
-                                        onchange={handleShareWithChange}
-                                        disabled={shareWithDisabled}
-                                        required ></lightning-combobox>
-                                </template>
-
-                                <lightning-input type="text" label="API Name" value ={rule.DeveloperName.value}></lightning-input>
-
-                                <lightning-input id="ruleLabel" type="text" label="Label" value ={rule.MasterLabel.value}></lightning-input>
-                            </div>
-                        </div>
-                    </div>
-                </span>
-            </div>
-        </div>
-    </template>
-</template>
-
--->
