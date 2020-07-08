@@ -21,20 +21,34 @@
 
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
 import getSpecificRule from '@salesforce/apex/FormulaShareRulesSelector.getSpecificRule';
 import getObjectApiNames from '@salesforce/apex/FormulaShareRuleDetailController.getObjectApiNames';
 import getFieldApiNames from '@salesforce/apex/FormulaShareRuleDetailController.getFieldApiNames';
 
 
 export default class FormulaShareRuleDetail extends LightningElement {
-    @api ruleId = 'm05260000008f4XAAQ';
+//    @api ruleId = 'm05260000008f4XAAQ';
+
+    @api
+    get ruleId() {
+        return this._ruleId;
+    }
+    set ruleId(value) {
+        this._ruleId = value;
+        this.populateRule();
+    }
+    _ruleId;
+
+    @api isEdit;
 
     @track rule = {"Id":"m057E0000005OHSQA2","Access_Level__c":"Edit","Object_Shared__c":"01I7E00000108uj","Shared_To__c":"01I7E00000108uj.00N7E000009M1fs","Share_With__c":"Public Groups","Sharing_Reason__c":"Thematic_Area_Coordination_Group__c","Active__c":true,"Shared_To_Field_Type__c":"Name","Child_Object_Shared_To_Field_Type__c":"Id","MasterLabel":"Share to Theme Coordination Group","DeveloperName":"Share_to_Theme_Coordination_Group","Object_Shared__r":{"QualifiedApiName":"Donation__c","MasterLabel":"Donation","Id":"000000000000000AAA","DurableId":"01I7E00000108uj"},"Shared_To__r":{"QualifiedApiName":"Thematic_Area_Coordination_Group__c","MasterLabel":"Thematic Area Coordination Group","Id":"000000000000000AAA","DurableId":"01I7E00000108uj.00N7E000009M1fs"}};
     @track ruleLabel;
     @track ruleName;
     @track ruleDescription;
     @track ruleActive;
-    @track sharedObjectApiName = "Donation__c";
+//    @track sharedObjectApiName = "Donation__c";
+    @track sharedObjectApiName;
     @track sharedObject;
     @track ruleType;
     @track relatedObjectSelected;   // Holds object|lookupField
@@ -46,11 +60,32 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     @track objectWithShareField;
 
+    @api
+    checkValidity() {
+        var ruleDetailValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
+        return ruleDetailValid;
+    }
+
+    connectedCallback() {
+        refreshApex(this.ruleDetails);
+        console.log('refreshing!');
+    }
+
     // Get FormulaShareRule metadata record, and populate variables to display summary of rule
     // Apex methods are called to access names and labels from entity attributes
-    @wire(getSpecificRule, { ruleId : '$ruleId'} )
-        ruleDetails({ error, data }) {
-            if(data) {
+//    @wire(getSpecificRule, { ruleId : '$ruleId'} )
+//        ruleDetails({ error, data }) {
+//            if(data) {
+//            }
+//            else if(error) {
+//                console.log('error: '+JSON.stringify(error));
+//                this.showError(error, 'Error retrieving rule details from Salesforce');
+//            }
+            
+        populateRule() {
+            console.log('_ruleId '+this._ruleid);
+            getSpecificRule({ ruleId : this._ruleId })
+            .then((data) => {
                 console.log('retrieved rule: '+JSON.stringify(data));
                 this.rule = data;
                 this.ruleLabel = data.MasterLabel;
@@ -136,11 +171,11 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 .catch(error => {
                     console.log('Error building object map ',JSON.stringify(error));
                 });
-            }
-            else if(error) {
-                console.log('error: '+JSON.stringify(error));
+            })
+            .catch(error => {
+                console.log('Error retrieving rule details from Salesforce',JSON.stringify(error));
                 this.showError(error, 'Error retrieving rule details from Salesforce');
-            }
+            });
         }
     
     
@@ -165,6 +200,16 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
         const evt = new CustomEvent('ruledetail', { detail: ruleDetails });
         this.dispatchEvent(evt);
+    }
+
+    // Populate share with in component if it's populated with something, otherwise default to Users
+    get shareWithPlusDefault() {
+        if(this.shareWith) {
+            return this.shareWith;
+        }
+        else {
+            return 'Users';
+        }
     }
 
     //--------------------- Event handlers for NameLabel component --------------------// 

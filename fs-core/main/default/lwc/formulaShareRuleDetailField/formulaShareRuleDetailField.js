@@ -20,9 +20,12 @@
 **/
 
 import { LightningElement, api, track, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
+import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
+
     @api
     get objectWithShareField() {
         return this._objectWithShareField;
@@ -30,11 +33,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     set objectWithShareField(value) {
         // Clear shareField and shareFieldType if object with share field is changed
         if(this._objectWithShareField && this._objectWithShareField != value) {
-            this.shareField = null;
-
+            this.updateShareField(null);
+            this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
+            
             // Retain id type if users selected
-            if(this.shareWith != 'users') {
-                this.shareFieldType = null;
+            if(this.shareWith != 'Users') {
+                this.updateShareFieldType(null);
             }
         }
         this._objectWithShareField = value;
@@ -75,7 +79,16 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     _externalSharingModel;
     
-    @api shareField;
+    @api
+    get shareField() {
+        return this._externalSharingModel;
+    }
+    set shareField(value) {
+        this._shareField = value;
+    }
+    _shareField;
+
+
     @api shareFieldType;
     fullFieldList = [];
     namesOnlyFieldList = [];
@@ -102,47 +115,52 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.shareWithOptions = optionsList;
     }
 
-    handleShareWithChange(event) {
-        this._shareWith = event.detail.value;
-        console.log('share with changed: ',this._shareWith);
-        const evt = new CustomEvent('sharewithchange', {
-            detail: this._shareWith
-        });
-        this.dispatchEvent(evt);
-        this.updateShareFieldTypeOptions();
-        this.setFieldOptions();
-        console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
+    @track fieldOptions;
+    shareFieldOptions;
+    fieldsMap = new Map();
+    loadingFields = true;
+    @wire(getShareFieldOptions, { objectApiName : '$_objectWithShareField'} )
+    wiredShareFieldOptions(value) {
+        this.shareFieldOptions = value;
+        const { data, error } = value;
+        if(data) {
+            console.log('getting fields for '+this._objectWithShareField);
+
+            // Refresh lists in case previously populated from another object
+            this.fieldsMap.clear();
+            this.fullFieldList = [];
+            this.namesOnlyFieldList = [];
+
+            data.forEach((obj) => {
+                this.fieldsMap.set(obj.fieldApiName,obj);
+                const option = {
+                    label: obj.fieldLabel + ' (' + obj.fieldApiName + ')',
+                    value: obj.fieldApiName
+                };
+                this.fullFieldList.push(option);
+
+                if(!obj.isIdType) {
+                    this.namesOnlyFieldList.push(option);
+                }
+            });
+
+            this.setFieldOptions();
+            this.updateShareWithOptions();
+            this.updateFieldDetails();
+        }
+        else if(error) {
+            console.log('Error getting fields for object ',JSON.stringify(error));
+        }
     }
 
-    @track fieldOptions;
-    @wire(getShareFieldOptions, { objectApiName : '$_objectWithShareField'} )
-        shareFieldOptions({ error, data }) {
-            if(data) {
-                console.log('getting fields for '+this._objectWithShareField);
-
-                // Refresh lists in case previously populated from another object
-                this.fullFieldList = [];
-                this.namesOnlyFieldList = [];
-
-                data.forEach((obj) => {
-                    const option = {
-                        label: obj.fieldLabel + ' (' + obj.fieldApiName + ')',
-                        value: obj.fieldApiName
-                    };
-                    this.fullFieldList.push(option);
-
-                    if(!obj.isIdType) {
-                        this.namesOnlyFieldList.push(option);
-                    }
-                });
-
-                this.setFieldOptions();
-                this.updateShareWithOptions();
-            }
-            else if(error) {
-                console.log('Error getting fields for object ',JSON.stringify(error));
-            }
-        }
+    refreshFields() {
+        console.log('refreshing');
+        this.loadingFields = true;
+        refreshApex(this.shareFieldOptions)
+        .then(() => {
+            this.loadingFields = false;
+        })
+    }
     
     // Set options to include id fields (user lookups) only if "Users" selected
     setFieldOptions() {
@@ -154,16 +172,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             console.log('setting to names only list ',this.namesOnlyFieldList);
             this.fieldOptions = this.namesOnlyFieldList;
         }
+        this.loadingFields = false;
     }
 
-    handleShareFieldChange(event) {
-        this.shareField = event.detail.value;
-        const evt = new CustomEvent('sharefieldchange', {
-            detail: this.shareField
-        });
-        this.dispatchEvent(evt);
-    }
-    
     @track shareFieldTypeOptions;
     @track fieldTypeIsReadOnly;
     updateShareFieldTypeOptions() {
@@ -174,9 +185,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
-                this.shareFieldType = 'Id';
+                this.updateShareFieldType('Id');
                 this.fieldTypeIsReadOnly = true;
-                console.log('this.shareFieldType ',this.shareFieldType);
                 break;
             case 'Public Groups':
                 console.log('updated to public groups');
@@ -198,12 +208,96 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
     }
 
+    @track viewFieldDetails;
+    viewFieldDetailsClosed = 'Browse field contents';
+    viewFieldDetailsOpen = 'Hide field contents';
+    @track fieldDetailsToggleText = this.viewFieldDetailsClosed;
+    toggleViewFieldDetails() {
+        if(this.viewFieldDetails) {
+            this.viewFieldDetails = false;
+            this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
+        }
+        else {
+            this.viewFieldDetails = true;
+            this.fieldDetailsToggleText = this.viewFieldDetailsOpen;
+        }
+    }
+
+    handleShareWithChange(event) {
+        this._shareWith = event.detail.value;
+        console.log('share with changed: ',this._shareWith);
+        const evt = new CustomEvent('sharewithchange', {
+            detail: this._shareWith
+        });
+        this.dispatchEvent(evt);
+        this.updateShareFieldTypeOptions();
+        this.setFieldOptions();
+        console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
+    }
+
+    handleShareFieldChange(event) {
+        this.updateShareField(event.detail.value);
+    }
+
+    updateShareField(value) {
+        this._shareField = value;
+        this.loadingSample = true;  // Show spinner until field contents loaded
+        this.updateFieldDetails();
+        const evt = new CustomEvent('sharefieldchange', {
+            detail: this._shareField
+        });
+        this.dispatchEvent(evt);
+    }
+
+    @track fieldType;
+    @track fieldFormula;
+    updateFieldDetails() {
+
+        // Clear details if field has been cleared
+        if(this._shareField === null) {
+            this.fieldType = null;
+            this.fieldFormula = null;
+            this.viewFieldDetails = null;
+            this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
+            console.log('cleared text '+this.fieldDetailsToggleText);
+        }
+
+        // Otherwise, if field details map is built then set details for this field
+        else if(this.fieldsMap.get(this._shareField)) {
+            var fieldOption = this.fieldsMap.get(this._shareField);
+            console.log('fieldOption: '+JSON.stringify(fieldOption));
+            this.fieldType = fieldOption.type;
+            this.fieldFormula = fieldOption.formula;
+        }
+    }
+
+    
+    @track fieldSample;
+    @track loadingSample = true;
+    @track fieldErrorMessage;
+    @wire(getSampleData, {objectApiName : '$_objectWithShareField', fieldApiName : '$_shareField'})
+    wiredSampleData(value) {
+        const { data, error } = value;
+        if(data) {
+            this.fieldSample = data;
+        }
+        else if(error) {
+            this.fieldSample = error.body.message;   // Show warning message inside box - consider using a warning popover box in future
+            console.log(JSON.stringify(error));
+        }
+        this.loadingSample = false;
+    }
+
     handleShareFieldTypeChange(event) {
-        this.shareFieldType = event.detail.value;
+        this.updateShareFieldType(event.detail.value);
+    }
+
+    updateShareFieldType(value) {
+        this.shareFieldType = value;
         const evt = new CustomEvent('sharefieldtypechange', {
             detail: this.shareFieldType
         });
-        this.dispatchEvent(evt);        
+        this.dispatchEvent(evt);
     }
-    
+
 }

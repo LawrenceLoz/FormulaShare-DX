@@ -10,8 +10,10 @@
                                 type="text" 
                                 label="Label" 
                                 value={ruleLabel}
+                                max-length="40"
                                 variant="label-inline"
                                 onchange={handleLabelChange}
+                                onblur={autoPopulateName}
                                 required>
                             </lightning-input>
 
@@ -20,8 +22,10 @@
                                 type="text" 
                                 label="API Name" 
                                 value={ruleName}
+                                max-length="40"
                                 variant="label-inline"
                                 onchange={handleNameChange}
+                                disabled={isEdit}
                                 required>
                             </lightning-input>
                         </div>
@@ -39,7 +43,8 @@
                                 id="ruleDescription" 
                                 label="Description" 
                                 value ={ruleDescription}
-                                onchange={handleDescriptionChange}>
+                                onchange={handleDescriptionChange}
+                                max-length="255">
                             </lightning-textarea>
 
 <!--                            <lightning-input type="toggle"

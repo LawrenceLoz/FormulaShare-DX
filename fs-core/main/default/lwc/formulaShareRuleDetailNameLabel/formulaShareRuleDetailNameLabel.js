@@ -5,6 +5,17 @@ export default class FormulaShareRuleDetailNameLabel extends LightningElement {
     @api ruleName;
     @api ruleDescription;
     @api ruleActive;
+    @api isEdit;
+
+    // If name is blank, replace with label with special characters replaced with underscores
+    autoPopulateName() {
+        console.log('autopop username');
+        if(!this.ruleName) {
+            console.log(this.ruleLabel.replace(/[^a-zA-Z0-9]/g,'_').replace(/_{2,}/g,'_'));
+            this.ruleName = this.ruleLabel.replace(/[^a-zA-Z0-9]/g,'_').replace(/_{2,}/g,'_');
+            this.dispatchNameChange();
+        }
+    }
 
     handleLabelChange(event) {
         this.ruleLabel = event.detail.value;
@@ -16,6 +27,10 @@ export default class FormulaShareRuleDetailNameLabel extends LightningElement {
 
     handleNameChange(event) {
         this.ruleName = event.detail.value;
+        this.dispatchNameChange();
+    }
+
+    dispatchNameChange() {
         const evt = new CustomEvent('namechange', {
             detail: this.ruleName
         });

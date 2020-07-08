@@ -7,20 +7,19 @@
             rule-label={ruleLabel}
             rule-description={ruleDescription}
             rule-active={ruleActive}
+            is-edit={isEdit}
             onlabelchange={handleLabelChange}
             onnamechange={handleNameChange}
             ondescriptionchange={handleDescriptionChange}
             onactivechange={handleActiveChange}>
         </c-formula-share-rule-detail-name-label>
 
-        <template if:true={sharedObjectApiName}>
-            <h3 class="slds-section-title--divider ">Object to share</h3>
-            <c-formula-share-rule-detail-shared-object 
-                shared-object-api-name={sharedObjectApiName}
-                onsetsharedobjectdetail={handleSetSharedObjectDetail}
-                onsharedobjectchange={handleSharedObjectChange}>
-            </c-formula-share-rule-detail-shared-object>
-        </template>
+        <h3 class="slds-section-title--divider ">Object to share</h3>
+        <c-formula-share-rule-detail-shared-object 
+            shared-object-api-name={sharedObjectApiName}
+            onsetsharedobjectdetail={handleSetSharedObjectDetail}
+            onsharedobjectchange={handleSharedObjectChange}>
+        </c-formula-share-rule-detail-shared-object>
 
         <template if:true={sharedObject}>
             <div class="slds-p-top_medium">
@@ -40,7 +39,7 @@
             <h3 class="slds-section-title--divider">Share with</h3>
             <c-formula-share-rule-detail-field 
                 object-with-share-field={objectWithShareField}
-                share-with={shareWith}
+                share-with={shareWithPlusDefault}
                 internal-sharing-model={sharedObject.internalSharingModel}
                 external-sharing-model={sharedObject.externalSharingModel}
                 share-field={shareField}
@@ -59,6 +58,7 @@
                 is-custom={sharedObject.isCustom}
                 shared-object-id={sharedObject.objectId}
                 shared-object-label={sharedObject.objectLabel}
+                shared-object-api-name={sharedObjectApiName}
                 access-level={accessLevel}
                 sharing-reason={sharingReason}
                 onaccesslevelchange={handleAccessLevelChange}

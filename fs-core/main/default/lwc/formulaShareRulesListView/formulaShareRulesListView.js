@@ -1,4 +1,4 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
@@ -34,34 +34,6 @@ export default class TreeGrid extends LightningElement {
         {type: 'boolean', fieldName: 'active', label: 'Active'
         , initialWidth: 75
     },
-/*        {
-            type: 'button-icon',
-            fieldName: 'calculationStatus',
-            label: 'Calculation Status',
-            typeAttributes: {
-                iconName: {fieldName : 'icon'},
-                name: 'sample', 
-                title: 'testtet',
-                label:'scheduled',
-                alternativeText:'Example',
-                variant: 'bare',                      
-                disabled: false
-            }
-            , cellAttributes: {
-                style: 'background:black'
-            }
-//            , cellAttributes: { class: { fieldName: 'dietCSSClass' }}
-        },
-            {
-                label: "Important Account",
-                fieldName: "VIP_Account__c",
-                cellAttributes: {
-                    style: 'background:black',
-                    iconName: {
-                        fieldName: 'icon'
-                    }
-                }
-            },  */
         {type: 'action', typeAttributes: {rowActions: this.getRowActions} }
     ];
 
@@ -73,7 +45,15 @@ export default class TreeGrid extends LightningElement {
     firstLoad = true;
     @track treeItems;
     @track currentExpanded;
+    @track processingLoad = true;
 
+    @api
+    get refreshList() {}
+    set refreshList(value) {
+        if(value == true) {
+            refreshApex(this.provisionedValue);
+        }
+    }
 
     @wire(getTreeGridData)
     wireTreeData(value) {
@@ -95,6 +75,8 @@ export default class TreeGrid extends LightningElement {
             else {
                 this.notifyDataUpdates();   // Pop toast with details of update
             }
+
+            this.processingLoad = false;
         }
 
         else if(error) {
@@ -134,9 +116,8 @@ export default class TreeGrid extends LightningElement {
                 break;
         }
         
-        // Display toast if message is populated
-        console.log('message :'+ message);
-        if(message) {
+        // Display toast if message is populated no modal is open
+        if(message && !this.openModal) {
             console.log('message :'+ message);
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -264,9 +245,10 @@ export default class TreeGrid extends LightningElement {
     // Action method to update a rule to active/inactive
     activateDeactivate(row, actionName) {
         const rowDeveloperName = row['developerName'];
-        activateDeactivate({ ruleName : rowDeveloperName, action : actionName })
+        activateDeactivate({ ruleName : rowDeveloperName, type : actionName })
             .then(() => {
                 const actToastTitle = actionName === 'activate' ? 'Queued for activation' : 'Queued for deactivation';
+                this.processingLoad = true;
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: actToastTitle,
@@ -298,6 +280,9 @@ export default class TreeGrid extends LightningElement {
         );
     }
 
+    handleRuleUpdated() {
+        refreshApex(this.provisionedValue);
+    }
 
     @track openModal
     @track rowRuleId

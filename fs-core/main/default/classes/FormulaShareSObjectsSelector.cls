@@ -32,8 +32,8 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
         // If child object sharing is required, add relationship sub-selects for fields on related objects
         for(RelatedObjectDetails rod : rodList) {
+            system.debug('rod.relationshipName '+rod.relationshipName);
             FormulaShareSObjectsSelector relatedObjSelector = new FormulaShareSObjectsSelector(true, rod.type, rod.fields);
-
             
             // Exclude records which don't have any shared to field populated - commented out as not possible to 
             // add conditions to subselects with current fflibs version
@@ -61,6 +61,28 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
             .setCondition('Id IN (' + sharedObjIdsString + ')')
             .toSOQL()
         );
+    }
+
+
+    // Returns values for first few records with non-blank field values
+    public List<String> selectSampleData(Integer queryLimit) {
+        Schema.SObjectField queryField = fields[0];
+        String queryFieldName = queryField.getDescribe().getName();
+
+        fflib_QueryFactory sampleQueryFactory = newQueryFactory();
+        List<SObject> results = Database.query(
+            sampleQueryFactory
+            .setCondition(queryFieldName + ' != null')
+            .setLimit(queryLimit)
+            .toSOQL()
+        );
+
+        List<String> returnList = new List<String>();
+        for(SObject so : results) {
+            String value = String.valueOf(so.get(queryFieldName));
+            returnList.add(value);
+        }
+        return returnList;
     }
 
 

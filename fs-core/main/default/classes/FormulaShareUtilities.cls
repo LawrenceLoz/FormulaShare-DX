@@ -132,27 +132,80 @@ public with sharing class FormulaShareUtilities {
 		List<ChildRelationshipDetails> crdList = new List<ChildRelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
 
-		// Iterate all child relationships for object
-		for(Schema.ChildRelationship cr : parentObjDesc.getChildRelationships()) {
-			
-			if(cr.getRelationshipName() != null) {
-				Schema.DescribeSObjectResult childObjDesc = cr.getChildSObject().getDescribe();
+		List<Schema.ChildRelationship> allChildRelationships = parentObjDesc.getChildRelationships();
 
-				if(childObjDesc.isSearchable()) {
-					Schema.DescribeFieldResult childObjFieldDesc = cr.getField().getDescribe();
-					ChildRelationshipDetails crd = new ChildRelationshipDetails();
-					crd.childObjectLabel = childObjFieldDesc.getLabel();
-					crd.childFieldApiName = childObjFieldDesc.getName();
-					crd.childObjectApiName = childObjDesc.getName();
-					crd.childObjectLabel = childObjDesc.getLabel();
-					crdList.add(crd);
-				
-					system.debug(childObjDesc.getName() + ' ' + childObjDesc.isAccessible());
+		// build CRD objects
+		List<ChildRelationshipDetails> allCrds = new List<ChildRelationshipDetails>();
+		List<String> childObjApiNames = new List<String>();
+		for(Schema.ChildRelationship cr : allChildRelationships) {
+
+			// Exclude child relationships with a null relationship name (these can't be processed by FormulaShareService)
+			if(cr.getRelationshipName() != null) {
+				ChildRelationshipDetails crd = convertToChildRelationshipDetails(cr);
+				allCrds.add(crd);
+				childObjApiNames.add(crd.childObjectApiName);
+			}
+		}
+
+		// Build map of entity definitions
+		List<EntityDefinition> edList = FormulaShareEntityDefinitionSelector.construct().getEntitiesForApiNames(childObjApiNames);
+		Map<String, EntityDefinition> edMap = new Map<String, EntityDefinition>();
+		for(EntityDefinition ed : edList) {
+			edMap.put(ed.QualifiedApiName, ed);
+		}
+
+		// Build list of crds which are valid for use as child objects
+		// Objects aren't included unless they're triggerable and customisable 
+		// (these don't seem to be acceptable entity definitions for custom metadata)
+		List<ChildRelationshipDetails> eligibleCrds = new List<ChildRelationshipDetails>();
+		for(ChildRelationshipDetails crd : allCrds) {
+			if(edMap.containsKey(crd.childObjectApiName)) {
+				EntityDefinition ed = edMap.get(crd.childObjectApiName);
+				if(ed.IsApexTriggerable && ed.IsCustomizable) {
+					eligibleCrds.add(crd);
 				}
 			}
 		}
 
+		List<ChildRelationshipDetails> customChildRelationships = new List<ChildRelationshipDetails>();
+		List<ChildRelationshipDetails> standardChildRelationships = new List<ChildRelationshipDetails>();
+
+		// Build lists of custom and standard child relationship details
+		for(ChildRelationshipDetails crd : eligibleCrds) {
+//			if(cr.getRelationshipName() != null) {
+			if(crd.childObjDesc.isCustom()) {
+				customChildRelationships.add(crd);
+			}
+			else if(crd.childObjDesc.isQueryable()) {
+				standardChildRelationships.add(crd);
+			}
+		}
+
+		// Add all child relationships for custom objects
+		for(ChildRelationshipDetails crd : customChildRelationships) {
+			crdList.add(crd);
+		}
+
+		// Then add all child relationships for queryable standard objects (ensures shows custom then standard)
+		for(ChildRelationshipDetails crd : standardChildRelationships) {
+			crdList.add(crd);
+		}
+
 		return crdList;
+	}
+
+	
+	private static ChildRelationshipDetails convertToChildRelationshipDetails(Schema.ChildRelationship cr) {
+
+		ChildRelationshipDetails crd = new ChildRelationshipDetails();
+		crd.childObjFieldDesc = cr.getField().getDescribe();
+		crd.childObjDesc = cr.getChildSObject().getDescribe();
+		crd.childObjectLabel = crd.childObjFieldDesc.getLabel();
+		crd.childFieldApiName = crd.childObjFieldDesc.getName();
+		crd.childObjectApiName = crd.childObjDesc.getName();
+		crd.childObjectLabel = crd.childObjDesc.getLabel();
+
+		return crd;
 	}
 
 
@@ -166,8 +219,7 @@ public with sharing class FormulaShareUtilities {
 			
 			// Check whether field could contain information for sharing 
 			if(fieldType == Schema.DisplayType.STRING
-				|| fieldType == Schema.DisplayType.PICKLIST
-				|| fieldType == Schema.DisplayType.COMBOBOX) {
+				|| fieldType == Schema.DisplayType.PICKLIST) {
 				shareFields.add(field);
 			}
 
@@ -321,7 +373,31 @@ public with sharing class FormulaShareUtilities {
         return URL.getOrgDomainUrl().getHost().split('\\.')[0].toLowerCase();
 	}
 
+
+	// Return a map of all sharing reasons for a particular object
+	@AuraEnabled(cacheable=true)
+	public static Map<String,String> getSharingReasons(String objectApiName) {
+		Map<String,String> reasons = new Map<String,String>();
+
+		// Get the SOBjectField corresponding to RowCause on the share object
+		Schema.SObjectType objectType = getSObjectTypeFromName(objectApiName);
+		Schema.SObjectType shareObjectType = getShareObject(objectType);
+		Schema.SObjectField rowCauseField = getSObjectFieldFromName('RowCause', shareObjectType);
+
+		for(PicklistEntry entry : rowCauseField.getDescribe().getPicklistValues()) {
+
+			// Only add custom reasons (ones ending in __c)
+			if(entry.getValue().right(3) == '__c') {
+				reasons.put(entry.getValue(), entry.getLabel());
+			}
+		}
+
+		return reasons;
+	}
+
     public class ChildRelationshipDetails {
+		private Schema.DescribeFieldResult childObjFieldDesc;
+		private Schema.DescribeSObjectResult childObjDesc;
         @AuraEnabled
         public String childObjectLabel {get;set;}
         @AuraEnabled
@@ -333,7 +409,7 @@ public with sharing class FormulaShareUtilities {
         @AuraEnabled
         public String childFieldApiName {get;set;}
         @AuraEnabled
-        public String childFieldId {get;set;}
-    }	
+		public String childFieldId {get;set;}
+    }
 
 }

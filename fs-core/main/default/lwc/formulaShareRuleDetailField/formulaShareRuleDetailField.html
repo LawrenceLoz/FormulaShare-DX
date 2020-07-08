@@ -1,66 +1,132 @@
 <template>
-    <div class="slds-grid slds-gutters">
-        <div class="slds-col slds-size_5-of-12 slds-var-p-around_medium">
-            <span>
-                <div class="slds-form slds-form_stacked">
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-                   <!--         <lightning-combobox
-                                name="shareWith"
-                                label="Share With"
-                                value={_shareWith}
-                                placeholder="Select Entity"
-                                options={shareWithOptions}
-                                onchange={handleShareWithChange}
-                                required >
-                            </lightning-combobox>   -->
-
-                            <lightning-radio-group name="shareWith"
-                                label="Share With"
-                                options={shareWithOptions}
-                                value={_shareWith}
-                                onchange={handleShareWithChange}
-                                type="radio"
-                                variant="label-hidden"
-                                required>
-                            </lightning-radio-group>
+    <div class="slds-m-vertical_medium">
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_5-of-12">
+                <span>
+                    <div class="slds-form slds-form_stacked">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <lightning-radio-group name="shareWith"
+                                    label="Share With"
+                                    options={shareWithOptions}
+                                    value={_shareWith}
+                                    onchange={handleShareWithChange}
+                                    type="radio"
+                                    variant="label-hidden"
+                                    required>
+                                </lightning-radio-group>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </span>
-        </div>
+                </span>
+            </div>
 
-        <div class="slds-col slds-size_7-of-12 slds-var-p-around_medium">
-            <span>
-                <div class="slds-form slds-form_stacked">
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-                            <template if:true={fieldOptions}>
+            <div class="slds-col slds-size_7-of-12">
+                <span>
+                    <div class="slds-form slds-form_stacked">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <template if:true={fieldOptions}>
+
+                                    <div style="display:flex; align-items:flex-end;">
+                                        <lightning-combobox
+                                            name="_shareField"
+                                            label="Specified in Field"
+                                            value={_shareField}
+                                            placeholder="Select Field"
+                                            options={fieldOptions}
+                                            onchange={handleShareFieldChange}
+                                            required >
+                                        </lightning-combobox>
+
+                                        <div class="slds-m-left_x-small" onclick={refreshFields}>
+                                            <lightning-icon 
+                                                style="background-color:#1589ee"
+                                                icon-name="action:refresh" 
+                                                alternative-text="Refresh" 
+                                                title="Refresh fields from object" 
+                                                size="x-small">
+                                            </lightning-icon>
+                                            <template if:true={loadingFields}>
+                                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                            </template>
+                                        </div>
+                                    </div>
+        
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+
                                 <lightning-combobox
-                                    name="shareField"
-                                    label="Specified in Field"
-                                    value={shareField}
-                                    placeholder="Select Field"
-                                    options={fieldOptions}
-                                    onchange={handleShareFieldChange}
+                                    class="slds-m-top_x-small"
+                                    name="shareFieldType"
+                                    label="Containing Type"
+                                    value={shareFieldType}
+                                    placeholder="Select"
+                                    options={shareFieldTypeOptions}
+                                    onchange={handleShareFieldTypeChange}
+                                    read-only={fieldTypeIsReadOnly}
+                                    message-when-value-missing="Complete this field (depends on Share With option selected)"
                                     required >
                                 </lightning-combobox>
+
+                                <template if:true={fieldType}>
+                                    <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewFieldDetails}>
+                                        {fieldDetailsToggleText}
+                                    </div>
+                                </template>
+
+                            </div>
+                        </div>
+                    </div>
+                </span>
+            </div>
+        </div>
+
+        <template if:true={viewFieldDetails}>
+            <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-bottom_medium">
+
+                <div class="slds-form slds-form_stacked">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+
+                            <template if:true={fieldFormula}>
+                                <lightning-textarea 
+                                    id="fieldFormula" 
+                                    label="Formula" 
+                                    value ={fieldFormula}
+                                    read-only>
+                                </lightning-textarea>
                             </template>
 
-                            <lightning-combobox
-                                name="shareFieldType"
-                                label="Containing Type"
-                                value={shareFieldType}
-                                placeholder="Select"
-                                options={shareFieldTypeOptions}
-                                onchange={handleShareFieldTypeChange}
-                                read-only={fieldTypeIsReadOnly}
-                                required >
-                            </lightning-combobox>
+                            <lightning-textarea 
+                                id="sample" 
+                                label="Sample data (from first 100 records)" 
+                                value ={fieldSample}
+                                read-only>
+                            </lightning-textarea>
+                            <template if:true={loadingSample}>
+                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                            </template>
+
                         </div>
                     </div>
                 </div>
-            </span>
-        </div>
+            </div>
+        </template>
+
     </div>
+<!--
+    show pop: {showPop}
+    <c-formula-share-field-popover 
+        topmargin={top} 
+        leftmargin={left} 
+        show-pop={showPop}
+        field-type={fieldType} 
+        field-formula={fieldFormula}>
+    </c-formula-share-field-popover>
+-->
 </template>

@@ -1,0 +1,22 @@
+<template>
+
+    <lightning-card title="Next batch scheduled: ">
+        <lightning-button 
+            label="New Rule" 
+            slot="actions"
+            onclick={handleNewRule}>
+        </lightning-button>
+        <div slot="footer" style="text-align:left;">
+            <c-formula-share-rules-list-view
+                refresh-list={refreshList}>
+            </c-formula-share-rules-list-view>
+        </div>
+    </lightning-card>
+    
+    <template if:true={openNewRuleModal}>
+        <c-formula-share-rule-create 
+            onclose={closeNewRuleModal}
+            onrulecreated={handleRuleCreated}>
+        </c-formula-share-rule-create>
+    </template>    
+</template>

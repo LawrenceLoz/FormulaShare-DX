@@ -168,24 +168,16 @@ public with sharing class FormulaShareRulesListViewController {
 
 
     @AuraEnabled
-    public static void activateDeactivate(String ruleName, String action) {
+    public static void activateDeactivate(String ruleName, String type) {
 
-        FormulaShareRule rule = new FormulaShareRule();
-        rule.developerName = ruleName;
+        Map<String,FormulaShare_Rule__mdt> fsRulesMap = new Map<String,FormulaShare_Rule__mdt>();
         
-        switch on action {
-            when 'activate' {
-                rule.active = true;
-            }
-            when 'deactivate' {
-                rule.active = false;
-            }
-        }
-        
-        Map<String,FormulaShareRule> rulesToUpdate = new Map<String,FormulaShareRule>();
-        rulesToUpdate.put(rule.developerName, rule);
+        FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
+        rule.Active__c = type == 'activate' ? true : false;
+        fsRulesMap.put(ruleName, rule);
 
-        Id asyncJobId = FormulaShareRulesMetadataDMLService.updateRules(rulesToUpdate, action);
+        Id asyncJobId = FormulaShareRulesMetadataDMLService.updateRules(fsRulesMap, type);
+        system.debug('Metadata deployment job ID : '+asyncJobId);
     }
 
     static FormulaShare_Settings__mdt settings;

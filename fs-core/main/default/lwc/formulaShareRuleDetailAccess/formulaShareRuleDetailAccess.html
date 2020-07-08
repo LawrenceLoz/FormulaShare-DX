@@ -1,63 +1,111 @@
 <template>
-    <div class="slds-grid slds-gutters">
-        <div class="slds-col slds-size_5-of-12 slds-var-p-around_medium">
-            <span>
-                <div class="slds-form slds-form_stacked">
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-                            <lightning-combobox 
-                                id="accessLevel" 
-                                name="accessLevel"
-                                label="Access Level" 
-                                value={accessLevel}
-                                options={accessLevelOptions}
-                                placeholder="Select"
-                                onchange={handleAccessLevelChange}
-                                read-only={accessLevelIsReadOnly}
-                                field-level-help={accessLevelHelpText}
-                                required>
-                            </lightning-combobox>
-                        </div>
+    <div class="slds-grid slds-gutters slds-wrap">
+        <div class="slds-col slds-size_5-of-12 slds-var-p-horizontal_medium slds-var-p-top_medium">
+            <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <lightning-combobox 
+                            id="accessLevel" 
+                            name="accessLevel"
+                            label="Access Level" 
+                            value={accessLevel}
+                            options={accessLevelOptions}
+                            placeholder="Select"
+                            onchange={handleAccessLevelChange}
+                            read-only={accessLevelIsReadOnly}
+                            field-level-help={accessLevelHelpText}
+                            required>
+                        </lightning-combobox>
                     </div>
                 </div>
-            </span>
+            </div>
         </div>
 
-        <div class="slds-col slds-size_7-of-12 slds-var-p-around_medium">
-            <span>
-                <div class="slds-form slds-form_stacked">
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-                            <template if:true={isCustom}>
-                                <lightning-input 
+        <div class="slds-col slds-size_7-of-12 slds-var-p-horizontal_medium slds-var-p-top_medium">
+            <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <template if:true={isCustom}>
+
+                            <div style="display:flex; align-items:flex-end;">
+                                <lightning-combobox 
                                     id="sharingReason" 
-                                    type="text" 
+                                    name="sharingReason"
                                     label="Sharing Reason" 
                                     value={sharingReason}
+                                    options={sharingReasonOptions}
+                                    placeholder="Select"
                                     onchange={handleSharingReasonChange}
-                                    field-level-help="Add the API name of an Apex Sharing Reason on this object"
                                     required>
-                                </lightning-input>
-                                
-                                <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleSharingReasonsHelpBox}>
-                                    Check or create Apex Sharing Reasons
+                                </lightning-combobox>
+
+                                <div class="slds-m-left_x-small" onclick={refreshReasons}>
+                                    <lightning-icon 
+                                        icon-name="action:refresh" 
+                                        alternative-text="Refresh" 
+                                        title="Refresh list of sharing reasons" 
+                                        size="x-small">
+                                    </lightning-icon>
+                                    <template if:true={loadingReasons}>
+                                        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                    </template>
                                 </div>
-                                <template if:true={sharingReasonsHelpBox}>
-                                    <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_medium">
-                                    Sharing reasons can be used in both Lightning and Classic, but must be created
-                                         from the object's setup page in Salesforce Classic. 
-                                        <lightning-formatted-url 
-                                            value={sharingReasonsSetupLink} 
-                                            label=" Click here " 
-                                            target="_blank"></lightning-formatted-url>
-                                        to open the Apex Sharing Reasons related list for {_sharedObjectLabel} in a new tab
-                                    </div>
-                                </template>
+
+                            </div>
+
+                            <template if:true={oneOrMoreReasons}>
+                                <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleSharingReasonsHelpBox}>
+                                    Manage Apex Sharing Reasons
+                                </div>
                             </template>
+
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-col slds-size_2-of-12 slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+        </div>
+
+        <div class="slds-col slds-size_10-of-12 slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+            <template if:true={sharingReasonsHelpBox}>
+                <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_xx-small slds-float_right">
+                    <div style="display:flex; align-items:center;">
+                        <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                        <div class="slds-m-left_medium">
+                            Sharing reasons are used in both Lightning and Classic, but must be created
+                            from the object's setup page in Salesforce Classic. 
+                            <lightning-formatted-url 
+                                value={sharingReasonsSetupLink} 
+                                label=" Click here " 
+                                target="_blank"></lightning-formatted-url>
+                            to open the Apex Sharing Reasons related list for {_sharedObjectLabel} in a new tab
                         </div>
                     </div>
                 </div>
-            </span>
+            </template>
+
+            <template if:true={isCustom}>
+                <template if:false={oneOrMoreReasons}>
+                    <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_xx-small slds-float_right">
+
+                        <div style="display:flex; align-items:center;">
+                            <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                            <div class="slds-m-left_medium">
+                                No sharing reasons are set up yet for {_sharedObjectLabel}. 
+                                    <lightning-formatted-url 
+                                        value={sharingReasonsSetupLink} 
+                                        label=" Click here " 
+                                        target="_blank"></lightning-formatted-url>
+                                to open the object setup, and click "New" in the Apex Sharing Reasons related list to create one.
+                                Once this is set up, click refresh above to update the options
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
         </div>
     </div>
+
 </template>

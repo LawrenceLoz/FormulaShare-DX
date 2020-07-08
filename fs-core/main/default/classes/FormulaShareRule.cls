@@ -45,6 +45,7 @@ public inherited sharing class FormulaShareRule {
     public String childObjectSharedToFieldType;
     public String label;
     public String developerName;
+    public String description;
 
     // Return a populated share record with appropriate values for this rule and a record and user combination
 	public SObject getShareRecord(Schema.SObjectType type, Id recordId, Id sharedTo) {

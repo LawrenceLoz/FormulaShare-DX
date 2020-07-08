@@ -1,8 +1,13 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
+import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getClassicDomain from '@salesforce/apex/FormulaShareUtilities.getClassicDomain';
+import getSharingReasons from '@salesforce/apex/FormulaShareUtilities.getSharingReasons';
+import { refreshApex } from '@salesforce/apex';
 
 export default class FormulaShareRuleDetailAccess extends LightningElement {
-    
+
+    infoCloudLogo = infoCloud;
+
     @api
     get internalSharingModel() {
         return this._internalSharingModel;
@@ -26,6 +31,12 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     @api
     get sharedObjectLabel() {}
     set sharedObjectLabel(value) {
+
+        // Clear fields if shared object is updated
+        if(this._sharedObjectLabel && this._sharedObjectLabel != value) {
+            this.updateAccessLevel(null);
+            this.updateSharingReason(null);
+        }
         this._sharedObjectLabel = value;
         this.updateAccessLevelOptions();
     }
@@ -39,9 +50,23 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
     _sharedObjectId;
 
+    @api sharedObjectApiName;
     @api isCustom;
     @api accessLevel;
     @api sharingReason;
+
+    @api
+    checkValidity() {
+        var arr = JSON.stringify([...this.template.querySelectorAll('lightning-input')]);
+        console.log(arr);
+
+        const allValid = [...this.template.querySelectorAll('lightning-input')]
+            .reduce((validSoFar, inputCmp) => {
+                        inputCmp.reportValidity();
+                        return validSoFar && inputCmp.checkValidity();
+            }, true);
+        return allValid;
+    }
 
     @track sharingReasonsHelpBox = false;
     toggleSharingReasonsHelpBox() {
@@ -75,10 +100,9 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         
         if(this._internalSharingModel && this._externalSharingModel && this._sharedObjectLabel) {
             var options = [];
-            options.push( { label: 'Read/Write', value: 'Edit' } );
     
             // Include Read Only option if either internal or external OWD is private
-            if(this._internalSharingModel === 'Private' || this._externalSharingModel === 'Private' || this.accessLevel === 'Read') {
+            if(this._internalSharingModel === 'Private' || this._externalSharingModel === 'Private') {
                 options.push( { label: 'Read Only', value: 'Read' } );
                 this.accessLevelHelpText = null;
                 this.accessLevelIsReadOnly = false;
@@ -88,14 +112,22 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
             else {
                 this.accessLevelIsReadOnly = true;
                 this.accessLevelHelpText = 'Access level must be more permissive than the organisation-wide default, which is set to Public Read Only for ' + this._sharedObjectLabel;
-                this.accessLevel = 'Edit';
+                this.updateAccessLevel('Edit');
             }
+
+            // Always include Read/Write as an option
+            options.push( { label: 'Read/Write', value: 'Edit' } );
+
             this.accessLevelOptions = options;
         }
     }
 
     handleAccessLevelChange(event) {
-        this.accessLevel = event.detail.value;
+        this.updateAccessLevel(event.detail.value);
+    }
+
+    updateAccessLevel(value) {
+        this.accessLevel = value;
         const evt = new CustomEvent('accesslevelchange', {
             detail: this.accessLevel
         });
@@ -103,11 +135,83 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
 
     handleSharingReasonChange(event) {
-        this.sharingReason = event.detail.value;
+        this.updateSharingReason(event.detail.value);
+    }
+
+    updateSharingReason(value) {
+        this.sharingReason = value;
         const evt = new CustomEvent('sharingreasonchange', {
             detail: this.sharingReason
         });
         this.dispatchEvent(evt);
+    }
+
+
+//    // Check that a share record can be instantiated with this reason
+//    handleSharingReasonValidation(event) {
+//        console.log('event '+JSON.stringify(event));
+//
+//        console.log('id and reason ' + this.sharedObjectApiName, this.sharingReason);
+//
+//        validateShareable({ objectApiName : this.sharedObjectApiName, sharingReason : this.sharingReason})
+//        .then((isShareable) => {
+//            console.log('isShareable '+isShareable);
+//
+//            // Find attribute by custom data-* attribtue as this is available in the DOM
+//            let sharingReasonField = this.template.querySelector("[data-id='sharingReason']");
+//
+//            // Show error if share cannot be created with this reason
+//            if(isShareable) {
+//                console.log('setting valitity');
+//                sharingReasonField.setCustomValidity("No sharing reason found with this name");
+//                sharingReasonField.reportValidity();
+//            }
+//
+//            else {
+//                sharingReasonField.setCustomValidity('');
+//                sharingReasonField.reportValidity();
+//            }
+//        })
+//        .catch(error => {
+//            console.log('Error checking shareable ',JSON.stringify(error));
+//        });
+//        
+//    }
+
+    @track oneOrMoreReasons;
+    @track sharingReasonOptions = [];
+    @track loadingReasons = true;
+    reasons;
+    @wire(getSharingReasons, { objectApiName : '$sharedObjectApiName'} )
+    wiredSharingReasons(value) {
+        this.reasons = value;
+        const { data, error } = value;
+        if(data) {
+            console.log('retrieved options: '+JSON.stringify(data));
+
+            this.sharingReasonOptions = [];
+            this.oneOrMoreReasons = false;
+
+            for(var key in data) {
+                this.oneOrMoreReasons = true;
+                const option = {
+                    value: key,
+                    label: data[key]
+                };
+                this.sharingReasonOptions.push(option);
+            }
+            this.loadingReasons = false;
+        }
+    }
+    
+    
+    refreshReasons() {
+        console.log('Getting more reasons');
+        this.loadingReasons = true;
+        refreshApex(this.reasons)
+        .then(() => {
+            this.loadingReasons = false;
+        });
     }
 
 }

@@ -1,17 +1,22 @@
 <template>
+
     <lightning-tree-grid 
         data={treeItems} 
         columns={columns} 
         key-field="key" 
-        hide-checkbox-column = "true" 
+        hide-checkbox-column="true" 
         onrowaction={handleRowAction}
         expanded-rows={currentExpanded}>
     </lightning-tree-grid>
+    <template if:true={processingLoad}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
 
     <template if:true={openModal}>
         <c-formula-share-rule-edit 
             rule-id={rowRuleId}
-            onclose={closeModal}>
+            onclose={closeModal}
+            onruleupdated={handleRuleUpdated}>
         </c-formula-share-rule-edit>
     </template>
 </template>

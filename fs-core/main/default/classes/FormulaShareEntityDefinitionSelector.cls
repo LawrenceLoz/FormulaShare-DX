@@ -40,6 +40,17 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
         return entities;
     }
 
+    public List<EntityDefinition> getEntitiesForApiNames(List<String> objectApiNames) {
+        List<EntityDefinition> entities = [
+            SELECT QualifiedApiName, DurableId
+                , IsApexTriggerable, IsCustomizable, IsLayoutable
+            FROM EntityDefinition
+            WHERE QualifiedApiName IN :objectApiNames
+            WITH SECURITY_ENFORCED];
+
+        return entities;
+    }
+
     public List<EntityDefinition> getAllShareable() {
         List<EntityDefinition> entities = [
             SELECT QualifiedApiName, DurableId, Label, PluralLabel, InternalSharingModel

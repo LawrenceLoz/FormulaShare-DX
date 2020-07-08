@@ -1,13 +1,12 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
-import submitForEdit from '@salesforce/apex/FormulaShareRuleDMLController.submitForEdit';
+import submitForCreate from '@salesforce/apex/FormulaShareRuleDMLController.submitForCreate';
 
 
-export default class FormulaShareRuleEdit extends LightningElement {
-    @api ruleId;
+export default class FormulaShareRuleCreate extends LightningElement {
     ruleDetails;
-    @track processingEdit = false;
+    @track processing = false;
 
     updateRule(event) {
         this.ruleDetails = event.detail;
@@ -16,27 +15,27 @@ export default class FormulaShareRuleEdit extends LightningElement {
     // Subcribes to list platform event, and refresh treegrid each time event is received
     connectedCallback() {
         const messageCallback = (response) => {
-            this.processingEdit = false;
+            this.processing = false;
             if(response.data.payload.Successful__c) {
-                console.log('Update Successful');
+                console.log('Create Successful');
                 this.dispatchEvent(
                     new ShowToastEvent({
-                        title: 'FormulaShare Rule updated',
+                        title: 'FormulaShare Rule created',
                         variant: 'success'
                     })
                 );
 
                 // Fire event to refresh list view and cloe modal
-                const evt = new CustomEvent('ruleupdated');
+                const evt = new CustomEvent('rulecreated');
                 this.dispatchEvent(evt);
                 this.closeModal();
             }
 
             else {
-                console.log('Update Failed');
+                console.log('Create Failed');
                 this.dispatchEvent(
                     new ShowToastEvent({
-                        title: 'Update Failed',
+                        title: 'Create Failed',
                         message: response.data.payload.Error__c,
                         variant: 'error'
                     })
@@ -60,13 +59,13 @@ export default class FormulaShareRuleEdit extends LightningElement {
         console.log('allValid '+ allValid);
 
         console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
-        this.processingEdit = true;
-        submitForEdit({ fsRuleString : JSON.stringify(this.ruleDetails) })
+        this.processing = true;
+        submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
             .then(() => {
                 console.log('submitted fsRuleString');
             })
             .catch(error => {
-                this.processingEdit = false;
+                this.processing = false;
                 console.log('Error saving rule: '+error);
                 this.dispatchEvent(
                     new ShowToastEvent({

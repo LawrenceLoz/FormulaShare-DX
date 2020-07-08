@@ -22,6 +22,8 @@
 
 public with sharing class FormulaShareRuleDetailController {
 
+    public class FSRuleException extends Exception {}
+
     public static List<ShareableObject> shareableObjects = new List<ShareableObject>();
 
     @AuraEnabled(cacheable=true)
@@ -39,11 +41,7 @@ public with sharing class FormulaShareRuleDetailController {
 
     @AuraEnabled(cacheable=true)
     public static Map<String,String> getFieldApiNames(List<String> fieldEntityIds){
-        List<FieldDefinition> fieldDefs = [
-            SELECT QualifiedApiName, DurableId
-            FROM FieldDefinition
-            WHERE DurableId IN :fieldEntityIds
-            WITH SECURITY_ENFORCED];
+        List<FieldDefinition> fieldDefs = FormulaShareFieldDefinitionSelector.construct().getFieldsForIds(fieldEntityIds);
         
         Map<String,String> fieldApiNamesMap = new Map<String,String>();
         for(FieldDefinition fd : fieldDefs) {
@@ -115,6 +113,19 @@ public with sharing class FormulaShareRuleDetailController {
             ShareFieldOption sfo = new shareFieldOption();
             sfo.fieldApiName = fieldDesc.getName();
             sfo.fieldLabel = fieldDesc.getLabel();
+            sfo.formula = fieldDesc.getCalculatedFormula();
+
+            switch on String.valueOf(fieldDesc.getType()) {
+                when 'STRING' {
+                    sfo.type = sfo.formula != null ? 'Formula' : 'Text';
+                }
+                when 'PICKLIST' {
+                    sfo.type = 'Picklist';
+                }
+                when 'REFERENCE' {
+                    sfo.type = 'Id';
+                }
+            }
 
             // If field is a lookup or a record id, set isIdType
             Schema.DisplayType fieldType = fieldDesc.getType();
@@ -125,6 +136,39 @@ public with sharing class FormulaShareRuleDetailController {
         }
 
         return sfoList;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static String getSampleData(String objectApiName, String fieldApiName) {
+        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(objectApiName);
+        Schema.SOBjectField field = FormulaShareUtilities.getSObjectFieldFromName(fieldApiName, type);
+        Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};
+
+        // Call selector method to retrieve sample data, and concatenate to a single string
+        FormulaShareSObjectsSelector soSelector = new FormulaShareSObjectsSelector(true, type, fieldSet);
+        List<String> sampleList;
+        try {
+            sampleList = soSelector.selectSampleData(100);
+        }
+
+        // If we encountered an exception due to field access, throw exception with custom message
+        catch (fflib_SecurityUtils.FlsException e) {
+            // Use the fflibs message ("You do not have permission to read the field field__c on object__c")
+            String errorMessage = e.getMessage() + '. You can still set up the rule, but the batch job must run under a user with field level security access';
+            throw new FSRuleException(errorMessage);
+        }
+        String concatString = '';
+        if(sampleList.isEmpty()) {
+            concatString = 'Nothing populated yet';
+        }
+        else {
+            for(String sample : sampleList) {
+                concatString += '"'+ sample +'", ';
+            }
+            concatString = concatString.left(concatString.length() - 2);
+        }
+
+        return concatString;
     }
 
     public class ShareableObject {
@@ -154,7 +198,11 @@ public with sharing class FormulaShareRuleDetailController {
         @AuraEnabled
         public String fieldLabel {get;set;}
         @AuraEnabled
+        public String type {get;set;}
+        @AuraEnabled
         public Boolean isIdType {get;set;}
+        @AuraEnabled
+        public String formula {get;set;}
     }
 
 }

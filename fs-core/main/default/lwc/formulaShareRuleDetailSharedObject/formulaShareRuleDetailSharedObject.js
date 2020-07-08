@@ -1,8 +1,11 @@
 import { LightningElement, track, api, wire } from 'lwc';
+import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getShareableObjects from '@salesforce/apex/FormulaShareRuleDetailController.getShareableObjects';
 import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
 
 export default class FormulaShareRuleDetailSharedObject extends LightningElement {
+
+    infoCloudLogo = infoCloud;
 
     @api
     get sharedObjectApiName() {

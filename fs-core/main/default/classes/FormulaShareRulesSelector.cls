@@ -59,7 +59,7 @@ public inherited sharing class FormulaShareRulesSelector {
             Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
             Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
 			FROM FormulaShare_Rule__mdt
 			WHERE Object_Shared__r.QualifiedApiName = :objectName];
         }
@@ -82,7 +82,7 @@ public inherited sharing class FormulaShareRulesSelector {
             Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
             Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
 			FROM FormulaShare_Rule__mdt
 			WHERE Child_Object_with_Shared_To_Field__c = null
             AND Object_Shared__r.QualifiedApiName = :objectName];
@@ -104,7 +104,7 @@ public inherited sharing class FormulaShareRulesSelector {
             Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
             Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
 			FROM FormulaShare_Rule__mdt
 			WHERE Child_Object_with_Shared_To_Field__c != null 
             AND Child_Object_with_Shared_To_Field__r.QualifiedApiName = :objectName];
@@ -125,7 +125,7 @@ public inherited sharing class FormulaShareRulesSelector {
             Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
             Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
 			FROM FormulaShare_Rule__mdt];
 
 		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
@@ -136,7 +136,7 @@ public inherited sharing class FormulaShareRulesSelector {
 
     // Returns details of a single rule matching a supplied id
     // Used by FormulaShareRuleDetail LWC
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static FormulaShare_Rule__mdt getSpecificRule(Id ruleId) {
 
         FormulaShare_Rule__mdt rule = [SELECT Id, Access_Level__c, 
@@ -146,7 +146,7 @@ public inherited sharing class FormulaShareRulesSelector {
             Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
             Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName
+            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
 			FROM FormulaShare_Rule__mdt WHERE Id = :ruleId WITH SECURITY_ENFORCED LIMIT 1];
 
 		return rule;
@@ -178,6 +178,7 @@ public inherited sharing class FormulaShareRulesSelector {
             rule.childObjectSharedToFieldLabel = ruleInScope.Child_Object_Shared_To_Field__r.MasterLabel;
             rule.label = ruleInScope.MasterLabel;
             rule.developerName = ruleInScope.DeveloperName;
+            rule.description = ruleInScope.Description__c;
 
 			rulesToReturn.add(rule);
 		}
