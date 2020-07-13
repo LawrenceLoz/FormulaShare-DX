@@ -22,24 +22,26 @@
 public with sharing class FormulaShareRuleDMLController {
 
     @AuraEnabled
-    public static void submitForCreate(String fsRuleString){
+    public static Id submitForCreate(String fsRuleString){
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
         rule.Active__c = true;      // Create all new rules as active
 
         Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
         ruleMap.put(rule.DeveloperName, rule);
 
-        FormulaShareRulesMetadataDMLService.createRules(ruleMap, 'edit');
+        Id jobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(ruleMap, 'create');
+        return jobId;
     }
 
     @AuraEnabled
-    public static void submitForEdit(String fsRuleString) {
+    public static Id submitForEdit(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
 
         Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
         ruleMap.put(rule.DeveloperName, rule);
 
-        FormulaShareRulesMetadataDMLService.updateRules(ruleMap, 'edit');
+        Id jobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(ruleMap, 'edit');
+        return jobId;
     }
 
     private static FormulaShare_Rule__mdt ruleStringToRule(String fsRuleString) {
@@ -71,31 +73,32 @@ public with sharing class FormulaShareRuleDMLController {
         return rule;
     }
 
-//        String ruleLabel":"Share Programmes to Donation Owner","ruleName":"Share_Programmes_to_Donation_Owner","ruleActive":false,"sharedObjectApiName":"Programme__c","sharedObject":{"detailUrl":"/{ID}","externalSharingModel":"Private","internalSharingModel":"Read","isCustom":true,"objectApiName":"Programme__c","objectId":"01I7E000000wZvu","objectLabel":"Programme","pluralLabel":"Programmes"},"ruleType":"child","relatedObjectSelected":"Donation__c&#124;Programme_to_Support__c","shareField":"OwnerId","shareWith":"Users","shareFieldType":"Id","accessLevel":"Edit","sharingReason":"Owner_of_Donations__c"}
+    @TestVisible
     private class ComponentRule {
-        String ruleLabel;
-        String ruleName;
-        String ruleDescription;
-        Boolean ruleActive;
-        String sharedObjectApiName;
-        ComponentSharedObject sharedObject;
-        String ruleType;
-        String relatedObjectSelected;
-        String shareField;
-        String shareWith;
-        String shareFieldType;
-        String accessLevel;
-        String sharingReason;
+        @TestVisible String ruleLabel;
+        @TestVisible String ruleName;
+        @TestVisible String ruleDescription;
+        @TestVisible Boolean ruleActive;
+        @TestVisible String sharedObjectApiName;
+        @TestVisible ComponentSharedObject sharedObject;
+        @TestVisible String ruleType;
+        @TestVisible String relatedObjectSelected;
+        @TestVisible String shareField;
+        @TestVisible String shareWith;
+        @TestVisible String shareFieldType;
+        @TestVisible String accessLevel;
+        @TestVisible String sharingReason;
     }
 
+    @TestVisible
     private class ComponentSharedObject {
-        String detailUrl;
-        String externalSharingModel;
-        String internalSharingModel;
-        Boolean isCustom;
-        String objectApiName;
-        String objectId;
-        String objectLabel;
-        String pluralLabel;
+        @TestVisible String detailUrl;
+        @TestVisible String externalSharingModel;
+        @TestVisible String internalSharingModel;
+        @TestVisible Boolean isCustom;
+        @TestVisible String objectApiName;
+        @TestVisible String objectId;
+        @TestVisible String objectLabel;
+        @TestVisible String pluralLabel;
     }
 }

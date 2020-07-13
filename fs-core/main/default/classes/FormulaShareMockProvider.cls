@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-@isTest
+@IsTest
 public inherited sharing class FormulaShareMockProvider implements System.StubProvider {
     
     public Object handleMethodCall(Object stubbedObject, String stubbedMethodName, 
@@ -54,13 +54,14 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
         // -------------------------- FormulaShareRulesSelector Mocks ----------------------------- //
 
-        else if(stubbedMethodName == 'getRulesSharingObject') {
+        else if(stubbedMethodName == 'getRulesSharingObject' || stubbedMethodName == 'getAllRules') {
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
             // Will add a sharing record for the role and subordinates group for the role name in Context__c field
             FormulaShareRule roleSubRule = new FormulaShareRule();
             roleSubRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             roleSubRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            roleSubRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
             roleSubRule.active = true;
             roleSubRule.sharedToFieldType = 'Name';
             roleSubRule.accessLevel = 'Read';
@@ -72,6 +73,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule roleRule = new FormulaShareRule();
             roleRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             roleRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            roleRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
             roleRule.active = true;
             roleRule.sharedToFieldType = 'Id';
             roleRule.accessLevel = 'Edit';
@@ -83,6 +85,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule groupRule = new FormulaShareRule();
             groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            groupRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
             groupRule.active = true;
             groupRule.sharedToFieldType = 'Name';
             groupRule.accessLevel = 'Edit';
@@ -94,6 +97,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule userRule = new FormulaShareRule();
             userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
             userRule.active = true;
             userRule.sharedToFieldType = 'Id';
             userRule.accessLevel = 'Edit';
@@ -105,6 +109,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule childUserRule = new FormulaShareRule();
             childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
             childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            childUserRule.childObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
             childUserRule.active = true;
             childUserRule.accessLevel = 'Edit';
             childUserRule.shareWith = 'Users';
@@ -252,7 +257,13 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return null;
         }
 
+        // -------------------- FormulaShareRulesMetadataDMLService Mocks ------------------- //
+
+        else if(stubbedMethodName == 'submitForDml') {
+            return UserInfo.getUserId();
+        }
 
         else return null;
     }
+
 }

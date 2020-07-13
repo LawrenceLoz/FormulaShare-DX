@@ -90,4 +90,56 @@ public with sharing class FormulaShareUtilitiesTest {
         system.assertEquals(null, idStringFromNull);        // Checks that static implementation returns null if passed null
     }
 
+
+    @IsTest
+    public static void checkChildRelationships() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        List<FormulaShareUtilities.ChildRelationshipDetails> crds = FormulaShareUtilities.getChildRelationships(prefix + 'FormulaShare_Log__c');
+        Boolean foundRibRelationship = false;
+        for(FormulaShareUtilities.ChildRelationshipDetails crd : crds) {
+            if(crd.childObjectApiName.contains('FormulaShare_Rule_in_Batch__c')) {
+                System.assert(crd.childFieldApiName.contains('FormulaShare_Log__c'), 'Relationship name is different to the one expected');
+                foundRibRelationship = true;
+            }
+        }
+        System.assert(foundRibRelationship, 'Didnt find the relationship with FS rules in batch');
+    }
+
+
+    @IsTest
+    public static void checkGetShareFields() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        List<Schema.SObjectField> fields = FormulaShareUtilities.getShareFields(prefix + 'FormulaShare_Log__c');
+
+        // Check a user lookup and a text field are both included, but lookup to another object isn't
+        Boolean foundUser = false;
+        Boolean foundText = false;
+        Boolean foundOtherLookup = false;
+        for(Schema.SObjectField field : fields) {
+            if(field.getDescribe().getName().contains('LastModifiedById')) foundUser = true;
+            if(field.getDescribe().getName().contains('Class_Name__c')) foundText = true;
+            if(field.getDescribe().getName().contains('Related_Log_Required_for_Test_Class__c')) foundOtherLookup = true;
+        }
+
+        System.assert(foundUser, 'Didnt find user lookup');
+        System.assert(foundText, 'Didnt find text lookup');
+        System.assert(!foundOtherLookup, 'Other lookup also returned');
+    }
+
+
+    @IsTest
+    public static void testGetSharingReasons() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        Map<String,String> reasons = FormulaShareUtilities.getSharingReasons(prefix + 'FormulaShare_Log__c');
+
+        Boolean foundReason = false;
+        for(String key : reasons.keySet()) {
+            if(key.contains('FormulaShare_Log_Share__c')) {
+                foundReason = true;
+                System.assertEquals('FormulaShare Log Share', reasons.get(key), 'Label mismatch');
+            }
+        }
+        System.assert(foundReason, 'Didnt find FormulaShare Log Share sharing reason');
+    }
+
 }

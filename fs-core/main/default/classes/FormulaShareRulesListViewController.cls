@@ -24,7 +24,7 @@ public with sharing class FormulaShareRulesListViewController {
     static Map<String,FormulaShareRule> rulesMap = new Map<String,FormulaShareRule>();
     
     @AuraEnabled(cacheable=true)
-    public static List<ObjectRulesWrapper> getTreeGridData(){
+    public static List<ObjectRulesWrapper> getTreeGridData() {
 
         List<FormulaShareRule> rules = FormulaShareRulesSelector.construct().getAllRules();
 
@@ -63,7 +63,7 @@ public with sharing class FormulaShareRulesListViewController {
             }
         }
 
-        for(FormulaShareRule rule : rules){
+        for(FormulaShareRule rule : rules) {
             rulesMap.put(rule.developerName, rule);
             
             List<RuleWrapper> rwList;
@@ -90,6 +90,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
             rw.active = rule.active;
+            rw.sharedObjectClass = 'slds-tree__item';
 
             // Set URL for shared to field if populated
             if(!String.isBlank(rule.sharedToTokenForRuleType) && rule.sharedToTokenForRuleType.contains('.')) {
@@ -114,7 +115,16 @@ public with sharing class FormulaShareRulesListViewController {
 
             else {
                 FormulaShareRuleInBatchSelector.RuleRunDetail runDetail = ruleRunDetailMap.get(rw.developerName);
-                rw.lastCalcStatus = runDetail.batchFinishComplete ? runDetail.processingFinished.format() : 'In Progress';
+                if(runDetail.batchFinishComplete) {
+                    rw.lastCalcStatus = runDetail.processingFinished.format();
+                }
+
+                // If currently processing, indicate this against the field
+                else {
+                    rw.lastCalcStatus = 'Processing...';
+                    rw.iconName = 'standard:today';
+                    rw.iconAlt = 'Currently Processing';
+                }
             }
 
             rwList.add(rw);
@@ -141,8 +151,8 @@ public with sharing class FormulaShareRulesListViewController {
             orw.items = rwList;
             system.debug('rwList'+ rwList);
             orw.objectApiName = objectName;
-            orw.isParentRow = true;
-//            orw.icon = 'utility:success';
+//            orw.isParentRow = true;
+            orw.sharedObjectClass = 'slds-tree__item slds-text-title_caps';
             orwList.add(orw);
         }
 
@@ -176,7 +186,7 @@ public with sharing class FormulaShareRulesListViewController {
         rule.Active__c = type == 'activate' ? true : false;
         fsRulesMap.put(ruleName, rule);
 
-        Id asyncJobId = FormulaShareRulesMetadataDMLService.updateRules(fsRulesMap, type);
+        Id asyncJobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(fsRulesMap, type);
         system.debug('Metadata deployment job ID : '+asyncJobId);
     }
 
@@ -197,7 +207,7 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String tableLabel {get;set;}
         @AuraEnabled
-        public Boolean isParentRow {get;set;}
+        public Boolean isParentRow = true;
         @AuraEnabled
         public String objectApiName {get;set;}
         @AuraEnabled
@@ -205,14 +215,9 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public List<RuleWrapper> items {get;set;}
         @AuraEnabled
-        public String icon {get;set;}
+        public String sharedObjectClass {get;set;}
     }
-/*
-    public class iconInfo {
-        @AuraEnabled
-        public String icon = 'utility:clock';
-    }
-*/
+
     public class RuleWrapper {
         @AuraEnabled
         public String key {get;set;}
@@ -223,7 +228,7 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String developerName {get;set;}
         @AuraEnabled
-        public Boolean isParentRow {get;set;}
+        public Boolean isParentRow = false;
         @AuraEnabled
         public String controllingObject {get;set;}
         @AuraEnabled
@@ -245,6 +250,10 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String lastCalcStatus {get;set;}
         @AuraEnabled
-        public List<RuleWrapper> items {get;set;}
+        public String sharedObjectClass {get;set;}
+        @AuraEnabled
+        public String iconName {get;set;}
+        @AuraEnabled
+        public String iconAlt {get;set;}
     }
 }

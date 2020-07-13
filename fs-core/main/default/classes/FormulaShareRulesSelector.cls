@@ -24,6 +24,7 @@ public inherited sharing class FormulaShareRulesSelector {
     public static FormulaShareRulesSelector mock;
     public static FormulaShareRulesSelector construct() {
         if(Test.isRunningTest() && mock != null ) {
+            system.debug('Mock requested: '+mock);
             return mock;
         }
         else {

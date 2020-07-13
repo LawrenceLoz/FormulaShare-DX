@@ -188,8 +188,6 @@ public with sharing class FormulaShareRuleDetailController {
         public String externalSharingModel {get;set;}
         @AuraEnabled
         public Boolean isCustom {get;set;}
-        @AuraEnabled
-        public List<FormulaShareUtilities.ChildRelationshipDetails> childRelationships {get;set;}
     }
 
     public class ShareFieldOption {

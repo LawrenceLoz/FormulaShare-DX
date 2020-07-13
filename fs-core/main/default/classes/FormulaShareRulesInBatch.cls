@@ -24,12 +24,12 @@ public inherited sharing class FormulaShareRulesInBatch extends fflib_SObjectDom
     public FormulaShareRulesInBatch(List<FormulaShare_Rule_in_Batch__c> sObjectList) {
         super(sObjectList);
     }
-
+/*
     public class Constructor implements fflib_SObjectDomain.IConstructable {
         public fflib_SObjectDomain construct(List<SObject> sObjectList) {
             return new FormulaShareRulesInBatch(sObjectList);
         }
-    }
+    }   */
 
     public List<FormulaShare_Rule_in_Batch__c> insertRulesInBatch() {
         List<FormulaShare_Rule_in_Batch__c> ribs = (List<FormulaShare_Rule_in_Batch__c>) Records;
