@@ -41,6 +41,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     _ruleId;
 
     @api isEdit;
+    @api shareWith;
 
     @track rule = {"Id":"m057E0000005OHSQA2","Access_Level__c":"Edit","Object_Shared__c":"01I7E00000108uj","Shared_To__c":"01I7E00000108uj.00N7E000009M1fs","Share_With__c":"Public Groups","Sharing_Reason__c":"Thematic_Area_Coordination_Group__c","Active__c":true,"Shared_To_Field_Type__c":"Name","Child_Object_Shared_To_Field_Type__c":"Id","MasterLabel":"Share to Theme Coordination Group","DeveloperName":"Share_to_Theme_Coordination_Group","Object_Shared__r":{"QualifiedApiName":"Donation__c","MasterLabel":"Donation","Id":"000000000000000AAA","DurableId":"01I7E00000108uj"},"Shared_To__r":{"QualifiedApiName":"Thematic_Area_Coordination_Group__c","MasterLabel":"Thematic Area Coordination Group","Id":"000000000000000AAA","DurableId":"01I7E00000108uj.00N7E000009M1fs"}};
     @track ruleLabel;
@@ -53,7 +54,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @track ruleType;
     @track relatedObjectSelected;   // Holds object|lookupField
     @track shareField;
-    @track shareWith;
     @track shareFieldType;
     @track accessLevel;
     @track sharingReason;
@@ -200,16 +200,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
         const evt = new CustomEvent('ruledetail', { detail: ruleDetails });
         this.dispatchEvent(evt);
-    }
-
-    // Populate share with in component if it's populated with something, otherwise default to Users
-    get shareWithPlusDefault() {
-        if(this.shareWith) {
-            return this.shareWith;
-        }
-        else {
-            return 'Users';
-        }
     }
 
     //--------------------- Event handlers for NameLabel component --------------------// 

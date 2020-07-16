@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 
 export default class FormulaShareRulesPage extends LightningElement {
     openNewRuleModal = false;
@@ -14,5 +14,12 @@ export default class FormulaShareRulesPage extends LightningElement {
     @track refreshList = false;
     handleRuleCreated() {
         this.refreshList = true;
+    }
+
+    @track noRules;
+    @track pluralise = 's';
+    handleRulesLoad(event) {
+        this.noRules = event.detail;
+        if(this.noRules === 1) this.pluralise = '';
     }
 }

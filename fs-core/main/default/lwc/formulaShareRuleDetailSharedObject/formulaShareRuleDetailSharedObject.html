@@ -5,6 +5,8 @@
         value={sharedObjectApiName}
         placeholder="Select Object"
         options={shareableObjectOptions}
+        onopen={handleSharedObjectOpen}
+        onblur={handleClickedOut}
         onchange={handleSharedObjectChange}></lightning-combobox>
 <!--    </template> -->
 
@@ -23,6 +25,11 @@
                 </div>
             </div>
         </div>
+    </template>
+
+    <!-- Add padding below dropdown if it's not populated -->
+    <template if:true={sharedObjectOpen}>
+        <div style="padding-bottom: 400px"></div>
     </template>
     
 </template>

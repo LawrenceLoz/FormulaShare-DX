@@ -1,4 +1,5 @@
 <template>
+    <div>
 
     <lightning-tree-grid 
         data={treeItems} 
@@ -11,6 +12,8 @@
     <template if:true={processingLoad}>
         <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
     </template>
+
+    </div>
 
     <template if:true={openModal}>
         <c-formula-share-rule-edit 

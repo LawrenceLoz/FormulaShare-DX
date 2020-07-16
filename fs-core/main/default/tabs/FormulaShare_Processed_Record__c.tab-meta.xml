@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <description>Contains logs of records which have recently been assessed for creation or removal of sharing</description>
+    <motif>Custom7: Square</motif>
+</CustomTab>

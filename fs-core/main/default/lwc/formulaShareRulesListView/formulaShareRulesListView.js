@@ -7,40 +7,86 @@ import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewContro
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 
 export default class TreeGrid extends LightningElement {
-    
-    @track data = [];
-    @track columns = [
-        {type: 'text', fieldName: 'tableLabel', label: 'Shared Object'
-//        , initialWidth: 150
-    },
-        {type: 'text', fieldName: 'shareWith', label: 'Share With', sortable: true
-//        , initialWidth: 150
-    },
-        {type: 'url', fieldName:'sharedToLink', label:'Specified in Field', 
-//        initialWidth: 250,
-            typeAttributes: {label: {fieldName:'sharedToLinkLabel'}, target:'_blank'} },
-        {type: 'text', fieldName: 'controllingObject', label: 'On Object'
-//        , initialWidth: 150
-    },
-        {type: 'text', fieldName: 'accessLevel', label: 'Access'
-//        , initialWidth: 75
-    },
-//        {type: 'text', fieldName: 'sharingReason', label: 'Sharing Reason'
-//        , initialWidth: 200
-//    },
-        {type: 'text', fieldName: 'lastCalcStatus', label: 'Last Full Assessment'
-        , initialWidth: 160
-    },
-        {type: 'boolean', fieldName: 'active', label: 'Active'
-        , initialWidth: 75
-    },
-        {type: 'action', typeAttributes: {rowActions: this.getRowActions} }
-    ];
 
+    @track data = [];
+    @track columns = [];
+
+    w0;
+    w1;
+    w15;
+    w2;
+    w3;
+    w4;
+    w5;
+    setWidths() {
+        if(this.template.querySelector('div')) {
+            var el = this.template.querySelector('div');
+            var windowWidth = el.clientWidth;
+            this.w1 = windowWidth / 13;
+            this.w15 = this.w1*1.5
+            this.w2 = this.w1*1.8;
+            this.w3 = this.w1*2.5;
+            this.w4 = this.w1*3;
+            this.w5 = this.w1*3.5;
+            this.w0 = this.w1*0.7;
+            console.log('width '+ windowWidth+ ' w1: '+this.w1 + ' w2 '+this.w2);
+            refreshApex(this.provisionedValue);
+        }
+    }
+
+    setColumns() {
+        this.columns = [
+            {type: 'text'
+                , fieldName: 'tableLabel'
+                , label: 'Object and Rule'
+                , cellAttributes: {class: {fieldName: 'sharedObjectClass'} }
+//                , typeAttributes: {label: {fieldName:'tableLabel'}, target: '_blank', tooltip: 'Click to open'}
+                , initialWidth: this.w5
+            },
+            {type: 'text'
+                , fieldName: 'shareWith'
+                , label: 'Shares With'
+                , sortable: true
+                , initialWidth: this.w15
+            },
+            {type: 'url'
+                , fieldName:'sharedToLink'
+                , label:'Specified in Field'
+                , typeAttributes: {label: {fieldName:'sharedToLinkLabel'}, target:'_blank', tooltip: 'Open field in setup menu'}
+                , initialWidth: this.w3
+            },
+            {type: 'text'
+                , fieldName: 'controllingObject'
+                , label: 'On Object'
+                , initialWidth: this.w15
+            },
+            {type: 'text'
+                , fieldName: 'accessLevel'
+                , label: 'Access'
+                , initialWidth: this.w0
+            },
+        //        {type: 'text', fieldName: 'sharingReason', label: 'Sharing Reason'
+        //        , initialWidth: 200
+        //    },
+            {type: 'text'
+                , fieldName: 'lastCalcStatus'
+                , label: 'Last Full Assessment'
+                , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
+                , initialWidth: this.w2
+            },
+            {type: 'boolean'
+                , fieldName: 'active'
+                , label: 'Active'
+                , initialWidth: this.w0
+            },
+            {type: 'action'
+                , typeAttributes: {rowActions: this.getRowActions} 
+            }
+        ];
+
+    }
 
     // Core method to load treegrid data from handler
-    refreshReason;
-    refreshObjectLabel;
     provisionedValue;
     firstLoad = true;
     @track treeItems;
@@ -61,19 +107,19 @@ export default class TreeGrid extends LightningElement {
         this.provisionedValue = value;
 
         if (data) {
+            if(!this.w1) this.setWidths();   // Set all width variables if not set already
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
             console.log('this.treeItems: '+JSON.stringify(this.treeItems));
             console.log('loading data');
 
+            this.setColumns();
+            this.countRows(tempjson);
+
             if(this.firstLoad) {
                 this.expandAllRows(tempjson);
                 this.manageRefreshEvents();     // Subscribe to event channel
                 this.firstLoad = false;
-            }
-
-            else {
-                this.notifyDataUpdates();   // Pop toast with details of update
             }
 
             this.processingLoad = false;
@@ -84,6 +130,24 @@ export default class TreeGrid extends LightningElement {
             this.showError(error, 'Error fetching data from Salesforce');
         }
     }
+
+
+    countRows(tempjson) {
+        var noRules = 0;
+        for(var i = 0; i < tempjson.length; i++) {
+
+            var children = tempjson[i]._children;
+            for(var j = 0; j < children.length; j++) {
+                noRules++;
+            }
+        }
+
+        const evt = new CustomEvent('ruleload', {
+            detail: noRules
+        });
+        this.dispatchEvent(evt);
+    }
+
 
     // Populate keys into currentExpanded to expand all
     expandAllRows(tempjson) {
@@ -98,45 +162,11 @@ export default class TreeGrid extends LightningElement {
         }
     }
 
-    // Pop notification on data load with what's updated (from refresh reason)
-    notifyDataUpdates() {
-        console.log('refreshReason : '+ this.refreshReason);
-
-        // Set a message to show for activation changes
-        let message;
-        switch (this.refreshReason) {
-            case 'activate':
-                message = 'Rule activated';
-                break;
-            case 'deactivate':
-                message = 'Rule deactivated';
-                break;
-            case 'recalculation':
-                message = 'Full sharing calculation for ' + this.refreshObjectLabel + ' complete';
-                break;
-        }
-        
-        // Display toast if message is populated no modal is open
-        if(message && !this.openModal) {
-            console.log('message :'+ message);
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: message,
-                    variant: 'success'
-                })
-            );
-        }
-
-        this.refreshReason = null;
-        this.refreshObjectLabel = null;
-    }
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
     @track channelName = '/event/FormulaShare_List_Update__e';
     manageRefreshEvents() {
         const messageCallback = (response) => {
-            this.refreshReason = response.data.payload.Type__c;
-            this.refreshObjectLabel = response.data.payload.Object_Label__c;
             refreshApex(this.provisionedValue);
         };
 
@@ -224,16 +254,27 @@ export default class TreeGrid extends LightningElement {
 
         const rowApiName = row['objectApiName'];
         const rowObjectLabel = row['key'];
+
+
+        // Set icons for all rules for this object to show it's recalculating (commented out - treeitem updates don't reflect in tree-grid)
+//        for(var rowNo in this.treeItems) {
+//            console.log('PR '+JSON.stringify(rowNo));
+//            console.log('parentRow.objectApiName === rowApiName '+this.treeItems[rowNo].objectApiName+'row api nmae '+rowApiName);
+//            if(this.treeItems[rowNo].objectApiName === rowApiName) {
+//                for(var ruleRowNo in this.treeItems[rowNo]._children) {
+//                    console.log('Updating row');
+//                    this.treeItems[rowNo]._children[ruleRowNo].iconName = 'standard:today';
+//                    this.treeItems[rowNo]._children[ruleRowNo].iconAlt = 'Now Processing';
+//                    this.treeItems[rowNo]._children[ruleRowNo].lastCalcStatus = 'Now...';
+//                }
+//            }
+//        }
+//        console.log('Updated this.treeItems: '+JSON.stringify(this.treeItems));
+
         recalculateSharing({ objectApiName : rowApiName })
             .then(() => {
                 // Refresh table to reflect processing status
                 refreshApex(this.provisionedValue);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Submitted ' + rowObjectLabel + ' for full sharing calculation',
-                        variant: 'info'
-                    })
-                );
             })
             .catch(error => {
                 console.log('Error submitting for recalculation');
@@ -247,14 +288,7 @@ export default class TreeGrid extends LightningElement {
         const rowDeveloperName = row['developerName'];
         activateDeactivate({ ruleName : rowDeveloperName, type : actionName })
             .then(() => {
-                const actToastTitle = actionName === 'activate' ? 'Queued for activation' : 'Queued for deactivation';
                 this.processingLoad = true;
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: actToastTitle,
-                        variant: 'info'
-                    })
-                );
             })
             .catch(error => {
                 console.log('Error changing activation status');

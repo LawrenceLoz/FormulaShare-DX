@@ -58,7 +58,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         for(String recordName : rulesMap.keySet()) {
             FormulaShare_Rule__mdt fr = rulesMap.get(recordName); 
             Metadata.CustomMetadata rule = new Metadata.CustomMetadata();
-            rule.fullName = FormulaShareTestUtils.getNamespacePrefix() + fullNamePrefix + recordName;
+            rule.fullName = fullNamePrefix + recordName;
             rule.label = fr.MasterLabel;
 
             List<String> fieldNames = new List<String>{

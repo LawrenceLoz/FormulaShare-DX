@@ -1,17 +1,58 @@
 <template>
 
-    <lightning-card title="Next batch scheduled: ">
-        <lightning-button 
-            label="New Rule" 
-            slot="actions"
-            onclick={handleNewRule}>
-        </lightning-button>
-        <div slot="footer" style="text-align:left;">
-            <c-formula-share-rules-list-view
-                refresh-list={refreshList}>
-            </c-formula-share-rules-list-view>
+    <div class="slds-page-header">
+        <div class="slds-page-header__row">
+          <div class="slds-page-header__col-title">
+            <div class="slds-media">
+<!--              <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-standard-custom">
+                  <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+                    <use xlink:href="/assets/icons/standard-sprite/svg/symbols.svg#custom"></use>
+                  </svg>
+                </span>
+              </div>    -->
+              <div class="slds-media__body">
+                <div class="slds-page-header__name">
+                  <div class="slds-page-header__name-title">
+                    <h1>
+                      <span class="slds-page-header__title slds-truncate" title="FormulaShare Rules">
+                        FormulaShare Rules
+                      </span>
+                    </h1>
+                    <p class="slds-page-header__meta-text slds-text-body--small slds-m-top_xxx-small">
+                        {noRules} item{pluralise}
+                    </p>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="slds-page-header__col-actions">
+            <div class="slds-page-header__controls">
+              <div class="slds-page-header__control">
+                <ul class="slds-button-group">
+                    <lightning-button 
+                        class="slds-button"
+                        variant="neutral"
+                        label="New Rule" 
+                        onclick={handleNewRule}>
+                    </lightning-button>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-    </lightning-card>
+<!--        <div class="slds-page-header__row">
+          <div class="slds-page-header__col-meta">
+            <p class="slds-page-header__meta-text slds-text-body--small">{noRules} items</p>
+          </div>
+        </div>  -->
+    </div>
+
+    <c-formula-share-rules-list-view
+        refresh-list={refreshList}
+        onruleload={handleRulesLoad}>
+    </c-formula-share-rules-list-view>
     
     <template if:true={openNewRuleModal}>
         <c-formula-share-rule-create 

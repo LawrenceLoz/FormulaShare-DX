@@ -75,8 +75,20 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             }
         }
 
+
+    // On open, increase height of modal if no previous selection (ensures there's space to see options)
+    sharedObjectOpen = false;
+    handleSharedObjectOpen(event) {
+        if(!this.sharedObject) this.sharedObjectOpen = true;
+    }
+
+    handleClickedOut(event) {
+        this.sharedObjectOpen = false;
+    }
+
     // On change, set shared object details and fire event
     handleSharedObjectChange(event) {
+        this.sharedObjectOpen = false;
         this._sharedObjectApiName = event.detail.value;
         this.sharedObject = this.apiNameToObjectDetailsMap.get(this._sharedObjectApiName);
         this.fireSharedObjectEvent('sharedobjectchange');
