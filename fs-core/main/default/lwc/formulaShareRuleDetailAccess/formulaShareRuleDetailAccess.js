@@ -57,13 +57,10 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
     @api
     checkValidity() {
-        var arr = JSON.stringify([...this.template.querySelectorAll('lightning-input')]);
-        console.log(arr);
-
-        const allValid = [...this.template.querySelectorAll('lightning-input')]
+        const allValid = [...this.template.querySelectorAll('lightning-combobox')]
             .reduce((validSoFar, inputCmp) => {
-                        inputCmp.reportValidity();
-                        return validSoFar && inputCmp.checkValidity();
+                inputCmp.reportValidity();
+                return validSoFar && inputCmp.checkValidity();
             }, true);
         return allValid;
     }
@@ -100,18 +97,21 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         
         if(this._internalSharingModel && this._externalSharingModel && this._sharedObjectLabel) {
             var options = [];
+
+            // Set help text
+            this.accessLevelHelpText = 'Organisation-wide default sharing for '+this._sharedObjectLabel+': '+this._internalSharingModel+' (intenal), ' +this._externalSharingModel+' (external)';
     
             // Include Read Only option if either internal or external OWD is private
             if(this._internalSharingModel === 'Private' || this._externalSharingModel === 'Private') {
                 options.push( { label: 'Read Only', value: 'Read' } );
-                this.accessLevelHelpText = null;
+//                this.accessLevelHelpText = null;
                 this.accessLevelIsReadOnly = false;
             }
     
             // Otherwise disable field, default to only option and add help text
             else {
                 this.accessLevelIsReadOnly = true;
-                this.accessLevelHelpText = 'Access level must be more permissive than the organisation-wide default, which is set to Public Read Only for ' + this._sharedObjectLabel;
+//                this.accessLevelHelpText = 'Access level must be more permissive than the organisation-wide default, which is set to Public Read Only for ' + this._sharedObjectLabel;
                 this.updateAccessLevel('Edit');
             }
 

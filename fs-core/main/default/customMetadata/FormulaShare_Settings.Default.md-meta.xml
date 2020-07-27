@@ -7,6 +7,22 @@
         <value xsi:type="xsd:boolean">true</value>
     </values>
     <values>
+        <field>Days_to_Retain_Batch_Logs__c</field>
+        <value xsi:type="xsd:double">31.0</value>
+    </values>
+    <values>
+        <field>Days_to_Retain_Record_Logs__c</field>
+        <value xsi:type="xsd:double">8.0</value>
+    </values>
+    <values>
+        <field>Log_Processing_Events__c</field>
+        <value xsi:type="xsd:string">All Sharing Updates</value>
+    </values>
+    <values>
+        <field>Logs_Removal_Batch_Size__c</field>
+        <value xsi:type="xsd:double">200.0</value>
+    </values>
+    <values>
         <field>Recalculation_Batch_Size__c</field>
         <value xsi:type="xsd:double">200.0</value>
     </values>

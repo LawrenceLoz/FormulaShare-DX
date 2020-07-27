@@ -3,6 +3,9 @@ public with sharing class FSSampleAppDataGenerationServiceTest {
     
     @IsTest
     public static void testGenerateData() {
+        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
+
         FSSampleAppDataGenerationService.run();
 
         // Check right number of countries created

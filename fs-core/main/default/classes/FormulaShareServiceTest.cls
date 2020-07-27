@@ -313,7 +313,11 @@ public class FormulaShareServiceTest {
         }
 
         // Add an element to the delete map. Any SObject is OK so long as the key matches the mock
-        fsService.mapToDelete.put('123123Read', new FormulaShare_Log__c());
+        FormulaShareService.ShareDetail sd = new FormulaShareService.ShareDetail();
+        FormulaShare_Log__c log = new FormulaShare_Log__c();
+        sd.shareRecord = log;
+        fsService.mapToDelete.put('123123Read', sd);
+        fsService.existingShareKeys.add('123123Read');
 
         fsService.updateShareMapsStandard(anyValidId, anyValidId, rule);
         system.assert(fsService.getSharesToInsert().isEmpty(), 'Record to insert which shouldnt be there');

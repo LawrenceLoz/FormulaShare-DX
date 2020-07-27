@@ -8,7 +8,8 @@
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                     <c-formula-share-rule-detail
                         share-with="Users"
-                        onruledetail={updateRule}>
+                        onruledetail={updateRule}
+                        onsharedobjectselected={handleSharedObjectSelected}>
                     </c-formula-share-rule-detail>
                     <template if:true={processing}>
                         <lightning-spinner alternative-text="Loading" size="x-large"></lightning-spinner>
@@ -23,7 +24,8 @@
                     <lightning-button 
                         label="Save" 
                         variant="brand" 
-                        onclick={saveMethod}>
+                        onclick={saveMethod}
+                        disabled={saveDisabled}>
                     </lightning-button>
                 </footer>
             </div>

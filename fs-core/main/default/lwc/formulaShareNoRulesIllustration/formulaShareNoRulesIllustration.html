@@ -1,0 +1,21 @@
+<template>
+    <article class="slds-card">
+        <div class="slds-illustration slds-illustration_small slds-p-top_large" aria-hidden="true">
+        <img src="/img/chatter/OpenRoad.svg" class="slds-illustration__svg slds-illustration_small" alt=""/>
+            <div class="slds-text-color_weak">
+                <h3 class="slds-text-heading_medium">No rules yet</h3>
+                <p class="slds-text-body_regular slds-p-vertical_small">But you're in the right place! Click below to create the first
+                    FormulaShare rule</p>
+            </div>
+        </div>
+
+        <footer class="slds-card__footer">
+            <lightning-button 
+                class="slds-button"
+                variant="brand"
+                label="Create Rule" 
+                onclick={handleNewRule}>
+            </lightning-button>
+        </footer>
+    </article>
+</template>

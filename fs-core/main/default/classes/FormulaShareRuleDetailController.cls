@@ -61,8 +61,10 @@ public with sharing class FormulaShareRuleDetailController {
         List<ShareableObject> soListCustom = new List<ShareableObject>();
 
         for(EntityDefinition ed : entityDefs) {
-            if(ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read'
-                || ed.ExternalSharingModel == 'Private' || ed.ExternalSharingModel == 'Read') {
+            System.debug('Checking object: '+ed.QualifiedApiName+' internal sharing: '+ed.InternalSharingModel+' external sharing '+ed.ExternalSharingModel);
+            if((ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read'
+                || ed.ExternalSharingModel == 'Private' || ed.ExternalSharingModel == 'Read')
+                && FormulaShareUtilities.isSupportedObjectForCustomMetadata(ed.QualifiedApiName)) {
                 ShareableObject so = new ShareableObject();
                 so.objectApiName = ed.QualifiedApiName;
                 so.objectLabel = ed.Label;

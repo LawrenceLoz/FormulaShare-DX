@@ -5,7 +5,6 @@
     <externalId>false</externalId>
     <label>FormulaShare Batch Log</label>
     <referenceTo>FormulaShare_Log__c</referenceTo>
-    <relationshipLabel>Processed Records</relationshipLabel>
     <relationshipName>FormulaShare_Processed_Records</relationshipName>
     <required>false</required>
     <trackTrending>false</trackTrending>

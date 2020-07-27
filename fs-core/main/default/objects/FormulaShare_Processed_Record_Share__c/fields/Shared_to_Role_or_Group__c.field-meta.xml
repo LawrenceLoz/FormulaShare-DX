@@ -3,7 +3,7 @@
     <fullName>Shared_to_Role_or_Group__c</fullName>
     <externalId>false</externalId>
     <label>Shared to Role or Group</label>
-    <length>255</length>
+    <length>80</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>

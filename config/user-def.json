@@ -1,0 +1,13 @@
+{
+    "Username": "formulasharetestuserLN2@sfdx.org",
+    "LastName": "Test",
+    "Email": "fstestuser@mailinator.com",
+    "Alias": "fstest",
+    "TimeZoneSidKey": "America/Denver",
+    "LocaleSidKey": "en_US",
+    "EmailEncodingKey": "UTF-8",
+    "LanguageLocaleKey": "en_US",
+    "profileName": "Standard User",
+    "permsets": ["FormulaShare_Sample_App_Permissions"],
+    "generatePassword": true
+}

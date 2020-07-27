@@ -128,16 +128,22 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>View</actionName>
+        <comment>Action override created by Lightning App Builder during activation.</comment>
+        <content>FormulaShare_Record_Logs_Record_Page</content>
         <formFactor>Large</formFactor>
-        <type>Default</type>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
+        <comment>Action override created by Lightning App Builder during activation.</comment>
+        <content>FormulaShare_Record_Logs_Record_Page</content>
         <formFactor>Small</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
         <type>Default</type>
     </actionOverrides>
     <allowInChatterGroups>false</allowInChatterGroups>
@@ -153,14 +159,20 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>FormulaShare Processed Record</label>
+    <label>FormulaShare Record Log</label>
     <nameField>
-        <displayFormat>PR-{00000000}</displayFormat>
-        <label>FormulaShare Processed Record Name</label>
+        <displayFormat>FRL-{00000000}</displayFormat>
+        <label>FormulaShare Record Log Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>FormulaShare Processed Records</pluralLabel>
-    <searchLayouts/>
+    <pluralLabel>FormulaShare Record Logs</pluralLabel>
+    <searchLayouts>
+        <searchResultsAdditionalFields>Object__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Record__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Processed_Date_Time__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>All_Deleted_Sharing_Successful__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>All_Inserted_Sharing_Successful__c</searchResultsAdditionalFields>
+    </searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

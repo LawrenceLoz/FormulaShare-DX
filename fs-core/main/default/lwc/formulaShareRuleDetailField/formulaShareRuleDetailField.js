@@ -300,4 +300,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.dispatchEvent(evt);
     }
 
+    @api
+    checkValidity() {
+        const allValid = [...this.template.querySelectorAll('lightning-combobox')]
+            .reduce((validSoFar, inputCmp) => {
+                inputCmp.reportValidity();
+                return validSoFar && inputCmp.checkValidity();
+            }, true);
+        return allValid;
+    }
+
 }

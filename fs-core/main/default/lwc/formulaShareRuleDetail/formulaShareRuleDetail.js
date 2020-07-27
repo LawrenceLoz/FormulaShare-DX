@@ -62,7 +62,13 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     @api
     checkValidity() {
-        var ruleDetailValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
+        console.log('checking validity');
+        var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
+        var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
+        var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
+        var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
+        ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
+        console.log('ruleDetailValid '+ruleDetailValid);
         return ruleDetailValid;
     }
 
@@ -227,6 +233,11 @@ export default class FormulaShareRuleDetail extends LightningElement {
     handleSetSharedObjectDetail(event) {
         console.log('handling handleSetSharedObjectDetail event ',event.detail);
         this.sharedObject = event.detail;
+
+        // Fire event for create component to disable button
+        const evt = new CustomEvent('sharedobjectselected');
+        this.dispatchEvent(evt);
+
         this.sharedObjectApiName = this.sharedObject.objectApiName;
         this.fireEventWithRule();
     }

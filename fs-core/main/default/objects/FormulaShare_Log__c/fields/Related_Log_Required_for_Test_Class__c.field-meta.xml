@@ -5,7 +5,6 @@
     <externalId>false</externalId>
     <label>Related Log (Required for Test Class)</label>
     <referenceTo>FormulaShare_Log__c</referenceTo>
-    <relationshipLabel>FormulaShare Logs</relationshipLabel>
     <relationshipName>FormulaShare_Logs</relationshipName>
     <required>false</required>
     <trackTrending>false</trackTrending>

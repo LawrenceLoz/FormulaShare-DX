@@ -236,27 +236,34 @@ public with sharing class FormulaShareTriggerHelper implements FormulaShareIHelp
 	}
 
 	public List<SObject> getSharesToDelete() {
-/*
-		if(populatedFsServiceMap.size() == 1 && populatedFsServiceMap.values()[0].getSharesToDelete() != null) {
-			FormulaShareService thisFsService = populatedFsServiceMap.values()[0];
-			List<SObject> sharesToDelete = thisFsService.getSharesToDelete();
-			return sharesToDelete;
-		}
 
-		else if(populatedFsServiceMap.size() > 1) {
-			throw new FormulaShareException('More than one object in scope - call getSharesToDelete with object API name instead');
-		}
-*/
-		Set<SObject> sharesToDeleteSet = new Set<SObject>();
+		Map<String,FormulaShareService.ShareDetail> deleteDetails = new Map<String,FormulaShareService.ShareDetail>();
 		List<SObject> sharesToDelete = new List<SObject>();
 
 		if(!populatedFsServiceMap.isEmpty()) {
 			for(FormulaShareService thisFsService : populatedFsServiceMap.values()) {
-				List<SObject> thisFsSharesToDelete = thisFsService.getSharesToDelete();
-				sharesToDeleteSet.addAll(thisFsSharesToDelete);
+				Map<String,FormulaShareService.ShareDetail> thisDd = thisFsService.getDeleteDetails();
+				if(thisDd != null) {
+					deleteDetails.putAll(thisDd);
+				}
 			}
 
-			sharesToDelete.addAll(sharesToDeleteSet);
+			for(FormulaShareService.ShareDetail sd : deleteDetails.values()) {
+				sharesToDelete.add(sd.shareRecord);
+			}
+
+			/// Fire platform events to track the share deletions
+			if(!deleteDetails.isEmpty()) {
+				try {
+					FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+					publisher.addDeleteEvents(deleteDetails, null, null);
+					publisher.publish();
+				}
+				catch(Exception e) {
+					System.debug('Exception constructing or publishing delete platform events. Details from Salesforce: '+e.getMessage());
+				}
+			}
+
 			return sharesToDelete;
 		}
 
@@ -268,28 +275,34 @@ public with sharing class FormulaShareTriggerHelper implements FormulaShareIHelp
 
 
 	public List<SObject> getSharesToInsert() {
-/*
-		if(populatedFsServiceMap.size() == 1 && populatedFsServiceMap.values()[0].getSharesToInsert() != null) {
-			FormulaShareService thisFsService = populatedFsServiceMap.values()[0];
-			List<SObject> sharesToInsert = thisFsService.getSharesToInsert();
-			return sharesToInsert;
-		}
 
-		else if(populatedFsServiceMap.size() > 1) {
-			throw new FormulaShareException('More than one object in scope - call getSharesToInsert with object API name instead');
-		}
-*/
-
-		Set<SObject> sharesToInsertSet = new Set<SObject>();
+		Map<String,FormulaShareService.ShareDetail> insertDetails = new Map<String,FormulaShareService.ShareDetail>();
 		List<SObject> sharesToInsert = new List<SObject>();
 
 		if(!populatedFsServiceMap.isEmpty()) {
 			for(FormulaShareService thisFsService : populatedFsServiceMap.values()) {
-				List<SObject> thisFsSharesToInsert = thisFsService.getSharesToInsert();
-				sharesToInsertSet.addAll(thisFsSharesToInsert);
+				Map<String,FormulaShareService.ShareDetail> thisInsertDetails = thisFsService.getInsertDetails();
+				if(thisInsertDetails != null) {
+					insertDetails.putAll(thisInsertDetails);
+				}
 			}
 
-			sharesToInsert.addAll(sharesToInsertSet);
+			for(FormulaShareService.ShareDetail sd : insertDetails.values()) {
+				sharesToInsert.add(sd.shareRecord);
+			}
+
+			/// Fire platform events to track the share insertions
+			if(!insertDetails.isEmpty()) {
+				try {
+					FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+					publisher.addInsertEvents(insertDetails, null, null);
+					publisher.publish();
+				}
+				catch(Exception e) {
+					System.debug('Exception constructing or publishing insert platform events. Details from Salesforce: '+e.getMessage());
+				}
+			}
+
 			return sharesToInsert;
 		}
 

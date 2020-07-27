@@ -26,9 +26,7 @@ export default class FormulaShareRuleEdit extends LightningElement {
                     })
                 );
 
-                // Fire event to refresh list view and cloe modal
-                const evt = new CustomEvent('ruleupdated');
-                this.dispatchEvent(evt);
+                // Close modal
                 this.closeModal();
             }
 
@@ -59,22 +57,24 @@ export default class FormulaShareRuleEdit extends LightningElement {
 
         console.log('allValid '+ allValid);
 
-        console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
-        this.processingEdit = true;
-        submitForEdit({ fsRuleString : JSON.stringify(this.ruleDetails) })
-            .then(() => {
-                console.log('submitted fsRuleString');
-            })
-            .catch(error => {
-                this.processingEdit = false;
-                console.log('Error saving rule: '+error);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error saving rule',
-                        message: 'Message from Salesforce: ' + JSON.stringify(error),
-                        variant: 'error'
-                    })
-                );
-            });
+        if(allValid) {
+            console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
+            this.processingEdit = true;
+            submitForEdit({ fsRuleString : JSON.stringify(this.ruleDetails) })
+                .then(() => {
+                    console.log('submitted fsRuleString');
+                })
+                .catch(error => {
+                    this.processingEdit = false;
+                    console.log('Error saving rule: '+error);
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error saving rule',
+                            message: 'Message from Salesforce: ' + JSON.stringify(error),
+                            variant: 'error'
+                        })
+                    );
+                });
+        }
     }
 }

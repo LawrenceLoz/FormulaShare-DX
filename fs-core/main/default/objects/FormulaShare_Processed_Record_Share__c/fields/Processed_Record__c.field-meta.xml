@@ -3,7 +3,7 @@
     <fullName>Processed_Record__c</fullName>
     <externalId>false</externalId>
     <label>Processed Record</label>
-    <referenceTo>FormulaShare_Processed_Record__c</referenceTo>
+    <referenceTo>FormulaShare_Record_Log__c</referenceTo>
     <relationshipLabel>Processed Record Shares</relationshipLabel>
     <relationshipName>FormulaShare_Processed_Record_Shares</relationshipName>
     <relationshipOrder>0</relationshipOrder>

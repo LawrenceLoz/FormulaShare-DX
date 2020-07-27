@@ -48,6 +48,10 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         if(stubbedMethodName == 'selectActiveSettings' && returnType.getName() == prefix + 'FormulaShare_Settings__mdt') {
             FormulaShare_Settings__mdt settings = new FormulaShare_Settings__mdt();
             settings.DeveloperName = 'Mocked Settings';
+            settings.Days_to_Retain_Batch_Logs__c = 2;
+            settings.Days_to_Retain_Record_Logs__c = 1;
+            settings.Log_Processing_Events__c = 'All Sharing Updates';
+            settings.Logs_Removal_Batch_Size__c = 200;
             settings.Recalculation_Batch_Size__c = 200;
             return settings;
         }
@@ -219,6 +223,72 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
             shares.add(share);
             return shares;
+        }
+
+        else if(stubbedMethodName == 'getInsertDetails') {
+            Map<String,FormulaShareService.ShareDetail> sharesMap = new Map<String,FormulaShareService.ShareDetail>();
+            FormulaShareService.ShareDetail shareDetail = new FormulaShareService.ShareDetail();
+
+            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+            share.AccessLevel = 'Read';
+            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
+            share.UserOrGroupId = UserInfo.getUserId();
+            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
+            shareDetail.shareRecord = share;
+
+            FormulaShareRule userRule = new FormulaShareRule();
+            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
+            userRule.active = true;
+            userRule.sharedToFieldType = 'Id';
+            userRule.accessLevel = 'Edit';
+            userRule.sharedToAPIName = prefix + 'Method_Name__c';
+            userRule.shareWith = 'Users';
+            shareDetail.rule = userRule;
+
+            shareDetail.type = User.getSObjectType();
+
+            String key = 'recordId0123456'
+            + 'sharedToId12345'
+            + share.AccessLevel
+            + share.RowCause;
+
+            sharesMap.put(key, shareDetail);
+            return sharesMap;
+        }
+
+        else if(stubbedMethodName == 'getDeleteDetails') {
+            Map<String,FormulaShareService.ShareDetail> sharesMap = new Map<String,FormulaShareService.ShareDetail>();
+            FormulaShareService.ShareDetail shareDetail = new FormulaShareService.ShareDetail();
+
+            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+            share.AccessLevel = 'Read';
+            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
+            share.UserOrGroupId = UserInfo.getUserId();
+            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
+            shareDetail.shareRecord = share;
+
+            FormulaShareRule userRule = new FormulaShareRule();
+            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
+            userRule.active = true;
+            userRule.sharedToFieldType = 'Id';
+            userRule.accessLevel = 'Edit';
+            userRule.sharedToAPIName = prefix + 'Method_Name__c';
+            userRule.shareWith = 'Users';
+            shareDetail.rule = userRule;
+
+            shareDetail.type = User.getSObjectType();
+
+            String key = 'recordId0123456'
+            + 'sharedToId12345'
+            + share.AccessLevel
+            + share.RowCause;
+
+            sharesMap.put(key, shareDetail);
+            return sharesMap;
         }
 
         else if(stubbedMethodName == 'getSObjectsWithFields') {

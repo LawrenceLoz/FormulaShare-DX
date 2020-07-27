@@ -93,14 +93,6 @@ export default class TreeGrid extends LightningElement {
     @track currentExpanded;
     @track processingLoad = true;
 
-    @api
-    get refreshList() {}
-    set refreshList(value) {
-        if(value == true) {
-            refreshApex(this.provisionedValue);
-        }
-    }
-
     @wire(getTreeGridData)
     wireTreeData(value) {
         const { data, error } = value;
@@ -116,10 +108,17 @@ export default class TreeGrid extends LightningElement {
             this.setColumns();
             this.countRows(tempjson);
 
+            // Expand all rows when table first loaded, and subscribe to events
             if(this.firstLoad) {
                 this.expandAllRows(tempjson);
                 this.manageRefreshEvents();     // Subscribe to event channel
                 this.firstLoad = false;
+            }
+
+            // Expand all rows if a rule was just set up or modified
+            if(this.createOrUpdate) {
+                this.expandAllRows(tempjson);
+                this.createOrUpdate = false;
             }
 
             this.processingLoad = false;
@@ -132,6 +131,7 @@ export default class TreeGrid extends LightningElement {
     }
 
 
+    rulesNotSetUp = true;
     countRows(tempjson) {
         var noRules = 0;
         for(var i = 0; i < tempjson.length; i++) {
@@ -142,9 +142,17 @@ export default class TreeGrid extends LightningElement {
             }
         }
 
+        if(noRules === 0) {
+            this.rulesNotSetUp = true;
+        }
+        else {
+            this.rulesNotSetUp = false;
+        }
+
         const evt = new CustomEvent('ruleload', {
             detail: noRules
         });
+        console.log('noRules '+noRules);
         this.dispatchEvent(evt);
     }
 
@@ -164,15 +172,26 @@ export default class TreeGrid extends LightningElement {
 
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
-    @track channelName = '/event/FormulaShare_List_Update__e';
+    createOrUpdate = false;
     manageRefreshEvents() {
-        const messageCallback = (response) => {
+
+        // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
+        const listUpdateCallback = (response) => {
             refreshApex(this.provisionedValue);
         };
-
-        // Invoke subscribe method of empApi. Pass reference to messageCallback
-        subscribe(this.channelName, -1, messageCallback).then(response => {
+        subscribe('/event/FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
             console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+        });
+
+        // Scubscribe to dml events (raised by on rule create/edit)
+        const dmlUpdateCallback = (response) => {
+            if(response.data.payload.Successful__c) {
+                this.createOrUpdate = true;
+                refreshApex(this.provisionedValue);
+            }
+        };
+        subscribe('/event/FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
+            console.log('List component subscribed to : ', JSON.stringify(response.channel));
         });
     }
 
@@ -312,10 +331,6 @@ export default class TreeGrid extends LightningElement {
                 variant: 'error'
             })
         );
-    }
-
-    handleRuleUpdated() {
-        refreshApex(this.provisionedValue);
     }
 
     @track openModal

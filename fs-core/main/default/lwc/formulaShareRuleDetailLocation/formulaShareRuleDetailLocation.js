@@ -92,5 +92,21 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         });
         this.dispatchEvent(selection);
     }
+
+    // Custom validation to check that related object selected when needed
+    @api
+    checkValidity() {
+        console.log('checking location valid');
+        var relatedObjCmp = this.template.querySelector('lightning-combobox');
+        console.log('relatedObjCmp '+relatedObjCmp);
+        console.log('this.relatedObjectSelected '+this.relatedObjectSelected );
+        if(relatedObjCmp && this.relatedObjectSelected === null) {
+            console.log('checking location valid');
+            relatedObjCmp.setCustomValidity('Complete this field.');
+            relatedObjCmp.reportValidity();
+            return false;
+        }
+        else return true;
+    }
     
 }

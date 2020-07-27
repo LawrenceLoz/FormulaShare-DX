@@ -165,7 +165,7 @@ public with sharing class FormulaShareRulesListViewController {
         system.debug(objectApiName);
 
         // Set batch size according to settings
-        FormulaShare_Settings__mdt settings = getFormulaShareSettings();
+        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
         Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(objectApiName);
@@ -190,16 +190,6 @@ public with sharing class FormulaShareRulesListViewController {
         system.debug('Metadata deployment job ID : '+asyncJobId);
     }
 
-    static FormulaShare_Settings__mdt settings;
-    private static FormulaShare_Settings__mdt getFormulaShareSettings() {
-
-		if(settings == null) {
-			settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-		}
-
-		return settings;
-    }
-    
     
     public class ObjectRulesWrapper {
         @AuraEnabled

@@ -24,10 +24,6 @@ export default class FormulaShareRuleCreate extends LightningElement {
                         variant: 'success'
                     })
                 );
-
-                // Fire event to refresh list view and cloe modal
-                const evt = new CustomEvent('rulecreated');
-                this.dispatchEvent(evt);
                 this.closeModal();
             }
 
@@ -49,6 +45,11 @@ export default class FormulaShareRuleCreate extends LightningElement {
         });
     }
 
+    @track saveDisabled = true;
+    handleSharedObjectSelected(event) {
+        this.saveDisabled = false;
+    }
+
     closeModal() {
         this.dispatchEvent(new CustomEvent('close'));
     }
@@ -58,22 +59,24 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
         console.log('allValid '+ allValid);
 
-        console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
-        this.processing = true;
-        submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
-            .then(() => {
-                console.log('submitted fsRuleString');
-            })
-            .catch(error => {
-                this.processing = false;
-                console.log('Error saving rule: '+error);
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error saving rule',
-                        message: 'Message from Salesforce: ' + JSON.stringify(error),
-                        variant: 'error'
-                    })
-                );
-            });
+        if(allValid) {
+            console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
+            this.processing = true;
+            submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
+                .then(() => {
+                    console.log('submitted fsRuleString');
+                })
+                .catch(error => {
+                    this.processing = false;
+                    console.log('Error saving rule: '+error);
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error saving rule',
+                            message: 'Message from Salesforce: ' + JSON.stringify(error),
+                            variant: 'error'
+                        })
+                    );
+                });
+        }
     }
 }

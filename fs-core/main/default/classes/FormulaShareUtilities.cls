@@ -220,7 +220,11 @@ public with sharing class FormulaShareUtilities {
 			// Check whether field could contain information for sharing 
 			if(fieldType == Schema.DisplayType.STRING
 				|| fieldType == Schema.DisplayType.PICKLIST) {
-				shareFields.add(field);
+
+				// Include only non-compound fields
+				if(isSupportedFieldForCustomMetadata(objectApiName, fieldDesc)) {
+					shareFields.add(field);
+				}
 			}
 
 			// If it's a lookup field, check whether the lookup object is user (only lookup type which could control sharing)
@@ -240,6 +244,58 @@ public with sharing class FormulaShareUtilities {
 		}
 
 		return shareFields;
+	}
+
+
+	// Checks and excludes compound fields
+	private static Boolean isSupportedFieldForCustomMetadata(String objectApiName, Schema.DescribeFieldResult fieldDesc) {
+
+		// Include all custom fields
+		if(fieldDesc.isCustom()) {
+			return true;
+		}
+
+		String fieldName = fieldDesc.getName();
+
+		// Return false for any fields which are not supported by custom metadata
+		// This is needed because it's not efficient to programmatically check for compound fields
+		switch on objectApiName {
+			when 'Account', 'Order', 'Contract' {
+				switch on fieldName.left(7) {
+					// Exclude compound address fields
+					when 'Billing', 'Shippin' {
+						return false;
+					}
+				}
+			}
+			when 'Contact', 'Lead' {
+				switch on fieldName.left(5) {
+					// Exclude compound address fields
+					when 'Maili', 'Other' {
+						return false;
+					}
+				}
+				switch on fieldName {
+					// Exclude compound name and specific address fields
+					when 'LastName', 'FirstName', 'City', 'State', 'PostalCode', 'Country', 'GeocodeAccuracy' {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+
+	// Some standard objects can't be used in custom metadata relationship fields
+	public static Boolean isSupportedObjectForCustomMetadata(String objectApiName) {
+		switch on objectApiName {
+			when 'Event', 'Task', 'User' {
+				return false;
+			}
+		}
+		return true;
 	}
 
 
@@ -394,6 +450,36 @@ public with sharing class FormulaShareUtilities {
 
 		return reasons;
 	}
+
+
+    public static Boolean isShareConstructable(Schema.SObjectType type, String accessLevel) {
+
+		Schema.SObjectType shareType = getShareObject(type);
+
+		// Check share object exists
+		if(shareType == null) {
+			System.debug('No share object exists for '+type.getDescribe().getName());
+			return false;
+		}
+
+		// Check share can be constructed with provided access level
+		try {
+			SObject newShare = shareType.newSObject();
+			if(type.getDescribe().isCustom()) {
+				newShare.put('AccessLevel', accessLevel);
+			}
+			else {
+				newShare.put(type + 'AccessLevel', accessLevel);
+			}
+		}
+		catch(System.SObjectException e) {
+			System.debug('Can\'t set access level of '+shareType.getDescribe().getName());
+			return false;
+		}
+
+		return true;
+    }
+
 
     public class ChildRelationshipDetails {
 		private Schema.DescribeFieldResult childObjFieldDesc;

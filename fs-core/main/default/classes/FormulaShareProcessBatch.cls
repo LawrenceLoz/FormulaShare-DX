@@ -37,7 +37,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	}
 	
 
-	public Database.QueryLocator start(Database.BatchableContext BC) {
+	public Database.QueryLocator start(Database.BatchableContext context) {
 		system.debug('FormulaShare batch job started. Type in scope: '+typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
 
@@ -81,9 +81,13 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	}
 
 
-   	public void execute(Database.BatchableContext BC, List<SObject> scope) {
+   	public void execute(Database.BatchableContext context, List<SObject> scope) {
 		
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
+		String insertStatus;
+		String insertStatusReason;
+		String deleteStatus;
+		String deleteStatusReason;
 
 		system.debug('*** batch scope : '+ scope);
 
@@ -104,7 +108,15 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		// Insert and remove sharing if required
 		if(!fsService.getSharesToInsert().isEmpty()) {
 			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(fsService.getSharesToInsert(), type);
-			fsSharesToInsert.insertShares();
+
+			try {
+				fsSharesToInsert.insertShares();
+				insertStatus = 'Success';
+			}
+			catch(Exception e) {
+				insertStatus = 'Failed';
+				insertStatusReason = e.getMessage();
+			}
 		}
 
 		Savepoint sp = Database.setSavepoint();
@@ -113,22 +125,40 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(fsService.getSharesToDelete(), type);
 			try {
 				fsSharesToDelete.deleteShares();
+				deleteStatus = 'Success';
 			}
 
 			// Revert to prior state if exceptions after deletion
 			catch(Exception e) {
 				Database.rollback(sp);
-				throw e;
+				deleteStatus = 'Failed';
+				deleteStatusReason = e.getMessage();
 			}
 		}
 
+		// Insert batch logs
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
 		logsList = fsLogs.upsertLogs();
+
+		// Create record logs
+		try {
+			Map<String,FormulaShareService.ShareDetail> insertDetails = fsService.getInsertDetails();
+			Map<String,FormulaShareService.ShareDetail> deleteDetails = fsService.getDeleteDetails();
+			FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+			publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
+			publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
+			FormulaShare_Log__c log = logsList[0];
+			publisher.setBatch(log.Id);
+			publisher.processDirectly();
+		}
+		catch(Exception e) {
+			System.debug('Error inserting logs. Message from Salesforce: '+e.getMessage());
+		}
 	}
 	
 
-	public void finish(Database.BatchableContext BC) {
+	public void finish(Database.BatchableContext context) {
 		
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.setBatchProcessingComplete();

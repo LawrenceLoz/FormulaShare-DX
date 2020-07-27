@@ -48,39 +48,54 @@ public inherited sharing class FormulaShareService {
 	static FormulaShare_Settings__mdt settings;
 	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
 	@TestVisible private Map<Id,SObject> recordsMap = new Map<Id,SObject>();
-	@TestVisible private Map<String,SObject> mapToDelete = new Map<String,SObject>();
-	private Set<SObject> setToInsert = new Set<SObject>();
+//	@TestVisible private Map<String,SObject> mapToDelete = new Map<String,SObject>();
+//	private Set<SObject> setToInsert = new Set<SObject>();
+	
+	@TestVisible private Map<String,ShareDetail> mapToDelete = new Map<String,ShareDetail>();
+	private Map<String,ShareDetail> mapToInsert = new Map<String,ShareDetail>();
+	@TestVisible Set<String> existingShareKeys = new Set<String>();
+	
 	private Schema.SObjectType type;
 	@TestVisible private List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
 	// Wrapper for a record and a rule sharing this record
 	private class SObjectRule {
-//		SObject obj;
 		SObject recordToShare;
 		SObject recordWithSharedToDetails;
 		FormulaShareRule rule;
-//		Id sharedObjectId;
 	}
 	
 
 	// Getter methods to access variables needed by calling classes. Methods are mocked for test classes
+
+	// TODO - MAY NOT NEED THESE GOING FORWARD (delete also methods in mock provider)
 	public List<SObject> getSharesToInsert() {
-		return new List<SObject>(setToInsert);
+		List<SObject> sharesList = new List<SObject>();
+		for(ShareDetail sd : mapToInsert.values()) {
+			sharesList.add(sd.shareRecord);
+		}
+		return sharesList;
+	}
+	public List<SOBject> getSharesToDelete() {
+		List<SObject> sharesList = new List<SObject>();
+		for(ShareDetail sd : mapToDelete.values()) {
+			sharesList.add(sd.shareRecord);
+		}
+		return sharesList;
 	}
 
-	public List<SOBject> getSharesToDelete() {
-		system.debug('Shares to delete: '+mapToDelete.values());
-		return mapToDelete.values();
+	// Return full details of share context for logging event
+	public Map<String,ShareDetail> getInsertDetails() {
+		return mapToInsert;
+	}
+	public Map<String,ShareDetail> getDeleteDetails() {
+		return mapToDelete;
 	}
 
 	public Schema.SObjectType getType() {
 		return type;
 	}
-/*
-	public void setRecordsMap(Map<Id,SObject> recordsMap) {
-		this.recordsMap = recordsMap;
-	}
-*/
+
 	public void addToRecordsMap(List<SObject> records) {
 		if(records != null) {
 			for(SOBject record : records) {
@@ -177,7 +192,7 @@ public inherited sharing class FormulaShareService {
 	public static void recalculateAll() {
 		List<Schema.SObjectType> types = getSharedObjectTypes();
 		if(!types.isEmpty()) {
-			FormulaShare_Settings__mdt settings = getFormulaShareSettings();
+			FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 			Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
 			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
 		}
@@ -205,7 +220,10 @@ public inherited sharing class FormulaShareService {
 			// Create map of shareQueryResults with record shares unique key
 			for(SObject share : sharesQueryResultCustom) {
 				String shareKey = FormulaShareUtilities.getShareRecordKeyCustom(share);
-				mapToDelete.put(shareKey, share);
+				ShareDetail sd = new ShareDetail();
+				sd.shareRecord = share;
+				sd.type = type;
+				mapToDelete.put(shareKey, sd);
 			}
 		}
 
@@ -219,7 +237,10 @@ public inherited sharing class FormulaShareService {
 			// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
 			for(SObject share : sharesQueryResultStandard) {
 				String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(type, share);
-				mapToDelete.put(shareKey, share);
+				ShareDetail sd = new ShareDetail();
+				sd.shareRecord = share;
+				sd.type = type;
+				mapToDelete.put(shareKey, sd);
 			}
 
 			List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLines = FormulaShareRemoveSharesSelector.construct().getRemovalLinesForType(type);
@@ -227,6 +248,8 @@ public inherited sharing class FormulaShareService {
 				removeExistingShares = false;
 			}
 		}
+
+		existingShareKeys = mapToDelete.keySet().clone();
 
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares();
@@ -546,16 +569,20 @@ public inherited sharing class FormulaShareService {
 			 + FormulaShareUtilities.get15CharacterId(sharedTo)
 			 + rule.accessLevel
 			 + rule.sharingReason;
-		
-		// If share record exists already, remove from map to be deleted
-		if(mapToDelete.get(shareKey) != null) {
-			mapToDelete.remove(shareKey);
-		}
 
-		// Otherwise add to map to be inserted
-		else {
-			SObject newShare = rule.getShareRecord(type, recordId, sharedTo);
-			setToInsert.add(newShare);
+		system.debug('*** searching with this Id: ' + shareKey);
+		system.debug('*** full map keys: ' + mapToDelete.keySet() );
+		system.debug('*** full keyset: ' + existingShareKeys );
+		system.debug('result of search: ' + mapToDelete.get(shareKey));
+
+		// If share record doesn't exist at the moment, we'll need to create this
+		if(!existingShareKeys.contains(shareKey)) {
+			addShareToInsertMap(type, recordId, sharedTo, shareKey, rule);
+		}
+		
+		// If share record does exist, remove from map to be deleted
+		else if(mapToDelete.containsKey(shareKey)) {
+			mapToDelete.remove(shareKey);
 		}
 	}
 
@@ -576,34 +603,50 @@ public inherited sharing class FormulaShareService {
 		system.debug('result of EDIT search: ' + mapToDelete.get(shareKeyEdit));
 
 		// If we already have a record with All, keep this (All will always be more permissive as the rule)
-		if(mapToDelete.get(shareKeyAll) != null) {
+		if(mapToDelete.containsKey(shareKeyAll)) {
 			mapToDelete.remove(shareKeyAll);
 		}
 
 		// If we already have a record with Edit, keep this (Edit will be at least as permissive as the rule)
- 		else if(mapToDelete.get(shareKeyEdit) != null) {
+ 		else if(mapToDelete.containsKey(shareKeyEdit)) {
 			mapToDelete.remove(shareKeyEdit);
 		}
 
 		// If we have a record with Read...
-		else if(mapToDelete.get(shareKeyRead) != null) {
+		// (assessment based on existingShareKeys in case we removed from map already - this 
+		// can be the case when multiple child records dictate same sharing on the parent)
+		else if(existingShareKeys.contains(shareKeyRead)) {
 
 			// If rule's access level is Read, keep this record
-			if(rule.accessLevel == 'Read') {
+			if(rule.accessLevel == 'Read' && mapToDelete.containsKey(shareKeyRead)) {
 				mapToDelete.remove(shareKeyRead);
 			}
 
 			// Otherwise add higher level share to be inserted
 			else {
-				SObject newShare = rule.getShareRecord(type, recordId, sharedTo);
-				setToInsert.add(newShare);
+				addShareToInsertMap(type, recordId, sharedTo, shareKeyBase, rule);
 			}
 		}
 
 		// If no share found, add to be created
 		else {
-				SObject newShare = rule.getShareRecord(type, recordId, sharedTo);
-				setToInsert.add(newShare);
+			addShareToInsertMap(type, recordId, sharedTo, shareKeyBase, rule);
+		}
+	}
+
+
+	private void addShareToInsertMap(Schema.SObjectType type, Id recordId, Id sharedTo, String shareKey, FormulaShareRule rule) {
+
+		// Check share can be contructed (might fail if OWD doesn't allow)
+		if(FormulaShareUtilities.isShareConstructable(type, rule.accessLevel)) {
+
+			// Create share record and add to insert map
+			SObject newShare = rule.getShareRecord(type, recordId, sharedTo);
+			ShareDetail sd = new ShareDetail();
+			sd.rule = rule;
+			sd.shareRecord = newShare;
+			sd.type = type;
+			mapToInsert.put(shareKey, sd);
 		}
 	}
 
@@ -622,6 +665,9 @@ public inherited sharing class FormulaShareService {
 		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(type);
 		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(recordsMap.keySet());
 		String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(rowCauseSet);
+		System.debug('parentIdsString: '+parentIdsString);
+		System.debug('rowCausesString: '+rowCausesString);
+		System.debug('type: ' +shareObjectType.getDescribe().getName());
 
 		// Query for relevant share records via selector
 		FormulaShareSObjectSharesCustomSelector sharesSelector = new FormulaShareSObjectSharesCustomSelector(true, shareObjectType);
@@ -655,14 +701,10 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private static FormulaShare_Settings__mdt getFormulaShareSettings() {
-
-		if(settings == null) {
-			settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-		}
-
-		return settings;
+	public class ShareDetail {
+		public SObject shareRecord;
+		public Schema.SObjectType type;
+		public FormulaShareRule rule;
 	}
-
 
 }

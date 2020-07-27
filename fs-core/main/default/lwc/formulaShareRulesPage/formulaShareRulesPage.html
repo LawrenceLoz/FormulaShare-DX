@@ -31,12 +31,14 @@
             <div class="slds-page-header__controls">
               <div class="slds-page-header__control">
                 <ul class="slds-button-group">
+                  <template if:false={rulesNotSetUp}>
                     <lightning-button 
                         class="slds-button"
                         variant="neutral"
                         label="New Rule" 
                         onclick={handleNewRule}>
                     </lightning-button>
+                  </template>
                 </ul>
               </div>
             </div>
@@ -50,14 +52,18 @@
     </div>
 
     <c-formula-share-rules-list-view
-        refresh-list={refreshList}
         onruleload={handleRulesLoad}>
     </c-formula-share-rules-list-view>
+
+    <template if:true={rulesNotSetUp}>
+      <c-formula-share-no-rules-illustration
+        onnewrule={handleNewRule}>
+      </c-formula-share-no-rules-illustration>
+    </template>
     
     <template if:true={openNewRuleModal}>
         <c-formula-share-rule-create 
-            onclose={closeNewRuleModal}
-            onrulecreated={handleRuleCreated}>
+            onclose={closeNewRuleModal}>
         </c-formula-share-rule-create>
     </template>    
 </template>

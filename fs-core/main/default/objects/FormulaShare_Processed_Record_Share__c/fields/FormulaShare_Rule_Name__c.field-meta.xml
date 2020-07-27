@@ -3,7 +3,7 @@
     <fullName>FormulaShare_Rule_Name__c</fullName>
     <externalId>false</externalId>
     <label>FormulaShare Rule Name</label>
-    <length>255</length>
+    <length>40</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
