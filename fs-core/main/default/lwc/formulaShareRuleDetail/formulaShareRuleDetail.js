@@ -67,7 +67,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
         var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
         var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
-        ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
+        var ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
         console.log('ruleDetailValid '+ruleDetailValid);
         return ruleDetailValid;
     }

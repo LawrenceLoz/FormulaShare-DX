@@ -307,6 +307,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
             }, true);
+        console.log('Detail field valid? '+allValid);
         return allValid;
     }
 

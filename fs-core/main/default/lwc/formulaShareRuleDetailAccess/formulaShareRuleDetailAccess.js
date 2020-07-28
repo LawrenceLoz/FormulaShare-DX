@@ -62,6 +62,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
             }, true);
+        console.log('Access valid: '+allValid);
         return allValid;
     }
 

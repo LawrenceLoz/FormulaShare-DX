@@ -55,3 +55,17 @@ fs-core/main/libs/fflib-apex-mdapi/classes/MetadataService.cls
 fs-core/main/libs/fflib-apex-mdapi/classes/MetadataService.cls-meta.xml
 fs-core/main/libs/fflib-apex-mdapi/classes/MetadataServiceTest.cls
 fs-core/main/libs/fflib-apex-mdapi/classes/MetadataServiceTest.cls-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/All_Deleted_Sharing_Successful__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/All_Inserted_Sharing_Successful__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/FormulaShare_Batch_Log__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/FormulaShare_Record_Log__c-en_US.objectTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Number_Processed_Record_Share_Deletes__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Number_Processed_Record_Share_Inserts__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Number_Successful_Record_Share_Deletes__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Number_Successful_Record_Share_Inserts__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Object__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Processed_Date_Time__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Record__c.fieldTranslation-meta.xml
+fs-core/main/default/objectTranslations/FormulaShare_Record_Log__c-en_US/Record_Id__c.fieldTranslation-meta.xml
+fs-core/main/default/profilePasswordPolicies/PT1_profilePasswordPolicy1595924553452.profilePasswordPolicy-meta.xml
+fs-core/main/default/profileSessionSettings/PT1_profileSessionSetting1595924553683.profileSessionSetting-meta.xml

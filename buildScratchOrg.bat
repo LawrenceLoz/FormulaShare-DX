@@ -24,5 +24,5 @@ call sfdx force:apex:execute -f config/setDebugModeForUser.apex
 echo Set up user for debug mode
 call sfdx force:apex:execute -f config/runApexOnInstallation.apex
 echo Created test data
-call sfdx force:user:create --setalias fstest --definitionfile config/user-def.json
+call sfdx force:user:create --setalias fstest --definitionfile config/user-def.json username=formulasharetestuser%orgName%@sfdx.org
 echo Created test user fstest

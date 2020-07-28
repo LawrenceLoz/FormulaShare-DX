@@ -4,6 +4,10 @@
         <application>FormulaShare</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <applicationVisibilities>
+        <application>FormulaShare_Classic</application>
+        <visible>true</visible>
+    </applicationVisibilities>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>FormulaShare_Rule__mdt</name>
@@ -277,6 +281,10 @@
         <object>FormulaShare_Rule_in_Batch__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <pageAccesses>
+        <apexPage>FormulaShareRulesPageVF</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
     <tabSettings>
         <tab>FormulaShare_Log__c</tab>
         <visibility>Visible</visibility>
@@ -287,6 +295,10 @@
     </tabSettings>
     <tabSettings>
         <tab>FormulaShare_Rules</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>FormulaShare_Rules_VF</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

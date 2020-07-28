@@ -1,0 +1,19 @@
+<apex:page>
+    <apex:includeLightning />
+
+    <div id="lightningvf" />
+
+    <script>
+        $Lightning.use("c:FormulaShareLightningOutApp", function() {
+          $Lightning.createComponent("c:formulaShareRulesPage",
+              {},
+              "lightningvf",
+              function(cmp) {
+                console.log("button was created");
+                // do some stuff
+              }
+          );
+        });
+    </script>
+
+</apex:page>
