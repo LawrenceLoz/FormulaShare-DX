@@ -48,9 +48,8 @@ public inherited sharing class FormulaShareService {
 	static FormulaShare_Settings__mdt settings;
 	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
 	@TestVisible private Map<Id,SObject> recordsMap = new Map<Id,SObject>();
-//	@TestVisible private Map<String,SObject> mapToDelete = new Map<String,SObject>();
-//	private Set<SObject> setToInsert = new Set<SObject>();
 	
+	private Map<String,Integer> noValidSharesForRules = new Map<String,Integer>();
 	@TestVisible private Map<String,ShareDetail> mapToDelete = new Map<String,ShareDetail>();
 	private Map<String,ShareDetail> mapToInsert = new Map<String,ShareDetail>();
 	@TestVisible Set<String> existingShareKeys = new Set<String>();
@@ -82,6 +81,11 @@ public inherited sharing class FormulaShareService {
 			sharesList.add(sd.shareRecord);
 		}
 		return sharesList;
+	}
+
+	// Return number of valid shares per rule (to create metrics on batch run if they don't exist)
+	public Map<String,Integer> getNoValidSharesForRules() {
+		return noValidSharesForRules;
 	}
 
 	// Return full details of share context for logging event
@@ -550,6 +554,17 @@ public inherited sharing class FormulaShareService {
 
 
 	private void updateShareMaps(Id recordId, Id sharedTo, FormulaShareRule rule) {
+
+		// Track this as a new shared
+		Integer noShares;
+		if(noValidSharesForRules.containsKey(rule.developerName)) {
+			noShares = noValidSharesForRules.get(rule.developerName);
+		}
+		else {
+			noShares = 0;
+		}
+		noShares++;
+		noValidSharesForRules.put(rule.developerName, noShares);
 		
 		// For custom objects, check whether sharing record for this sharing reason exists at correct access level
 		if(type.getDescribe().isCustom()) {

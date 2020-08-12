@@ -25,12 +25,6 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
     public void addInsertEvents(Map<String,FormulaShareService.ShareDetail> shareDetails, String status, String statusReason) {
 
-        // Continue only if logging is enabled
-        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-        if(settings.Log_Processing_Events__c == 'Deleted Sharing Only' || settings.Log_Processing_Events__c == 'None') {
-            return;
-        }
-
         Map<String,FormulaShare_Processed_Share_Event__e> pseMap = getEventsForRecordDetail(shareDetails, status, statusReason);
 
         // Add details from rule, set operation and add to list to publish
@@ -45,12 +39,6 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
 
     public void addDeleteEvents(Map<String,FormulaShareService.ShareDetail> shareDetails, String status, String statusReason) {
-
-        // Continue only if logging is enabled
-        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-        if(settings.Log_Processing_Events__c == 'Inserted Sharing Only' || settings.Log_Processing_Events__c == 'None') {
-            return;
-        }
 
         Map<String,FormulaShare_Processed_Share_Event__e> pseMap = getEventsForRecordDetail(shareDetails, status, statusReason);
 
@@ -78,11 +66,16 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
 
     // Method to process insertion of record logs directly rather than via published events
-    public void processDirectly() {
-        if(!pseList.isEmpty()) {
-            FormulaShareProcessedShareEventService.process(pseList);
+    public fflib_ISObjectUnitOfWork processForBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog, Map<String,Integer> noValidSharesNewMetrics) {
+
+        // Continue only if we've inserted / removed shares
+        // or if this is the first batch run for one or more rules
+        if(!pseList.isEmpty() || !noValidSharesNewMetrics.isEmpty()) {
+            uow = FormulaShareProcessedShareEventService.processForBatch(uow, pseList, relatedBatchLog, noValidSharesNewMetrics);
+            system.debug('Processing for batch. UOW3: '+uow);
             pseList.clear();
         }
+        return uow;
     }
 
 

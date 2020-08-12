@@ -60,11 +60,11 @@ export default class TreeGrid extends LightningElement {
                 , label: 'On Object'
                 , initialWidth: this.w15
             },
-            {type: 'text'
-                , fieldName: 'accessLevel'
-                , label: 'Access'
-                , initialWidth: this.w0
-            },
+//            {type: 'text'
+//                , fieldName: 'accessLevel'
+//                , label: 'Access'
+//                , initialWidth: this.w0
+//            },
         //        {type: 'text', fieldName: 'sharingReason', label: 'Sharing Reason'
         //        , initialWidth: 200
         //    },
@@ -73,6 +73,26 @@ export default class TreeGrid extends LightningElement {
                 , label: 'Last Full Assessment'
                 , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
                 , initialWidth: this.w2
+            },
+//            {
+//                fieldName: '',
+//                label: 'Static Icon',
+//                type: 'button-icon',
+//                typeAttributes: { class:'slds-button__icon slds-button__icon_large', iconClass:'slds-button__icon slds-button__icon_large', iconName: 'utility:success' }
+//                cellAttributes: { iconName: 'utility:success', iconAlternativeText: 'Up arrow' }
+//            },
+            {type: 'url'
+                , fieldName: 'batchShareUrl'
+                , label:'Batch Sharing'
+                , typeAttributes: {label: {fieldName:'batchShareUrlLabel'}, target:'_blank', tooltip: 'There was an error in the most recent calculation. Click to view logs for the rule'}
+                , cellAttributes: { iconName: {fieldName: 'batchShareIcon'}, iconLabel: {fieldName: 'batchShareText'}, iconPosition: 'left' }
+                , initialWidth: this.w3
+            },
+            {type: 'url'
+                , fieldName: 'triggerShareUrl'
+                , label:'Trigger Sharing'
+                , typeAttributes: {label: {fieldName:'triggerShareUrlLabel'}, target:'_blank', tooltip: 'There was an error in the most recent calculation. Click to view logs for the rule'}
+                , cellAttributes: { iconName: {fieldName: 'triggerShareIcon'}, iconLabel: {fieldName: 'triggerShareText'}, iconPosition: 'left' }
             },
             {type: 'boolean'
                 , fieldName: 'active'

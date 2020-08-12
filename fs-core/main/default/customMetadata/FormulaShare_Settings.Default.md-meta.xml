@@ -16,7 +16,7 @@
     </values>
     <values>
         <field>Log_Processing_Events__c</field>
-        <value xsi:type="xsd:string">All Sharing Updates</value>
+        <value xsi:type="xsd:string">All</value>
     </values>
     <values>
         <field>Logs_Removal_Batch_Size__c</field>

@@ -8,10 +8,7 @@
           $Lightning.createComponent("c:formulaShareRulesPage",
               {},
               "lightningvf",
-              function(cmp) {
-                console.log("button was created");
-                // do some stuff
-              }
+              function(cmp) {}
           );
         });
     </script>

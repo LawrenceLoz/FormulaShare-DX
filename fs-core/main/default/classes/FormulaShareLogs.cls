@@ -84,17 +84,11 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
         }
     }
 
-    public List<FormulaShare_Log__c> upsertLogs() {
+    public List<FormulaShare_Log__c> getFinalisedLogs() {
         List<FormulaShare_Log__c> logs = (List<FormulaShare_Log__c>) Records;
         for(FormulaShare_Log__c log : logs) {
             log.Processing_Finished__c = DateTime.now();
             log.Processing_Finished_Milliseconds__c = DateTime.now().getTime();
-        }
-        try {
-            upsert logs;
-        }
-        catch(Exception e) {
-            system.debug('log upsert failed. Message from Salesforce: '+e.getMessage());
         }
         return logs;
     }

@@ -21,5 +21,5 @@
 
 trigger FormulaShareProcessedShareEventTrigger on FormulaShare_Processed_Share_Event__e (after insert) {
 
-    FormulaShareProcessedShareEventService.process(Trigger.New);
+    FormulaShareProcessedShareEventService.processForEvents(Trigger.New, FormulaShareProcessedShareEventService.triggerContext);
 }

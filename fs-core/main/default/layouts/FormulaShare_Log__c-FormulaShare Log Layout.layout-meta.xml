@@ -160,13 +160,20 @@
         <fields>Rule_Active_for_Batch_Run__c</fields>
         <relatedList>FormulaShare_Rule_in_Batch__c.FormulaShare_Log__c</relatedList>
     </relatedLists>
+    <relatedLists>
+        <fields>NAME</fields>
+        <fields>Record__c</fields>
+        <fields>All_Deleted_Sharing_Successful__c</fields>
+        <fields>All_Inserted_Sharing_Successful__c</fields>
+        <relatedList>FormulaShare_Record_Log__c.FormulaShare_Batch_Log__c</relatedList>
+    </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>false</showHighlightsPanel>
     <showInteractionLogPanel>false</showInteractionLogPanel>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h25000001X1ND</masterLabel>
+        <masterLabel>00h26000000v8pB</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

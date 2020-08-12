@@ -13,19 +13,9 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>All Sharing Updates</fullName>
+                <fullName>All</fullName>
                 <default>true</default>
-                <label>All Sharing Updates</label>
-            </value>
-            <value>
-                <fullName>Inserted Sharing Only</fullName>
-                <default>false</default>
-                <label>Inserted Sharing Only</label>
-            </value>
-            <value>
-                <fullName>Deleted Sharing Only</fullName>
-                <default>false</default>
-                <label>Deleted Sharing Only</label>
+                <label>All</label>
             </value>
             <value>
                 <fullName>None</fullName>

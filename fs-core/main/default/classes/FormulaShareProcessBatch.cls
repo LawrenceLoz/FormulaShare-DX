@@ -26,7 +26,8 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	Schema.SObjectType typeInThisBatch;
 	List<FormulaShareRule> rulesForType;
 	List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
-
+	Set<String> newMetricsForBatch;
+	public static final String batchContext = 'Batch';
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
 	public FormulaShareProcessBatch(List<Schema.SObjectType> types, Integer batchSize) {
@@ -42,35 +43,43 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		system.debug('Rules for this object: '+rulesForType);
 
 		if(!rulesForType.isEmpty()) {
-
 			Database.QueryLocator ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
-
 			system.debug('query locator: ' + ql);
+
+			// Establish unit of work for batch log and rules in batch
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
 
 			FormulaShare_Log__c log = new FormulaShare_Log__c();
 			logsList = new List<FormulaShare_Log__c>();
 			logsList.add(log);
 			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 
-			fsLogs.setContext('FormulaShareProcessBatch', null, 'Batch');
+			fsLogs.setContext('FormulaShareProcessBatch', null, batchContext);
 			String typeInScope = typeInThisBatch.getDescribe().getName();
 			String query = ql.getQuery();
 			fsLogs.setBatchDetails(batchSize, typeInScope, rulesForType, query);	// need to fix this
-			logsList = fsLogs.upsertLogs();
-
-			log = logsList[0];
+			logsList = fsLogs.getFinalisedLogs();
+			uow.registerNew(logsList);
 
 			List<FormulaShare_Rule_in_Batch__c> ribList = new List<FormulaShare_Rule_in_Batch__c>();
 			for(FormulaShareRule rule : rulesForType) {
 				FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
-				rib.FormulaShare_Log__c = log.Id;
 				rib.FormulaShare_Rule_Name__c = rule.developerName;
 				rib.Rule_Active_for_Batch_Run__c = rule.active;
-				ribList.add(rib);
+
+				log = logsList[0];		// There will be only one log
+				uow.registerNew(rib, FormulaShare_Rule_in_Batch__c.FormulaShare_Log__c, log);
 			}
 
-			FormulaShareRulesInBatch fsRibs = new FormulaShareRulesInBatch(ribList);
-			fsRibs.insertRulesInBatch();
+			// Create metrics for any rules which don't have them already
+			List<FormulaShare_Metrics__c> metrics = createMetricsForNewRules();
+			newMetricsForBatch = new Set<String>();		// Track which rules had this added
+			for(FormulaShare_Metrics__c m : metrics) {
+				newMetricsForBatch.add(m.FormulaShare_Rule_Name__c);
+			}
+			uow.registerNew(metrics);
+
+			uow.commitWork();
 
 			return ql;
 		}
@@ -136,33 +145,47 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			}
 		}
 
-		// Insert batch logs
+		// Unit of work to update batch logs, and insert/update logs and metircs
+		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+
+		// Set batch logs
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
-		logsList = fsLogs.upsertLogs();
+		uow.registerDirty(fsLogs.getFinalisedLogs());
 
-		// Create record logs
-		try {
-			Map<String,FormulaShareService.ShareDetail> insertDetails = fsService.getInsertDetails();
-			Map<String,FormulaShareService.ShareDetail> deleteDetails = fsService.getDeleteDetails();
-			FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
-			publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
-			publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
-			FormulaShare_Log__c log = logsList[0];
-			publisher.setBatch(log.Id);
-			publisher.processDirectly();
+		// Build map of number of valid shares for all new metrics (we'll increment metrics for these)
+		Map<String,Integer> noValidSharesForRules = fsService.getNoValidSharesForRules();
+		Map<String,Integer> noValidSharesNewMetrics = new Map<String,Integer>();
+		for(String ruleName : newMetricsForBatch) {
+			Integer validShares = noValidSharesForRules.get(ruleName);
+			noValidSharesNewMetrics.put(ruleName, validShares);
 		}
-		catch(Exception e) {
-			System.debug('Error inserting logs. Message from Salesforce: '+e.getMessage());
-		}
+
+		// Set record logs
+		Map<String,FormulaShareService.ShareDetail> insertDetails = fsService.getInsertDetails();
+		Map<String,FormulaShareService.ShareDetail> deleteDetails = fsService.getDeleteDetails();
+		FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+		publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
+		publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
+		System.debug('No insert events: '+insertDetails.size());
+		System.debug('No delete events: '+insertDetails.size());
+		FormulaShare_Log__c log = logsList[0];
+		uow = publisher.processForBatch(uow, log, noValidSharesNewMetrics);
+        system.debug('Processing for batch. UOW3: '+uow);
+
+		uow.commitWork();
+
 	}
 	
 
 	public void finish(Database.BatchableContext context) {
-		
+
+		// Update batch log records
+		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.setBatchProcessingComplete();
-		logsList = fsLogs.upsertLogs();
+		uow.registerDirty(fsLogs.getFinalisedLogs());
+		uow.commitWork();
 
 		// Publish event to update FormulaShare Rules list in real time
 		List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
@@ -170,7 +193,6 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		updateEvent.Type__c = 'recalculation';
 		updateEvent.Object_Label__c = typeInThisBatch.getDescribe().getLabel();
 		eventsList.add(updateEvent);
-		system.debug('eventsList 2Size '+ eventsList.size() );
 		List<Database.SaveResult> results = EventBus.publish(eventsList);
 
 		// If there are more types to process, submit another batch
@@ -179,7 +201,26 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
 			system.debug('Submitted next batch, Id = ' + batchJobId);
 		}
+	}
 
+
+	private List<FormulaShare_Metrics__c> createMetricsForNewRules() {
+
+		// Make a set of rules which haven't had metrics records created already
+		Set<String> ruleNames = new Set<String>();
+		for(FormulaShareRule rule : rulesForType) {
+			ruleNames.add(rule.developerName);
+		}
+		FormulaShareMetricsSelector fsmSelector = new FormulaShareMetricsSelector();
+		List<FormulaShare_Metrics__c> existingMetrics = fsmSelector.getMetricsForRulesAndContext(ruleNames, batchContext);
+		for(FormulaShare_Metrics__c m : existingMetrics) {
+			ruleNames.remove(m.FormulaShare_Rule_Name__c);	// Take rules with metrics out of the set
+		}
+
+		// Get list of blank metrics records for all rules which don't yet have batch metrics
+		List<FormulaShare_Metrics__c> allMetrics = FormulaShareMetrics.getBlankMetrics(ruleNames, batchContext);
+
+		return allMetrics;
 	}
 	
 }
