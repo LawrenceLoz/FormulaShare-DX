@@ -7,7 +7,7 @@
                         <lightning-combobox 
                             id="accessLevel" 
                             name="accessLevel"
-                            label="Access Level" 
+                            label={accessLevelLabel} 
                             value={accessLevel}
                             options={accessLevelOptions}
                             placeholder="Select"
@@ -16,6 +16,50 @@
                             field-level-help={accessLevelHelpText}
                             required>
                         </lightning-combobox>
+
+                        <template if:true={showAccountRelatedAccess}>
+                            <div class="slds-p-top_medium">
+                                <lightning-combobox 
+                                    id="contactAccess" 
+                                    name="contactAccess"
+                                    label="Contact Access"
+                                    value={contactAccess}
+                                    options={contactAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleContactAccessChange}
+                                    read-only={contactAccessIsReadOnly}
+                                    field-level-help={contactAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+
+                                <lightning-combobox 
+                                    id="opportunityAccess" 
+                                    name="opportunityAccess"
+                                    label="Opportunity Access"
+                                    value={opportunityAccess}
+                                    options={opportunityAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleOpportunityAccessChange}
+                                    read-only={opportunityAccessIsReadOnly}
+                                    field-level-help={opportunityAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+
+                                <lightning-combobox 
+                                    id="caseAccess" 
+                                    name="caseAccess"
+                                    label="Case Access"
+                                    value={caseAccess}
+                                    options={caseAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleCaseAccessChange}
+                                    read-only={caseAccessIsReadOnly}
+                                    field-level-help={caseAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+                            </div>
+                        </template>
+
                     </div>
                 </div>
             </div>

@@ -54,6 +54,9 @@ public with sharing class FormulaShareRuleDMLController {
         rule.Description__c = cr.ruleDescription;
         rule.Share_With__c = cr.shareWith;
         rule.Access_Level__c = cr.accessLevel;
+        rule.Contact_Access__c = cr.contactAccess;
+        rule.Case_Access__c = cr.caseAccess;
+        rule.Opportunity_Access__c = cr.opportunityAccess;
         rule.Sharing_Reason__c = cr.sharingReason;
         rule.Object_Shared__c = cr.sharedObject.objectApiName;
 
@@ -87,6 +90,9 @@ public with sharing class FormulaShareRuleDMLController {
         @TestVisible String shareWith;
         @TestVisible String shareFieldType;
         @TestVisible String accessLevel;
+        @TestVisible String contactAccess;
+        @TestVisible String caseAccess;
+        @TestVisible String opportunityAccess;
         @TestVisible String sharingReason;
     }
 

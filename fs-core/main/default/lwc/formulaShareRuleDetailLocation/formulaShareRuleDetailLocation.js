@@ -100,7 +100,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         var relatedObjCmp = this.template.querySelector('lightning-combobox');
         console.log('relatedObjCmp '+relatedObjCmp);
         console.log('this.relatedObjectSelected '+this.relatedObjectSelected );
-        if(relatedObjCmp && this.relatedObjectSelected === null) {
+        if(relatedObjCmp && !this.relatedObjectSelected) {
             console.log('checking location valid');
             relatedObjCmp.setCustomValidity('Complete this field.');
             relatedObjCmp.reportValidity();

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Account_related_object_access_contact</fullName>
+    <active>true</active>
+    <errorConditionFormula>Object_Shared__r.DeveloperName = &apos;Account&apos; &amp;&amp; ISBLANK(TEXT(Contact_Access__c))</errorConditionFormula>
+    <errorDisplayField>Contact_Access__c</errorDisplayField>
+    <errorMessage>Contact Access must be set for account sharing. If organisation-wide default sharing for Contact is &quot;Controlled by Parent&quot; select this as the option, otherwise select a level of sharing which is the same or more permissive than the org-wide default</errorMessage>
+</ValidationRule>

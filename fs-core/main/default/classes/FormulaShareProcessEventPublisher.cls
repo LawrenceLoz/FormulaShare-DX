@@ -23,6 +23,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
     List<FormulaShare_Processed_Share_Event__e> pseList = new List<FormulaShare_Processed_Share_Event__e>();
 
+    // Log when service class has identified insert is needed
     public void addInsertEvents(Map<String,FormulaShareService.ShareDetail> shareDetails, String status, String statusReason) {
 
         Map<String,FormulaShare_Processed_Share_Event__e> pseMap = getEventsForRecordDetail(shareDetails, status, statusReason);
@@ -37,7 +38,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
         }
     }
 
-
+    // Log when service class has identified deletion is needed
     public void addDeleteEvents(Map<String,FormulaShareService.ShareDetail> shareDetails, String status, String statusReason) {
 
         Map<String,FormulaShare_Processed_Share_Event__e> pseMap = getEventsForRecordDetail(shareDetails, status, statusReason);
@@ -49,13 +50,30 @@ public inherited sharing class FormulaShareProcessEventPublisher {
         }
     }
 
+    // Log when service class processed a non-blank field but didn't find an entity
+    public void addEventsForEntitiesNotFound(List<FormulaShareService.EntityNotFound> entitiesNotFound) {
+        for(FormulaShareService.EntityNotFound enf : entitiesNotFound) {
+            FormulaShare_Processed_Share_Event__e pse = new FormulaShare_Processed_Share_Event__e();
+            pse.Record_Id__c = enf.recordId;
+            pse.Object__c = enf.type.getDescribe().getName();
+            pse.Processed_Date_Time__c = System.now();
+            pse.Status__c = 'Error';
+            pse.Failed_Status_Reason__c = enf.failedStatusReason;
+            pse.Access_Level__c = (String) enf.rule.accessLevel;
+            pse.Sharing_Reason__c = (String) enf.rule.sharingReason;
+            pse.Share_With__c = (String) enf.rule.shareWith;
+            pse.FormulaShare_Rule_Name__c = enf.rule.developerName;
+            pse.Operation__c = 'Insert';
+            pseList.add(pse);
+        }
+    }
+
 
     public void setBatch(Id batchId) {
         for(FormulaShare_Processed_Share_Event__e pse : pseList) {
             pse.Related_Batch_Log_Id__c = String.valueOf(batchId);
         }
     }
-
 
     public void publish() {
         if(!pseList.isEmpty()) {
@@ -66,16 +84,14 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
 
     // Method to process insertion of record logs directly rather than via published events
-    public fflib_ISObjectUnitOfWork processForBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog, Map<String,Integer> noValidSharesNewMetrics) {
+    public FormulaShareProcessedShareEventService.IncrementsWithUow processForBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog) {
+        
+        // Set logs for processed shares
+        FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = FormulaShareProcessedShareEventService.processForBatch(uow, pseList, relatedBatchLog);
+        system.debug('Processing for batch. UOW3: '+uow);
+        pseList.clear();
 
-        // Continue only if we've inserted / removed shares
-        // or if this is the first batch run for one or more rules
-        if(!pseList.isEmpty() || !noValidSharesNewMetrics.isEmpty()) {
-            uow = FormulaShareProcessedShareEventService.processForBatch(uow, pseList, relatedBatchLog, noValidSharesNewMetrics);
-            system.debug('Processing for batch. UOW3: '+uow);
-            pseList.clear();
-        }
-        return uow;
+        return incWithUow;
     }
 
 
@@ -89,8 +105,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             FormulaShareService.ShareDetail sd = shareDetails.get(key);
 
             FormulaShare_Processed_Share_Event__e pse = new FormulaShare_Processed_Share_Event__e();
-            Schema.DescribeSObjectResult typeDesc = sd.type.getDescribe();
-            String objectName = typeDesc.getName();
+            String objectName = sd.type.getDescribe().getName();
             system.debug('obj name *** '+objectName);
             pse.Object__c = objectName;
 
@@ -105,15 +120,10 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             pse.Failed_Status_Reason__c = statusReason;
 
             // Set attributes from share record according to whether standard or custom object
-            if(!typeDesc.isCustom()) {
-                pse.Record_Id__c = String.valueOf(share.get(objectName + 'Id'));
-                pse.Access_Level__c = (String) share.get(objectName + 'AccessLevel');
-            }
-            else {
-                pse.Record_Id__c = String.valueOf(share.get('ParentId'));
-                pse.Access_Level__c = (String) share.get('AccessLevel');
-                pse.Sharing_Reason__c = (String) share.get('RowCause');
-            }
+            FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(sd.type);
+            pse.Record_Id__c = String.valueOf(share.get(objUtils.parentIdFieldName()));
+            pse.Access_Level__c = (String) share.get(objUtils.accessLevelFieldName());
+            pse.Sharing_Reason__c = (String) share.get('RowCause');
 
             pseMap.put(key, pse);
         }

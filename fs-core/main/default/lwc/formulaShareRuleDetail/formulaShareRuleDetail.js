@@ -56,8 +56,11 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @track shareField;
     @track shareFieldType;
     @track accessLevel;
+    @track contactAccess;
+    @track caseAccess;
+    @track opportunityAccess;
     @track sharingReason;
-
+    
     @track objectWithShareField;
 
     @api
@@ -100,6 +103,9 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 this.ruleActive = data.Active__c;
                 this.shareWith = data.Share_With__c;
                 this.accessLevel = data.Access_Level__c;
+                this.contactAccess = data.Contact_Access__c;
+                this.caseAccess = data.Case_Access__c;
+                this.opportunityAccess = data.Opportunity_Access__c;
                 this.sharingReason = data.Sharing_Reason__c;
 
                 // Create array of objects to query for details
@@ -201,6 +207,9 @@ export default class FormulaShareRuleDetail extends LightningElement {
             "shareWith" : this.shareWith,
             "shareFieldType" : this.shareFieldType,
             "accessLevel" : this.accessLevel,
+            "contactAccess" : this.contactAccess,
+            "caseAccess" : this.caseAccess,
+            "opportunityAccess" : this.opportunityAccess,
             "sharingReason" : this.sharingReason
         }
 
@@ -246,11 +255,34 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.handleSetSharedObjectDetail(event);    // Capture object details
 
         // On change of shared object, assume that rule will be standard
+        // Clear any object specific fields
         this.ruleType = 'standard';
         this.objectWithShareField = this.sharedObjectApiName;
         this.relatedObjectSelected = null;
+        this.contactAcess = null;
+        this.caseAcess = null;
+        this.opportunityAcess = null;
         this.fireEventWithRule();
     }
+
+    @track accountRelatedOwd;
+    handleSetAccountRelatedOwd(event) {
+        this.accountRelatedOwd = event.detail;
+    }
+
+//    handleContactSharingDetails(event) {
+//        console.log('Set contact detail: '+JSON.stringify(this.contactObjectDetail))
+//    }
+//
+//    handleCaseSharingDetails(event) {
+//        this.caseObjectDetail = event.detail;
+//        console.log('Set case detail: '+JSON.stringify(this.caseObjectDetail))
+//    }
+//
+//    handleOpportunitySharingDetails(event) {
+//        this.opportunityObjectDetail = event.detail;
+//        console.log('Set opp detail: '+JSON.stringify(this.opportunityObjectDetail))
+//    }
 
     //--------------------- Event handlers for Location component ---------------------// 
 
@@ -294,6 +326,20 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     handleAccessLevelChange(event) {
         this.accessLevel = event.detail;
+        this.fireEventWithRule();
+    }
+
+    handleContactAccessChange(event) {
+        this.contactAccess = event.detail;
+        this.fireEventWithRule();
+    }
+    handleCaseAccessChange(event) {
+        this.caseAccess = event.detail;
+        console.log('case access change: '+JSON.stringify(event.detail));
+        this.fireEventWithRule();
+    }
+    handleOpportunityAccessChange(event) {
+        this.opportunityAccess = event.detail;
         this.fireEventWithRule();
     }
 

@@ -1,8 +1,9 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getClassicDomain from '@salesforce/apex/FormulaShareUtilities.getClassicDomain';
 import getSharingReasons from '@salesforce/apex/FormulaShareUtilities.getSharingReasons';
-import { refreshApex } from '@salesforce/apex';
+import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
 
 export default class FormulaShareRuleDetailAccess extends LightningElement {
 
@@ -28,6 +29,8 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
     _externalSharingModel;
 
+    accessLevelLabel;
+    showAccountRelatedAccess;
     @api
     get sharedObjectLabel() {}
     set sharedObjectLabel(value) {
@@ -38,7 +41,20 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
             this.updateSharingReason(null);
         }
         this._sharedObjectLabel = value;
+
+        // Set access level options
         this.updateAccessLevelOptions();
+
+        // Set label and visibility of depending on whether account or not
+        // Also set field attributes for related objects
+        if(this._sharedObjectLabel === 'Account') {
+            this.accessLevelLabel = 'Account and Contract Access';
+            this.assessAccountRelatedAccess();
+        }
+        else {
+            this.accessLevelLabel = 'Access Level';
+            this.showAccountRelatedAccess = false;
+        }
     }
     _sharedObjectLabel;
 
@@ -50,9 +66,43 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
     _sharedObjectId;
 
+    @api
+    get accountRelatedOwd() {}
+    set accountRelatedOwd(value) {
+        this._accountRelatedOwd = value;
+        console.log('accountrelated OWD: ' +JSON.stringify(this._accountRelatedOwd));
+        this.assessAccountRelatedAccess();
+    }
+    _accountRelatedOwd;
+
+    assessAccountRelatedAccess() {
+
+        // Proceed only if all required attributes are set and shared object is Account
+        if(this._accountRelatedOwd
+            && this._sharedObjectLabel === 'Account') {
+
+            // Set options for case and opportunity
+            this.updateAccessLevelOption('case', this._accountRelatedOwd.caseAccess.internalSharingModel);
+            this.updateAccessLevelOption('opportunity', this._accountRelatedOwd.opportunityAccess.internalSharingModel);
+
+            // Check whether contact is controlled by account, and set options for contact sharing
+            isContactSharingControlledByAccount()
+            .then((isControlledByAccount) => {
+                console.log('controlled by account: '+isControlledByAccount);
+                var contactIntSharing;
+                isControlledByAccount ? contactIntSharing = 'ControlledByParent' : contactIntSharing = this._accountRelatedOwd.contactAccess.internalSharingModel;
+                this.updateAccessLevelOption('contact', contactIntSharing);
+                this.showAccountRelatedAccess = true;
+            });
+        }
+    }
+
     @api sharedObjectApiName;
     @api isCustom;
     @api accessLevel;
+    @api contactAccess;
+    @api caseAccess;
+    @api opportunityAccess;
     @api sharingReason;
 
     @api
@@ -133,6 +183,91 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
             detail: this.accessLevel
         });
         this.dispatchEvent(evt);
+    }
+
+    handleContactAccessChange(event) {
+        this.updateRelatedAccess('contact', event.detail.value);
+    }
+    handleCaseAccessChange(event) {
+        this.updateRelatedAccess('case', event.detail.value);
+    }
+    handleOpportunityAccessChange(event) {
+        this.updateRelatedAccess('opportunity', event.detail.value);
+    }
+
+    updateRelatedAccess(type, value) {
+        switch (type) {
+            case 'contact':
+                console.log('contact access updated');
+                this.contactAccess = value;
+                break;
+            case 'case':
+                this.caseAccess = value;
+                break;
+            case 'opportunity':
+                this.opportunityAccess = value;
+        }
+        const evt = new CustomEvent(type + 'accesschange', {
+            detail: value
+        });
+        this.dispatchEvent(evt);        
+    }
+
+    @track contactAccessOptions;
+    @track contactAccessIsReadOnly;
+    @track contactAccessHelpText;
+    @track caseAccessOptions;
+    @track caseAccessIsReadOnly;
+    @track caseAccessHelpText;
+    @track opportunityAccessOptions;
+    @track opportunityAccessIsReadOnly;
+    @track opportunityAccessHelpText;
+    updateAccessLevelOption(type, internalSharing) {
+        var options = [];
+        var isReadOnly = true;
+        var helpText = 'Internal organisation-wide default sharing for '+type+': '+internalSharing;
+
+        // Set options which include default and higher access only
+        // To create account sharing, it's required to specify sharing for case and opp and also contact 
+        // (unless controlled by parent). This sharing must be OWD for these objects or higher
+        if(internalSharing === 'Private') {
+            options.push( { label: 'None', value: 'None' } );
+            options.push( { label: 'Read Only', value: 'Read' } );
+            options.push( { label: 'Read/Write', value: 'Edit' } );
+            isReadOnly = false;
+        }
+        else if(internalSharing === 'Read') {
+            options.push( { label: 'Read Only', value: 'Read' } );
+            options.push( { label: 'Read/Write', value: 'Edit' } );
+            isReadOnly = false;
+        }
+        else if(internalSharing === 'ReadWrite' || internalSharing === 'ReadWriteTransfer') {
+            options.push( { label: 'Read/Write', value: 'Edit' } );
+            this.updateRelatedAccess(type, 'Edit');     // Default to only option
+            isReadOnly = true;
+        }
+        else if(internalSharing === 'ControlledByParent') {
+            options.push( { label: 'Controlled By Parent', value: 'ControlledByParent' } );
+            this.updateRelatedAccess(type, 'ControlledByParent');   // Default to only option
+            isReadOnly = true;
+        }
+
+        // Set field attributes for object
+        if(type === 'contact') {
+            this.contactAccessOptions = options;
+            this.contactAccessIsReadOnly = isReadOnly;
+            this.contactAccessHelpText = helpText;
+        }
+        else if(type === 'case') {
+            this.caseAccessOptions = options;
+            this.caseAccessIsReadOnly = isReadOnly;
+            this.caseAccessHelpText = helpText;
+        }
+        else if(type === 'opportunity') {
+            this.opportunityAccessOptions = options;
+            this.opportunityAccessIsReadOnly = isReadOnly;
+            this.opportunityAccessHelpText = helpText;
+        }
     }
 
     handleSharingReasonChange(event) {

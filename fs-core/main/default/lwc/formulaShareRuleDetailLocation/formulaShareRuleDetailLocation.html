@@ -28,11 +28,14 @@
 
                             </span>
                             <span class="slds-icon_container slds-visual-picker__text-check">
-                                <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
-                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
-                                </svg>
+                                <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
+                                    icon-name="utility:check" 
+                                    size="x-small"
+                                    variant="inverse"
+                                    alternative-text="Check" 
+                                    title="Check">
+                                </lightning-icon>
                             </span>
-
                         </label>
                     </div>
                 </div>
@@ -61,11 +64,14 @@
 
                             </span>
                             <span class="slds-icon_container slds-visual-picker__text-check">
-                                <svg class="slds-icon slds-icon-text-check slds-icon_x-small" aria-hidden="true">
-                                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
-                                </svg>
+                                <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
+                                    icon-name="utility:check" 
+                                    size="x-small"
+                                    variant="inverse"
+                                    alternative-text="Check" 
+                                    title="Check">
+                                </lightning-icon>
                             </span>
-
                         </label>
                     </div>
 
@@ -75,7 +81,8 @@
                             placeholder="Select Object"
                             options={relatedObjectOptions}
                             value={relatedObjectSelected}
-                            onchange={handleRelatedObjectChange}></lightning-combobox>
+                            onchange={handleRelatedObjectChange}>
+                        </lightning-combobox>
                     </template>
 
                 </div>

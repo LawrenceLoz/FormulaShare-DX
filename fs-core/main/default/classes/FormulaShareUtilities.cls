@@ -372,26 +372,37 @@ public with sharing class FormulaShareUtilities {
 		return true;
 	}
 
-	public static String getShareRecordKeyStandard(Schema.SOBjectType type, SObject shareRecord) {
-		Id parentId = (Id) shareRecord.get(type + 'Id');
-		Id userOrGroupId = (Id) shareRecord.get('UserOrGroupId');
-		String parentId15 = get15CharacterId(parentId);
-		String userOrGroupId15 = get15CharacterId(userOrGroupId);
-		String accessLevel = (String) shareRecord.get(type + 'AccessLevel');
-		String shareKey = parentId15 + userOrGroupId15 + accessLevel;
-		return shareKey;
+
+	public static String getHighestAccess(List<String> accessLevels) {
+		String highestLevel = 'None';
+		for(String level : accessLevels) {
+			if(accessLevelIsHigher(level, highestLevel)) {
+				highestLevel = level;
+			}
+		}
+		return highestLevel;
 	}
 
 
-	public static String getShareRecordKeyCustom(SObject shareRecord) {
-		Id parentId = (Id) shareRecord.get('ParentId');
-		Id userOrGroupId = (Id) shareRecord.get('UserOrGroupId');
-		String parentId15 = get15CharacterId(parentId);
-		String userOrGroupId15 = get15CharacterId(userOrGroupId);
-		String accessLevel = (String) shareRecord.get('AccessLevel');
-		String rowCause = (String) shareRecord.get('RowCause');
-		String shareKey = parentId15 + userOrGroupId15 + accessLevel + rowCause;
-		return shareKey;
+	public static Boolean accessLevelIsHigher(String candidateLevel, String baseLevel) {
+		switch on candidateLevel {
+			when 'Read' {
+				if(baseLevel == 'None') {
+					return true;
+				}
+			}
+			when 'Edit' {
+				if(baseLevel == 'None' || baseLevel == 'Read') {
+					return true;
+				}
+			}
+			when 'All' {
+				if(baseLevel == 'None' || baseLevel == 'Read' || baseLevel == 'Edit') {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
@@ -452,33 +463,18 @@ public with sharing class FormulaShareUtilities {
 	}
 
 
-    public static Boolean isShareConstructable(Schema.SObjectType type, String accessLevel) {
-
-		Schema.SObjectType shareType = getShareObject(type);
-
-		// Check share object exists
-		if(shareType == null) {
-			System.debug('No share object exists for '+type.getDescribe().getName());
-			return false;
-		}
-
-		// Check share can be constructed with provided access level
+	@AuraEnabled(cacheable=true)
+	public static Boolean isContactSharingControlledByAccount() {
+		Schema.SObjectType accountShareType = AccountShare.SObjectType;
+		SObject share = accountShareType.newSObject();
 		try {
-			SObject newShare = shareType.newSObject();
-			if(type.getDescribe().isCustom()) {
-				newShare.put('AccessLevel', accessLevel);
-			}
-			else {
-				newShare.put(type + 'AccessLevel', accessLevel);
-			}
+			share.put('ContactAccessLevel', 'Read');
 		}
-		catch(System.SObjectException e) {
-			System.debug('Can\'t set access level of '+shareType.getDescribe().getName());
-			return false;
+		catch(Exception e) {
+			return true;	// If exception assigning contact access level, sharing is controlled by account
 		}
-
-		return true;
-    }
+		return false;
+	}
 
 
     public class ChildRelationshipDetails {

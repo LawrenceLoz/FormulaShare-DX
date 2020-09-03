@@ -46,7 +46,13 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
             FormulaShare_Settings__mdt.Logs_Removal_Batch_Size__c,
             FormulaShare_Settings__mdt.Recalculation_Batch_Size__c,
             FormulaShare_Settings__mdt.Days_to_Retain_Batch_Logs__c,
-            FormulaShare_Settings__mdt.Days_to_Retain_Record_Logs__c};
+            FormulaShare_Settings__mdt.Days_to_Retain_Record_Logs__c,
+            FormulaShare_Settings__mdt.All_Record_Logs_Report_Name__c,
+            FormulaShare_Settings__mdt.Record_Logs_Since_Last_Batch_Report_Name__c,
+            FormulaShare_Settings__mdt.All_Record_Errors_Report_Name__c,
+            FormulaShare_Settings__mdt.Rec_Errors_Since_Last_Batch_Report_Name__c,
+            FormulaShare_Settings__mdt.Batch_Errors_Report_Name__c
+        };
     }
 
     public Schema.SObjectType getSObjectType() {

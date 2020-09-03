@@ -18,7 +18,9 @@
         <c-formula-share-rule-detail-shared-object 
             shared-object-api-name={sharedObjectApiName}
             onsetsharedobjectdetail={handleSetSharedObjectDetail}
-            onsharedobjectchange={handleSharedObjectChange}>
+            onsharedobjectchange={handleSharedObjectChange}
+            onaccountrelatedowd={handleSetAccountRelatedOwd}
+            >
         </c-formula-share-rule-detail-shared-object>
 
         <template if:true={sharedObject}>
@@ -55,14 +57,22 @@
             <c-formula-share-rule-detail-access 
                 internal-sharing-model={sharedObject.internalSharingModel}
                 external-sharing-model={sharedObject.externalSharingModel}
+                account-related-owd={accountRelatedOwd}
                 is-custom={sharedObject.isCustom}
                 shared-object-id={sharedObject.objectId}
                 shared-object-label={sharedObject.objectLabel}
                 shared-object-api-name={sharedObjectApiName}
                 access-level={accessLevel}
+                contact-access={contactAccess}
+                case-access={caseAccess}
+                opportunity-access={opportunityAccess}
                 sharing-reason={sharingReason}
                 onaccesslevelchange={handleAccessLevelChange}
-                onsharingreasonchange={handleSharingReasonChange}>
+                onsharingreasonchange={handleSharingReasonChange}
+                oncontactaccesschange={handleContactAccessChange}
+                oncaseaccesschange={handleCaseAccessChange}
+                onopportunityaccesschange={handleOpportunityAccessChange}
+                >
             </c-formula-share-rule-detail-access>            
         </template>
 

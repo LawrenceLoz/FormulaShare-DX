@@ -23,32 +23,55 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
     static String context;    // "Batch" and "Trigger" supported
     static FormulaShare_Log__c batchLog;
-    static Map<String,Integer> validSharesNewMetrics;
     static FormulaShare_Settings__mdt settings;
     static fflib_ISObjectUnitOfWork uow;
-    public static final String batchContext = FormulaShareProcessBatch.batchContext;
-    public static final String triggerContext = 'Trigger';
+    public static final String batchContext = 'Batch Operations Since Last Batch';
+    public static final String triggerContext = 'Trigger Operations Since Last Batch';
+    public static final String batchFinishContext = 'Last Batch';
 
     public static void processForEvents(List<FormulaShare_Processed_Share_Event__e> pseList, String eventContext) {
+        System.debug('pseList: '+ pseList);
         context = eventContext;
         uow = FormulaShareApplication.unitOfWork.newInstance();
         process(pseList);
         uow.commitWork();   // Commit all DML
     }
 
-    public static fflib_ISObjectUnitOfWork processForBatch(fflib_ISObjectUnitOfWork batchUow, List<FormulaShare_Processed_Share_Event__e> pseList, FormulaShare_Log__c relatedBatchLog, Map<String,Integer> noValidSharesNewMetrics) {
+    public static IncrementsWithUow processForBatch(fflib_ISObjectUnitOfWork batchUow, List<FormulaShare_Processed_Share_Event__e> pseList, FormulaShare_Log__c relatedBatchLog) {
         context = batchContext;
         uow = batchUow;
         system.debug('Processing for batch. UOW1: '+uow);
         batchLog = relatedBatchLog;
-        validSharesNewMetrics = noValidSharesNewMetrics;
-        process(pseList);
+
+        Map<String,FormulaShareMetrics.Increment> incMap;
+        incMap = process(pseList);
+        
+        IncrementsWithUow incWithUow = new IncrementsWithUow();
+        incWithUow.incrementsMap = incMap;
+        incWithUow.uow = uow;
         system.debug('Processing for batch. UOW2: '+uow);
-        return uow;     // Pass uow back to ProcessBatch class
+
+        return incWithUow;     // Pass uow back to ProcessBatch class
+    }
+
+    public static fflib_ISObjectUnitOfWork processForBatchFail(fflib_ISObjectUnitOfWork batchUow, List<FormulaShareRule> rules) {
+        context = batchContext;
+        uow = batchUow;
+        setMetricsForBatchFail(rules);
+        return uow;
+    }
+
+    public static fflib_ISObjectUnitOfWork processForBatchFinish(fflib_ISObjectUnitOfWork batchUow, Map<String,Integer> totalValidSharesForRule, Map<String,Integer> totalErrorSharesForRule, FormulaShare_Log__c relatedBatchLog) {
+        context = batchFinishContext;
+        uow = batchUow;
+        batchLog = relatedBatchLog;
+        setMetricsForBatchFinish(totalValidSharesForRule, totalErrorSharesForRule);
+        clearMetricsAfterBatchFinish(totalValidSharesForRule.keySet(), relatedBatchLog);
+        return uow;
     }
     
 
-    private static void process(List<FormulaShare_Processed_Share_Event__e> pseList) {
+    private static Map<String,FormulaShareMetrics.Increment> process(List<FormulaShare_Processed_Share_Event__e> pseList) {
         settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 
         Map<String,FormulaShare_Record_Log__c> processedRecords = new Map<String,FormulaShare_Record_Log__c>();
@@ -94,7 +117,16 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         List<FormulaShare_Processed_Record_Share__c> processedRecordShares = getProcessedRecordShares(recordLogs, eventsByType);
 
         // Query for and update, or create new metrics records
-        setMetrics(processedRecordShares);
+        Map<String,FormulaShareMetrics.Increment> increments = setMetricsProcessedRecords(processedRecordShares);
+
+        // Fire event to update rules list view
+        List<String> objectLabels = new List<String>();
+        for(String objectName : eventsByType.keySet()) {
+            FormulaShareUtilities.describe(objectName).getLabel();
+        }
+        fireRulesListUpdateEvent(objectLabels);
+
+        return increments;
     }
 
 
@@ -119,7 +151,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
             for(FormulaShare_Processed_Share_Event__e pse : pseForObjectList) {
 
-                // If status was set there's no need to query, so map to record and add to be inserted
+                // If status was set (e.g. if entity not found) there's no need to query, so map to record and add to be inserted
                 if(pse.Status__c != null) {
                     FormulaShare_Processed_Record_Share__c prs = mapEventToProcessedRecordShare(pse, recordLogsMap, groupsMap);
                     processedRecordShares.add(prs);
@@ -147,26 +179,23 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                 Set<Id> shareIdSet = new Set<Id>();
 
                 // For standard objects, query for all shares and add keys & ids to sets
+                List<SObject> sharesList;
+                FormulaShareSObjectSharesSelector sharesSelector = new FormulaShareSObjectSharesSelector(true, shareObjectType, type);
                 if(!type.getDescribe().isCustom()) {
-                    FormulaShareSObjectSharesStdSelector sharesSelector = new FormulaShareSObjectSharesStdSelector(true, shareObjectType, type);
-                    List<SObject> sharesList = sharesSelector.selectByParentIds(parentIdsString);
-                    for(SObject share : sharesList) {
-                        String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(type, share);
-                        shareKeySet.add(shareKey);
-                        shareIdSet.add(share.Id);
-                    }
+                    sharesList = sharesSelector.selectByParentIds(parentIdsString);
                 }
 
                 // For custom objects, query for all shares and add to sets
                 else {
                     String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(sharingReasonsSet);
-                    FormulaShareSObjectSharesCustomSelector sharesSelector = new FormulaShareSObjectSharesCustomSelector(true, shareObjectType);
-                    List<SObject> sharesList = sharesSelector.selectByParentIdsAndRowCauses(parentIdsString, rowCausesString);
-                    for(SObject share : sharesList) {
-                        String shareKey = FormulaShareUtilities.getShareRecordKeyCustom(share);
-                        shareKeySet.add(shareKey);
-                        shareIdSet.add(share.Id);
-                    }
+                    sharesList = sharesSelector.selectByParentIdsAndRowCauses(parentIdsString, rowCausesString);
+                }
+
+                for(SObject share : sharesList) {
+                    FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
+                    String shareKey = objectUtils.getShareKey(share);
+                    shareKeySet.add(shareKey);
+                    shareIdSet.add(share.Id);
                 }
 
                 // Set statuses based on information returned
@@ -211,11 +240,14 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         // Find groups we'll need to query based on Shared_to_Id__c type
         List<Id> groupIdList = new List<Id>();
         for(FormulaShare_Processed_Share_Event__e pse : pseList) {
-            Id userOrGroupId = Id.valueOf(pse.Shared_to_Id__c);
-            Schema.SObjectType userOrGroupType = userOrGroupId.getSObjectType();
-            if(userOrGroupType == Group.SOBjectType) {
-                system.debug('group id: '+userOrGroupId);
-                groupIdList.add(userOrGroupId);
+            if(pse.Shared_to_Id__c != null) {
+                Id userOrGroupId = Id.valueOf(pse.Shared_to_Id__c);
+                Schema.SObjectType userOrGroupType = userOrGroupId.getSObjectType();
+
+                if(userOrGroupType == Group.SOBjectType) {
+                    system.debug('group id: '+userOrGroupId);
+                    groupIdList.add(userOrGroupId);
+                }
             }
         }
         
@@ -239,24 +271,31 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         prs.FormulaShare_Rule_Name__c = pse.FormulaShare_Rule_Name__c;
         prs.Access_Level__c = pse.Access_Level__c;
 
-        // Check whether user or group share
-        Id userOrGroupId = Id.valueOf(pse.Shared_to_Id__c);
-        system.debug('userOrGroupId: '+ userOrGroupId);
-        Schema.SObjectType userOrGroupType = userOrGroupId.getSObjectType();
-
         // Set status if provided
         prs.Status__c = pse.Status__c;
         prs.Status_Reason__c = pse.Failed_Status_Reason__c;
 
         // Populate share with type and relevant fields depending on user or group sharing
-        if(userOrGroupType == User.SOBjectType) {
-            prs.Shared_to_User__c = userOrGroupId;
-            prs.Share_With__c = 'Users';
+        // Check whether user or group share
+        if(pse.Shared_to_Id__c != null) {
+            Id userOrGroupId = Id.valueOf(pse.Shared_to_Id__c);
+            system.debug('userOrGroupId: '+ userOrGroupId);
+            Schema.SObjectType userOrGroupType = userOrGroupId.getSObjectType();
+            if(userOrGroupType == User.SOBjectType) {
+                prs.Shared_to_User__c = userOrGroupId;
+                prs.Share_With__c = 'Users';
+            }
+            else if(userOrGroupType == Group.SOBjectType) {
+                Group grp = groupsMap.get(userOrGroupId);
+                prs.Shared_to_Role_or_Group__c = grp.DeveloperName;
+                prs.Share_With__c = grp.Type;
+            }
         }
-        else if(userOrGroupType == Group.SOBjectType) {
-            Group grp = groupsMap.get(userOrGroupId);
-            prs.Shared_to_Role_or_Group__c = grp.DeveloperName;
-            prs.Share_With__c = grp.Type;
+
+        // If share with wasn't populated based on id type (e.g. if entity not found), set this from attribute
+        // (we don't do this for all logs because share with isn't known for deletes)
+        else {
+            prs.Share_With__c = pse.Share_With__c;
         }
 
         // Register records for insert if settings allow
@@ -270,7 +309,71 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     }
 
 
-    private static void setMetrics(List<FormulaShare_Processed_Record_Share__c> prsList) {
+    // Will augment metrics to indicate a batch failure
+    private static void setMetricsForBatchFail(List<FormulaShareRule> rules) {
+        Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
+
+        for(FormulaShareRule rule : rules) {
+            FormulaShareMetrics.Increment inc = new FormulaShareMetrics.Increment();
+            inc.noSuccessfulInserts = 0;
+            inc.noFailedInserts = 0;
+            inc.lastFailedBatch = DateTime.now();
+            metricsIncrements.put(rule.developerName, inc);
+        }
+        
+        // Insert or update metrics
+        FormulaShareMetrics metrics = getNewAndExistingMetrics(metricsIncrements);
+        uow = metrics.augmentMetrics(uow, metricsIncrements);
+    }
+
+
+    // Update batch metrics at end of run to overwrite total shares
+    private static void setMetricsForBatchFinish(Map<String,Integer> totalValidSharesForRule, Map<String,Integer> totalErrorSharesForRule) {
+        Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
+
+        for(String ruleName : totalValidSharesForRule.keySet()) {
+            FormulaShareMetrics.Increment inc = new FormulaShareMetrics.Increment();
+            inc.noSuccessfulInserts = totalValidSharesForRule.get(ruleName);
+            inc.noFailedInserts = totalErrorSharesForRule.get(ruleName);
+            inc.lastSuccessfulBatch = DateTime.now();
+            metricsIncrements.put(ruleName, inc);
+        }
+        
+        // Insert or update metrics
+        FormulaShareMetrics metrics = getNewAndExistingMetrics(metricsIncrements);
+        uow = metrics.overwriteMetrics(uow, metricsIncrements, batchLog);
+    }
+
+
+    private static void clearMetricsAfterBatchFinish(Set<String> ruleNamesSet, FormulaShare_Log__c batchLog) {
+
+        // Get existing metrics for rules
+        List<FormulaShare_Metrics__c> metricsObjectList = new FormulaShareMetricsSelector().getAllMetricsForRules(ruleNamesSet);
+
+        // Consider only batch and trigger metrics
+        List<FormulaShare_Metrics__c> metricsOjectsToUpdate = new List<FormulaShare_Metrics__c>();
+        for(FormulaShare_Metrics__c metricsObj : metricsObjectList) {
+            if(metricsObj.Context__c == batchContext || metricsObj.Context__c == triggerContext) {
+                metricsOjectsToUpdate.add(metricsObj);
+            }
+        }
+        System.debug('metricsOjectsToUpdate '+ metricsOjectsToUpdate);
+        FormulaShareMetrics metrics = new FormulaShareMetrics(metricsOjectsToUpdate);
+
+        // Create a zero metric for each rule
+        Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
+        for(String ruleName : ruleNamesSet) {
+            FormulaShareMetrics.Increment inc = new FormulaShareMetrics.Increment();
+            inc.noSuccessfulInserts = 0;
+            inc.noFailedInserts = 0;
+            metricsIncrements.put(ruleName, inc);
+        }
+        
+        // Update all batch and trigger metrics with last batch lookup and zero success/fail
+        uow = metrics.overwriteMetrics(uow, metricsIncrements, batchLog);
+    }
+
+    private static Map<String,FormulaShareMetrics.Increment> setMetricsProcessedRecords(List<FormulaShare_Processed_Record_Share__c> prsList) {
         Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
 
         for(FormulaShare_Processed_Record_Share__c prs : prsList) {
@@ -302,42 +405,19 @@ public inherited sharing class FormulaShareProcessedShareEventService {
             }
         }
 
-        // Add or update increments for first created metrics if running batch for first time
-        if(context == batchContext) {
-            for(String ruleName : validSharesNewMetrics.keySet()) {
-                System.debug('Processing for inc: '+ruleNAme);
-                
-                FormulaShareMetrics.Increment inc;
-                Integer noValidShares = validSharesNewMetrics.get(ruleName);
+        FormulaShareMetrics metrics = getNewAndExistingMetrics(metricsIncrements);
+        uow = metrics.augmentMetrics(uow, metricsIncrements);
 
-                if(metricsIncrements.containsKey(ruleName)) {
-                    System.debug('Found metric increment');
-                    inc = metricsIncrements.get(ruleName);
+        return metricsIncrements;
+    }
 
-                    // Check whether we have more valid shares than the ones inserted now, and increase if so
-                    if(noValidShares != null && inc.noSuccessfulInserts + inc.noFailedInserts < noValidShares) {
-                        inc.noSuccessfulInserts = noValidShares - inc.noFailedInserts;
-                    }
-                    metricsIncrements.put(ruleName, inc);
-                }
 
-                // If we didn't have an increment for this rule, create one indicating all valid shares are inserted
-                else if(noValidShares != null && noValidShares > 0) {
-                    System.debug('Creating metric increment');
-                    inc = new FormulaShareMetrics.Increment();
-                    inc.noSuccessfulInserts = noValidShares;
-                    inc.noFailedInserts = 0;
-                    inc.LastSuccessfulOperation = DateTime.now();
-                    metricsIncrements.put(ruleName, inc);
-                }
-            }
-        }
-
+    private static FormulaShareMetrics getNewAndExistingMetrics(Map<String,FormulaShareMetrics.Increment> metricsIncrements) {
+        
         // Get existing metrics and match to wrapper records
         List<FormulaShare_Metrics__c> metricsObjectList = new FormulaShareMetricsSelector().getMetricsForRulesAndContext(metricsIncrements.keySet(), context);
         System.debug('metricsObjectList: '+ metricsObjectList);
         System.debug('metricsIncrements: '+ metricsIncrements);
-
 
         // Prepare set of rule names which are not in existing metrics records
         List<String> rulesInMetrics = new List<String>();
@@ -350,7 +430,28 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         // Instantiate domain with existing metrics, set new metrics, and augment all with increments
         FormulaShareMetrics metrics = new FormulaShareMetrics(metricsObjectList);
         metrics.setBlankMetrics(rulesNotInMetrics, context);
-        uow = metrics.augmentMetrics(uow, metricsIncrements);
+        return metrics;
+    }
+
+
+    // Publish event to update FormulaShare Rules list in real time
+    public static void fireRulesListUpdateEvent(List<String> objectLabels) {
+        List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
+        
+        for(String objectLabel : objectLabels) {
+            FormulaShare_List_Update__e updateEvent = new FormulaShare_List_Update__e();
+            updateEvent.Type__c = 'recalculation';
+            updateEvent.Object_Label__c = objectLabel;
+            eventsList.add(updateEvent);
+        }
+
+        List<Database.SaveResult> results = EventBus.publish(eventsList);
+    }
+
+
+    public class IncrementsWithUow {
+        public Map<String,FormulaShareMetrics.Increment> incrementsMap;
+        public fflib_ISObjectUnitOfWork uow;
     }
 
 }

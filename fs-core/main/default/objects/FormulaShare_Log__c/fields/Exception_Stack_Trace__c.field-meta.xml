@@ -3,7 +3,7 @@
     <fullName>Exception_Stack_Trace__c</fullName>
     <externalId>false</externalId>
     <label>Exception Stack Trace</label>
-    <length>32768</length>
+    <length>1000</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>3</visibleLines>

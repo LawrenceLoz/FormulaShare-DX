@@ -38,18 +38,25 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
         return FormulaShare_Rule_in_Batch__c.sObjectType;
     }
 
-    public List<RuleRunDetail> getLogsForRule(List<String> ruleNames) {
-        List<RuleRunDetail> rrDetails = new List<RuleRunDetail>();
-        for(FormulaShare_Rule_in_Batch__c rib : Database.query(
+    public List<FormulaShare_Rule_in_Batch__c> getLogsForRules(List<String> ruleNames) {
+        return Database.query(
             newQueryFactory(false).
             selectField(FormulaShare_Rule_in_Batch__c.FormulaShare_Rule_Name__c).
             selectField(FormulaShare_Rule_in_Batch__c.Rule_Active_for_Batch_Run__c).
+            selectField(FormulaShare_Rule_in_Batch__c.Records_Shared_in_This_Batch__c).
+            selectField(FormulaShare_Rule_in_Batch__c.Record_Errors_in_This_Batch__c).
+            selectField(FormulaShare_Rule_in_Batch__c.Total_Records_Shared_by_Rule__c).
             selectField('FormulaShare_Log__r.Processing_Started__c').
             selectField('FormulaShare_Log__r.Processing_Finished__c').
             selectField('FormulaShare_Log__r.Batch_Finish_Complete__c').
             setCondition('FormulaShare_Rule_Name__c IN :ruleNames').
-            toSOQL())) {
-                rrDetails.add(new RuleRunDetail(rib));
+            toSOQL());
+    }
+
+    public List<RuleRunDetail> getRuleRuns(List<String> ruleNames) {
+        List<RuleRunDetail> rrDetails = new List<RuleRunDetail>();
+        for(FormulaShare_Rule_in_Batch__c rib : getLogsForRules(ruleNames)) {
+            rrDetails.add(new RuleRunDetail(rib));
         }
         
         return rrDetails;

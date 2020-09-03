@@ -48,21 +48,21 @@ public with sharing class FormulaShareUtilitiesTest {
         system.assertEquals(sObjField, accuontFieldOnContact);
     }
 
-
-    @IsTest
-    public static void testGetShareRecordKeyCustom() {
-        FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-        share.UserOrGroupId = UserInfo.getUserId();  // Any valid id
-        share.ParentId = UserInfo.getUserId();  // Any valid id
-        share.AccessLevel = 'Read';
-        share.RowCause = 'FormulaShare_Log_Share__c';
-
-        String shareKey = FormulaShareUtilities.getShareRecordKeyCustom(share);
-
-        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
-        String expectedKey = idString + idString + 'Read' + 'FormulaShare_Log_Share__c';
-        system.assertEquals(expectedKey, shareKey);
-    }
+// Method is now part of FormulaShareRule
+//    @IsTest
+//    public static void testGetShareRecordKeyCustom() {
+//        FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+//        share.UserOrGroupId = UserInfo.getUserId();  // Any valid id
+//        share.ParentId = UserInfo.getUserId();  // Any valid id
+//        share.AccessLevel = 'Read';
+//        share.RowCause = 'FormulaShare_Log_Share__c';
+//
+//        String shareKey = FormulaShareUtilities.getShareRecordKey(share);
+//
+//        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
+//        String expectedKey = idString + idString + 'Read' + 'FormulaShare_Log_Share__c';
+//        system.assertEquals(expectedKey, shareKey);
+//    }
 /*
     @IsTest
     public static void testGetShareRecordKeyStandard() {

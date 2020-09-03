@@ -2,11 +2,13 @@ import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
+import { NavigationMixin } from 'lightning/navigation';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 
-export default class TreeGrid extends LightningElement {
+
+export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     @track data = [];
     @track columns = [];
@@ -74,26 +76,38 @@ export default class TreeGrid extends LightningElement {
                 , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
                 , initialWidth: this.w2
             },
-//            {
-//                fieldName: '',
-//                label: 'Static Icon',
-//                type: 'button-icon',
-//                typeAttributes: { class:'slds-button__icon slds-button__icon_large', iconClass:'slds-button__icon slds-button__icon_large', iconName: 'utility:success' }
-//                cellAttributes: { iconName: 'utility:success', iconAlternativeText: 'Up arrow' }
-//            },
-            {type: 'url'
-                , fieldName: 'batchShareUrl'
-                , label:'Batch Sharing'
-                , typeAttributes: {label: {fieldName:'batchShareUrlLabel'}, target:'_blank', tooltip: 'There was an error in the most recent calculation. Click to view logs for the rule'}
-                , cellAttributes: { iconName: {fieldName: 'batchShareIcon'}, iconLabel: {fieldName: 'batchShareText'}, iconPosition: 'left' }
+            {type: 'number'
+                , fieldName: 'noSharesApplied'
+                , label:'Records Shared'
                 , initialWidth: this.w3
-            },
-            {type: 'url'
-                , fieldName: 'triggerShareUrl'
-                , label:'Trigger Sharing'
-                , typeAttributes: {label: {fieldName:'triggerShareUrlLabel'}, target:'_blank', tooltip: 'There was an error in the most recent calculation. Click to view logs for the rule'}
-                , cellAttributes: { iconName: {fieldName: 'triggerShareIcon'}, iconLabel: {fieldName: 'triggerShareText'}, iconPosition: 'left' }
-            },
+            }
+        ];
+
+        // Iterate all child rows to check for warnings
+        var showWarnings = false;
+        for(var rowNo in this.treeItems) {
+            for(var ruleRowNo in this.treeItems[rowNo]._children) {
+                // If rule is active and warning URL populated, recognise we need to show warning column
+                var thisRow = this.treeItems[rowNo]._children[ruleRowNo];
+                if(thisRow.warningUrlLabel && thisRow.active) {
+                    showWarnings = true;
+                    break;
+                }
+            }
+        }
+
+        if(showWarnings) {
+            this.columns.push(
+                {type: 'url'
+                    , fieldName: 'warningUrl'
+                    , label:'Warnings'
+                    , typeAttributes: {label: {fieldName:'warningUrlLabel'}, target:'_blank', tooltip: {fieldName:'warningTooltip'}}
+//                    , cellAttributes: { iconName: {fieldName: 'warningIcon'}, iconPosition: 'left' }
+                }
+            );
+        }
+
+        this.columns.push(
             {type: 'boolean'
                 , fieldName: 'active'
                 , label: 'Active'
@@ -102,8 +116,7 @@ export default class TreeGrid extends LightningElement {
             {type: 'action'
                 , typeAttributes: {rowActions: this.getRowActions} 
             }
-        ];
-
+        );
     }
 
     // Core method to load treegrid data from handler
@@ -218,37 +231,56 @@ export default class TreeGrid extends LightningElement {
 
     // Set available drop-down actions for each grid row
     getRowActions(row, doneCallback) {
+        const rowApiName = row['objectApiName'];
+
+        // Check the retention days before populating (this is used in an action label)
+        console.log('loading actions');
+
         const actions =[];
         const isActive = row['active'];
         const isParentRow = row['isParentRow'];
-            if(isParentRow) {
-                actions.push({
-                    'label': 'Recalculate Sharing',
-                    'name': 'recalculate'
-                });
-            }
-            else {
+        if(isParentRow) {
+            actions.push({
+                'label': 'Recalculate Sharing',
+                'name': 'recalculate'
+            });
+        }
+        else {
             actions.push({
                 'label': 'Edit',
                 'name': 'edit'
             });
+
             if (isActive) {
-                    actions.push({
-                        'label': 'Deactivate',
-                        'name': 'deactivate'
-                    });
-                } else {
-                    actions.push({
-                        'label': 'Activate',
-                        'name': 'activate'
-                    });
-                }
+                actions.push({
+                    'label': 'Deactivate',
+                    'name': 'deactivate'
+                });
+            }
+            else {
+                actions.push({
+                    'label': 'Activate',
+                    'name': 'activate'
+                });
             }
 
-            // simulate a trip to the server
-            setTimeout(() => {
-                doneCallback(actions);
-            }, 200);
+            // Set label according to whether logs will be restricted to the last batch
+            var viewLogsLabel = 'View Logs';
+            if(row['lastBatchId']) {
+                viewLogsLabel += ' Since Last Batch';
+            }
+            actions.push({
+                'label': viewLogsLabel,
+                'name': 'viewlogs'
+            });
+        }
+
+        // simulate a trip to the server
+        setTimeout(() => {
+            doneCallback(actions);
+        }, 200);                
+
+        console.log('loaded actions');
     }
 
 
@@ -270,6 +302,9 @@ export default class TreeGrid extends LightningElement {
             case 'activate':
             case 'deactivate':
                 this.activateDeactivate(row, actionName);
+                break;
+            case 'viewlogs':
+                this.openLogsReport(row);
                 break;
         }
     }
@@ -333,6 +368,33 @@ export default class TreeGrid extends LightningElement {
                 console.log('Error changing activation status');
                 this.showError(error, 'Error changing activation status')
             });
+    }
+
+
+    openLogsReport(row) {
+
+        // Set filter parameter for report ("fv0" is the convention for the first filter)
+        var params = {};
+        params['fv0'] = encodeURI(row['developerName']);
+
+        // Set parameters for last batch and batch finish time if batch has run
+        if(row['lastBatchId']) {
+            params['fv1'] = encodeURI(row['lastBatchId']);
+            params['fv2'] = encodeURI(row['batchFinishEpoch']);
+        }
+
+        // Open report in a new tab
+        this[NavigationMixin.GenerateUrl]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: row['recordLogsReportId'],
+                objectApiName: 'Report',
+                actionName: 'view',
+            },
+            state: params   //  Filter set via query string parameter
+        }).then(url => {
+             window.open(url);
+        });
     }
 
 

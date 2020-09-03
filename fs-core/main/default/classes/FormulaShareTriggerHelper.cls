@@ -277,13 +277,22 @@ public with sharing class FormulaShareTriggerHelper implements FormulaShareIHelp
 	public List<SObject> getSharesToInsert() {
 
 		Map<String,FormulaShareService.ShareDetail> insertDetails = new Map<String,FormulaShareService.ShareDetail>();
+		List<FormulaShareService.EntityNotFound> enfList = new List<FormulaShareService.EntityNotFound>();
 		List<SObject> sharesToInsert = new List<SObject>();
 
 		if(!populatedFsServiceMap.isEmpty()) {
+
+			// Get details of inserted shares, and sharing which looked like it was needed but an entity couldn't be found
 			for(FormulaShareService thisFsService : populatedFsServiceMap.values()) {
 				Map<String,FormulaShareService.ShareDetail> thisInsertDetails = thisFsService.getInsertDetails();
-				if(thisInsertDetails != null) {
+				List<FormulaShareService.EntityNotFound> entitiesNotFound = thisFsService.getEntitiesNotFound();
+				if(!thisInsertDetails.isEmpty()) {
+					System.debug('insertDetails: '+thisInsertDetails.size()+' | '+ thisInsertDetails);
 					insertDetails.putAll(thisInsertDetails);
+				}
+				if(!entitiesNotFound.isEmpty()) {
+					System.debug('entitiesNotFound: '+entitiesNotFound.size()+' | '+ entitiesNotFound);
+					enfList.addAll(entitiesNotFound);
 				}
 			}
 
@@ -292,10 +301,11 @@ public with sharing class FormulaShareTriggerHelper implements FormulaShareIHelp
 			}
 
 			/// Fire platform events to track the share insertions
-			if(!insertDetails.isEmpty()) {
+			if(!insertDetails.isEmpty() || !enfList.isEmpty()) {
 				try {
 					FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
 					publisher.addInsertEvents(insertDetails, null, null);
+					publisher.addEventsForEntitiesNotFound(enfList);
 					publisher.publish();
 				}
 				catch(Exception e) {

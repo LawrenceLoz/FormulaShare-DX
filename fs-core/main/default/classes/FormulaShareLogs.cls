@@ -31,44 +31,36 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
         }
     }
 
-    public void setContext(String className, String methodName, String context) {
-        
+    String failedBatches;
+
+
+    public void setContext(String className, Integer batchSize, String typeInScope, List<FormulaShareRule> rulesForType, String query) {
+
         for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
             log.Class_Name__c = className;
-            log.Method_Name__c = methodName;
-            log.Context__c = context; //e.g. 'Batch'
-
-            log.Processing_Started__c = DateTime.now();
-            log.Processing_Started_Milliseconds__c = DateTime.now().getTime();
-        }
-    }
-
-    public void setBatchDetails(Integer batchSize, String typeInScope, List<FormulaShareRule> rulesForType, String query) {
-
-        for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
             log.Type_In_Scope__c = typeInScope;
             log.Number_Of_Rules__c = rulesForType.size();
             log.Query__c = query;
             log.Batches_Processed__c = 0;
+            log.Failed_Batches__c = '';
+
+            log.Processing_Started__c = DateTime.now();
+            log.Processing_Started_Milliseconds__c = DateTime.now().getTime();
 
             system.debug('The query: '+query);
-
-/*            Decimal noRecords = (Decimal) Database.countQuery(query);
-            log.Records_In_Batch__c = noRecords.intvalue();
-
-            Decimal noBatches = noRecords.divide(batchSize, 0, System.RoundingMode.UP);
-            log.Total_Batches__c = noBatches.intvalue();
-            */
         }
     }
 
     public void logException(Exception e) {
 
         for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
+            log.Exception_Message__c = e.getMessage();
             log.Exception_Line_Number__c = e.getLineNumber();
-            log.Exception_Cause__c = '' + e.getCause();
             log.Exception_Stack_Trace__c = e.getStackTraceString();
             log.Exception_Type__c = e.getTypeName();
+            if(log.Failed_Batches__c == null || log.Failed_Batches__c.length() < 248) {
+                log.Failed_Batches__c += String.valueOf(log.Batches_Processed__c) + ', ';
+            }
         }
     }
 
@@ -84,7 +76,21 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
         }
     }
 
-    public List<FormulaShare_Log__c> getFinalisedLogs() {
+    public void trimFailedBatches() {
+        List<FormulaShare_Log__c> logs = (List<FormulaShare_Log__c>) Records;
+        for(FormulaShare_Log__c log : logs) {
+            if(log.Failed_Batches__c != null) {
+                // Remove comma suffix and abbreviate if needed
+                log.Failed_Batches__c = log.Failed_Batches__c.left(log.Failed_Batches__c.length() - 2);
+                log.Failed_Batches__c = log.Failed_Batches__c.abbreviate(245);
+            }
+            else {
+                log.Failed_Batches__c = 'None';
+            }
+        }
+    }
+
+    public List<FormulaShare_Log__c> setFinalisedLogs() {
         List<FormulaShare_Log__c> logs = (List<FormulaShare_Log__c>) Records;
         for(FormulaShare_Log__c log : logs) {
             log.Processing_Finished__c = DateTime.now();

@@ -23,10 +23,12 @@ public with sharing class FormulaShareMetrics extends fflib_SObjectDomain {
 
     // Values to augment onto metrics
     public class Increment {
-        public Integer noFailedInserts = 0;
-        public DateTime lastFailedOperation;
-        public DateTime LastSuccessfulOperation;
         public Integer noSuccessfulInserts = 0;
+        public Integer noFailedInserts = 0;
+        public DateTime LastSuccessfulOperation;
+        public DateTime lastFailedOperation;
+        public DateTime LastSuccessfulBatch;
+        public DateTime lastFailedBatch;
     }
 
     public FormulaShareMetrics(List<FormulaShare_Metrics__c> sObjectList) {
@@ -58,7 +60,7 @@ public with sharing class FormulaShareMetrics extends fflib_SObjectDomain {
         return metricsList;
     }
 
-    // Updates metrics records with incremented values
+    // Adds incremented values to metrics
     public fflib_ISObjectUnitOfWork augmentMetrics(fflib_ISObjectUnitOfWork uow, Map<String,Increment> incrementsMap) {
         for(FormulaShare_Metrics__c metrics : (List<FormulaShare_Metrics__c>) Records) {
 
@@ -67,23 +69,55 @@ public with sharing class FormulaShareMetrics extends fflib_SObjectDomain {
 
                 // Increment the metrics and set date/times
                 Increment inc = incrementsMap.get(metrics.FormulaShare_Rule_Name__c);
-                system.debug('rule name: '+ metrics.FormulaShare_Rule_Name__c);
-                system.debug('inc.noFailedInserts: '+ inc.noFailedInserts);
-                system.debug('metrics.Failed_Inserts__c '+ metrics.Failed_Inserts__c);
-                
-                metrics.Failed_Inserts__c += inc.noFailedInserts;
-                metrics.Last_Failed_Operation__c = inc.lastFailedOperation;
-                metrics.Last_Successful_Operation__c = inc.LastSuccessfulOperation;
                 metrics.Successful_Inserts__c += inc.noSuccessfulInserts;
-                if(metrics.Id == null) {
-                    uow.registerNew(metrics);
-                }
-                else {
-                    uow.registerDirty(metrics);
-                }
+                metrics.Failed_Inserts__c += inc.noFailedInserts;
+
+                uow = updateDatesAndRegister(uow, metrics, inc);
             }
         }
         return uow;
     }
+
+    // Updates metrics records with incremented values
+    public fflib_ISObjectUnitOfWork overwriteMetrics(fflib_ISObjectUnitOfWork uow, Map<String,Increment> incrementsMap, FormulaShare_Log__c batchLog) {
+
+        System.debug('Records: '+ Records);
+        for(FormulaShare_Metrics__c metrics : (List<FormulaShare_Metrics__c>) Records) {
+
+            // Continue if there's an increment for the rule
+            if(incrementsMap.containsKey(metrics.FormulaShare_Rule_Name__c)) {
+
+                // Increment the metrics and set date/times
+                Increment inc = incrementsMap.get(metrics.FormulaShare_Rule_Name__c);
+                system.debug('rule name: '+ metrics.FormulaShare_Rule_Name__c);
+                system.debug('inc.noSuccessfulInserts: '+ inc.noSuccessfulInserts);
+                
+                metrics.Successful_Inserts__c = inc.noSuccessfulInserts;
+                metrics.Failed_Inserts__c = inc.noFailedInserts;
+
+                system.debug('batchLog: '+ batchLog);
+                uow.registerRelationship(metrics, FormulaShare_Metrics__c.Last_Batch_Run__c, batchLog);
+                
+                uow = updateDatesAndRegister(uow, metrics, inc);
+            }
+        }
+        return uow;
+    }
+
+    private fflib_ISObjectUnitOfWork updateDatesAndRegister(fflib_ISObjectUnitOfWork uow, FormulaShare_Metrics__c metrics, Increment inc) {
+        metrics.Last_Successful_Operation__c = inc.LastSuccessfulOperation;
+        metrics.Last_Failed_Operation__c = inc.lastFailedOperation;
+        metrics.Last_Successful_Batch__c = inc.LastSuccessfulBatch;
+        metrics.Last_Failed_Batch__c = inc.lastFailedBatch;
+
+        if(metrics.Id == null) {
+            uow.registerNew(metrics);
+        }
+        else {
+            uow.registerDirty(metrics);
+        }
+        return uow;
+    }
+
 
 }

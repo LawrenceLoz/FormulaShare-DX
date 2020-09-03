@@ -59,7 +59,12 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         try {
             // Check that object can be created by current or requesting user (or bypass if this is a test run)
             if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
+                // Insert the sharing record
+                // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
+                // update the existing share rather than create a new one. For this reason, assessment of sharing will only
+                // delete shares if there is no sharing of any level to be applied
                 insert shares;
+                system.debug('DML inserted shares '+ shares);
             }
         }
         catch(Exception e) {
@@ -74,6 +79,7 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         try {
             // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
             if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
+                system.debug('DML shares to be deleted '+ shares);
                 delete shares;
             }
         }

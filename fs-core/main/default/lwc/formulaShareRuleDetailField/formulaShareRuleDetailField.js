@@ -101,12 +101,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         ];
 
         // If object is private or public read-only for internal, include roles and internal subordinates sharing
-        if(this._internalSharingModel === 'Private' || this.internalSharingModel === 'Read') {
+        if(this._internalSharingModel === 'Private' || this._internalSharingModel === 'Read') {
             optionsList.push( { label: 'Roles and Internal Subordinates', value: 'Roles and Internal Subordinates' } );
         }
 
         // If object is private or public read-only for external, include roles and internal subordinates sharing
-        if(this._externalSharingModel === 'Private' || this.externalSharingModel === 'Read') {
+        if(this._externalSharingModel === 'Private' || this._externalSharingModel === 'Read') {
             optionsList.push( { label: 'Roles, Internal and Portal Subordinates', value: 'Roles, Internal and Portal Subordinates' } );
         }
 

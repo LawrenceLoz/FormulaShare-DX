@@ -38,7 +38,7 @@ public with sharing class FormulaShareRulesListViewController {
 
         // Assess when last sharing calculation happened
         FormulaShareRuleInBatchSelector ribSelector = new FormulaShareRuleInBatchSelector(true);
-        List<FormulaShareRuleInBatchSelector.RuleRunDetail> runDetails = ribSelector.getLogsForRule(ruleNames);
+        List<FormulaShareRuleInBatchSelector.RuleRunDetail> runDetails = ribSelector.getRuleRuns(ruleNames);
         Map<String,FormulaShareRuleInBatchSelector.RuleRunDetail> ruleRunDetailMap = new Map<String,FormulaShareRuleInBatchSelector.RuleRunDetail>();
 
         // Iterate through logs and build map of latest calculations
@@ -99,7 +99,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.active = rule.active;
             rw.sharedObjectClass = 'slds-tree__item';
 
-            rw.setSharingAttributes(metricsMap);
+            rw.setMetricsDetails(objectName, metricsMap);
 
             // Set URL for shared to field if populated
             if(!String.isBlank(rule.sharedToTokenForRuleType) && rule.sharedToTokenForRuleType.contains('.')) {
@@ -119,8 +119,10 @@ public with sharing class FormulaShareRulesListViewController {
 
             // Set calculation status depending on most recent logs
             if(!ruleRunDetailMap.containsKey(rw.developerName)) {
-                rw.lastCalcStatus = 'None';
-            }
+                rw.lastCalcStatus = 'Pending';
+                rw.iconName = 'standard:today';
+                rw.iconAlt = 'Pending';
+        }
 
             else {
                 FormulaShareRuleInBatchSelector.RuleRunDetail runDetail = ruleRunDetailMap.get(rw.developerName);
@@ -131,7 +133,7 @@ public with sharing class FormulaShareRulesListViewController {
                 // If currently processing, indicate this against the field
                 else {
                     rw.lastCalcStatus = 'Processing...';
-                    rw.iconName = 'standard:today';
+                    rw.iconName = 'standard:product_transfer';
                     rw.iconAlt = 'Currently Processing';
                 }
             }
@@ -199,7 +201,7 @@ public with sharing class FormulaShareRulesListViewController {
         system.debug('Metadata deployment job ID : '+asyncJobId);
     }
 
-
+    
     // Query and cache whether the job is scheduled
     static Boolean jobScheduled;
     private static Boolean jobScheduled() {
@@ -269,128 +271,152 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String iconAlt {get;set;}
         @AuraEnabled
-        public String batchShareIcon {get;set;}
+        public Decimal noSharesApplied {get;set;}
         @AuraEnabled
-        public String batchShareText {get;set;}
+        public String warningIcon {get;set;}
+//        @AuraEnabled
+//        public String warningText {get;set;}
         @AuraEnabled
-        public String batchShareUrl {get;set;}
+        public String warningUrl {get;set;}
         @AuraEnabled
-        public String batchShareUrlLabel {get;set;}
+        public String warningUrlLabel {get;set;}
         @AuraEnabled
-        public String triggerShareIcon {get;set;}
-        @AuraEnabled
-        public String triggerShareText {get;set;}
-        @AuraEnabled
-        public String triggerShareUrl {get;set;}
-        @AuraEnabled
-        public String triggerShareUrlLabel {get;set;}
+        public String warningTooltip {get;set;}
 
-        private final String successIcon = 'standard:task2';
-        private final String pendingIcon = 'standard:today';   // custom:custom25
-        private final String warningIcon = 'utility:warning';
-        private final String noSharesIcon = 'utility:success';
+        // Ids and parameters for filtered record report URL (built in navigation mixin)
+        @AuraEnabled
+        public Id recordLogsReportId {get;set;}
+        @AuraEnabled
+        public Id lastBatchId {get;set;}
+        @AuraEnabled
+        public Long batchFinishEpoch {get;set;}
+
+
+//        private final String successIcon = 'standard:task2';
+//        private final String pendingIcon = 'standard:today';   // custom:custom25
+//        private final String noSharesIcon = 'utility:success';
+
+        private final String warningTriangle = 'utility:warning';
         
-        public void setSharingAttributes(Map<String,FormulaShare_Metrics__c> metricsMap) {
+        private void setMetricsDetails(String objectApiName, Map<String,FormulaShare_Metrics__c> metricsMap) {
+            FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
+
+            // Separate metrics for contexts
             String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
             String batchContext = FormulaShareProcessedShareEventService.batchContext;
+            String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
             FormulaShare_Metrics__c triggerMetrics = metricsMap.get(developerName + triggerContext);
             FormulaShare_Metrics__c batchMetrics = metricsMap.get(developerName + batchContext);
+            FormulaShare_Metrics__c batchFinishMetrics = metricsMap.get(developerName + batchFinishContext);
 
-            batchShareIcon = getIcon(batchMetrics);
-            batchShareText = getText(batchMetrics);
-            batchShareUrl = getUrl(batchMetrics);
-            batchShareUrlLabel = getUrlLabel(batchMetrics);
-            triggerShareIcon = getIcon(triggerMetrics);
-            triggerShareText = getText(triggerMetrics);
-            triggerShareUrl = getUrl(triggerMetrics);
-            triggerShareUrlLabel = getUrlLabel(triggerMetrics);
+            Integer noSharesFailed = 0;
+            Boolean recordFailure = false;
+            Boolean batchFailure = false;
+
+            // Set report url to report returning all records (overwritten if batch has run)
+            recordLogsReportId = FormulaShareReportsService.getReportIdForName(settings.All_Record_Logs_Report_Name__c);
+
+            // If complete batch metrics are available, use these together with more recent trigger metrics
+            String ruleName;
+            if(batchFinishMetrics != null) {
+                ruleName = batchFinishMetrics.FormulaShare_Rule_Name__c;
+
+                noSharesApplied = batchFinishMetrics.Successful_Inserts__c;
+                noSharesFailed = (Integer) batchFinishMetrics.Failed_Inserts__c;
+                lastBatchId = batchFinishMetrics.Last_Batch_Run__c;
+
+                // Add contributions from trigger metrics if captured after last batch
+                if(triggerMetrics != null && triggerMetrics.Last_Batch_Run__c == lastBatchId) {
+                    noSharesApplied += triggerMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // Indicate batch failure if last finshed batches failed...
+                if(batchFinishMetrics.Last_Failed_Batch__c != null) {
+                    batchFailure = true;
+                }
+
+                // ... Or if currently running batch failed
+                else if(batchMetrics != null && batchMetrics.Last_Batch_Run__c != lastBatchId
+                    && batchMetrics.Last_Failed_Batch__c != null) {
+                    batchFailure = true;
+                }
+
+                // Set record log report urls and parameters for action
+                recordLogsReportId = FormulaShareReportsService.getReportIdForName(settings.Record_Logs_Since_Last_Batch_Report_Name__c);
+
+                // Convert batch finish datetime to epoch for use in report url parameters
+                DateTime batchFinishDateTime = batchFinishMetrics.Last_Successful_Batch__c;
+                Long millisecs = batchFinishDateTime.getTime();
+                batchFinishEpoch = millisecs / 1000;
+            }
+
+            else if(triggerMetrics != null || batchMetrics != null) {
+                noSharesApplied = 0;
+
+                // Set number of shares from trigger metrics
+                if(triggerMetrics != null) {
+                    ruleName = triggerMetrics.FormulaShare_Rule_Name__c;
+                    noSharesApplied = triggerMetrics.Successful_Inserts__c;
+                    noSharesFailed = (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // Add details from batch metrics
+                if(batchMetrics != null) {
+                    ruleName = batchMetrics.FormulaShare_Rule_Name__c;
+                    noSharesApplied += batchMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) batchMetrics.Failed_Inserts__c;
+                    if(batchMetrics.Last_Failed_Batch__c != null) {
+                        batchFailure = true;
+                    }
+                }
+            }
+
+            if(noSharesFailed > 0) {
+                recordFailure = true;
+            }
 
             // If job isn't scheduled, set icon and link
+            warningUrlLabel = '';
             if(!jobScheduled()) {
-                batchShareIcon = warningIcon;
-                batchShareText = '';
-                batchShareUrlLabel = 'Schedule job';
-
+                warningIcon = warningTriangle;
+                warningUrlLabel = 'Schedule batch job';
+                warningTooltip = 'FormulaShareProcessBatch must be scheduled for rules to apply correctly. Use the "Schedule Apex" button from Apex Classes in the setup menu';
                 String domainName = FormulaShareUtilities.getLightningDomain();
                 String apexClassesSetup = domainName + '/lightning/setup/ApexClasses/home';
-                batchShareUrl = apexClassesSetup;
+                warningUrl = apexClassesSetup;
             }
 
-            // Set batch to pending if not run yet
-            else if(batchMetrics == null) {
-                batchShareIcon = pendingIcon;
-                batchShareText = 'Pending';
-            }
-        }
+            // If either trigger or batch failure, provide link to filtered report
+            else if(recordFailure || batchFailure) {
 
-        private String getIcon(FormulaShare_Metrics__c metrics) {
-            switch on metricsStatus(metrics) {
-                when 'No metrics' {
-                    return null;
-                }
-                when 'No shares yet' {
-                    return noSharesIcon;
-                }
-                when 'Last operation failed' {
-                    return warningIcon;
-                }
-                when else {
-                    return successIcon;
-                }
-            }
-        }
+                // Set text depending on what's failed
 
-        private String getText(FormulaShare_Metrics__c metrics) {
-            switch on metricsStatus(metrics) {
-                when 'No metrics', 'Last operation failed' {
-                    return null;
+                // ..Batch error report if any batch failures
+                if(batchFailure) {
+                    warningUrlLabel = 'Batch errors';
+                    warningTooltip = 'View batch error logs';
+                    warningUrl = FormulaShareReportsService.getBatchErrorReportUrl(objectApiName);
                 }
-                when else {
-                    String text = String.valueOf(metrics.Successful_Inserts__c);
-                    return text;
+                else if(recordFailure) {
+                    warningUrlLabel = noSharesFailed + ' record errors';
+                    warningTooltip = 'View record error logs';
+                    
+                    // ..Record errors since last batch if batch run completed before
+                    if(lastBatchId != null && batchFinishEpoch != null) {
+                        warningTooltip += ' since last batch';
+                        warningUrl = FormulaShareReportsService.getRecordErrorsSinceLastBatchReportUrl(ruleName, lastBatchId, batchFinishEpoch);
+                    }
+                    // ..All record errors if no completed batch
+                    else {
+                        warningUrl = FormulaShareReportsService.getRecordErrorsAllReportUrl(ruleName);
+                    }
                 }
-            }
-        }
 
-        private String getUrl(FormulaShare_Metrics__c metrics) {
-            switch on metricsStatus(metrics) {
-                when 'Last operation failed' {
-                    return 'url for monitor tab';
-                }
-                when else {
-                    return null;
-                }
+                // Set warning icon, messages and url
+                warningIcon = warningTriangle;
             }
         }
-
-        private String getUrlLabel(FormulaShare_Metrics__c metrics) {
-            switch on metricsStatus(metrics) {
-                when 'Last operation failed' {
-                    return 'Check errors';
-                }
-                when else {
-                    return null;
-                }
-            }
-        }
-
-        private String metricsStatus(FormulaShare_Metrics__c metrics) {
-            if(metrics == null) {
-                return 'No metrics';
-            }
-            else if(
-                metrics.Last_Failed_Operation__c != null 
-                && (metrics.Last_Successful_Operation__c == null
-                    || metrics.Last_Failed_Operation__c > metrics.Last_Successful_Operation__c)
-            ) {
-                return 'Last operation failed';
-            }
-            else if(metrics.Successful_Inserts__c == 0) {
-                return 'No shares yet';
-            }
-            else {
-                return 'Success';
-            }
-        }
+    
     }
 }

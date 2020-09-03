@@ -33,6 +33,7 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             .then((domainName) => {
                 this.setupSharingSettings = domainName + '/lightning/setup/SecuritySharing/home';
             });
+        this.fireAccountRelatedOwdEvent();
     }
 
 
@@ -42,12 +43,15 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
     setSharedObject() {
         if(this._sharedObjectApiName && this.apiNameToObjectDetailsMap.size > 0) {
             this.sharedObject = this.apiNameToObjectDetailsMap.get(this.sharedObjectApiName);
-            this.fireSharedObjectEvent('setsharedobjectdetail');
+            this.fireNotifyObjectSharingEvent('setsharedobjectdetail', this.sharedObject);
         }
     }
 
     @track apiNameToObjectDetailsMap = new Map();
     @track shareableObjectOptions;
+    contactAccess;
+    caseAccess;
+    opportunityAccess;
     @wire(getShareableObjects)
         shareableObjects({ error, data }) {
             if(data) {
@@ -64,7 +68,11 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
                         value: obj.objectApiName
                     };
                     this.shareableObjectOptions.push(option);
+
+                    // Fire event to capture internal sharing model of contact, opp and case (for account sharing)
+                    this.setAccountRelatedOwdSharing(obj);
                 });
+                this.fireAccountRelatedOwdEvent();
 
                 // Set shared object and fire event
                 this.setSharedObject();
@@ -75,6 +83,37 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             }
         }
 
+    // Notify parent of sharing details for contact, case and opp
+    setAccountRelatedOwdSharing(obj) {
+        switch (obj.objectApiName) {
+            case 'Contact' :
+//                this.fireNotifyObjectSharingEvent('contactsharingdetail', obj);
+                this.contactAccess = obj;
+                break;
+            case 'Case' :
+//                this.fireNotifyObjectSharingEvent('casesharingdetail', obj);
+                this.caseAccess = obj;
+                break;
+            case 'Opportunity' :
+//                this.fireNotifyObjectSharingEvent('opportunitysharingdetail', obj);
+                this.opportunityAccess = obj;
+                break;
+        }
+    }
+
+    fireAccountRelatedOwdEvent() {
+
+        if(this.contactAccess && this.caseAccess && this.opportunityAccess) {
+            var accountRelatedSharing = {
+                "contactAccess" : this.contactAccess,
+                "caseAccess" : this.caseAccess,
+                "opportunityAccess" : this.opportunityAccess
+            }
+    
+            const evt = new CustomEvent('accountrelatedowd', { detail: accountRelatedSharing });
+            this.dispatchEvent(evt);
+        }
+    }
 
     // On open, increase height of modal if no previous selection (ensures there's space to see options)
     sharedObjectOpen = false;
@@ -91,14 +130,15 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
         this.sharedObjectOpen = false;
         this._sharedObjectApiName = event.detail.value;
         this.sharedObject = this.apiNameToObjectDetailsMap.get(this._sharedObjectApiName);
-        this.fireSharedObjectEvent('sharedobjectchange');
+        this.fireNotifyObjectSharingEvent('sharedobjectchange', this.sharedObject);
     }
 
     // Notify parent component of shared object details when initally set or changed
-    fireSharedObjectEvent(eventName) {
+    fireNotifyObjectSharingEvent(eventName, obj) {
         const selection = new CustomEvent(eventName, {
-            detail: this.sharedObject
+            detail: obj
         });
         this.dispatchEvent(selection);
     }
+
 }

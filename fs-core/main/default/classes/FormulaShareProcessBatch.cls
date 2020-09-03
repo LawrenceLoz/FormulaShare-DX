@@ -26,8 +26,15 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	Schema.SObjectType typeInThisBatch;
 	List<FormulaShareRule> rulesForType;
 	List<FormulaShare_Log__c> logsList = new List<FormulaShare_Log__c>();
-	Set<String> newMetricsForBatch;
-	public static final String batchContext = 'Batch';
+
+//	Set<String> newMetricsForBatch;
+	Map<String,Integer> totalValidSharesForRule = new Map<String,Integer>();
+	Map<String,Integer> totalErrorSharesForRule = new Map<String,Integer>();
+
+
+	public static final String batchContext = FormulaShareProcessedShareEventService.batchContext;
+	Boolean atLeastOneBatchFailed = false;
+	Boolean atLeastOneMetricsUpdateFailed = false;
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
 	public FormulaShareProcessBatch(List<Schema.SObjectType> types, Integer batchSize) {
@@ -54,11 +61,10 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			logsList.add(log);
 			FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 
-			fsLogs.setContext('FormulaShareProcessBatch', null, batchContext);
 			String typeInScope = typeInThisBatch.getDescribe().getName();
 			String query = ql.getQuery();
-			fsLogs.setBatchDetails(batchSize, typeInScope, rulesForType, query);	// need to fix this
-			logsList = fsLogs.getFinalisedLogs();
+			fsLogs.setContext('FormulaShareProcessBatch', batchSize, typeInScope, rulesForType, query);
+			logsList = fsLogs.setFinalisedLogs();
 			uow.registerNew(logsList);
 
 			List<FormulaShare_Rule_in_Batch__c> ribList = new List<FormulaShare_Rule_in_Batch__c>();
@@ -69,14 +75,18 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 				log = logsList[0];		// There will be only one log
 				uow.registerNew(rib, FormulaShare_Rule_in_Batch__c.FormulaShare_Log__c, log);
+
+				// Establish maps for finish metrics (set to zero here - will be updated if any records in batch execute)
+				totalValidSharesForRule.put(rule.developerName, 0);
+				totalErrorSharesForRule.put(rule.developerName, 0);
 			}
 
 			// Create metrics for any rules which don't have them already
 			List<FormulaShare_Metrics__c> metrics = createMetricsForNewRules();
-			newMetricsForBatch = new Set<String>();		// Track which rules had this added
-			for(FormulaShare_Metrics__c m : metrics) {
-				newMetricsForBatch.add(m.FormulaShare_Rule_Name__c);
-			}
+//			newMetricsForBatch = new Set<String>();		// Track which rules had this added
+//			for(FormulaShare_Metrics__c m : metrics) {
+//				newMetricsForBatch.add(m.FormulaShare_Rule_Name__c);
+//			}
 			uow.registerNew(metrics);
 
 			uow.commitWork();
@@ -97,26 +107,51 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		String insertStatusReason;
 		String deleteStatus;
 		String deleteStatusReason;
+		Map<String,Integer> failedInsertsMap = new Map<String,Integer>();
+		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+		fsLogs.incrementBatches();
 
 		system.debug('*** batch scope : '+ scope);
 
-		// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
-		Set<Id> sharedObjIdSet = new Set<Id>();
-        for(SObject obj : scope) {
-            sharedObjIdSet.add((Id) obj.get('Id'));
-        }
-		List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
+		try {
+			// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
+			Set<Id> sharedObjIdSet = new Set<Id>();
+			for(SObject obj : scope) {
+				sharedObjIdSet.add((Id) obj.get('Id'));
+			}
+			List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
 
-		// Populate records in batch scope into wrapper
-		fsService.addToRecordsMap(records);
+			// Populate records in batch scope into wrapper
+			fsService.addToRecordsMap(records);
+		}
 
-		// Assess sharing for this object
-		fsService.processFormulaShares();
-		Schema.SObjectType type = fsService.getType();
+		catch(Exception e) {
+			e.setMessage('Issue populating batch scope. Message from Salesforce: ' + e.getMessage());
+			fsLogs.logException(e);
+			atLeastOneBatchFailed = true;
+		}
 
-		// Insert and remove sharing if required
-		if(!fsService.getSharesToInsert().isEmpty()) {
-			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(fsService.getSharesToInsert(), type);
+		try {
+			// Assess sharing for this object
+			fsService.processFormulaShares();
+		}
+
+		catch(Exception e) {
+			e.setMessage('FormulaShareService processing error. Message from Salesforce: ' + e.getMessage());
+			fsLogs.logException(e);
+			atLeastOneBatchFailed = true;
+		}
+		
+		// Get insert details and extract list of shares
+		Map<String,FormulaShareService.ShareDetail> insertDetails = fsService.getInsertDetails();
+		List<SObject> sharesToInsert = new List<SObject>();
+		for(FormulaShareService.ShareDetail sd : insertDetails.values()) {
+			sharesToInsert.add(sd.shareRecord);
+		}
+
+		// Insert if required
+		if(!sharesToInsert.isEmpty()) {
+			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(sharesToInsert, typeInThisBatch);
 
 			try {
 				fsSharesToInsert.insertShares();
@@ -125,13 +160,31 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			catch(Exception e) {
 				insertStatus = 'Failed';
 				insertStatusReason = e.getMessage();
+
+				// Populate map of no failed inserts by rule for finish metrics
+				for(FormulaShareService.ShareDetail sd : insertDetails.values()) {
+					Integer noFails = 0;
+					if(failedInsertsMap.containsKey(sd.rule.developerName)) {
+						noFails = failedInsertsMap.get(sd.rule.developerName);						
+					}
+					noFails++;
+					failedInsertsMap.put(sd.rule.developerName, noFails);
+				}
 			}
 		}
 
 		Savepoint sp = Database.setSavepoint();
 
-		if(!fsService.getSharesToDelete().isEmpty()) {
-			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(fsService.getSharesToDelete(), type);
+		// Get delete details and extract list of shares
+		Map<String,FormulaShareService.ShareDetail> deleteDetails = fsService.getDeleteDetails();
+		List<SObject> sharesToDelete = new List<SObject>();
+		for(FormulaShareService.ShareDetail sd : deleteDetails.values()) {
+			sharesToDelete.add(sd.shareRecord);
+		}
+
+		// Delete if required
+		if(!sharesToDelete.isEmpty()) {
+			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(sharesToDelete, typeInThisBatch);
 			try {
 				fsSharesToDelete.deleteShares();
 				deleteStatus = 'Success';
@@ -145,55 +198,161 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			}
 		}
 
-		// Unit of work to update batch logs, and insert/update logs and metircs
-		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+		try {
+			// Unit of work to update batch logs, and insert/update logs and metrics
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
 
-		// Set batch logs
-		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
-		fsLogs.incrementBatches();
-		uow.registerDirty(fsLogs.getFinalisedLogs());
+			// Set batch logs
+			uow.registerDirty(fsLogs.setFinalisedLogs());
 
-		// Build map of number of valid shares for all new metrics (we'll increment metrics for these)
-		Map<String,Integer> noValidSharesForRules = fsService.getNoValidSharesForRules();
-		Map<String,Integer> noValidSharesNewMetrics = new Map<String,Integer>();
-		for(String ruleName : newMetricsForBatch) {
-			Integer validShares = noValidSharesForRules.get(ruleName);
-			noValidSharesNewMetrics.put(ruleName, validShares);
+			// Set record logs
+			List<FormulaShareService.EntityNotFound> entitiesNotFound = fsService.getEntitiesNotFound();
+			FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+			publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
+			publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
+			publisher.addEventsForEntitiesNotFound(entitiesNotFound);
+
+			System.debug('No insert events: '+insertDetails.size());
+			System.debug('No delete events: '+insertDetails.size());
+			FormulaShare_Log__c log = logsList[0];
+			FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = publisher.processForBatch(uow, log);
+			uow = incWithUow.uow;
+			system.debug('Processing for batch. UOW3: '+uow);
+
+			// Get rule in batch records to be updated
+			List<String> ruleNames = new List<String>();
+			for(FormulaShareRule rule : rulesForType) {
+				ruleNames.add(rule.developerName);
+			}
+			List<FormulaShare_Rule_in_Batch__c> ribList = new FormulaShareRuleInBatchSelector(true).getLogsForRules(ruleNames);
+			Map<String,FormulaShare_Rule_in_Batch__c> ribMap = new Map<String,FormulaShare_Rule_in_Batch__c>();
+			for(FormulaShare_Rule_in_Batch__c rib : ribList) {
+				ribMap.put(rib.FormulaShare_Rule_Name__c, rib);
+			}
+
+			// Increment no. records shared (reduced by insert failures) and failures
+			// This contributes to batch finish metrics
+			Map<String,Integer> noValidSharesForRulesBatch = fsService.getNoValidSharesForRules();
+			for(FormulaShareRule rule : rulesForType) {
+				String ruleName = rule.developerName;
+				Integer validShares = 0;
+				Integer insertedShares = 0;
+				Integer errorShares = 0;
+				FormulaShare_Rule_in_Batch__c rib = ribMap.get(rule.developerName);
+
+				if(rib != null) {
+					if(rib.Total_Records_Shared_by_Rule__c != null) {
+						validShares = (Integer) rib.Total_Records_Shared_by_Rule__c;
+					}
+					if(rib.Records_Shared_in_This_Batch__c != null) {
+						insertedShares = (Integer) rib.Records_Shared_in_This_Batch__c;
+					}
+					if(rib.Record_Errors_in_This_Batch__c != null) {
+						errorShares = (Integer) rib.Record_Errors_in_This_Batch__c;
+					}
+				}
+
+				if(incWithUow.incrementsMap.containsKey(ruleName)) {
+					FormulaShareMetrics.Increment metrics = incWithUow.incrementsMap.get(ruleName);
+					errorShares += metrics.noFailedInserts;
+					insertedShares += metrics.noSuccessfulInserts;
+				}
+
+				// Set inserted and error totals
+				totalErrorSharesForRule.put(ruleName, errorShares);
+				rib.Record_Errors_in_This_Batch__c = errorShares;
+				rib.Records_Shared_in_This_Batch__c = insertedShares;
+
+				// Add number of valid shares in batch, and subtract any inserts which failed
+				// This should be the only type of failure not already excluded
+				validShares += noValidSharesForRulesBatch.get(ruleName);
+				if(insertStatus == 'Failed') {
+					validShares -= failedInsertsMap.get(ruleName);
+				}
+
+				totalValidSharesForRule.put(ruleName, validShares);
+				rib.Total_Records_Shared_by_Rule__c = validShares;
+
+//				// Add all errors
+//				if(totalErrorSharesForRule.containsKey(ruleName)) {
+//					errorShares = totalErrorSharesForRule.get(ruleName);
+//				}
+//				if(incWithUow.incrementsMap.containsKey(ruleName)) {
+//					FormulaShareMetrics.Increment metrics = incWithUow.incrementsMap.get(ruleName);
+//					errorShares += metrics.noFailedInserts;
+//					insertedShares = metrics.noSuccessfulInserts;
+//				}
+//				totalErrorSharesForRule.put(ruleName, errorShares);
+//
+//				// Add all valid shares
+//				if(totalValidSharesForRule.containsKey(ruleName)) {
+//					validShares = totalValidSharesForRule.get(ruleName);
+//				}
+//
+//				validShares += noValidSharesForRulesBatch.get(ruleName);
+//
+//				// Subtract any inserts which failed during the insert
+//				// This should be the only type of failure not already excluded
+//				if(insertStatus == 'Failed') {
+//					validShares -= failedInsertsMap.get(ruleName);
+//				}
+//				totalValidSharesForRule.put(ruleName, validShares);
+//
+//				// Set rule in batch totals
+//				rib.Total_Records_Shared_by_Rule__c += noValidSharesForRulesBatch.get(ruleName);
+//				rib.Records_Shared_in_This_Batch__c += insertedShares;
+//				rib.Record_Errors_in_This_Batch__c = errorShares;
+				uow.registerDirty(rib);
+
+				System.debug('totalValidSharesForRule for execution: '+ totalValidSharesForRule);
+			}
+
+			uow.commitWork();
 		}
 
-		// Set record logs
-		Map<String,FormulaShareService.ShareDetail> insertDetails = fsService.getInsertDetails();
-		Map<String,FormulaShareService.ShareDetail> deleteDetails = fsService.getDeleteDetails();
-		FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
-		publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
-		publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
-		System.debug('No insert events: '+insertDetails.size());
-		System.debug('No delete events: '+insertDetails.size());
-		FormulaShare_Log__c log = logsList[0];
-		uow = publisher.processForBatch(uow, log, noValidSharesNewMetrics);
-        system.debug('Processing for batch. UOW3: '+uow);
-
-		uow.commitWork();
-
+		catch(Exception e) {
+			e.setMessage('Issue capturing logs or metrics. Message from Salesforce: ' + e.getMessage());
+			fsLogs.logException(e);
+			atLeastOneMetricsUpdateFailed = true;
+		}
 	}
 	
 
 	public void finish(Database.BatchableContext context) {
+		System.debug('totalValidSharesForRule for finish: '+ totalValidSharesForRule);
 
 		// Update batch log records
 		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+		fsLogs.trimFailedBatches();
 		fsLogs.setBatchProcessingComplete();
-		uow.registerDirty(fsLogs.getFinalisedLogs());
+		uow.registerDirty(fsLogs.setFinalisedLogs());
+
+		// Indicate batch failure in metrics if any failed batches
+		if(atLeastOneBatchFailed) {
+			uow = FormulaShareProcessedShareEventService.processForBatchFail(uow, rulesForType);
+		}
+
+		// Update total shares in batch finish metrics provided no metric capture issues
+		if(!atLeastOneMetricsUpdateFailed) {
+			FormulaShare_Log__c log = logsList[0];
+			uow = FormulaShareProcessedShareEventService.processForBatchFinish(uow, totalValidSharesForRule, totalErrorSharesForRule, log);
+		}
+		
+		// Fire event to update list view
+		String objectLabel = typeInThisBatch.getDescribe().getLabel();
+        List<String> objectLabelsList = new List<String>{objectLabel};
+        FormulaShareProcessedShareEventService.fireRulesListUpdateEvent(objectLabelsList);
+
 		uow.commitWork();
 
 		// Publish event to update FormulaShare Rules list in real time
-		List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
-		FormulaShare_List_Update__e updateEvent = new FormulaShare_List_Update__e();
-		updateEvent.Type__c = 'recalculation';
-		updateEvent.Object_Label__c = typeInThisBatch.getDescribe().getLabel();
-		eventsList.add(updateEvent);
-		List<Database.SaveResult> results = EventBus.publish(eventsList);
+//		List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
+//		FormulaShare_List_Update__e updateEvent = new FormulaShare_List_Update__e();
+//		updateEvent.Type__c = 'recalculation';
+//		updateEvent.Object_Label__c = typeInThisBatch.getDescribe().getLabel();
+//		eventsList.add(updateEvent);
+//		List<Database.SaveResult> results = EventBus.publish(eventsList);
 
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {

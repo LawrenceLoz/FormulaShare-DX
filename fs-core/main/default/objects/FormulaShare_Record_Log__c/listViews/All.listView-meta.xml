@@ -2,6 +2,7 @@
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All</fullName>
     <columns>NAME</columns>
+    <columns>Context__c</columns>
     <columns>Object__c</columns>
     <columns>Record__c</columns>
     <columns>Processed_Date_Time__c</columns>
