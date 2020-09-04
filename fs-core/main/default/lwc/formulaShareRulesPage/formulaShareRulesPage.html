@@ -35,6 +35,12 @@
                     <lightning-button 
                         class="slds-button"
                         variant="neutral"
+                        label="About" 
+                        onclick={handleAbout}>
+                    </lightning-button>
+                    <lightning-button 
+                        class="slds-button slds-p-left_xx-small"
+                        variant="neutral"
                         label="New Rule" 
                         onclick={handleNewRule}>
                     </lightning-button>
@@ -60,10 +66,16 @@
         onnewrule={handleNewRule}>
       </c-formula-share-no-rules-illustration>
     </template>
-    
+
+    <template if:true={openAboutModal}>
+      <c-formula-share-about
+        onclose={closeAboutModal}>
+      </c-formula-share-about>
+    </template>
+
     <template if:true={openNewRuleModal}>
         <c-formula-share-rule-create 
             onclose={closeNewRuleModal}>
         </c-formula-share-rule-create>
-    </template>    
+    </template>
 </template>

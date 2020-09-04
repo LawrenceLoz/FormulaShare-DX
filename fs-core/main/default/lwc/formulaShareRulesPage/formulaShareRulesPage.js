@@ -1,14 +1,21 @@
 import { LightningElement, track, api } from 'lwc';
 
 export default class FormulaShareRulesPage extends LightningElement {
-    openNewRuleModal = false;
 
+    openNewRuleModal = false;
     handleNewRule() {
         this.openNewRuleModal = true;
     }
-
     closeNewRuleModal() {
         this.openNewRuleModal = false;
+    }
+
+    openAboutModal = false;
+    handleAbout() {
+        this.openAboutModal = true;
+    }
+    closeAboutModal() {
+        this.openAboutModal = false;
     }
 
     @track noRules;
