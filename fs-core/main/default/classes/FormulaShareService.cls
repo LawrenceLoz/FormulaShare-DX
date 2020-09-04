@@ -330,10 +330,6 @@ public inherited sharing class FormulaShareService {
 						sharedToNamesGroups.add(sharedToString);
 						groupRecordRules.add(recordRule);
 					}
-					else {
-						String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
-						captureEntityNotFound(recordRule, logMessage);
-					}
 				}
 
 				// Add Role Id to role group query set
@@ -345,14 +341,15 @@ public inherited sharing class FormulaShareService {
 					else if(rule.sharedToFieldTypeForRuleType == 'Name') {
 						sharedToNamesRoles.add(sharedToString);
 					}
-					else {
-						String logMessage = 'Expected field to contain valid role id. Instead found: ' + sharedToString;
-						captureEntityNotFound(recordRule, logMessage);
-					}
 					roleRecordRules.add(recordRule);
 				}
 
 				else system.debug('Share With value ' + rule.shareWith + ' does not match allowed options');
+			}
+
+			else if(!rule.isValid) {
+				String logMessage = 'Invalid rule metadata, check all fields populated: '+rule;
+				captureEntityNotFound(recordRule, logMessage);
 			}
 		}
 
@@ -546,6 +543,7 @@ public inherited sharing class FormulaShareService {
 				else {
 					String logMessage = 'Field value \''+sharedTo+'\' should correspond to an active role, but no role was found with this name';
 					captureEntityNotFound(recordRule, logMessage);
+					continue;	// No need to process remaining recordRule logic
 				}
 			}
 

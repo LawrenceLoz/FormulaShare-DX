@@ -14,6 +14,7 @@
     <label>FormulaShare</label>
     <navType>Standard</navType>
     <tabs>FormulaShare_Rules</tabs>
+    <tabs>FormulaShare_Dashboard</tabs>
     <tabs>FormulaShare_Record_Log__c</tabs>
     <tabs>FormulaShare_Log__c</tabs>
     <uiType>Lightning</uiType>
