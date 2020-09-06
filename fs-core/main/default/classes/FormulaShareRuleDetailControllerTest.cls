@@ -18,7 +18,7 @@ public with sharing class FormulaShareRuleDetailControllerTest {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         String logObjName = prefix + 'FormulaShare_Log__c';
         List<EntityDefinition> edList = [SELECT DurableId FROM EntityDefinition WHERE QualifiedApiName = :logObjName];
-        String fieldName = prefix + 'Class_Name__c';
+        String fieldName = prefix + 'Context__c';
         List<FieldDefinition> fdList = [SELECT DurableId FROM FieldDefinition WHERE EntityDefinitionId = :edList[0].DurableId AND QualifiedApiName = :fieldName];
         List<String> fieldIds = new List<String>{fdList[0].DurableId};
 
@@ -57,7 +57,7 @@ public with sharing class FormulaShareRuleDetailControllerTest {
                 System.assertEquals('Id', sfo.type, 'User lookup should indicate Id');
                 System.assert(sfo.isIdType, 'Should have id flag set to true');
             }
-            if(sfo.fieldApiName.contains('Class_Name__c')) {
+            if(sfo.fieldApiName.contains('Context__c')) {
                 foundText = true;
                 System.assertEquals('Text', sfo.type, 'User lookup should indicate Text');
             }
@@ -75,12 +75,12 @@ public with sharing class FormulaShareRuleDetailControllerTest {
 
         // Insert FS log to check field contents returned
         FormulaShare_Log__c fsLog = new FormulaShare_Log__c();
-        fsLog.Class_Name__c = 'Testing';
+        fsLog.Context__c = 'Testing';
         insert fsLog;
 
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         String objectApiName = prefix + 'FormulaShare_Log__c';
-        String fieldApiName = prefix + 'Class_Name__c';
+        String fieldApiName = prefix + 'Context__c';
 
         String sampleDataString = FormulaShareRuleDetailController.getSampleData(objectApiName, fieldApiName);
 

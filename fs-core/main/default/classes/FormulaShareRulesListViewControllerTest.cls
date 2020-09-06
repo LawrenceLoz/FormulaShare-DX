@@ -320,7 +320,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         Test.stopTest();
 
         List<FormulaShare_Log__c> fsLogs = [SELECT Id, Type_In_Scope__c FROM FormulaShare_Log__c 
-            WHERE Class_Name__c = 'FormulaShareProcessBatch'];
+            WHERE Context__c = 'FormulaShareProcessBatch'];
         
         System.assertEquals(1, fsLogs.size(), 'Expected a single log record for the batch');
         System.assertEquals(objApiName, fsLogs[0].Type_In_Scope__c, 'Mismatch with object type submitted'); 

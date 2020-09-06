@@ -49,7 +49,6 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         System.debug('parameter(s) sent into the mocked call: ' + listOfArgs);
         
         Id userId = UserInfo.getUserId();
-        Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
 
         // -------------------------- FormulaShareSettingsSelector Mocks ----------------------------- //
 
@@ -78,7 +77,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule roleSubRule = getRoleAndSubRule();
             rules.add(roleSubRule);
 
-            // Will add a sharing record for the role group for the role id in Class_Name__c field
+            // Will add a sharing record for the role group for the role id in Context__c field
             FormulaShareRule roleRule = getRoleRule();
             rules.add(roleRule);
 
@@ -86,11 +85,11 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             FormulaShareRule groupRule = getGroupRule();
             rules.add(groupRule);
 
-            // Will add a sharing record for the user with the user id in Method_Name__c field
+            // Will add a sharing record for the user with the user id in Exception_Type__c field
             FormulaShareRule userRule = getUserRule();
             rules.add(userRule);
 
-            // Will add a sharing record for the user with the user id in Method_Name__c field for all related log records
+            // Will add a sharing record for the user with the user id in Exception_Type__c field for all related log records
             FormulaShareRule childUserRule = getChildUserRule();
             rules.add(childUserRule);
 
@@ -139,11 +138,13 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         else if(stubbedMethodName == 'getSharesToInsert') {
+            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
             List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Edit');
             return shares;
         }
 
         else if(stubbedMethodName == 'getSharesToDelete') {
+            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
             List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Read');
             return shares;
         }
@@ -185,16 +186,16 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         else if(stubbedMethodName == 'getSObjectsWithFields') {
             String queryString = 'SELECT '
                 + prefix + 'Id, '
+                + prefix + 'Failed_Batches__c, '
                 + prefix + 'Context__c, '
-                + prefix + 'Class_Name__c, '
                 + prefix + 'Type_In_Scope, '
-                + prefix + 'Method_Name__c, '
+                + prefix + 'Exception_Type__c, '
                 + '(SELECT '
                     + prefix + 'Id, '
+                    + prefix + 'Failed_Batches__c, '
                     + prefix + 'Context__c, '
-                    + prefix + 'Class_Name__c, '
                     + prefix + 'Type_In_Scope, '
-                    + prefix + 'Method_Name__c '
+                    + prefix + 'Exception_Type__c '
                     + 'FROM '
                     + prefix + ' FormulaShare_Logs__r '
                 + ') FROM '
@@ -254,7 +255,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 //            // For user rule, set batchFinish metrics
 //            FormulaShare_Metrics__c metrics = getBasicMetrics();
 //            metrics.FormulaShare_Rule_Name__c = userRuleName;
-//            metrics.Context__c = batchFinishContext;
+//            metrics.Failed_Batches__c = batchFinishContext;
 //            metrics.Failed_Inserts__c = 3;
 //            metrics.Successful_Inserts__c = 100;
 //
@@ -270,7 +271,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 //                for(String context : contextList) {
 //                    FormulaShare_Metrics__c metrics = new FormulaShare_Metrics__c();
 //                    metrics.FormulaShare_Rule_Name__c = ruleName;
-//                    metrics.Context__c = context;
+//                    metrics.Failed_Batches__c = context;
 //
 //
 //                    metricsList.add(metrics);
@@ -287,7 +288,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         userRule.developerName = userRuleName;
         userRule.sharedToFieldType = 'Id';
         userRule.accessLevel = 'Edit';
-        userRule.sharedToAPIName = prefix + 'Method_Name__c';
+        userRule.sharedToAPIName = prefix + 'Exception_Type__c';
         userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         userRule.shareWith = 'Users';
         return userRule;
@@ -311,7 +312,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         roleSubRule.developerName = roleSubName;
         roleSubRule.sharedToFieldType = 'Name';
         roleSubRule.accessLevel = 'Read';
-        roleSubRule.sharedToAPIName = prefix + 'Context__c';
+        roleSubRule.sharedToAPIName = prefix + 'Failed_Batches__c';
         roleSubRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         roleSubRule.shareWith = 'Roles and Internal Subordinates';
         return roleSubRule;
@@ -323,7 +324,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         roleRule.developerName = roleRuleName;
         roleRule.sharedToFieldType = 'Id';
         roleRule.accessLevel = 'Edit';
-        roleRule.sharedToAPIName = prefix + 'Class_Name__c';
+        roleRule.sharedToAPIName = prefix + 'Context__c';
         roleRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         roleRule.shareWith = 'Roles';
         return roleRule;
@@ -337,7 +338,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         childUserRule.shareWith = 'Users';
         childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
         childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
-        childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
+        childUserRule.childObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
         childUserRule.childObjectSharedToFieldType = 'Id';
         childUserRule.childObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         return childUserRule;

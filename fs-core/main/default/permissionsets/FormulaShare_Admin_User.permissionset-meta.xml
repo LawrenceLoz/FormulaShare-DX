@@ -293,7 +293,22 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>FormulaShare_Rule_in_Batch__c.Record_Errors_in_This_Batch__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Rule_in_Batch__c.Records_Shared_in_This_Batch__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>FormulaShare_Rule_in_Batch__c.Rule_Active_for_Batch_Run__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Rule_in_Batch__c.Total_Records_Shared_by_Rule__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
@@ -312,7 +327,7 @@
         <allowDelete>true</allowDelete>
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
+        <modifyAllRecords>true</modifyAllRecords>
         <object>FormulaShare_Log__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
@@ -374,6 +389,10 @@
         <apexPage>FormulaShareRulesPageVF</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
+    <tabSettings>
+        <tab>FormulaShare_Dashboard</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <tabSettings>
         <tab>FormulaShare_Log__c</tab>
         <visibility>Visible</visibility>

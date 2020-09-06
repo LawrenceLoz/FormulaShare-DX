@@ -72,28 +72,28 @@ public with sharing class FormulaShareServiceBulkTest {
         List<FormulaShare_Log__c> fsLogs = new List<FormulaShare_Log__c>();
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
-            log.Class_Name__c = role.Id;  // Share with role (id)
+            log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+            log.Context__c = role.Id;  // Share with role (id)
             log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-            log.Method_Name__c = UserInfo.getUserId();  // Share with user (Id)
-            log.Exception_Type__c = 'allShares';     // To identify records later
+            log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
+            log.Exception_Message__c = 'allShares';     // To identify records later
             fsLogs.add(log);
         }
 
         // Create records to be shared through role and subordinates sharing only
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
-            log.Exception_Type__c = 'oneShare';     // To identify records later
+            log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+            log.Exception_Message__c = 'oneShare';     // To identify records later
             fsLogs.add(log);
         }
 
         // Create records to be shared through two different rules
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Class_Name__c = role.Id;  // Share with role (id)
+            log.Context__c = role.Id;  // Share with role (id)
             log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-            log.Exception_Type__c = 'twoShares';     // To identify records later
+            log.Exception_Message__c = 'twoShares';     // To identify records later
             fsLogs.add(log);
         }
 
@@ -103,12 +103,10 @@ public with sharing class FormulaShareServiceBulkTest {
         // Call recalculate method to set sharing
         Test.startTest();
         FormulaShareService.recalculateAll();
-        Test.getEventBus().deliver();
         Test.stopTest();
 
-        Test.getEventBus().deliver();
         // Find a record which should be shared by all rules
-        FormulaShare_Log__c log1 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'allShares'][0];
+        FormulaShare_Log__c log1 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Message__c = 'allShares'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log1.Id];
@@ -139,7 +137,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
 
         // Find a record which should be shared by just one rule
-        FormulaShare_Log__c log2 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'oneShare'][0];
+        FormulaShare_Log__c log2 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Message__c = 'oneShare'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares2 = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log2.Id];
@@ -163,7 +161,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
 
         // Find a record which should be shared by just one rule
-        FormulaShare_Log__c log3 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'twoShares'][0];
+        FormulaShare_Log__c log3 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Message__c = 'twoShares'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares3 = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log3.Id];
@@ -185,10 +183,6 @@ public with sharing class FormulaShareServiceBulkTest {
         System.assert(!foundRoleSubordinatesShare3);
         System.assert(foundGroupShare3);
 
-
-        // Check that record logs are created (based on platform events)
-        List<FormulaShare_Record_Log__c> recordLogs = [SELECT Id, Context__c FROM FormulaShare_Record_Log__c];
-        System.assertEquals(noSharesOfEachType, recordLogs.size(), 'Expected a record log for every inserted share');
     }
 
 
@@ -210,28 +204,28 @@ public with sharing class FormulaShareServiceBulkTest {
         List<FormulaShare_Log__c> fsLogs = new List<FormulaShare_Log__c>();
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
-            log.Class_Name__c = role.Id;  // Share with role (id)
+            log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+            log.Context__c = role.Id;  // Share with role (id)
             log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-            log.Method_Name__c = UserInfo.getUserId();  // Share with user (Id)
-            log.Exception_Type__c = 'allShares';     // To identify records later
+            log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
+            log.Exception_Message__c = 'allShares';     // To identify records later
             fsLogs.add(log);
         }
 
         // Create records to be shared through role and subordinates sharing only
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
-            log.Exception_Type__c = 'oneShare';     // To identify records later
+            log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+            log.Exception_Message__c = 'oneShare';     // To identify records later
             fsLogs.add(log);
         }
 
         // Create records to be shared through two different rules
         for(Integer i=0; i<noSharesOfEachType; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Class_Name__c = role.Id;  // Share with role (id)
+            log.Context__c = role.Id;  // Share with role (id)
             log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-            log.Exception_Type__c = 'twoShares';     // To identify records later
+            log.Exception_Message__c = 'twoShares';     // To identify records later
             fsLogs.add(log);
         }
 
@@ -250,29 +244,29 @@ public with sharing class FormulaShareServiceBulkTest {
         // Update to remove sharing from records shared with all
         List<FormulaShare_Log__c> fsLogsToUpdate = new List<FormulaShare_Log__c>();
 
-        List<FormulaShare_Log__c> fsLogsAll = [SELECT Id, Context__c, Class_Name__c, Type_In_Scope__c, Method_Name__c
-            FROM FormulaShare_Log__c WHERE Exception_Type__c = 'allShares'];
+        List<FormulaShare_Log__c> fsLogsAll = [SELECT Id, Failed_Batches__c, Context__c, Type_In_Scope__c, Exception_Type__c
+            FROM FormulaShare_Log__c WHERE Exception_Message__c = 'allShares'];
         system.debug('alls size: '+fsLogsAll.size());
 
         for(FormulaShare_Log__c log : fsLogsAll) {
+            log.Failed_Batches__c = '';
             log.Context__c = '';
-            log.Class_Name__c = '';
             log.Type_In_Scope__c = '';
-            log.Method_Name__c = '';
+            log.Exception_Type__c = '';
             fsLogsToUpdate.add(log);
         }
 
         // Update to change sharing for records with two shares
-        List<FormulaShare_Log__c> fsLogsTwo = [SELECT Id, Context__c, Class_Name__c, Type_In_Scope__c, Method_Name__c
-            FROM FormulaShare_Log__c WHERE Exception_Type__c = 'twoShares'];
+        List<FormulaShare_Log__c> fsLogsTwo = [SELECT Id, Failed_Batches__c, Context__c, Type_In_Scope__c, Exception_Type__c
+            FROM FormulaShare_Log__c WHERE Exception_Message__c = 'twoShares'];
         for(FormulaShare_Log__c log : fsLogsTwo) {
-            log.Class_Name__c = role2.Id;  // Share with other role
+            log.Context__c = role2.Id;  // Share with other role
             fsLogsToUpdate.add(log);
         }
 
         // Update to add sharing for records with one share
-        List<FormulaShare_Log__c> fsLogsOne = [SELECT Id, Context__c, Class_Name__c, Type_In_Scope__c, Method_Name__c
-            FROM FormulaShare_Log__c WHERE Exception_Type__c = 'oneShare'];
+        List<FormulaShare_Log__c> fsLogsOne = [SELECT Id, Failed_Batches__c, Exception_Message__c, Type_In_Scope__c, Exception_Type__c
+            FROM FormulaShare_Log__c WHERE Exception_Message__c = 'oneShare'];
         for(FormulaShare_Log__c log : fsLogsOne) {
             log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
             fsLogsToUpdate.add(log);
@@ -287,7 +281,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
 
         // Find a record which should have had sharing removed
-        FormulaShare_Log__c log1 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'allShares'][0];
+        FormulaShare_Log__c log1 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Message__c = 'allShares'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares1 = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log1.Id];
@@ -318,7 +312,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
 
         // Find a record which should have had sharing updated
-        FormulaShare_Log__c log2 = [SELECT Id, Context__c, Class_Name__c, Type_In_Scope__c, Method_Name__c FROM FormulaShare_Log__c WHERE Exception_Type__c = 'twoShares'][0];
+        FormulaShare_Log__c log2 = [SELECT Id, Failed_Batches__c, Exception_Message__c, Type_In_Scope__c, Exception_Type__c FROM FormulaShare_Log__c WHERE Exception_Message__c = 'twoShares'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares2 = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log2.Id];
@@ -342,7 +336,7 @@ public with sharing class FormulaShareServiceBulkTest {
 
 
         // Find a record which should have had sharing added
-        FormulaShare_Log__c log3 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'oneShare'][0];
+        FormulaShare_Log__c log3 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Message__c = 'oneShare'][0];
 
         // Retrieve share records for this log 
         List<FormulaShare_Log__Share> shares3 = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log3.Id];

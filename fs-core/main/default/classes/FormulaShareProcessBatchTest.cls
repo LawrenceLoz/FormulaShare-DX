@@ -40,7 +40,7 @@ public with sharing class FormulaShareProcessBatchTest {
         // Create a log object in scope of mock rule so that execute method can be invoked
         FormulaShare_Log__c log = new FormulaShare_Log__c();
         log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-        log.Method_Name__c = UserInfo.getUserId();  // Share with user (Id)
+        log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
         insert log;
 
         List<Schema.SObjectType> types = new List<Schema.SObjectType>();

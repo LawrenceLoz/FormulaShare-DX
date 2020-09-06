@@ -112,7 +112,7 @@ public class FormulaShareServiceTest {
 
         // Create log object and set fields which have test rules created within apex class
         FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Class_Name__c = role.Id;  // Share with role (id)
+        log.Context__c = role.Id;  // Share with role (id)
         insert log;
 
         FormulaShareService fsService = callProcessForLogRecord(log);
@@ -139,7 +139,7 @@ public class FormulaShareServiceTest {
 
         // Create log object and set fields which have test rules created within apex class
         FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
+        log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
         insert log;
 
         FormulaShareService fsService = callProcessForLogRecord(log);
@@ -198,12 +198,12 @@ public class FormulaShareServiceTest {
         insert parentLog;
 
         FormulaShare_Log__c childLog = new FormulaShare_Log__c();
-        childLog.Method_Name__c = u.Id;  // Share with user (Id)
+        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
         childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
         insert childLog;
 
         FormulaShare_Log__c childLog2 = new FormulaShare_Log__c();
-        childLog2.Method_Name__c = u.Id;  // Share with user (Id)
+        childLog2.Exception_Type__c = u.Id;  // Share with user (Id)
         childLog2.Related_Log_Required_for_Test_Class__c = parentLog.Id;
         insert childLog2;
 
@@ -231,7 +231,7 @@ public class FormulaShareServiceTest {
 
         // Create log object and set fields which have test rules created within apex class
         FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Method_Name__c = u.Id;  // Share with user (Id)
+        log.Exception_Type__c = u.Id;  // Share with user (Id)
         log.OwnerId = UserInfo.getUserId();     // Make sure owner is a different user
         insert log;
 
@@ -262,7 +262,7 @@ public class FormulaShareServiceTest {
         
         // Create log object and set fields which have test rules created within apex class
         FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Class_Name__c = roles[0].Id;
+        log.Context__c = roles[0].Id;
         insert log;
 
         test.startTest();
@@ -271,7 +271,7 @@ public class FormulaShareServiceTest {
         FormulaShareService.recalculateAll();
 
         // Update log record to share with different role
-        log.Class_Name__c = roles[1].Id;
+        log.Context__c = roles[1].Id;
         update log;
 
         FormulaShareService fsService = callProcessForLogRecord(log);
@@ -365,10 +365,10 @@ public class FormulaShareServiceTest {
         // Create log object and set fields which have test rules created within apex class
         List<FormulaShare_Log__c> fsLogs = new List<FormulaShare_Log__c>();
         FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Context__c = role.DeveloperName;  // Share with role and subordinates (name)
-        log.Class_Name__c = role.Id;  // Share with role (id)
+        log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+        log.Context__c = role.Id;  // Share with role (id)
         log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-        log.Method_Name__c = UserInfo.getUserId();  // Share with user (Id)
+        log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
         insert log;
         fsLogs.add(log);
 

@@ -25,12 +25,12 @@ public with sharing class FormulaShareUtilitiesTest {
     @IsTest
     public static void testGetSObjectFieldFromName() {
 
-        // Check we can get a token for the field Class_Name__c on FormulaShare_Log__c
+        // Check we can get a token for the field Context__c on FormulaShare_Log__c
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        String fieldNameWithPrefix = FormulaShareTestUtils.getNamespacePrefix() + 'Class_Name__c';
+        String fieldNameWithPrefix = FormulaShareTestUtils.getNamespacePrefix() + 'Context__c';
         SObjectField classNameField = FormulaShareUtilities.getSObjectFieldFromName(fieldNameWithPrefix, fsLogType);
 
-		SObjectField sObjField = FormulaShare_Log__c.Class_Name__c.getDescribe().getSObjectField();
+		SObjectField sObjField = FormulaShare_Log__c.Context__c.getDescribe().getSObjectField();
 
         system.assertEquals(sObjField, classNameField);
     }
@@ -116,8 +116,9 @@ public with sharing class FormulaShareUtilitiesTest {
         Boolean foundText = false;
         Boolean foundOtherLookup = false;
         for(Schema.SObjectField field : fields) {
+            System.debug(field.getDescribe().getName());
             if(field.getDescribe().getName().contains('LastModifiedById')) foundUser = true;
-            if(field.getDescribe().getName().contains('Class_Name__c')) foundText = true;
+            if(field.getDescribe().getName().contains('Context__c')) foundText = true;
             if(field.getDescribe().getName().contains('Related_Log_Required_for_Test_Class__c')) foundOtherLookup = true;
         }
 

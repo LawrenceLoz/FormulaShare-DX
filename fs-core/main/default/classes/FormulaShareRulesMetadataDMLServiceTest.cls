@@ -7,7 +7,7 @@ public with sharing class FormulaShareRulesMetadataDMLServiceTest {
         rule.DeveloperName = 'Test_FS_Rule';
         rule.MasterLabel = 'Test FS Rule';
         rule.Object_Shared__c = prefix + 'FormulaShare_Log__c';
-        rule.Shared_To__c = 'Context__c';
+        rule.Shared_To__c = 'Failed_Batches__c';
         rule.Share_With__c = 'Roles and Internal Subordinates';
         rule.Access_Level__c = 'Read';
         rule.Active__c = true;

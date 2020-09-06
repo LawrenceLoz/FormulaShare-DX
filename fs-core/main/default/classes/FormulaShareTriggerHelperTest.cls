@@ -157,7 +157,7 @@ public with sharing class FormulaShareTriggerHelperTest {
         insert parentLog;
 
         FormulaShare_Log__c childLog = new FormulaShare_Log__c();
-        childLog.Method_Name__c = u.Id;  // Share with user (Id)
+        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
         childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
         insert childLog;
 

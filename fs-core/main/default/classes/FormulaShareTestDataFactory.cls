@@ -22,7 +22,7 @@ public with sharing class FormulaShareTestDataFactory {
 
         for(Integer i = 0; i < size; i++) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Class_Name__c = 'FormulaShareProcessBatch';
+            log.Context__c = 'FormulaShareProcessBatch';
             log.Type_In_Scope__c = 'FormulaShare_Log__c';
             log.Query__c = 'SELECT Id FROM FormulaShare_Log__c ORDER BY Name ASC NULLS FIRST';
             log.Batches_Processed__c = 10;

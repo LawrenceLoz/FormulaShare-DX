@@ -19,7 +19,7 @@ public with sharing class FormulaShareRuleDMLControllerTest {
         FormulaShareRuleDMLController.ComponentSharedObject cso = new FormulaShareRuleDMLController.ComponentSharedObject();
         cso.objectApiName = prefix + 'FormulaShare_Log__c';
         cr.sharedObject = cso;
-        cr.shareField = 'Context__c';
+        cr.shareField = 'Failed_Batches__c';
         cr.shareWith = 'Roles and Internal Subordinates';
         cr.accessLevel = 'Read';
         cr.ruleActive = true;
