@@ -7,6 +7,7 @@
     <label>FormulaShare</label>
     <logo>FormulaShare_App_Images/FormulaShare_Classic_App_Logo.jpg</logo>
     <tabs>FormulaShare_Rules_VF</tabs>
+    <tabs>standard-Dashboard</tabs>
     <tabs>FormulaShare_Record_Log__c</tabs>
     <tabs>FormulaShare_Log__c</tabs>
 </CustomApplication>

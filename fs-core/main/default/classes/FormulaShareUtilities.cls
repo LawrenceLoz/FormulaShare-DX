@@ -465,7 +465,7 @@ public with sharing class FormulaShareUtilities {
 
 	@AuraEnabled(cacheable=true)
 	public static Boolean isContactSharingControlledByAccount() {
-		Schema.SObjectType accountShareType = AccountShare.SObjectType;
+		Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
 		SObject share = accountShareType.newSObject();
 		try {
 			share.put('ContactAccessLevel', 'Read');

@@ -88,15 +88,14 @@ public inherited sharing class FormulaShareRule {
 
         // If object is account need to check related objects
         if(objectUtils.objectName == 'Account') {
-            AccountShare accShare = (AccountShare) share;
 
             // If case or opportunity access is different, return false
-            if(caseAccess != accShare.CaseAccessLevel || opportunityAccess != accShare.OpportunityAccessLevel) {
+            if(caseAccess != share.get('CaseAccessLevel') || opportunityAccess != share.get('OpportunityAccessLevel')) {
                 return false;
             }
 
             // If contact is controlled by account and contact access is different, return false
-            else if(contactIsControlledByAccount && contactAccess != accShare.ContactAccessLevel) {
+            else if(contactIsControlledByAccount && contactAccess != share.get('ContactAccessLevel')) {
                 return false;
             }
             return true;
@@ -120,15 +119,17 @@ public inherited sharing class FormulaShareRule {
 
         // For account, also add case, opportunity and (if not controlled by account) contact access
         if(objectUtils.objectName == 'Account') {
-            AccountShare currentAccShare = (AccountShare) currentShare;
-            String targetCaseAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentAccShare.CaseAccessLevel, caseAccess});
-            String targetOpportunityAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentAccShare.OpportunityAccessLevel, opportunityAccess});
+            String currentCaseAccess = (String) currentShare.get('CaseAccessLevel');
+            String currentOpportunityAccess = (String) currentShare.get('OpportunityAccessLevel');
+            String targetCaseAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentCaseAccess, caseAccess});
+            String targetOpportunityAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentOpportunityAccess, opportunityAccess});
             objectAccessLevels.put('CaseAccessLevel', targetCaseAccess);
             objectAccessLevels.put('OpportunityAccessLevel', targetOpportunityAccess);
 
             // Set contact sharing if contact is not controlled by account
             if(!contactIsControlledByAccount) {
-                String targetContactAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentAccShare.ContactAccessLevel, contactAccess});
+                String currentContactAccess = (String) currentShare.get('ContactAccessLevel');
+                String targetContactAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentContactAccess, contactAccess});
                 objectAccessLevels.put('ContactAccessLevel', targetContactAccess);
             }
         }
