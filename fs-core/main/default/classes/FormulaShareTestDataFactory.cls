@@ -11,6 +11,8 @@ public with sharing class FormulaShareTestDataFactory {
     static String roleRuleName = FormulaShareMockProvider.roleRuleName;
     static String childUserRuleName = FormulaShareMockProvider.childUserRuleName;
 
+    static String prefix = FormulaShareTestUtils.getNamespacePrefix();
+
     public static FormulaShare_Log__c getBatchLog() {
         return getBatchLogs(1)[0];
     }
@@ -30,6 +32,24 @@ public with sharing class FormulaShareTestDataFactory {
         }
 
         return logs;
+    }
+
+    public static FormulaShare_Log__Share getShareForBatchLog(Id batchLogId, Id userOrGroupId, String accessLevel) {
+        return getSharesForBatchLog(batchLogId, new List<Id>{userOrGroupId}, accessLevel)[0];
+    }
+
+    public static List<FormulaShare_Log__Share> getSharesForBatchLog(Id batchLogId, List<Id> userOrGroupIdList, String accessLevel) {
+        List<FormulaShare_Log__Share> sharesList = new List<FormulaShare_Log__Share>();
+
+        for(Id userOrGroupId : userOrGroupIdList) {
+            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+            share.AccessLevel = accessLevel;
+            share.ParentId = batchLogId;
+            share.UserOrGroupId = userOrGroupId;
+            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
+            sharesList.add(share);
+        }
+        return sharesList;
     }
 
     public static FormulaShare_Metrics__c getBatchFinishMetricsForRuleAndBatch(String ruleName, Id batchLogId) {

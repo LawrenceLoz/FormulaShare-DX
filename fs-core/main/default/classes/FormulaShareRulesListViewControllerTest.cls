@@ -309,6 +309,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         System.assert(foundUserRule, 'Couldn\'t find user rule in list');
     }    
 
+    
     @IsTest
     public static void checkRecalculation() {
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();

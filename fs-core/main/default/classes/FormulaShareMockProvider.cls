@@ -48,6 +48,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             listOfArgs.size());
         System.debug('parameter(s) sent into the mocked call: ' + listOfArgs);
         
+        Id userId = UserInfo.getUserId();
+        Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
 
         // -------------------------- FormulaShareSettingsSelector Mocks ----------------------------- //
 
@@ -137,82 +139,33 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         else if(stubbedMethodName == 'getSharesToInsert') {
-            List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
-
-            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-            share.AccessLevel = 'Edit';
-//            share.ParentId = log.Id;
-            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
-            share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
-            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
-            shares.add(share);
-
+            List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Edit');
             return shares;
         }
 
         else if(stubbedMethodName == 'getSharesToDelete') {
-            List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
-
-            // Create sharing table record linked to this log
-            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-            share.AccessLevel = 'Read';
-//            share.ParentId = log.Id;
-            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
-            share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
-            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
-            shares.add(share);
-
+            List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Read');
             return shares;
         }
 
-        else if(stubbedMethodName == 'getInsertDetails') {
+        else if(stubbedMethodName == 'getInsertDetails' || stubbedMethodName == 'getDeleteDetails') {
             Map<String,FormulaShareService.ShareDetail> sharesMap = new Map<String,FormulaShareService.ShareDetail>();
             FormulaShareService.ShareDetail shareDetail = new FormulaShareService.ShareDetail();
-
-            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-            share.AccessLevel = 'Read';
-            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
-            share.UserOrGroupId = UserInfo.getUserId();
-            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
-            shareDetail.shareRecord = share;
-
+    
+            FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(userId, userId, 'Read');
+    
             FormulaShareRule userRule = getUserRule();
             shareDetail.rule = userRule;
-
+    
             shareDetail.type = User.getSObjectType();
-
+    
             String key = 'recordId0123456'
             + 'sharedToId12345'
             + share.AccessLevel
             + share.RowCause;
-
+    
             sharesMap.put(key, shareDetail);
-            return sharesMap;
-        }
-
-        else if(stubbedMethodName == 'getDeleteDetails') {
-            Map<String,FormulaShareService.ShareDetail> sharesMap = new Map<String,FormulaShareService.ShareDetail>();
-            FormulaShareService.ShareDetail shareDetail = new FormulaShareService.ShareDetail();
-
-            FormulaShare_Log__Share share = new FormulaShare_Log__Share();
-            share.AccessLevel = 'Read';
-            share.ParentId = UserInfo.getUserId();      // Any valid id is fine
-            share.UserOrGroupId = UserInfo.getUserId();
-            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
-            shareDetail.shareRecord = share;
-
-            FormulaShareRule userRule = getUserRule();
-            shareDetail.rule = userRule;
-
-            shareDetail.type = User.getSObjectType();
-
-            String key = 'recordId0123456'
-            + 'sharedToId12345'
-            + share.AccessLevel
-            + share.RowCause;
-
-            sharesMap.put(key, shareDetail);
-            return sharesMap;
+            return sharesMap;      
         }
 
         else if(stubbedMethodName == 'getEntitiesNotFound') {

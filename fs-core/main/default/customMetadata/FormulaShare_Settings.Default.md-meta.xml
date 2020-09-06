@@ -7,6 +7,18 @@
         <value xsi:type="xsd:boolean">true</value>
     </values>
     <values>
+        <field>All_Record_Errors_Report_Name__c</field>
+        <value xsi:type="xsd:string">FormulaShare_Record_Share_Failures_ilt</value>
+    </values>
+    <values>
+        <field>All_Record_Logs_Report_Name__c</field>
+        <value xsi:type="xsd:string">Processed_Record_Share_Details_acr</value>
+    </values>
+    <values>
+        <field>Batch_Errors_Report_Name__c</field>
+        <value xsi:type="xsd:string">FormulaShare_Batch_Errors_Gpn</value>
+    </values>
+    <values>
         <field>Days_to_Retain_Batch_Logs__c</field>
         <value xsi:type="xsd:double">31.0</value>
     </values>
@@ -23,8 +35,16 @@
         <value xsi:type="xsd:double">200.0</value>
     </values>
     <values>
+        <field>Rec_Errors_Since_Last_Batch_Report_Name__c</field>
+        <value xsi:type="xsd:string">Record_Share_Errors_Since_Last_Batch_hB9</value>
+    </values>
+    <values>
         <field>Recalculation_Batch_Size__c</field>
         <value xsi:type="xsd:double">200.0</value>
+    </values>
+    <values>
+        <field>Record_Logs_Since_Last_Batch_Report_Name__c</field>
+        <value xsi:type="xsd:string">Record_Share_Logs_Since_Last_Batch_E3E</value>
     </values>
     <values>
         <field>Trigger_Helper_Class_Override__c</field>

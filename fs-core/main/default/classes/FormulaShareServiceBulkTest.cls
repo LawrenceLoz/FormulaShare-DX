@@ -101,10 +101,12 @@ public with sharing class FormulaShareServiceBulkTest {
         insert fsLogs;
 
         // Call recalculate method to set sharing
-        test.startTest();
+        Test.startTest();
         FormulaShareService.recalculateAll();
-        test.stopTest();
+        Test.getEventBus().deliver();
+        Test.stopTest();
 
+        Test.getEventBus().deliver();
         // Find a record which should be shared by all rules
         FormulaShare_Log__c log1 = [SELECT Id FROM FormulaShare_Log__c WHERE Exception_Type__c = 'allShares'][0];
 
@@ -182,6 +184,11 @@ public with sharing class FormulaShareServiceBulkTest {
         System.assert(foundRoleShare3);
         System.assert(!foundRoleSubordinatesShare3);
         System.assert(foundGroupShare3);
+
+
+        // Check that record logs are created (based on platform events)
+        List<FormulaShare_Record_Log__c> recordLogs = [SELECT Id, Context__c FROM FormulaShare_Record_Log__c];
+        System.assertEquals(noSharesOfEachType, recordLogs.size(), 'Expected a record log for every inserted share');
     }
 
 
@@ -274,9 +281,9 @@ public with sharing class FormulaShareServiceBulkTest {
         update fsLogsToUpdate;
 
         // Call recalculate method to set sharing
-        test.startTest();
+        Test.startTest();
         FormulaShareService.recalculateAll();
-        test.stopTest();
+        Test.stopTest();
 
 
         // Find a record which should have had sharing removed
