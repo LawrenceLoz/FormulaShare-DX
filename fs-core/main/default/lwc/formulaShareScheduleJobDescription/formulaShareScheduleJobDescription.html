@@ -1,0 +1,48 @@
+<template>
+    <div style="height: 300px;">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Schedule Batch Job</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <div class="slds-p-vertical_medium slds-align_absolute-center">
+                        <img src={warningCloud} alt="warningCloud" width="130">
+                    </div>
+                    <div class="slds-text-longform slds-p-top_small">
+                        <p>
+                            The FormulaShare batch isn't yet scheduled. This job checks and updates sharing on all records and is important to make sure 
+                            all changes can be applied.
+                        </p>
+                        <p>
+                            To schedule, navigate to "Apex Classes" in the setup menu (or 
+                            <lightning-formatted-url 
+                                value={setupUrl}
+                                label=" click here" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            ). Click the "Schedule Apex" button, select the class FormulaShareProcessSchedulable,
+                            and set a time and frequency which work for your organisation - we recommend once per day.
+                        </p>
+                        <p>
+                            It's important the job is scheduled by an admin, so make sure that's you! The scheduling user needs these permissions:
+                        </p>
+                        <ul class="slds-list_dotted">
+                            <li>Permission to access all objects, records and fields involved in the rules</li>
+                            <li>Modify All permission on the objects shared</li>
+                            <li>The FormulaShareAdmin permission set</li>
+                        </ul>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button 
+                        label="Close" 
+                        variant="neutral" 
+                        onclick={closeModal}>
+                    </lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>    
+    </div>
+</template>

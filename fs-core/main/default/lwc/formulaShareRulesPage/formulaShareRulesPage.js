@@ -1,6 +1,8 @@
 import { LightningElement, track, api } from 'lwc';
+import rulesPageIcon from '@salesforce/resourceUrl/RulesPageIcon';
 
 export default class FormulaShareRulesPage extends LightningElement {
+    rulesPageIcon = rulesPageIcon;
 
     openNewRuleModal = false;
     handleNewRule() {

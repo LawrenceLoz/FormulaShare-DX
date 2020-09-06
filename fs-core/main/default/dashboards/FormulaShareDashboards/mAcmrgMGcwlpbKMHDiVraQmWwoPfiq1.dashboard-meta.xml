@@ -22,7 +22,7 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Total Shared Records</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
+                <report>FormulaShareDashboardReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
@@ -31,7 +31,7 @@
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
-            <rowSpan>8</rowSpan>
+            <rowSpan>9</rowSpan>
         </dashboardGridComponents>
         <dashboardGridComponents>
             <colSpan>2</colSpan>
@@ -51,7 +51,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_All_Rules_NPn</report>
+                <report>FormulaShareDashboardReports/Dashboard_All_Rules_NPn</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -75,7 +75,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Rules_Sharing_Records_6cQ</report>
+                <report>FormulaShareDashboardReports/Dashboard_Rules_Sharing_Records_6cQ</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -85,25 +85,38 @@
             <colSpan>4</colSpan>
             <columnIndex>8</columnIndex>
             <dashboardComponent>
-                <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+                <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
                 <chartAxisRange>Auto</chartAxisRange>
-                <componentType>Bar</componentType>
-                <displayUnits>Auto</displayUnits>
+                <chartSummary>
+                    <axisBinding>y</axisBinding>
+                    <column>FORMULA1</column>
+                </chartSummary>
+                <componentType>Donut</componentType>
+                <decimalPrecision>1</decimalPrecision>
+                <displayUnits>Integer</displayUnits>
                 <drillEnabled>false</drillEnabled>
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingSortProperties/>
-                <header>Records Shared by Each Rule</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Sharing_by_Rule_1Cp</report>
+                <groupingColumn>FK_$FormulaShare_Log__c.Type_In_Scope__c</groupingColumn>
+                <groupingSortProperties>
+                    <groupingSorts>
+                        <groupingLevel>g1</groupingLevel>
+                        <sortOrder>d</sortOrder>
+                    </groupingSorts>
+                </groupingSortProperties>
+                <header>Last Batch Run Time</header>
+                <legendPosition>Right</legendPosition>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Batch_Performance_av7</report>
                 <showPercentage>false</showPercentage>
-                <showPicturesOnCharts>false</showPicturesOnCharts>
-                <showValues>false</showValues>
+                <showTotal>true</showTotal>
+                <showValues>true</showValues>
                 <sortBy>RowLabelAscending</sortBy>
-                <useReportChart>true</useReportChart>
+                <title>Time taken to process each object</title>
+                <useReportChart>false</useReportChart>
             </dashboardComponent>
             <rowIndex>4</rowIndex>
-            <rowSpan>6</rowSpan>
+            <rowSpan>7</rowSpan>
         </dashboardGridComponents>
         <dashboardGridComponents>
             <colSpan>4</colSpan>
@@ -119,14 +132,14 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Batch Job</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
+                <report>FormulaShareDashboardReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
                 <sortBy>RowLabelAscending</sortBy>
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
-            <rowIndex>8</rowIndex>
+            <rowIndex>9</rowIndex>
             <rowSpan>9</rowSpan>
         </dashboardGridComponents>
         <dashboardGridComponents>
@@ -143,14 +156,14 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Trigger Operations</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
+                <report>FormulaShareDashboardReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
                 <sortBy>RowLabelAscending</sortBy>
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
-            <rowIndex>8</rowIndex>
+            <rowIndex>9</rowIndex>
             <rowSpan>9</rowSpan>
         </dashboardGridComponents>
         <dashboardGridComponents>
@@ -186,10 +199,10 @@
                     </groupingSorts>
                 </groupingSortProperties>
                 <header>Record Share Errors</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
                 <title>Shows errors logged over the last 7 days</title>
             </dashboardComponent>
-            <rowIndex>10</rowIndex>
+            <rowIndex>11</rowIndex>
             <rowSpan>7</rowSpan>
         </dashboardGridComponents>
         <dashboardGridComponents>
@@ -268,9 +281,9 @@
                 </flexComponentProperties>
                 <groupingSortProperties/>
                 <header>Record Share Error Details</header>
-                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
             </dashboardComponent>
-            <rowIndex>17</rowIndex>
+            <rowIndex>18</rowIndex>
             <rowSpan>10</rowSpan>
         </dashboardGridComponents>
         <numberOfColumns>12</numberOfColumns>

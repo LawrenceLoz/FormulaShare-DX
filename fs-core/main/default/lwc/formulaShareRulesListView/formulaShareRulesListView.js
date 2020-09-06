@@ -89,19 +89,42 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             for(var ruleRowNo in this.treeItems[rowNo]._children) {
                 // If rule is active and warning URL populated, recognise we need to show warning column
                 var thisRow = this.treeItems[rowNo]._children[ruleRowNo];
-                if(thisRow.warningUrlLabel && thisRow.active) {
-                    showWarnings = true;
+                if(thisRow.warningUrlLabel && thisRow.warningUrlLabel === 'Schedule batch job' && thisRow.active) {
+                    showWarnings = 'scheduleWarning';
+                    this.scheduleWarningsUrl = thisRow.warningUrl;
+                    break;
+                }
+                else if(thisRow.warningUrlLabel && thisRow.active) {
+                    showWarnings = 'processingWarning';
                     break;
                 }
             }
         }
 
-        if(showWarnings) {
+        if(showWarnings === 'scheduleWarning') {
+            this.columns.push(
+                {   type: 'button'
+                    , fieldName: 'warningUrl'
+                    , label: 'Warnings'
+                    , typeAttributes: {
+                        name: 'scheduleWarning'
+                        , title: {fieldName: 'warningTooltip'}
+                        , label: {fieldName: 'warningUrlLabel'}
+                        , variant: 'base'
+                    }
+                }
+            );
+        }
+        else if(showWarnings === 'processingWarning') {
             this.columns.push(
                 {type: 'url'
                     , fieldName: 'warningUrl'
                     , label:'Warnings'
-                    , typeAttributes: {label: {fieldName:'warningUrlLabel'}, target:'_blank', tooltip: {fieldName:'warningTooltip'}}
+                    , typeAttributes: {
+                        label: {fieldName:'warningUrlLabel'}
+                        , target:'_blank'
+                        , tooltip: {fieldName:'warningTooltip'}
+                    }
 //                    , cellAttributes: { iconName: {fieldName: 'warningIcon'}, iconPosition: 'left' }
                 }
             );
@@ -118,6 +141,11 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             }
         );
     }
+
+    handleRowSelection() {
+
+    }
+
 
     // Core method to load treegrid data from handler
     provisionedValue;
@@ -287,6 +315,11 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Delegate processing of treegrid actions
     handleRowAction(event) {
 
+        // If click is on a schedule warning button, toggle the modal
+        if(event.detail.action.name === 'scheduleWarning') {
+            this.doOpenScheduleModal();
+        }
+
         const actionName = event.detail.action.name;
         const row = event.detail.row;
 
@@ -309,6 +342,15 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
     }
 
+    scheduleWarningsUrl;
+    openScheduleModal = false;
+    doOpenScheduleModal() {
+        console.log('opening schedule modal');
+        this.openScheduleModal = true;
+    }
+    closeScheduleModal() {
+        this.openScheduleModal = false;
+    }
 
     // Action method to trigger FormulaShareBatch for the specified object
     submitForRecalc(row) {

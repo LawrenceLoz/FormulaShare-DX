@@ -203,11 +203,11 @@ public with sharing class FormulaShareRulesListViewController {
 
     
     // Query and cache whether the job is scheduled
-    static Boolean jobScheduled;
+    @TestVisible static Boolean jobScheduled;
     private static Boolean jobScheduled() {
         if(jobScheduled == null) {
             List<AsyncApexJob> jobs = [SELECT Id FROM AsyncApexJob 
-            WHERE Status!='Aborted' AND Status!='Completed' AND Status!='Failed'
+            WHERE Status != 'Aborted' AND Status != 'Completed' AND Status != 'Failed'
             AND ApexClass.Name = 'FormulaShareProcessSchedulable'];
             jobScheduled = !jobs.isEmpty();
         }
@@ -314,7 +314,8 @@ public with sharing class FormulaShareRulesListViewController {
             Boolean batchFailure = false;
 
             // Set report url to report returning all records (overwritten if batch has run)
-            recordLogsReportId = FormulaShareReportsService.getReportIdForName(settings.All_Record_Logs_Report_Name__c);
+            FormulaShareReportsService reportsService = FormulaShareReportsService.construct();
+            recordLogsReportId = reportsService.getReportIdForName(settings.All_Record_Logs_Report_Name__c);
 
             // If complete batch metrics are available, use these together with more recent trigger metrics
             String ruleName;
@@ -343,12 +344,14 @@ public with sharing class FormulaShareRulesListViewController {
                 }
 
                 // Set record log report urls and parameters for action
-                recordLogsReportId = FormulaShareReportsService.getReportIdForName(settings.Record_Logs_Since_Last_Batch_Report_Name__c);
+                recordLogsReportId = reportsService.getReportIdForName(settings.Record_Logs_Since_Last_Batch_Report_Name__c);
 
                 // Convert batch finish datetime to epoch for use in report url parameters
-                DateTime batchFinishDateTime = batchFinishMetrics.Last_Successful_Batch__c;
-                Long millisecs = batchFinishDateTime.getTime();
-                batchFinishEpoch = millisecs / 1000;
+                if(batchFinishMetrics.Last_Successful_Batch__c != null) {
+                    DateTime batchFinishDateTime = batchFinishMetrics.Last_Successful_Batch__c;
+                    Long millisecs = batchFinishDateTime.getTime();
+                    batchFinishEpoch = millisecs / 1000;
+                }
             }
 
             else if(triggerMetrics != null || batchMetrics != null) {
@@ -381,7 +384,7 @@ public with sharing class FormulaShareRulesListViewController {
             if(!jobScheduled()) {
                 warningIcon = warningTriangle;
                 warningUrlLabel = 'Schedule batch job';
-                warningTooltip = 'FormulaShareProcessBatch must be scheduled for rules to apply correctly. Use the "Schedule Apex" button from Apex Classes in the setup menu';
+                warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';
                 String domainName = FormulaShareUtilities.getLightningDomain();
                 String apexClassesSetup = domainName + '/lightning/setup/ApexClasses/home';
                 warningUrl = apexClassesSetup;
@@ -396,7 +399,7 @@ public with sharing class FormulaShareRulesListViewController {
                 if(batchFailure) {
                     warningUrlLabel = 'Batch errors';
                     warningTooltip = 'View batch error logs';
-                    warningUrl = FormulaShareReportsService.getBatchErrorReportUrl(objectApiName);
+                    warningUrl = reportsService.getBatchErrorReportUrl(objectApiName);
                 }
                 else if(recordFailure) {
                     warningUrlLabel = noSharesFailed + ' record errors';
@@ -405,11 +408,11 @@ public with sharing class FormulaShareRulesListViewController {
                     // ..Record errors since last batch if batch run completed before
                     if(lastBatchId != null && batchFinishEpoch != null) {
                         warningTooltip += ' since last batch';
-                        warningUrl = FormulaShareReportsService.getRecordErrorsSinceLastBatchReportUrl(ruleName, lastBatchId, batchFinishEpoch);
+                        warningUrl = reportsService.getRecordErrorsSinceLastBatchReportUrl(ruleName, lastBatchId, batchFinishEpoch);
                     }
                     // ..All record errors if no completed batch
                     else {
-                        warningUrl = FormulaShareReportsService.getRecordErrorsAllReportUrl(ruleName);
+                        warningUrl = reportsService.getRecordErrorsAllReportUrl(ruleName);
                     }
                 }
 
