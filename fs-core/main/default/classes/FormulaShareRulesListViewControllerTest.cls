@@ -10,6 +10,9 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
+
+        FormulaShareReportsService mockFSReportsService = (FormulaShareReportsService) FormulaShareMockUtil.createMock(FormulaShareReportsService.class);
+        FormulaShareReportsService.mock = mockFSReportsService;
     }
 
     @IsTest
@@ -54,7 +57,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                         System.assertEquals(fsRules[0].ruleId, rw.ruleId, 'Mis-match of rule ID in wrapper');
                         System.assert(rw.sharedToLink.contains('objecttoken1234'), 'Link missing object token');
                         System.assert(rw.sharedToLink.contains('fieldtoken12345'), 'Link missing field token');
-                        System.assertEquals('None', rw.lastCalcStatus, 'Calc status not empty as expected');
+                        System.assertEquals('Pending', rw.lastCalcStatus, 'Calc status not empty as expected');
                     }
                 }
             }
@@ -98,6 +101,8 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                     if(rw.developerName == fsRules[0].developerName) {
                         foundRule = true;
                         System.assertEquals(fsRules[0].ruleId, rw.ruleId, 'Mis-match of rule ID in wrapper');
+                        System.debug('rw: '+ rw);
+                        System.debug('rw.sharedToLink: '+ rw.sharedToLink );
                         System.assert(rw.sharedToLink.contains('objecttoken1234'), 'Link missing object token');
                         System.assert(rw.sharedToLink.contains('fieldtoken12345'), 'Link missing field token');
                         System.assertEquals('Processing...', rw.lastCalcStatus, 'Rule does not indicate processing is ongoing');
@@ -168,6 +173,141 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         System.assert(foundRule, 'Did not find the rule for the first rule');
     }
 
+
+    @IsTest
+    public static void testBatchFinishMetricsPopulate() {
+        FormulaShareRulesListViewController.jobScheduled = true;
+        setMocks();
+        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+
+        // Create batch log
+        FormulaShare_Log__c batchLog = FormulaShareTestDataFactory.getBatchLog();
+        insert batchLog;
+
+        // Create sample metrics for user rule
+        FormulaShare_Metrics__c batchFinishMetrics = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, batchLog.Id);
+        insert batchFinishMetrics;
+
+        // Run core method
+        List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
+
+        Boolean foundUserRule = false;
+        for(FormulaShareRulesListViewController.ObjectRulesWrapper orw : orwList) {
+            if(orw.objectApiName == fsRules[0].objectSharedAPIName) {
+                for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
+
+                    // Check user rule
+                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                        System.assertEquals(101, rw.noSharesApplied);
+                        System.assertEquals(batchLog.Id, rw.lastBatchId);
+                        System.assertEquals(UserInfo.getUserId(), rw.recordLogsReportId, 'Expected the mocked ID as the report ID');
+                        System.assertEquals('RecordErrorsSinceLastBatchReportUrl', rw.warningUrl, 'Expected record error report to be set as url, since some records failed');
+                        foundUserRule = true;
+                    }
+                }
+            }
+        }
+        System.assert(foundUserRule, 'Couldn\'t find user rule in list');
+    }
+
+
+    @IsTest
+    public static void testBatchFinishFailPlusOtherMetrics() {
+        FormulaShareRulesListViewController.jobScheduled = true;
+        setMocks();
+        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+
+        // Create batch log
+        FormulaShare_Log__c batchLog = FormulaShareTestDataFactory.getBatchLog();
+        insert batchLog;
+
+        // Create sample metrics for user rule
+        FormulaShare_Metrics__c batchFinishMetricsFailed = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatchFail(FormulaShareMockProvider.userRuleName, batchLog.Id);
+        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, batchLog.Id);
+        insert batchFinishMetricsFailed;
+        insert triggerMetrics;
+
+        // Run core method
+        List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
+
+        Boolean foundUserRule = false;
+        for(FormulaShareRulesListViewController.ObjectRulesWrapper orw : orwList) {
+            if(orw.objectApiName == fsRules[0].objectSharedAPIName) {
+                for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
+
+                    // Check user rule
+                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                        foundUserRule = true;
+                        System.assertEquals(203, rw.noSharesApplied);
+                        System.assertEquals(batchLog.Id, rw.lastBatchId);
+                        System.assertEquals(UserInfo.getUserId(), rw.recordLogsReportId, 'Expected the mocked ID to be set for records report');
+                        System.assertEquals('BatchErrorReportUrl', rw.warningUrl, 'Expected record error report to be set as url, since batch failed');
+                    }
+                }
+            }
+        }
+        System.assert(foundUserRule, 'Couldn\'t find user rule in list');
+    }
+
+
+    @IsTest
+    public static void testBatchAndTriggerOnly() {
+        FormulaShareRulesListViewController.jobScheduled = true;
+        setMocks();
+        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+
+        // Create sample metrics for user rule
+        FormulaShare_Metrics__c batchMetrics = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, null);
+        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, null);
+        insert batchMetrics;
+        insert triggerMetrics;
+
+        // Run core method
+        List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
+
+        Boolean foundUserRule = false;
+        for(FormulaShareRulesListViewController.ObjectRulesWrapper orw : orwList) {
+            if(orw.objectApiName == fsRules[0].objectSharedAPIName) {
+                for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
+
+                    // Check user rule
+                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                        foundUserRule = true;
+                        System.assertEquals(205, rw.noSharesApplied);
+                        System.assertEquals(UserInfo.getUserId(), rw.recordLogsReportId, 'Expected the mocked ID to be set for records report');
+                        System.assertEquals('RecordErrorsAllReportUrl', rw.warningUrl, 'Expected all record errors, since no complete batch run yet');
+                    }
+                }
+            }
+        }
+        System.assert(foundUserRule, 'Couldn\'t find user rule in list');
+    }
+
+
+    @IsTest
+    public static void testNoJobScheduled() {
+        FormulaShareRulesListViewController.jobScheduled = false;   // Should trigger error message relating to scheduled job
+        setMocks();
+        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+
+        // Run core method
+        List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
+
+        Boolean foundUserRule = false;
+        for(FormulaShareRulesListViewController.ObjectRulesWrapper orw : orwList) {
+            if(orw.objectApiName == fsRules[0].objectSharedAPIName) {
+                for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
+
+                    // Check user rule
+                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                        foundUserRule = true;
+                        System.assertEquals('Schedule batch job', rw.warningUrlLabel, 'Expected batch job scheduled warning');
+                    }
+                }
+            }
+        }
+        System.assert(foundUserRule, 'Couldn\'t find user rule in list');
+    }    
 
     @IsTest
     public static void checkRecalculation() {

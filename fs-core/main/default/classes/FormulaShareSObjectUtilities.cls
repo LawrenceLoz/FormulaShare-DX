@@ -59,16 +59,16 @@ public with sharing class FormulaShareSObjectUtilities {
         if(removeSharesForObject == null) {
 
             // Always remove for custom objects as we distinguish by row cause
-            if(isCustom) {
-                removeSharesForObject = true;
-            }
+            removeSharesForObject = true;
 
             // Otherwise check custom metadata setting for this object
-            FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
-			List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLines = selector.getRemovalLinesForType(type);
-            if(!removalLines.isEmpty()) {
-				removeSharesForObject = false;
-			}
+            if(!isCustom) {
+                FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
+                List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLines = selector.getRemovalLinesForType(type);
+                if(removalLines.isEmpty()) {
+                    removeSharesForObject = false;
+                }
+            }
         }
         return removeSharesForObject;
     }

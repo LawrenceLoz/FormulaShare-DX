@@ -21,7 +21,13 @@
 
 @IsTest
 public inherited sharing class FormulaShareMockProvider implements System.StubProvider {
-    
+
+    public static String userRuleName = 'User_rule';
+    public static String groupRuleName = 'Group_rule';
+    public static String roleSubName = 'Rule_sub_rule';
+    public static String roleRuleName = 'Rule_rule';
+    public static String childUserRuleName = 'Child_user_rule';
+
     public Object handleMethodCall(Object stubbedObject, String stubbedMethodName, 
         Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames, 
         List<Object> listOfArgs) {
@@ -53,6 +59,11 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             settings.Log_Processing_Events__c = 'All Sharing Updates';
             settings.Logs_Removal_Batch_Size__c = 200;
             settings.Recalculation_Batch_Size__c = 200;
+            settings.All_Record_Errors_Report_Name__c = 'FormulaShare_Record_Share_Failures_ilt';
+            settings.All_Record_Logs_Report_Name__c = 'Processed_Record_Share_Details_acr';
+            settings.Batch_Errors_Report_Name__c = 'FormulaShare_Batch_Errors_Gpn';
+            settings.Rec_Errors_Since_Last_Batch_Report_Name__c = 'Record_Share_Errors_Since_Last_Batch_hB9';
+            settings.Record_Logs_Since_Last_Batch_Report_Name__c = 'Record_Share_Logs_Since_Last_Batch_E3E';
             return settings;
         }
 
@@ -62,65 +73,23 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
             // Will add a sharing record for the role and subordinates group for the role name in Context__c field
-            FormulaShareRule roleSubRule = new FormulaShareRule();
-            roleSubRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            roleSubRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            roleSubRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            roleSubRule.active = true;
-            roleSubRule.sharedToFieldType = 'Name';
-            roleSubRule.accessLevel = 'Read';
-            roleSubRule.sharedToAPIName = prefix + 'Context__c';
-            roleSubRule.shareWith = 'Roles and Internal Subordinates';
+            FormulaShareRule roleSubRule = getRoleAndSubRule();
             rules.add(roleSubRule);
 
             // Will add a sharing record for the role group for the role id in Class_Name__c field
-            FormulaShareRule roleRule = new FormulaShareRule();
-            roleRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            roleRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            roleRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            roleRule.active = true;
-            roleRule.sharedToFieldType = 'Id';
-            roleRule.accessLevel = 'Edit';
-            roleRule.sharedToAPIName = prefix + 'Class_Name__c';
-            roleRule.shareWith = 'Roles';
+            FormulaShareRule roleRule = getRoleRule();
             rules.add(roleRule);
 
             // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
-            FormulaShareRule groupRule = new FormulaShareRule();
-            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            groupRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            groupRule.active = true;
-            groupRule.sharedToFieldType = 'Name';
-            groupRule.accessLevel = 'Edit';
-            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
-            groupRule.shareWith = 'Public Groups';
+            FormulaShareRule groupRule = getGroupRule();
             rules.add(groupRule);
 
             // Will add a sharing record for the user with the user id in Method_Name__c field
-            FormulaShareRule userRule = new FormulaShareRule();
-            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            userRule.active = true;
-            userRule.sharedToFieldType = 'Id';
-            userRule.accessLevel = 'Edit';
-            userRule.sharedToAPIName = prefix + 'Method_Name__c';
-            userRule.shareWith = 'Users';
+            FormulaShareRule userRule = getUserRule();
             rules.add(userRule);
 
             // Will add a sharing record for the user with the user id in Method_Name__c field for all related log records
-            FormulaShareRule childUserRule = new FormulaShareRule();
-            childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            childUserRule.childObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            childUserRule.active = true;
-            childUserRule.accessLevel = 'Edit';
-            childUserRule.shareWith = 'Users';
-            childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
-            childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
-            childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
-            childUserRule.childObjectSharedToFieldType = 'Id';
+            FormulaShareRule childUserRule = getChildUserRule();
             rules.add(childUserRule);
 
             return rules;
@@ -131,14 +100,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
            // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
-            FormulaShareRule groupRule = new FormulaShareRule();
-            groupRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            groupRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            groupRule.active = true;
-            groupRule.sharedToFieldType = 'Name';
-            groupRule.accessLevel = 'Edit';
-            groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
-            groupRule.shareWith = 'Public Groups';
+            FormulaShareRule groupRule = getGroupRule();
             rules.add(groupRule);
 
             return rules;
@@ -149,16 +111,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
            // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
-            FormulaShareRule childUserRule = new FormulaShareRule();
-            childUserRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            childUserRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            childUserRule.active = true;
-            childUserRule.accessLevel = 'Edit';
-            childUserRule.shareWith = 'Users';
-            childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
-            childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
-            childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
-            childUserRule.childObjectSharedToFieldType = 'Id';
+            FormulaShareRule childUserRule = getChildUserRule();
             rules.add(childUserRule);
 
             return rules;
@@ -173,7 +126,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         // -------------------------- FormulaShareUtilities Mocks ----------------------------- //
 
         else if(stubbedMethodName == 'get15CharacterIdInstance') {
-            return '123';    // Return a string (only used as a string key by mocked method)
+            String argument18 = (String) listOfArgs[0];
+            return argument18.left(15);
         }
 
         // -------------------------- FormulaShareService Mocks ----------------------------- //
@@ -185,12 +139,6 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         else if(stubbedMethodName == 'getSharesToInsert') {
             List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
 
-            // Insert log object against which a share record could be inserted
-//            FormulaShare_Log__c log = new FormulaShare_Log__c();
-//            log.Exception_Type__c = 'log with share to insert';  // So we can identify in test class
-//            insert log;
-
-            // Create sharing table record
             FormulaShare_Log__Share share = new FormulaShare_Log__Share();
             share.AccessLevel = 'Edit';
 //            share.ParentId = log.Id;
@@ -205,11 +153,6 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         else if(stubbedMethodName == 'getSharesToDelete') {
             List<FormulaShare_Log__Share> shares = new List<FormulaShare_Log__Share>();
 
-            // Insert log object which we'll create a share record for
-//            FormulaShare_Log__c log = new FormulaShare_Log__c();
-//            log.Exception_Type__c = 'log with share to delete';  // So we can identify in test class
-//            insert log;
-
             // Create sharing table record linked to this log
             FormulaShare_Log__Share share = new FormulaShare_Log__Share();
             share.AccessLevel = 'Read';
@@ -217,11 +160,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             share.ParentId = UserInfo.getUserId();      // Any valid id is fine
             share.UserOrGroupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
             share.RowCause = prefix + 'FormulaShare_Log_Share__c';
-
-            // Insert share so it can be deleted by calling methods
-//            insert share;
-
             shares.add(share);
+
             return shares;
         }
 
@@ -236,15 +176,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             share.RowCause = prefix + 'FormulaShare_Log_Share__c';
             shareDetail.shareRecord = share;
 
-            FormulaShareRule userRule = new FormulaShareRule();
-            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            userRule.active = true;
-            userRule.sharedToFieldType = 'Id';
-            userRule.accessLevel = 'Edit';
-            userRule.sharedToAPIName = prefix + 'Method_Name__c';
-            userRule.shareWith = 'Users';
+            FormulaShareRule userRule = getUserRule();
             shareDetail.rule = userRule;
 
             shareDetail.type = User.getSObjectType();
@@ -269,15 +201,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             share.RowCause = prefix + 'FormulaShare_Log_Share__c';
             shareDetail.shareRecord = share;
 
-            FormulaShareRule userRule = new FormulaShareRule();
-            userRule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-            userRule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-            userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';     // Used to check links building correctly
-            userRule.active = true;
-            userRule.sharedToFieldType = 'Id';
-            userRule.accessLevel = 'Edit';
-            userRule.sharedToAPIName = prefix + 'Method_Name__c';
-            userRule.shareWith = 'Users';
+            FormulaShareRule userRule = getUserRule();
             shareDetail.rule = userRule;
 
             shareDetail.type = User.getSObjectType();
@@ -289,6 +213,20 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
             sharesMap.put(key, shareDetail);
             return sharesMap;
+        }
+
+        else if(stubbedMethodName == 'getEntitiesNotFound') {
+            List<FormulaShareService.EntityNotFound> enfList = new List<FormulaShareService.EntityNotFound>();
+            FormulaShareService.EntityNotFound enf = new FormulaShareService.EntityNotFound();
+            enf.recordId = 'entitynotfoundi';
+            enf.type = User.getSObjectType();
+            enf.failedStatusReason = 'Some reason';
+            
+            FormulaShareRule userRule = getUserRule();
+            enf.rule = userRule;
+
+            enfList.add(enf);
+            return enfList;
         }
 
         else if(stubbedMethodName == 'getSObjectsWithFields') {
@@ -333,7 +271,132 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return UserInfo.getUserId();
         }
 
+        // -------------------- FormulaShareReportsService Mocks ------------------- //
+
+        else if(stubbedMethodName == 'getRecordErrorsAllReportUrl') {
+            return 'RecordErrorsAllReportUrl';
+        }
+        else if(stubbedMethodName == 'getRecordErrorsSinceLastBatchReportUrl') {
+            return 'RecordErrorsSinceLastBatchReportUrl';
+        }
+        else if(stubbedMethodName == 'getBatchErrorReportUrl') {
+            return 'BatchErrorReportUrl';
+        }
+        else if(stubbedMethodName == 'getReportIdForName') {
+            return UserInfo.getUserId();
+        }
+
+        // -------------------- FormulaShareMetricsSelector Mocks ------------------- //
+
+//        else if(stubbedMethodName == 'getAllMetricsForRules') {
+//            Set<String> ruleNames = (Set<String>) listOfArgs[0];
+//            
+//            List<FormulaShare_Metrics__c> metricsList = new List<FormulaShare_Metrics__c>();
+//
+//            String batchContext = FormulaShareProcessedShareEventService.batchContext;
+//            String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
+//            String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
+////            Set<String> contextList = new List<String>{batchContext, triggerContext, batchFinishContext};
+//
+//            // For user rule, set batchFinish metrics
+//            FormulaShare_Metrics__c metrics = getBasicMetrics();
+//            metrics.FormulaShare_Rule_Name__c = userRuleName;
+//            metrics.Context__c = batchFinishContext;
+//            metrics.Failed_Inserts__c = 3;
+//            metrics.Successful_Inserts__c = 100;
+//
+//            metrics.Last_Failed_Operation__c = null;
+//            metrics.Last_Successful_Operation__c = DateTime.now();
+//            metrics.Last_Failed_Batch__c = null;
+//            metrics.Last_Successful_Batch__c = DateTime.now();
+//            metrics.Last_Batch_Run__c = DateTime.now();
+//
+//
+//
+//            for(String ruleName : ruleNames) {
+//                for(String context : contextList) {
+//                    FormulaShare_Metrics__c metrics = new FormulaShare_Metrics__c();
+//                    metrics.FormulaShare_Rule_Name__c = ruleName;
+//                    metrics.Context__c = context;
+//
+//
+//                    metricsList.add(metrics);
+//                }
+//            }
+//        }
+
         else return null;
+    }
+
+    private FormulaShareRule getUserRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule userRule = getBasicRule();
+        userRule.developerName = userRuleName;
+        userRule.sharedToFieldType = 'Id';
+        userRule.accessLevel = 'Edit';
+        userRule.sharedToAPIName = prefix + 'Method_Name__c';
+        userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        userRule.shareWith = 'Users';
+        return userRule;
+    }
+
+    private FormulaShareRule getGroupRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule groupRule = getBasicRule();
+        groupRule.developerName = groupRuleName;
+        groupRule.sharedToFieldType = 'Name';
+        groupRule.accessLevel = 'Edit';
+        groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
+        groupRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        groupRule.shareWith = 'Public Groups';
+        return groupRule;
+    }
+
+    private FormulaShareRule getRoleAndSubRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule roleSubRule = getBasicRule();
+        roleSubRule.developerName = roleSubName;
+        roleSubRule.sharedToFieldType = 'Name';
+        roleSubRule.accessLevel = 'Read';
+        roleSubRule.sharedToAPIName = prefix + 'Context__c';
+        roleSubRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        roleSubRule.shareWith = 'Roles and Internal Subordinates';
+        return roleSubRule;
+    }
+
+    private FormulaShareRule getRoleRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule roleRule = getBasicRule();
+        roleRule.developerName = roleRuleName;
+        roleRule.sharedToFieldType = 'Id';
+        roleRule.accessLevel = 'Edit';
+        roleRule.sharedToAPIName = prefix + 'Class_Name__c';
+        roleRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        roleRule.shareWith = 'Roles';
+        return roleRule;
+    }
+
+    private FormulaShareRule getChildUserRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule childUserRule = getBasicRule();
+        childUserRule.developerName = childUserRuleName;
+        childUserRule.accessLevel = 'Edit';
+        childUserRule.shareWith = 'Users';
+        childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
+        childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
+        childUserRule.childObjectSharedToFieldAPIName = prefix + 'Method_Name__c';
+        childUserRule.childObjectSharedToFieldType = 'Id';
+        childUserRule.childObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        return childUserRule;
+    }
+
+    private FormulaShareRule getBasicRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRule rule = new FormulaShareRule();
+        rule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+        rule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+        rule.active = true;
+        return rule;
     }
 
 }

@@ -503,7 +503,7 @@ public inherited sharing class FormulaShareService {
 		// Query for matching public groups and queues
 		for(Group grp : [SELECT Id, DeveloperName FROM Group 
 			WHERE DeveloperName IN :groupNames
-			AND (Type = 'Regular' OR Type = 'Queue')]) {
+			AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')]) {
 			groups.put(grp.DeveloperName,grp.Id);
 		}
 		return groups;

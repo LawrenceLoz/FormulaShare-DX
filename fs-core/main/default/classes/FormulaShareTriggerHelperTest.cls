@@ -193,7 +193,7 @@ public with sharing class FormulaShareTriggerHelperTest {
 
         List<FormulaShare_Log__Share> sharesToInsert = (List<FormulaShare_Log__Share>) helper.getSharesToInsert();
 
-        system.assert(!sharesToInsert.isEmpty(), 'No shares to delete returned');
+        system.assert(!sharesToInsert.isEmpty(), 'No shares to insert returned');
         system.assertEquals(1, sharesToInsert.size());
     }
 

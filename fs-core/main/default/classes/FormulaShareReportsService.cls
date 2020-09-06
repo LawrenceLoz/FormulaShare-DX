@@ -21,9 +21,21 @@
 
 public inherited sharing class FormulaShareReportsService {
 
-    static String reportPrefix = '/lightning/r/Report/';
+    public static FormulaShareReportsService mock;
+    public static FormulaShareReportsService thisSelector;
+    public static FormulaShareReportsService construct() {
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+        else if(thisSelector == null) {
+            thisSelector = new FormulaShareReportsService();
+        }
+        return thisSelector;
+    }
 
-    public static String getRecordErrorsAllReportUrl(String ruleName) {
+    @TestVisible static String reportPrefix = '/lightning/r/Report/';
+
+    public String getRecordErrorsAllReportUrl(String ruleName) {
         FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
         String reportName = settings.All_Record_Errors_Report_Name__c;
         Id reportId = getReportIdForName(reportName);
@@ -31,8 +43,8 @@ public inherited sharing class FormulaShareReportsService {
         String reportUrl = reportPrefix + reportId + '/view' + '?fv1=' + ruleNameUrlFormat;
         return reportUrl;
     }
-    
-    public static String getRecordErrorsSinceLastBatchReportUrl(String ruleName, Id lastBatchId, Long batchFinishEpoch) {
+
+    public String getRecordErrorsSinceLastBatchReportUrl(String ruleName, Id lastBatchId, Long batchFinishEpoch) {
         FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
         String reportName = settings.Rec_Errors_Since_Last_Batch_Report_Name__c;
         Id reportId = getReportIdForName(reportName);
@@ -40,8 +52,8 @@ public inherited sharing class FormulaShareReportsService {
         String reportUrl = reportPrefix + reportId + '/view' + '?fv1=' + ruleNameUrlFormat + '&fv2=' + lastBatchId + '&fv3=' + batchFinishEpoch;
         return reportUrl;
     }
-
-    public static String getBatchErrorReportUrl(String objectApiName) {
+    
+    public String getBatchErrorReportUrl(String objectApiName) {
         FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
         String reportName = settings.Batch_Errors_Report_Name__c;
         Id reportId = getReportIdForName(reportName);
@@ -50,15 +62,15 @@ public inherited sharing class FormulaShareReportsService {
         return reportUrl;
     }
 
-    public static Id getReportIdForName(String reportName) {
+    public Id getReportIdForName(String reportName) {
         if(reportIdsMap == null) {
             setReportIdsMap();
         }
         return reportIdsMap.get(reportName);
     }
 
-    static Map<String,Id> reportIdsMap;
-    private static void setReportIdsMap() {
+    Map<String,Id> reportIdsMap;
+    private void setReportIdsMap() {
         reportIdsMap = new Map<String,Id>();
 
         // Get developer names for all reports specified in settings

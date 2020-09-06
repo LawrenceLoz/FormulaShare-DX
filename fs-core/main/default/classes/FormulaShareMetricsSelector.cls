@@ -1,7 +1,15 @@
 public inherited sharing class FormulaShareMetricsSelector extends fflib_SObjectSelector {
 
+    public static FormulaShareMetricsSelector mock;
+    public static FormulaShareMetricsSelector thisSelector;
     public static FormulaShareMetricsSelector construct() {
-        return new FormulaShareMetricsSelector();
+        if(Test.isRunningTest() && mock != null ) {
+            return mock;
+        }
+        else if(thisSelector == null) {
+            thisSelector = new FormulaShareMetricsSelector();
+        }
+        return thisSelector;
     }
 
     public Schema.SObjectType getSObjectType() {
