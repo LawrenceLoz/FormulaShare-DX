@@ -22,7 +22,7 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Total Shared Records</header>
-                <report>FormulaShareDashboardReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
@@ -51,7 +51,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareDashboardReports/Dashboard_All_Rules_NPn</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_All_Rules_NPn</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -75,7 +75,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareDashboardReports/Dashboard_Rules_Sharing_Records_6cQ</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Rules_Sharing_Records_6cQ</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -132,7 +132,7 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Batch Job</header>
-                <report>FormulaShareDashboardReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
@@ -156,7 +156,7 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Trigger Operations</header>
-                <report>FormulaShareDashboardReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
@@ -199,7 +199,7 @@
                     </groupingSorts>
                 </groupingSortProperties>
                 <header>Record Share Errors</header>
-                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
                 <title>Shows errors logged over the last 7 days</title>
             </dashboardComponent>
             <rowIndex>11</rowIndex>
@@ -281,7 +281,7 @@
                 </flexComponentProperties>
                 <groupingSortProperties/>
                 <header>Record Share Error Details</header>
-                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareReports/FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
             </dashboardComponent>
             <rowIndex>18</rowIndex>
             <rowSpan>10</rowSpan>
@@ -291,7 +291,7 @@
     </dashboardGridLayout>
     <dashboardType>SpecifiedUser</dashboardType>
     <isGridLayout>true</isGridLayout>
-    <runningUser>test-0bmg1gyb8bme@example.com</runningUser>
+    <runningUser>test-panxsdugfitj@example.com</runningUser>
     <textColor>#000000</textColor>
     <title>FormulaShare Summary</title>
     <titleColor>#000000</titleColor>

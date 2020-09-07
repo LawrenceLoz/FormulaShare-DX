@@ -31,6 +31,23 @@ public with sharing class FormulaShareUtilities {
         }
     }
 
+    // Method returns the namespace of the package with underscores appended
+    // Used to determine what to add to object and field names
+    static String classInPackage = 'FormulaShareService';
+    static String namespacePrefix = '';
+	static Boolean namespaceSet = false;
+	@AuraEnabled(cacheable=true)
+    public static String getNamespacePrefix() {
+        if(!namespaceSet) {
+            ApexClass cs = [SELECT NamespacePrefix from ApexClass where Name = :classInPackage LIMIT 1][0];
+            if(!String.isBlank(cs.NamespacePrefix)) {
+                namespacePrefix = cs.NamespacePrefix + '__';
+            }
+            namespaceSet = true;
+        }
+        return namespacePrefix;
+    }
+
 	// Cache global describe for performance
 	public static Map<String, Schema.SObjectType> globalDescribe {
 		get {

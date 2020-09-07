@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
 import submitForCreate from '@salesforce/apex/FormulaShareRuleDMLController.submitForCreate';
+import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 
 
 export default class FormulaShareRuleCreate extends LightningElement {
@@ -39,10 +40,18 @@ export default class FormulaShareRuleCreate extends LightningElement {
             }
         };
 
-        // Invoke subscribe method of empApi. Pass reference to messageCallback
-        subscribe('/event/FormulaShare_Rule_DML__e', -1, messageCallback).then(response => {
-            console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
-        });
+        // Get namespace prefix
+        getNamespacePrefix()
+            .then((prefix) => {
+                // Invoke subscribe method of empApi. Pass reference to messageCallback
+                subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, messageCallback).then(response => {
+                    console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                });
+            })
+            .catch(error => {
+                console.log('Error getting namespace prefix');
+                this.showError(error, 'Error getting namespace prefix');
+            });
     }
 
     @track saveDisabled = true;

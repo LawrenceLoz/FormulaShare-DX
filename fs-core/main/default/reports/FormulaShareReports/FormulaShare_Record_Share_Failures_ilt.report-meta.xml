@@ -10,6 +10,9 @@
         <field>FormulaShare_Processed_Record_Share__c.Status_Reason__c</field>
     </columns>
     <columns>
+        <field>FormulaShare_Record_Log__c.FormulaShare_Batch_Log__c</field>
+    </columns>
+    <columns>
         <field>FormulaShare_Record_Log__c.Context__c</field>
     </columns>
     <columns>

@@ -6,6 +6,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
+import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
@@ -142,10 +143,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         );
     }
 
-    handleRowSelection() {
-
-    }
-
 
     // Core method to load treegrid data from handler
     provisionedValue;
@@ -236,24 +233,35 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     createOrUpdate = false;
     manageRefreshEvents() {
 
-        // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
-        const listUpdateCallback = (response) => {
-            refreshApex(this.provisionedValue);
-        };
-        subscribe('/event/FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
-            console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
-        });
+        // Get namespace prefix
+        getNamespacePrefix()
+            .then((prefix) => {
+                console.log('Got namespace: '+prefix);
 
-        // Scubscribe to dml events (raised by on rule create/edit)
-        const dmlUpdateCallback = (response) => {
-            if(response.data.payload.Successful__c) {
-                this.createOrUpdate = true;
-                refreshApex(this.provisionedValue);
-            }
-        };
-        subscribe('/event/FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
-            console.log('List component subscribed to : ', JSON.stringify(response.channel));
-        });
+                // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
+                const listUpdateCallback = (response) => {
+                    refreshApex(this.provisionedValue);
+                };
+                subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
+                    console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                });
+
+                // Scubscribe to dml events (raised by on rule create/edit)
+                const dmlUpdateCallback = (response) => {
+                    if(response.data.payload.Successful__c) {
+                        this.createOrUpdate = true;
+                        refreshApex(this.provisionedValue);
+                    }
+                };
+                subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
+                    console.log('List component subscribed to : ', JSON.stringify(response.channel));
+                });
+
+            })
+            .catch(error => {
+                console.log('Error getting namespace prefix');
+                this.showError(error, 'Error getting namespace prefix');
+            });
     }
 
 

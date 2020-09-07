@@ -32,7 +32,8 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     }
     @TestVisible List<Metadata.Metadata> testRecords;
 
-    String fullNamePrefix = 'FormulaShare_Rule.';
+    String namespacePrefix = FormulaShareUtilities.getNamespacePrefix();
+    String mdNamePrefix = 'FormulaShare_Rule.';
 
     // Get metadata container and submit for processing
     public Id submitForDml(Map<String,FormulaShare_Rule__mdt> rulesMap, String type) {
@@ -58,25 +59,25 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         for(String recordName : rulesMap.keySet()) {
             FormulaShare_Rule__mdt fr = rulesMap.get(recordName); 
             Metadata.CustomMetadata rule = new Metadata.CustomMetadata();
-            rule.fullName = fullNamePrefix + recordName;
+            rule.fullName = namespacePrefix + mdNamePrefix + recordName;
             rule.label = fr.MasterLabel;
 
             List<String> fieldNames = new List<String>{
-                'Object_Shared__c',
-                'Shared_To__c',
-                'Share_With__c',
-                'Access_Level__c',
-                'Active__c',
-                'Shared_To_Field_Type__c',
-                'Sharing_Reason__c',
-                'Contact_Access__c',
-                'Case_Access__c',
-                'Opportunity_Access__c',
-                'Child_Object_with_Shared_To_Field__c',
-                'Child_Object_Lookup_Field__c',
-                'Child_Object_Shared_To_Field__c',
-                'Child_Object_Shared_To_Field_Type__c',
-                'Description__c'
+                namespacePrefix + 'Object_Shared__c',
+                namespacePrefix + 'Shared_To__c',
+                namespacePrefix + 'Share_With__c',
+                namespacePrefix + 'Access_Level__c',
+                namespacePrefix + 'Active__c',
+                namespacePrefix + 'Shared_To_Field_Type__c',
+                namespacePrefix + 'Sharing_Reason__c',
+                namespacePrefix + 'Contact_Access__c',
+                namespacePrefix + 'Case_Access__c',
+                namespacePrefix + 'Opportunity_Access__c',
+                namespacePrefix + 'Child_Object_with_Shared_To_Field__c',
+                namespacePrefix + 'Child_Object_Lookup_Field__c',
+                namespacePrefix + 'Child_Object_Shared_To_Field__c',
+                namespacePrefix + 'Child_Object_Shared_To_Field_Type__c',
+                namespacePrefix + 'Description__c'
             };
 
             List<Metadata.CustomMetadataValue> valuesList = new List<Metadata.CustomMetadataValue>();
@@ -108,7 +109,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         List<String> ruleFullNames = new List<String>();
         for (String recordName : rulesMap.keySet()) {
 //            ruleFullNames.add(FormulaShareTestUtils.getNamespacePrefix() + 'FormulaShare_Rule.' + recordName);
-            ruleFullNames.add(fullNamePrefix + recordName);
+            ruleFullNames.add(mdNamePrefix + recordName);
         }
         
         List<Metadata.Metadata> records;
@@ -131,7 +132,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
 
             // If both are populated, set name and label
             if(ruleToCopy.DeveloperName != null && ruleToCopy.MasterLabel != null) {
-                rule.fullName = fullNamePrefix + ruleToCopy.DeveloperName;
+                rule.fullName = mdNamePrefix + ruleToCopy.DeveloperName;
                 rule.label = ruleToCopy.MasterLabel;
                 system.debug('MasterLabel: '+ruleToCopy.MasterLabel);
                 system.debug('rule.fullName: '+rule.fullName);
@@ -150,17 +151,17 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
                 
                 // If standard rule, set all child fields to blank
                 if(ruleType == 'standard' && (
-                    ruleFieldValue.field == 'Child_Object_Lookup_Field__c'
-                    || ruleFieldValue.field == 'Child_Object_Shared_To_Field__c'
-                    || ruleFieldValue.field == 'Child_Object_Shared_To_Field_Type__c'
-                    || ruleFieldValue.field == 'Child_Object_with_Shared_To_Field__c')) {
+                    ruleFieldValue.field == namespacePrefix + 'Child_Object_Lookup_Field__c'
+                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_Shared_To_Field__c'
+                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_Shared_To_Field_Type__c'
+                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_with_Shared_To_Field__c')) {
                     ruleFieldValue.value = null;
                 }
 
                 // If child rule, set all standard fields to blank
                 else if(ruleType == 'child' && (
-                    ruleFieldValue.field == 'Shared_To__c'
-                    || ruleFieldValue.field == 'Shared_To_Field_Type__c')) {
+                    ruleFieldValue.field == namespacePrefix + 'Shared_To__c'
+                    || ruleFieldValue.field == namespacePrefix + 'Shared_To_Field_Type__c')) {
                     ruleFieldValue.value = null;
                 }
 

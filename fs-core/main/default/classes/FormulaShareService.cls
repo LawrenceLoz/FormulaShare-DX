@@ -126,7 +126,7 @@ public inherited sharing class FormulaShareService {
 		// Configure to disable object and field security for tests (can't guarantee permissions of running user)
 		Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
 
-		Database.QueryLocator ql = new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity,type,fieldsSet).selectAllSharedObjectsLocator();
+		Database.QueryLocator ql = FormulaShareSObjectsSelector.construct(enforceObjectAndFieldSecurity, type, fieldsSet).selectAllLocator();
 		return ql;
 	}
 
@@ -193,7 +193,7 @@ public inherited sharing class FormulaShareService {
 		Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
 //		Boolean enforceObjectAndFieldSecurity = false;
 
-		List<SObject> objectLocator = new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity,type,fieldsSet).selectWithFieldsForObjectList(rodMap.values(), sharedObjIdSet);
+		List<SObject> objectLocator = FormulaShareSObjectsSelector.construct(enforceObjectAndFieldSecurity,type,fieldsSet).selectWithFieldsForObjectList(rodMap.values(), sharedObjIdSet);
 		return objectLocator;
 	}
 

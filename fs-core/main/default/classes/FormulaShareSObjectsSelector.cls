@@ -3,6 +3,17 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
     public Schema.SObjectType type;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
 
+//    public static FormulaShareSObjectsSelector mock;
+    public static FormulaShareSObjectsSelector construct(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type, Set<Schema.SObjectField> fieldsSet) {
+//        if(Test.isRunningTest()) {
+//            return mock;
+//        }
+//        else {
+            return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type, fieldsSet);
+//        }
+    }
+
+
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type, Set<Schema.SObjectField> fieldsSet) {
         super(false // Do not include FieldSet fields
             , enforceObjectAndFieldSecurity // Enforce field security if requested

@@ -240,6 +240,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return UserInfo.getUserId();
         }
 
+
+
         // -------------------- FormulaShareMetricsSelector Mocks ------------------- //
 
 //        else if(stubbedMethodName == 'getAllMetricsForRules') {
