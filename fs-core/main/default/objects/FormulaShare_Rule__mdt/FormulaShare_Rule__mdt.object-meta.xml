@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Defines the users, groups or roles which a standard or custom object should be shared to</description>
+    <description>Holds dynamic rules defining sharing logic for the org. NOTE rules are now set up through the FormulaShare app, available to users with the &quot;FormulaShare Admin&quot; permission set. Whilst metadata can still be created and edited directly it&apos;s strongly recommended you manage rules through the app instead, which ensures rules are valid and allows easy monitoring</description>
     <label>FormulaShare Rule</label>
     <pluralLabel>FormulaShare Rules</pluralLabel>
     <visibility>Public</visibility>

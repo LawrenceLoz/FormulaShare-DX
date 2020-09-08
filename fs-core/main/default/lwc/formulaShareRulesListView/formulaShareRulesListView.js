@@ -33,7 +33,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             this.w5 = this.w1*3.5;
             this.w0 = this.w1*0.7;
             console.log('width '+ windowWidth+ ' w1: '+this.w1 + ' w2 '+this.w2);
-            refreshApex(this.provisionedValue);
+            this.refreshView();
         }
     }
 
@@ -240,7 +240,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
-                    refreshApex(this.provisionedValue);
+                    this.refreshView();
                 };
                 subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
                     console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
@@ -249,8 +249,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
                     if(response.data.payload.Successful__c) {
+                        console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
-                        refreshApex(this.provisionedValue);
+                        this.refreshView();
                     }
                 };
                 subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
@@ -398,12 +399,17 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         recalculateSharing({ objectApiName : rowApiName })
             .then(() => {
                 // Refresh table to reflect processing status
-                refreshApex(this.provisionedValue);
+                this.refreshView();
             })
             .catch(error => {
                 console.log('Error submitting for recalculation');
                 this.showError(error, 'Error submitting for recalculation')
             });
+    }
+
+    // Refreshes provisioned list of rules
+    refreshView() {
+        refreshApex(this.provisionedValue);
     }
 
 
