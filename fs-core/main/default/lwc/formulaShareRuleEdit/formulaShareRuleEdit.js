@@ -18,7 +18,9 @@ export default class FormulaShareRuleEdit extends LightningElement {
     connectedCallback() {
         const messageCallback = (response) => {
             this.processingEdit = false;
-            if(response.data.payload.Successful__c) {
+
+            // Success attribute contains package namespace
+            if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
                 console.log('Update Successful');
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -33,10 +35,17 @@ export default class FormulaShareRuleEdit extends LightningElement {
 
             else {
                 console.log('Update Failed');
+                var errorMessage;
+                if(response.data.payload.sdfs__Error__c) {
+                    errorMessage = response.data.payload.sdfs__Error__c
+                }
+                else {
+                    errorMessage = response.data.payload.Error__c;
+                }
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Update Failed',
-                        message: response.data.payload.Error__c,
+                        message: errorMessage,
                         variant: 'error'
                     })
                 );

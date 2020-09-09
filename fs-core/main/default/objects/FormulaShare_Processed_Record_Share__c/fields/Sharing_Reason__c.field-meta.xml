@@ -3,7 +3,7 @@
     <fullName>Sharing_Reason__c</fullName>
     <externalId>false</externalId>
     <label>Sharing Reason</label>
-    <length>40</length>
+    <length>80</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>

@@ -2,6 +2,7 @@ import { LightningElement, track, api, wire } from 'lwc';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getShareableObjects from '@salesforce/apex/FormulaShareRuleDetailController.getShareableObjects';
 import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
+import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
 
 export default class FormulaShareRuleDetailSharedObject extends LightningElement {
 
@@ -67,11 +68,26 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
                         label: obj.objectLabel + ' (' + obj.objectApiName + ')',
                         value: obj.objectApiName
                     };
-                    this.shareableObjectOptions.push(option);
 
-                    // Fire event to capture internal sharing model of contact, opp and case (for account sharing)
+                    // Capture internal sharing model of contact, opp and case (for account sharing)
                     this.setAccountRelatedOwdSharing(obj);
+                    
+                    // Unless we found contact shared by account, push to shareable list
+                    if(obj.objectApiName !== 'Contact' || this.contactAccess !== 'ControlledByParent') {
+                        this.shareableObjectOptions.push(option);
+                    }
                 });
+
+                // In case any objects 
+                if(!this.contactAccess) {
+                    this.contactAccess = 'ReadWrite';
+                }
+                if(!this.caseAccess) {
+                    this.caseAccess = 'ReadWrite';
+                }
+                if(!this.opportunityAccess) {
+                    this.opportunityAccess = 'ReadWrite';
+                }
                 this.fireAccountRelatedOwdEvent();
 
                 // Set shared object and fire event
@@ -87,15 +103,17 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
     setAccountRelatedOwdSharing(obj) {
         switch (obj.objectApiName) {
             case 'Contact' :
-//                this.fireNotifyObjectSharingEvent('contactsharingdetail', obj);
-                this.contactAccess = obj;
+                // For contacts, first check whether shared by account
+                isContactSharingControlledByAccount()
+                .then((isControlledByAccount) => {
+                    console.log('controlled by account: '+isControlledByAccount);
+                    isControlledByAccount ? this.contactAccess = 'ControlledByParent' : this.contactAccess = obj;
+                });
                 break;
             case 'Case' :
-//                this.fireNotifyObjectSharingEvent('casesharingdetail', obj);
                 this.caseAccess = obj;
                 break;
             case 'Opportunity' :
-//                this.fireNotifyObjectSharingEvent('opportunitysharingdetail', obj);
                 this.opportunityAccess = obj;
                 break;
         }

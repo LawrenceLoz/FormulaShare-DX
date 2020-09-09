@@ -31,7 +31,8 @@ public inherited sharing class FormulaShareFieldDefinitionSelector {
 
     public List<FieldDefinition> getFieldsForIds(List<String> fieldEntityIds) {
         List<FieldDefinition> fields = [
-            SELECT QualifiedApiName, DurableId
+            SELECT QualifiedApiName     // Field API name with namespace prefix
+            , DurableId
             FROM FieldDefinition
             WHERE DurableId IN :fieldEntityIds
             WITH SECURITY_ENFORCED];

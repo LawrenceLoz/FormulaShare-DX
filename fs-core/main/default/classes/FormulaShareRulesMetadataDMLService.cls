@@ -109,7 +109,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         List<String> ruleFullNames = new List<String>();
         for (String recordName : rulesMap.keySet()) {
 //            ruleFullNames.add(FormulaShareTestUtils.getNamespacePrefix() + 'FormulaShare_Rule.' + recordName);
-            ruleFullNames.add(mdNamePrefix + recordName);
+            ruleFullNames.add(namespacePrefix + mdNamePrefix + recordName);
         }
         
         List<Metadata.Metadata> records;
@@ -130,9 +130,9 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
             String ruleRecordName = rule.fullName.substringAfter('.');
             FormulaShare_Rule__mdt ruleToCopy = rulesMap.get(ruleRecordName);
 
-            // If both are populated, set name and label
+            // If developer name and label are populated, set these in the metadata rule
             if(ruleToCopy.DeveloperName != null && ruleToCopy.MasterLabel != null) {
-                rule.fullName = mdNamePrefix + ruleToCopy.DeveloperName;
+                rule.fullName = namespacePrefix + mdNamePrefix + ruleToCopy.DeveloperName;
                 rule.label = ruleToCopy.MasterLabel;
                 system.debug('MasterLabel: '+ruleToCopy.MasterLabel);
                 system.debug('rule.fullName: '+rule.fullName);

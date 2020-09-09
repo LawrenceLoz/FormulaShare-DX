@@ -6,7 +6,7 @@
     <isNameField>false</isNameField>
     <isSortingDisabled>false</isSortingDisabled>
     <label>Object</label>
-    <length>40</length>
+    <length>80</length>
     <required>false</required>
     <type>Text</type>
     <unique>false</unique>

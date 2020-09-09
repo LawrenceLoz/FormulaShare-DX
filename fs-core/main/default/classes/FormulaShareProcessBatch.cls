@@ -83,10 +83,6 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 			// Create metrics for any rules which don't have them already
 			List<FormulaShare_Metrics__c> metrics = createMetricsForNewRules();
-//			newMetricsForBatch = new Set<String>();		// Track which rules had this added
-//			for(FormulaShare_Metrics__c m : metrics) {
-//				newMetricsForBatch.add(m.FormulaShare_Rule_Name__c);
-//			}
 			uow.registerNew(metrics);
 
 			uow.commitWork();
@@ -273,35 +269,6 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				totalValidSharesForRule.put(ruleName, validShares);
 				rib.Total_Records_Shared_by_Rule__c = validShares;
 
-//				// Add all errors
-//				if(totalErrorSharesForRule.containsKey(ruleName)) {
-//					errorShares = totalErrorSharesForRule.get(ruleName);
-//				}
-//				if(incWithUow.incrementsMap.containsKey(ruleName)) {
-//					FormulaShareMetrics.Increment metrics = incWithUow.incrementsMap.get(ruleName);
-//					errorShares += metrics.noFailedInserts;
-//					insertedShares = metrics.noSuccessfulInserts;
-//				}
-//				totalErrorSharesForRule.put(ruleName, errorShares);
-//
-//				// Add all valid shares
-//				if(totalValidSharesForRule.containsKey(ruleName)) {
-//					validShares = totalValidSharesForRule.get(ruleName);
-//				}
-//
-//				validShares += noValidSharesForRulesBatch.get(ruleName);
-//
-//				// Subtract any inserts which failed during the insert
-//				// This should be the only type of failure not already excluded
-//				if(insertStatus == 'Failed') {
-//					validShares -= failedInsertsMap.get(ruleName);
-//				}
-//				totalValidSharesForRule.put(ruleName, validShares);
-//
-//				// Set rule in batch totals
-//				rib.Total_Records_Shared_by_Rule__c += noValidSharesForRulesBatch.get(ruleName);
-//				rib.Records_Shared_in_This_Batch__c += insertedShares;
-//				rib.Record_Errors_in_This_Batch__c = errorShares;
 				uow.registerDirty(rib);
 
 				System.debug('totalValidSharesForRule for execution: '+ totalValidSharesForRule);
@@ -311,8 +278,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		}
 
 		catch(Exception e) {
-			e.setMessage('Issue capturing logs or metrics. Message from Salesforce: ' + e.getMessage());
-			fsLogs.logException(e);
+			updateLogAfterMetricsFail(fsLogs, e);
 			atLeastOneMetricsUpdateFailed = true;
 		}
 	}
@@ -321,38 +287,39 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	public void finish(Database.BatchableContext context) {
 		System.debug('totalValidSharesForRule for finish: '+ totalValidSharesForRule);
 
-		// Update batch log records
-		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.trimFailedBatches();
 		fsLogs.setBatchProcessingComplete();
-		uow.registerDirty(fsLogs.setFinalisedLogs());
 
-		// Indicate batch failure in metrics if any failed batches
-		if(atLeastOneBatchFailed) {
-			uow = FormulaShareProcessedShareEventService.processForBatchFail(uow, rulesForType);
+		Exception metricsException;
+		try {
+			// Update batch log records
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+			uow.registerDirty(fsLogs.setFinalisedLogs());
+
+			// Indicate batch failure in metrics if any failed batches
+			if(atLeastOneBatchFailed) {
+				uow = FormulaShareProcessedShareEventService.processForBatchFail(uow, rulesForType);
+			}
+
+			// Update total shares in batch finish metrics provided no metric capture issues
+			if(!atLeastOneMetricsUpdateFailed) {
+				FormulaShare_Log__c log = logsList[0];
+				uow = FormulaShareProcessedShareEventService.processForBatchFinish(uow, totalValidSharesForRule, totalErrorSharesForRule, log);
+			}
+			
+			// Fire event to update list view
+			String objectLabel = typeInThisBatch.getDescribe().getLabel();
+			List<String> objectLabelsList = new List<String>{objectLabel};
+			FormulaShareProcessedShareEventService.fireRulesListUpdateEvent(objectLabelsList);
+
+			uow.commitWork();
 		}
 
-		// Update total shares in batch finish metrics provided no metric capture issues
-		if(!atLeastOneMetricsUpdateFailed) {
-			FormulaShare_Log__c log = logsList[0];
-			uow = FormulaShareProcessedShareEventService.processForBatchFinish(uow, totalValidSharesForRule, totalErrorSharesForRule, log);
+		// If any exceptions updating logs, ensure batch is closed
+		catch(Exception e) {
+			metricsException = e;
 		}
-		
-		// Fire event to update list view
-		String objectLabel = typeInThisBatch.getDescribe().getLabel();
-        List<String> objectLabelsList = new List<String>{objectLabel};
-        FormulaShareProcessedShareEventService.fireRulesListUpdateEvent(objectLabelsList);
-
-		uow.commitWork();
-
-		// Publish event to update FormulaShare Rules list in real time
-//		List<FormulaShare_List_Update__e> eventsList = new List<FormulaShare_List_Update__e>();
-//		FormulaShare_List_Update__e updateEvent = new FormulaShare_List_Update__e();
-//		updateEvent.Type__c = 'recalculation';
-//		updateEvent.Object_Label__c = typeInThisBatch.getDescribe().getLabel();
-//		eventsList.add(updateEvent);
-//		List<Database.SaveResult> results = EventBus.publish(eventsList);
 
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {
@@ -360,6 +327,25 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
 			system.debug('Submitted next batch, Id = ' + batchJobId);
 		}
+
+		try {
+			fsLogs.setFinalisedLogs();
+			updateLogAfterMetricsFail(fsLogs, metricsException);
+		}
+		catch(Exception e) {
+			System.debug('Error updating batch log after metrics error');
+		}
+
+	}
+
+
+	private void updateLogAfterMetricsFail(FormulaShareLogs fsLogs, Exception metricsException) {
+		metricsException.setMessage('Issue capturing logs or metrics. Message from Salesforce: ' + metricsException.getMessage());
+		fsLogs.logException(metricsException);
+		
+		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+		uow.registerDirty(fsLogs.Records);
+		uow.commitWork();
 	}
 
 

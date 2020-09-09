@@ -17,7 +17,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
     connectedCallback() {
         const messageCallback = (response) => {
             this.processing = false;
-            if(response.data.payload.Successful__c) {
+            if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
                 console.log('Create Successful');
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -30,10 +30,17 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
             else {
                 console.log('Create Failed');
+                var errorMessage;
+                if(response.data.payload.sdfs__Error__c) {
+                    errorMessage = response.data.payload.sdfs__Error__c
+                }
+                else {
+                    errorMessage = response.data.payload.Error__c;
+                }
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Create Failed',
-                        message: response.data.payload.Error__c,
+                        message: errorMessage,
                         variant: 'error'
                     })
                 );

@@ -633,6 +633,9 @@ public inherited sharing class FormulaShareService {
 
 			// Remove from map to delete - share will be kept or updated
 			mapToDelete.remove(shareKey);
+
+			// Track this as a valid share record to populate metrics
+			incrementShareMetrics(rule);
 		}
 
 		// Otherwise if we've already identified sharing is needed for this record...
@@ -646,14 +649,14 @@ public inherited sharing class FormulaShareService {
 			populateMapHighestAccess(recordId, sharedTo, shareKey, rule, contactIsControlledByAccount, share);
 		}		
 
-		// If no match, add to be created
-		else {
+		// Or, if sharing at this level doesn't exist now (and we haven't already identified sharing is needed), create sharing at this level
+		else if(!existingShareKeys.contains(shareKey)) {
 			System.debug('||| creating new share based on rule');
 			populateMapNewShare(recordId, sharedTo, shareKey, rule, contactIsControlledByAccount);
-		}
 
-		// Track this as a valid share record to populate metrics
-		incrementShareMetrics(rule);
+			// Track this as a valid share record to populate metrics
+			incrementShareMetrics(rule);
+		}
 	}
 
 

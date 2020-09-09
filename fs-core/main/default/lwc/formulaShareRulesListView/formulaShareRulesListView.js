@@ -248,7 +248,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
-                    if(response.data.payload.Successful__c) {
+                    if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
                         console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
@@ -302,7 +302,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             }
 
             // Set label according to whether logs will be restricted to the last batch
-            var viewLogsLabel = 'View Logs';
+            var viewLogsLabel = 'View Records Shared';
             if(row['lastBatchId']) {
                 viewLogsLabel += ' Since Last Batch';
             }

@@ -31,8 +31,10 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
 
     public List<EntityDefinition> getEntitiesForIds(List<String> objectEntityIds) {
         List<EntityDefinition> entities = [
-            SELECT QualifiedApiName, DurableId, Label, PluralLabel, InternalSharingModel
-            , ExternalSharingModel, DetailUrl
+            SELECT QualifiedApiName     // Object API name with namespace prefix
+            , DurableId, Label, PluralLabel
+            , InternalSharingModel, ExternalSharingModel      // Private, Read, ReadWrite, ReadWriteTransfer, FullAccess (campaigns), ControlledByParent (MD children)
+            , DetailUrl
             FROM EntityDefinition
             WHERE DurableId IN :objectEntityIds
             WITH SECURITY_ENFORCED];

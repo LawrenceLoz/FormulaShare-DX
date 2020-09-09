@@ -3,7 +3,8 @@
     <fullName>Exception_Message__c</fullName>
     <externalId>false</externalId>
     <label>Exception Message</label>
-    <required>false</required>
+    <length>10000</length>
     <trackTrending>false</trackTrending>
-    <type>TextArea</type>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
 </CustomField>

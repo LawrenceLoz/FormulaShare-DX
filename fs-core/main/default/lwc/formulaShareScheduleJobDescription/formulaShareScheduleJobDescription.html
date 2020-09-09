@@ -11,21 +11,20 @@
                     </div>
                     <div class="slds-text-longform slds-p-top_small">
                         <p>
-                            The FormulaShare batch isn't yet scheduled. This job checks and updates sharing on all records and is important to make sure 
+                            The FormulaShare batch isn't scheduled yet. This job will check and update sharing on all records and is important to make sure 
                             all changes can be applied.
                         </p>
                         <p>
-                            To schedule, navigate to "Apex Classes" in the setup menu (or 
                             <lightning-formatted-url 
                                 value={setupUrl}
-                                label=" click here" 
+                                label="Click here " 
                                 target="_blank">
                             </lightning-formatted-url>
-                            ). Click the "Schedule Apex" button, select the class FormulaShareProcessSchedulable,
-                            and set a time and frequency which work for your organisation - we recommend once per day.
+                            (or go to "Apex Classes" in the setup menu), click the "Schedule Apex" button and select the class 
+                            <b> FormulaShareProcessSchedulable</b>. Set a time and frequency which work for your organisation - we recommend once a day.
                         </p>
                         <p>
-                            It's important the job is scheduled by an admin, so make sure that's you! The scheduling user needs these permissions:
+                            It's important the job is scheduled by an admin, so make sure that's you! The scheduling user must have:
                         </p>
                         <ul class="slds-list_dotted">
                             <li>Permission to access all objects, records and fields involved in the rules</li>
