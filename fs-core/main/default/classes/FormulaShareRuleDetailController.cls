@@ -57,8 +57,7 @@ public with sharing class FormulaShareRuleDetailController {
 
         List<EntityDefinition> entityDefs = FormulaShareEntityDefinitionSelector.construct().getAllShareable();
 
-        List<ShareableObject> soListStandard = new List<ShareableObject>();
-        List<ShareableObject> soListCustom = new List<ShareableObject>();
+        List<ShareableObject> soList = new List<ShareableObject>();
 
         for(EntityDefinition ed : entityDefs) {
             System.debug('Checking object: '+ed.QualifiedApiName+' internal sharing: '+ed.InternalSharingModel+' external sharing '+ed.ExternalSharingModel);
@@ -81,19 +80,10 @@ public with sharing class FormulaShareRuleDetailController {
 
                 Schema.DescribeSObjectResult objType = FormulaShareUtilities.describe(ed.QualifiedApiName);
                 if(objType != null) {
-                    if(objType.isCustom()) {
-                        soListCustom.add(so);
-                    }
-                    else {
-                        soListStandard.add(so);
-                    }
+                    soList.add(so);
                 }
             }
         }
-
-        List<ShareableObject> soList = new List<ShareableObject>();
-        soList.addAll(soListCustom);
-        soList.addAll(soListStandard);
 
         system.debug('soList '+ soList);
         return soList;

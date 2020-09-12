@@ -155,11 +155,11 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 if(sharedToField) {
                     fieldsToCheck.push(sharedToField);
                 }
-                const sharedToFieldRelated = data[prefix + 'Child_Object_Lookup_Field__c'];
+                const sharedToFieldRelated = data[prefix + 'Child_Object_Shared_To_Field__c'];
                 if(sharedToFieldRelated) {
                     fieldsToCheck.push(sharedToFieldRelated);
                 }
-                const lookupFieldRelated = data[prefix + 'Child_Object_Shared_To_Field__c'];
+                const lookupFieldRelated = data[prefix + 'Child_Object_Lookup_Field__c'];
                 if(lookupFieldRelated) {
                     fieldsToCheck.push(lookupFieldRelated);
                 }

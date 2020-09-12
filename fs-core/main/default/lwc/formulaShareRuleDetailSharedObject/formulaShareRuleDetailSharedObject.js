@@ -1,5 +1,6 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getShareableObjects from '@salesforce/apex/FormulaShareRuleDetailController.getShareableObjects';
 import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
 import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
@@ -44,9 +45,27 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
     setSharedObject() {
         if(this._sharedObjectApiName && this.apiNameToObjectDetailsMap.size > 0) {
             this.sharedObject = this.apiNameToObjectDetailsMap.get(this.sharedObjectApiName);
-            this.fireNotifyObjectSharingEvent('setsharedobjectdetail', this.sharedObject);
+            if(this.sharedObject) {
+                this.fireNotifyObjectSharingEvent('setsharedobjectdetail', this.sharedObject);
+            }
+            else {
+                this.objectNotSharedError(this._sharedObjectApiName);
+            }
         }
     }
+
+    objectNotSharedError(objectName) {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Object cannot be shared'
+                , message: 'It looks like the organisation-wide default sharing for ' + objectName
+                    + ' no longer allow sharing. Check Setup -> Sharing Settings to review this.'
+                , variant: 'error'
+                , mode: 'sticky'
+            })
+        );
+    }
+
 
     @track apiNameToObjectDetailsMap = new Map();
     @track shareableObjectOptions;
@@ -56,42 +75,67 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
     @wire(getShareableObjects)
         shareableObjects({ error, data }) {
             if(data) {
-                this.shareableObjectOptions = [];
-                console.log('geting shared objects');
 
-                // Build list of options to populate in shared object dropdown
-                data.forEach((obj) => {
-                    this.apiNameToObjectDetailsMap.set(obj.objectApiName, obj);
+                // Check whether contact controlled by parent
+                isContactSharingControlledByAccount()
+                .then((contactControlledByAccount) => {
 
-                    // Include label and api name (object api name used as key)
-                    const option = {
-                        label: obj.objectLabel + ' (' + obj.objectApiName + ')',
-                        value: obj.objectApiName
-                    };
-
-                    // Capture internal sharing model of contact, opp and case (for account sharing)
-                    this.setAccountRelatedOwdSharing(obj);
-                    
-                    // Unless we found contact shared by account, push to shareable list
-                    if(obj.objectApiName !== 'Contact' || this.contactAccess !== 'ControlledByParent') {
-                        this.shareableObjectOptions.push(option);
+                    // Set contact related sharing if controlled by parent
+                    console.log('controlled by account: '+contactControlledByAccount);
+                    if(contactControlledByAccount) {
+                        this.contactAccess = 'ControlledByParent';
                     }
+
+                    // Build list of options to populate in shared object dropdown
+                    this.shareableObjectOptions = [];
+                    console.log('geting shared objects');
+                    data.forEach((obj) => {
+                        this.apiNameToObjectDetailsMap.set(obj.objectApiName, obj);
+
+                        // Include label and api name (object api name used as key)
+                        const option = {
+                            label: obj.objectLabel + ' (' + obj.objectApiName + ')',
+                            value: obj.objectApiName
+                        };
+
+                        // Capture internal sharing model of contact, opp and case (for account sharing), and add to shareable options list
+                        switch (obj.objectApiName) {
+                            case 'Contact':
+                                // Only include in shareable list if not controlled by account
+                                if(!contactControlledByAccount) {
+                                    this.contactAccess = obj.internalSharingModel;
+                                    this.shareableObjectOptions.push(option);
+                                }
+                                break;
+                            case 'Case':
+                                this.caseAccess = obj.internalSharingModel;
+                                this.shareableObjectOptions.push(option);
+                                break;
+                            case 'Opportunity':
+                                this.opportunityAccess = obj.internalSharingModel;
+                                this.shareableObjectOptions.push(option);
+                                break;
+                            default:
+                                this.shareableObjectOptions.push(option);
+                        }
+
+                    });
+
+                    // For any account related objects not considered so far, access level must be Read/Write
+                    if(!this.contactAccess) {
+                        this.contactAccess = 'ReadWrite';
+                    }
+                    if(!this.caseAccess) {
+                        this.caseAccess = 'ReadWrite';
+                    }
+                    if(!this.opportunityAccess) {
+                        this.opportunityAccess = 'ReadWrite';
+                    }
+                    this.fireAccountRelatedOwdEvent();
+
+                    // Set shared object and fire event
+                    this.setSharedObject();
                 });
-
-                // In case any objects 
-                if(!this.contactAccess) {
-                    this.contactAccess = 'ReadWrite';
-                }
-                if(!this.caseAccess) {
-                    this.caseAccess = 'ReadWrite';
-                }
-                if(!this.opportunityAccess) {
-                    this.opportunityAccess = 'ReadWrite';
-                }
-                this.fireAccountRelatedOwdEvent();
-
-                // Set shared object and fire event
-                this.setSharedObject();
             }
 
             else if(error) {
@@ -99,25 +143,6 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             }
         }
 
-    // Notify parent of sharing details for contact, case and opp
-    setAccountRelatedOwdSharing(obj) {
-        switch (obj.objectApiName) {
-            case 'Contact' :
-                // For contacts, first check whether shared by account
-                isContactSharingControlledByAccount()
-                .then((isControlledByAccount) => {
-                    console.log('controlled by account: '+isControlledByAccount);
-                    isControlledByAccount ? this.contactAccess = 'ControlledByParent' : this.contactAccess = obj;
-                });
-                break;
-            case 'Case' :
-                this.caseAccess = obj;
-                break;
-            case 'Opportunity' :
-                this.opportunityAccess = obj;
-                break;
-        }
-    }
 
     fireAccountRelatedOwdEvent() {
 

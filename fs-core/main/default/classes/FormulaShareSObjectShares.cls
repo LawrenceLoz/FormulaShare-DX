@@ -30,6 +30,8 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
             return new FormulaShareSObjectShares(sObjectList, type);
         }
     }
+    
+    public class FormulaShareException extends Exception {}    
 
     public Schema.SObjectType type;
 
@@ -56,19 +58,22 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
     public void insertShares() {
         List<SObject> shares = Records;
 
-        try {
-            // Check that object can be created by current or requesting user (or bypass if this is a test run)
-            if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
-                // Insert the sharing record
-                // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
-                // update the existing share rather than create a new one. For this reason, assessment of sharing will only
-                // delete shares if there is no sharing of any level to be applied
-                insert shares;
-                system.debug('DML inserted shares '+ shares);
-            }
+        // Check that object can be created by current or requesting user (or bypass if this is a test run)
+        if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
+            // Insert the sharing record
+            // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
+            // update the existing share rather than create a new one. For this reason, assessment of sharing will only
+            // delete shares if there is no sharing of any level to be applied
+            insert shares;
+            system.debug('DML inserted shares '+ shares);
         }
-        catch(Exception e) {
-            system.debug('Insert of share records failed. Message from Salesforce: '+e.getMessage());
+
+        else if(!type.getDescribe().isAccessible()) {
+            throw new FormulaShareException('Share insert failed - share object not accessible to running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
+        }
+
+        else if(!type.getDescribe().isCreateable()) {
+            throw new FormulaShareException('Share insert failed - share object not creatable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
         }
     }
 
@@ -76,15 +81,18 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
     public void deleteShares() {
         List<SObject> shares = Records;
 
-        try {
-            // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
-            if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
-                system.debug('DML shares to be deleted '+ shares);
-                delete shares;
-            }
+        // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
+        if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
+            system.debug('DML shares to be deleted '+ shares);
+            delete shares;
         }
-        catch(Exception e) {
-            system.debug('Deletion of share records failed. Message from Salesforce: '+e.getMessage());
+
+        else if(!type.getDescribe().isAccessible()) {
+            throw new FormulaShareException('Share delete failed - share object not accessible to running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
+        }
+
+        else if(!type.getDescribe().isDeletable()) {
+            throw new FormulaShareException('Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
         }
     }
 

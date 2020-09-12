@@ -14,73 +14,35 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     @track data = [];
     @track columns = [];
 
-    w0;
-    w1;
-    w15;
-    w2;
-    w3;
-    w4;
-    w5;
-    setWidths() {
-        if(this.template.querySelector('div')) {
-            var el = this.template.querySelector('div');
-            var windowWidth = el.clientWidth;
-            this.w1 = windowWidth / 13;
-            this.w15 = this.w1*1.5
-            this.w2 = this.w1*1.8;
-            this.w3 = this.w1*2.5;
-            this.w4 = this.w1*3;
-            this.w5 = this.w1*3.5;
-            this.w0 = this.w1*0.7;
-            console.log('width '+ windowWidth+ ' w1: '+this.w1 + ' w2 '+this.w2);
-            this.refreshView();
-        }
-    }
-
     setColumns() {
         this.columns = [
             {type: 'text'
                 , fieldName: 'tableLabel'
                 , label: 'Object and Rule'
                 , cellAttributes: {class: {fieldName: 'sharedObjectClass'} }
-//                , typeAttributes: {label: {fieldName:'tableLabel'}, target: '_blank', tooltip: 'Click to open'}
-                , initialWidth: this.w5
             },
             {type: 'text'
                 , fieldName: 'shareWith'
                 , label: 'Shares With'
                 , sortable: true
-                , initialWidth: this.w15
             },
             {type: 'url'
                 , fieldName:'sharedToLink'
                 , label:'Specified in Field'
                 , typeAttributes: {label: {fieldName:'sharedToLinkLabel'}, target:'_blank', tooltip: 'Open field in setup menu'}
-                , initialWidth: this.w3
             },
             {type: 'text'
                 , fieldName: 'controllingObject'
                 , label: 'On Object'
-                , initialWidth: this.w15
             },
-//            {type: 'text'
-//                , fieldName: 'accessLevel'
-//                , label: 'Access'
-//                , initialWidth: this.w0
-//            },
-        //        {type: 'text', fieldName: 'sharingReason', label: 'Sharing Reason'
-        //        , initialWidth: 200
-        //    },
             {type: 'text'
                 , fieldName: 'lastCalcStatus'
                 , label: 'Last Full Assessment'
                 , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
-                , initialWidth: this.w2
             },
             {type: 'number'
                 , fieldName: 'noSharesApplied'
                 , label:'Records Shared'
-                , initialWidth: this.w3
             }
         ];
 
@@ -126,7 +88,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                         , target:'_blank'
                         , tooltip: {fieldName:'warningTooltip'}
                     }
-//                    , cellAttributes: { iconName: {fieldName: 'warningIcon'}, iconPosition: 'left' }
                 }
             );
         }
@@ -135,7 +96,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             {type: 'boolean'
                 , fieldName: 'active'
                 , label: 'Active'
-                , initialWidth: this.w0
             },
             {type: 'action'
                 , typeAttributes: {rowActions: this.getRowActions} 
@@ -157,7 +117,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         this.provisionedValue = value;
 
         if (data) {
-            if(!this.w1) this.setWidths();   // Set all width variables if not set already
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
             console.log('this.treeItems: '+JSON.stringify(this.treeItems));
@@ -284,7 +243,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
         else {
             actions.push({
-                'label': 'Edit',
+                'label': 'View / Edit',
                 'name': 'edit'
             });
 
@@ -379,22 +338,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
         const rowApiName = row['objectApiName'];
         const rowObjectLabel = row['key'];
-
-
-        // Set icons for all rules for this object to show it's recalculating (commented out - treeitem updates don't reflect in tree-grid)
-//        for(var rowNo in this.treeItems) {
-//            console.log('PR '+JSON.stringify(rowNo));
-//            console.log('parentRow.objectApiName === rowApiName '+this.treeItems[rowNo].objectApiName+'row api nmae '+rowApiName);
-//            if(this.treeItems[rowNo].objectApiName === rowApiName) {
-//                for(var ruleRowNo in this.treeItems[rowNo]._children) {
-//                    console.log('Updating row');
-//                    this.treeItems[rowNo]._children[ruleRowNo].iconName = 'standard:today';
-//                    this.treeItems[rowNo]._children[ruleRowNo].iconAlt = 'Now Processing';
-//                    this.treeItems[rowNo]._children[ruleRowNo].lastCalcStatus = 'Now...';
-//                }
-//            }
-//        }
-//        console.log('Updated this.treeItems: '+JSON.stringify(this.treeItems));
 
         recalculateSharing({ objectApiName : rowApiName })
             .then(() => {

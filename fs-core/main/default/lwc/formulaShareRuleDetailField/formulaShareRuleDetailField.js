@@ -21,6 +21,7 @@
 
 import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
@@ -81,10 +82,11 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     
     @api
     get shareField() {
-        return this._externalSharingModel;
+        return this._shareField;
     }
     set shareField(value) {
         this._shareField = value;
+        this.updateFieldDetails();
     }
     _shareField;
 
@@ -269,8 +271,26 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.fieldType = fieldOption.type;
             this.fieldFormula = fieldOption.formula;
         }
+
+        // Or if field and fields map populated but no match, show error
+        else if(this._shareField && this.fieldsMap && this.fieldsMap.size > 0) {
+            this.fieldNotAvailableForSharingError(this._shareField);
+        }
     }
 
+    fieldNotAvailableForSharingError(fieldName) {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Field not suitable for sharing'
+                , message: 'It looks like the field currently set on this rule (' + fieldName
+                    + ') is not of a type fully compatible with FormulaShare. Consider updating the field'
+                    + ' type, or changing the field to an alternative of one of the following'
+                    + ': Formula (returning text), Text or Lookup (to user object).'
+                , variant: 'error'
+                , mode: 'sticky'
+            })
+        );
+    }
     
     @track fieldSample;
     @track loadingSample = true;

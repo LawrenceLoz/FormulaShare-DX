@@ -154,7 +154,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				insertStatus = 'Success';
 			}
 			catch(Exception e) {
-				insertStatus = 'Failed';
+				insertStatus = 'Error';
 				insertStatusReason = e.getMessage();
 
 				// Populate map of no failed inserts by rule for finish metrics
@@ -189,7 +189,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			// Revert to prior state if exceptions after deletion
 			catch(Exception e) {
 				Database.rollback(sp);
-				deleteStatus = 'Failed';
+				deleteStatus = 'Error';
 				deleteStatusReason = e.getMessage();
 			}
 		}
@@ -262,7 +262,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				// Add number of valid shares in batch, and subtract any inserts which failed
 				// This should be the only type of failure not already excluded
 				validShares += noValidSharesForRulesBatch.get(ruleName);
-				if(insertStatus == 'Failed') {
+				if(insertStatus == 'Error' && failedInsertsMap.containsKey(ruleName)) {
 					validShares -= failedInsertsMap.get(ruleName);
 				}
 

@@ -88,7 +88,7 @@ public with sharing class FormulaShareRulesListViewController {
             RuleWrapper rw = new RuleWrapper();
             rw.ruleId = rule.ruleId;
             rw.developerName = rule.developerName;
-            rw.key = rule.developerName;
+            rw.key = 'rule|' + rule.developerName;
             rw.tableLabel = rule.label;
             rw.label = rule.label;
             rw.objectLabel = rule.objectSharedLabel;
@@ -158,7 +158,8 @@ public with sharing class FormulaShareRulesListViewController {
             }
             String objectLabel = objectNameToLabelMap.get(objectName);
             orw.tableLabel = objectLabel + ' (' + rwList.size() + ')';
-            orw.key = objectLabel;
+//            orw.key = objectLabel;
+            orw.key = 'object|'+objectName;
             orw.items = rwList;
             system.debug('rwList'+ rwList);
             orw.objectApiName = objectName;

@@ -76,13 +76,12 @@ public inherited sharing class FormulaShareRule {
     }
 
 
-    public Boolean shareMatchesRulePermissions(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
+    public Boolean shareEqualOrMorePermissiveThanRule(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
 
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
         String objectAccess = (String) share.get(objectUtils.accessLevelFieldName());
 
-        // If object access doesn't match, return false
-        if(accessLevel != objectAccess) {
+        if(FormulaShareUtilities.accessLevelIsHigher(accessLevel, objectAccess)) {
             return false;
         }
 
@@ -90,19 +89,21 @@ public inherited sharing class FormulaShareRule {
         if(objectUtils.objectName == 'Account') {
 
             // If case or opportunity access is different, return false
-            if(caseAccess != share.get('CaseAccessLevel') || opportunityAccess != share.get('OpportunityAccessLevel')) {
+            if(FormulaShareUtilities.accessLevelIsHigher(caseAccess, (String) share.get('CaseAccessLevel'))) {
+                return false;
+            }
+            else if(FormulaShareUtilities.accessLevelIsHigher(opportunityAccess, (String) share.get('OpportunityAccessLevel'))) {
                 return false;
             }
 
-            // If contact is controlled by account and contact access is different, return false
-            else if(contactIsControlledByAccount && contactAccess != share.get('ContactAccessLevel')) {
+            // If contact is NOT controlled by account and contact access is different, return false
+            else if(!contactIsControlledByAccount && FormulaShareUtilities.accessLevelIsHigher(contactAccess, (String) share.get('ContactAccessLevel'))) {
                 return false;
             }
             return true;
         }
         return true;
     }
-
 
     // Used to create a share with the highest permissions of the rule and an existing provided share
     public SObject getMostPermissiveShare(Schema.SObjectType type, Id recordId, Id sharedTo, SObject currentShare, Boolean contactIsControlledByAccount) {

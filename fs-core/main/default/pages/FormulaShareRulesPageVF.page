@@ -1,6 +1,7 @@
 <apex:page>
 
     <apex:includeLightning />
+
     <apex:includeScript value="{!$Resource.cometd}"/>
     <apex:includeScript value="{!$Resource.jquery}"/>
     <apex:includeScript value="{!$Resource.json2}"/>
@@ -9,8 +10,8 @@
     <div id="lightningvf" />
 
     <script>
-        $Lightning.use("c:FormulaShareLightningOutApp", function () {
-            $Lightning.createComponent("c:formulaShareRulesPage",
+        $Lightning.use("sdfs:FormulaShareLightningOutApp", function () {
+            $Lightning.createComponent("sdfs:formulaShareRulesPage",
                 {},
                 "lightningvf",
                 function (cmp) { }

@@ -3,7 +3,6 @@ import { refreshApex } from '@salesforce/apex';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getClassicDomain from '@salesforce/apex/FormulaShareUtilities.getClassicDomain';
 import getSharingReasons from '@salesforce/apex/FormulaShareUtilities.getSharingReasons';
-import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
 
 export default class FormulaShareRuleDetailAccess extends LightningElement {
 
@@ -82,18 +81,12 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
             && this._sharedObjectLabel === 'Account') {
 
             // Set options for case and opportunity
-            this.updateAccessLevelOption('case', this._accountRelatedOwd.caseAccess.internalSharingModel);
-            this.updateAccessLevelOption('opportunity', this._accountRelatedOwd.opportunityAccess.internalSharingModel);
+            this.updateAccessLevelOption('case', this._accountRelatedOwd.caseAccess);
+            this.updateAccessLevelOption('opportunity', this._accountRelatedOwd.opportunityAccess);
+            this.updateAccessLevelOption('contact', this._accountRelatedOwd.contactAccess);
 
-            // Check whether contact is controlled by account, and set options for contact sharing
-            isContactSharingControlledByAccount()
-            .then((isControlledByAccount) => {
-                console.log('controlled by account: '+isControlledByAccount);
-                var contactIntSharing;
-                isControlledByAccount ? contactIntSharing = 'ControlledByParent' : contactIntSharing = this._accountRelatedOwd.contactAccess.internalSharingModel;
-                this.updateAccessLevelOption('contact', contactIntSharing);
-                this.showAccountRelatedAccess = true;
-            });
+            // Show fields to set access levels
+            this.showAccountRelatedAccess = true;
         }
     }
 

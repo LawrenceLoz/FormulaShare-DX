@@ -153,6 +153,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
                 // If status was set (e.g. if entity not found) there's no need to query, so map to record and add to be inserted
                 if(pse.Status__c != null) {
+                    System.debug('Adding share with status set: '+pse);
                     FormulaShare_Processed_Record_Share__c prs = mapEventToProcessedRecordShare(pse, recordLogsMap, groupsMap);
                     processedRecordShares.add(prs);
                 }
@@ -206,9 +207,11 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                     // For insert, check whether share record was found in queried records and set to Success if so
                     if(prs.Operation__c == 'Insert') {
                         if(shareKeySet.contains(pse.Share_Key__c)) {
+                            System.debug('Found the record for this share: '+pse.Share_Key__c);
                             prs.Status__c = 'Success';
                         }
                         else {
+                            System.debug('No record found for this share : '+pse.Share_Key__c);
                             prs.Status__c = 'Error';
                             prs.Status_Reason__c = 'Share record to be inserted wasn\'t detected in query';
                         }
@@ -217,9 +220,11 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                     // For delete, check whether share record was found in queried records and set to Success if not
                     else if(prs.Operation__c == 'Delete') {
                         if(!shareIdSet.contains(pse.Share_Id__c)) {
+                            System.debug('Confirmed this share was deleted: '+pse.Share_Key__c);
                             prs.Status__c = 'Success';
                         }
                         else {
+                            System.debug('Expected this share to be deleted (record still exists): '+pse.Share_Key__c);
                             prs.Status__c = 'Error';
                             prs.Status_Reason__c = 'Share record identified for removal not actually deleted';
                         }
@@ -229,6 +234,8 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                 }
             }
         }
+
+        System.debug('Full processedRecordShare list: '+processedRecordShares);
 
         return processedRecordShares;
     }
