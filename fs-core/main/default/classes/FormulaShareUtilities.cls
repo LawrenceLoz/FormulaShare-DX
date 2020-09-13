@@ -56,6 +56,7 @@ public with sharing class FormulaShareUtilities {
 			}
 			return globalDescribe;
 		}
+		private set;
 	}
 
 	public static Map<String,Schema.DescribeSObjectResult> cachedDescribes = new Map<String,Schema.DescribeSObjectResult>();
