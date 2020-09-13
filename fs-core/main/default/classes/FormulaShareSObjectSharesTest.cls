@@ -72,47 +72,47 @@ public with sharing class FormulaShareSObjectSharesTest {
     }
 
 
-    @IsTest
-    public static void testInsertExceptionCaught() {
-        
-        FormulaShare_Log__c log = [SELECT Id FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'AllInternalUsers'][0];
-        
-        // Set constructor parameters
-        List<FormulaShare_Log__Share> sharesList = getSharesListForLog(log);
-        sharesList[0].AccessLevel = 'Not an allowed value';
-        Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
-
-        // Construct domain instance
-        FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(sharesList, fsLogShareType);
-
-        // Attempt to insert share
-        sharesDomain.insertShares();
-
-        // Look for inserted record and check nothing found
-        List<FormulaShare_Log__Share> insertedShares = [SELECT Id, ParentId FROM FormulaShare_Log__Share WHERE RowCause = :reason];
-        system.assert(insertedShares.isEmpty(), 'Share record not deleted');
-    }
-
-
-    @IsTest
-    public static void testDeleteExceptionCaught() {
-        
-        FormulaShare_Log__c log = [SELECT Id FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'AllInternalUsers'][0];
-        
-        // Set constructor parameters
-        List<FormulaShare_Log__Share> sharesList = getSharesListForLog(log);
-        Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
-
-        // Construct domain instance
-        FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(sharesList, fsLogShareType);
-
-        // Attempt to delete share before inserting
-        sharesDomain.deleteShares();
-
-        // Check no shares
-        List<FormulaShare_Log__Share> insertedShares = [SELECT Id, ParentId FROM FormulaShare_Log__Share WHERE RowCause = :reason];
-        system.assert(insertedShares.isEmpty(), 'Share record remains');
-    }
+//    @IsTest
+//    public static void testInsertExceptionCaught() {
+//        
+//        FormulaShare_Log__c log = [SELECT Id FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'AllInternalUsers'][0];
+//        
+//        // Set constructor parameters
+//        List<FormulaShare_Log__Share> sharesList = getSharesListForLog(log);
+//        sharesList[0].AccessLevel = 'Not an allowed value';
+//        Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
+//
+//        // Construct domain instance
+//        FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(sharesList, fsLogShareType);
+//
+//        // Attempt to insert share
+//        sharesDomain.insertShares();
+//
+//        // Look for inserted record and check nothing found
+//        List<FormulaShare_Log__Share> insertedShares = [SELECT Id, ParentId FROM FormulaShare_Log__Share WHERE RowCause = :reason];
+//        system.assert(insertedShares.isEmpty(), 'Share record not deleted');
+//    }
+//
+//
+//    @IsTest
+//    public static void testDeleteExceptionCaught() {
+//        
+//        FormulaShare_Log__c log = [SELECT Id FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'AllInternalUsers'][0];
+//        
+//        // Set constructor parameters
+//        List<FormulaShare_Log__Share> sharesList = getSharesListForLog(log);
+//        Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
+//
+//        // Construct domain instance
+//        FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(sharesList, fsLogShareType);
+//
+//        // Attempt to delete share before inserting
+//        sharesDomain.deleteShares();
+//
+//        // Check no shares
+//        List<FormulaShare_Log__Share> insertedShares = [SELECT Id, ParentId FROM FormulaShare_Log__Share WHERE RowCause = :reason];
+//        system.assert(insertedShares.isEmpty(), 'Share record remains');
+//    }
 
     @IsTest
     public static void testContructor() {
