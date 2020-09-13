@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
+        <field>FormulaShare_Record_Log__c.Record__c</field>
+    </columns>
+    <columns>
+        <field>FormulaShare_Record_Log__c.FormulaShare_Batch_Log__c</field>
+    </columns>
+    <columns>
         <field>FormulaShare_Record_Log__c.Processed_Date_Time__c</field>
     </columns>
     <columns>
@@ -10,9 +16,6 @@
         <field>FormulaShare_Processed_Record_Share__c.Status_Reason__c</field>
     </columns>
     <columns>
-        <field>FormulaShare_Record_Log__c.FormulaShare_Batch_Log__c</field>
-    </columns>
-    <columns>
         <field>FormulaShare_Record_Log__c.Context__c</field>
     </columns>
     <columns>
@@ -20,9 +23,6 @@
     </columns>
     <columns>
         <field>FormulaShare_Record_Log__c.Object__c</field>
-    </columns>
-    <columns>
-        <field>FormulaShare_Record_Log__c.Record__c</field>
     </columns>
     <columns>
         <field>FormulaShare_Processed_Record_Share__c.FormulaShare_Rule_Name__c</field>
@@ -35,6 +35,9 @@
     </columns>
     <columns>
         <field>FormulaShare_Processed_Record_Share__c.Shared_to_User__c</field>
+    </columns>
+    <columns>
+        <field>CUST_NAME</field>
     </columns>
     <filter>
         <criteriaItems>

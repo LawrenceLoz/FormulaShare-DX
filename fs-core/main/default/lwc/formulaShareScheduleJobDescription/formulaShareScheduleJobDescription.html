@@ -11,25 +11,23 @@
                     </div>
                     <div class="slds-text-longform slds-p-top_small">
                         <p>
-                            The FormulaShare batch isn't scheduled yet. This job will check and update sharing on all records and is important to make sure 
-                            all changes can be applied.
-                        </p>
-                        <p>
                             <lightning-formatted-url 
                                 value={setupUrl}
                                 label="Click here " 
                                 target="_blank">
                             </lightning-formatted-url>
-                            (or go to "Apex Classes" in the setup menu), click the "Schedule Apex" button and select the class 
-                            <b> FormulaShareProcessSchedulable</b>. Set a time and frequency which work for your organisation - we recommend once a day.
+                            (or go to "Apex Classes" in the setup menu), click the "Schedule Apex" button and select 
+                            <b> FormulaShareProcessSchedulable</b>.
                         </p>
                         <p>
-                            It's important the job is scheduled by an admin, so make sure that's you! The scheduling user must have:
+                            This job will check and update sharing on all records and is important to make sure 
+                            sharing stays consistent with rules. Set a time and frequency which works for your organisation - we recommend once a day.
+                            It's important the person scheduling is an admin or has the right permissions:
                         </p>
                         <ul class="slds-list_dotted">
-                            <li>Permission to access all objects, records and fields involved in the rules</li>
-                            <li>Modify All permission on the objects shared</li>
-                            <li>The FormulaShareAdmin permission set</li>
+                            <li>Modify All on the objects shared</li>
+                            <li>Permissions for all records and fields involved in the rules</li>
+                            <li>Full access to all FormulaShare components (provided to admins, profiles specified on install, and anyone with the FormulaShareAdmin permission set)</li>
                         </ul>
                     </div>
                 </div>
