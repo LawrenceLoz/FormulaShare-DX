@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Database.Stateful {
+public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Database.Stateful, Database.RaisesPlatformEvents {
 	
 	List<Schema.SObjectType> types;
 	Integer batchSize;
@@ -281,6 +281,8 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			updateLogAfterMetricsFail(fsLogs, e);
 			atLeastOneMetricsUpdateFailed = true;
 		}
+
+		listViewUpdate();
 	}
 	
 
@@ -308,12 +310,8 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				uow = FormulaShareProcessedShareEventService.processForBatchFinish(uow, totalValidSharesForRule, totalErrorSharesForRule, log);
 			}
 			
-			// Fire event to update list view
-			String objectLabel = typeInThisBatch.getDescribe().getLabel();
-			List<String> objectLabelsList = new List<String>{objectLabel};
-			FormulaShareProcessedShareEventService.fireRulesListUpdateEvent(objectLabelsList);
-
 			uow.commitWork();
+			listViewUpdate();
 		}
 
 		// If any exceptions updating logs, ensure batch is closed
@@ -337,6 +335,19 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		}
 
 	}
+
+
+	private void listViewUpdate() {
+		try {
+			String objectLabel = typeInThisBatch.getDescribe().getLabel();
+			List<String> objectLabelsList = new List<String>{objectLabel};
+			FormulaShareProcessedShareEventService.fireRulesListUpdateEvent(objectLabelsList);
+		}
+		catch(Exception e) {
+			System.debug('Error firing event to update list view. Message from Salesforce: '+e.getMessage());
+		}
+	}
+
 
 
 	private void updateLogAfterMetricsFail(FormulaShareLogs fsLogs, Exception metricsException) {

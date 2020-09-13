@@ -212,8 +212,6 @@ public inherited sharing class FormulaShareService {
 	// Core method called from trigger and batch context - returns a wrapper with all details needed to make updates
 	public void processFormulaShares() {
 
-		Boolean removeExistingShares = true;
-
 		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(type);
 		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(recordsMap.keySet());
 		System.debug('parentIdsString: '+parentIdsString);
@@ -271,7 +269,8 @@ public inherited sharing class FormulaShareService {
 		assessRequiredShares();
 
 		// Clear deletion map if object is standard and removal of standard sharing is not permitted
-		if(removeExistingShares && !type.getDescribe().isCustom()) {
+		FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(type);
+		if(!objUtils.removeSharesForObject()) {
 			mapToDelete.clear();
 		}
 	}
@@ -307,6 +306,7 @@ public inherited sharing class FormulaShareService {
 			system.debug('shared to string: ' + sharedToString);
 			
 			if(rule.isValid && rule.active) {
+				System.debug('rule.sharedToFieldTypeForRuleType: '+rule.sharedToFieldTypeForRuleType);
 
 				// Add User Id to map
 				if(rule.shareWith == 'Users') {
@@ -350,6 +350,7 @@ public inherited sharing class FormulaShareService {
 						}
 					}
 					else if(rule.sharedToFieldTypeForRuleType == 'Name') {
+						System.debug('Adding share for role rule with name');
 						sharedToNamesRoles.add(sharedToString);
 						roleRecordRules.add(recordRule);
 					}
@@ -385,7 +386,7 @@ public inherited sharing class FormulaShareService {
 		}
 
 		// Process role and/or role and subordinate sharing
-		if(!roleQueryIdSet.isEmpty() || !roleNamesToIdsMap.isEmpty()) {
+		if(!roleQueryIdSet.isEmpty() || !roleRecordRules.isEmpty() || !roleNamesToIdsMap.isEmpty()) {
 			assessRoleSharing(roleQueryIdSet, roleRecordRules, roleNamesToIdsMap);
 		}
 	}

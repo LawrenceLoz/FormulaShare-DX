@@ -199,6 +199,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
+                    console.log('Received Refresh Event');
                     this.refreshView();
                 };
                 subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
