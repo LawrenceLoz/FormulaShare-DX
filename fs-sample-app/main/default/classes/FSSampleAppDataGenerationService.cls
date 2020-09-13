@@ -74,6 +74,12 @@ public with sharing class FSSampleAppDataGenerationService {
 
                 d.Donor_Name__c = firstNameMeta.DeveloperName + ' ' + surnameMeta.DeveloperName;
                 d.Amount__c = randomAmount;
+                if(randomAmount < 300) {
+                    d.External_Sharing_Role__c = 'Programme_Manager';
+                }
+                else if(randomAmount < 600) {
+                    d.External_Sharing_Role__c = 'Business_Development_Manager';
+                }
                 d.Programme_to_Support__c = progs[randomIndex].Id;
                 donations.add(d);
             }

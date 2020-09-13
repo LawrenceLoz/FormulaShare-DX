@@ -291,7 +291,6 @@
     </dashboardGridLayout>
     <dashboardType>SpecifiedUser</dashboardType>
     <isGridLayout>true</isGridLayout>
-    <runningUser>test-panxsdugfitj@example.com</runningUser>
     <textColor>#000000</textColor>
     <title>FormulaShare Summary</title>
     <titleColor>#000000</titleColor>
