@@ -371,7 +371,7 @@ public inherited sharing class FormulaShareService {
 		}
 
 		// Process group sharing
-		if(!sharedToNamesGroups.isEmpty()) {
+		if(!groupRecordRules.isEmpty()) {
 			assessGroupSharingFromNames(sharedToNamesGroups, groupRecordRules);
 		}
 
@@ -386,7 +386,7 @@ public inherited sharing class FormulaShareService {
 		}
 
 		// Process role and/or role and subordinate sharing
-		if(!roleQueryIdSet.isEmpty() || !roleRecordRules.isEmpty() || !roleNamesToIdsMap.isEmpty()) {
+		if(!roleRecordRules.isEmpty()) {
 			assessRoleSharing(roleQueryIdSet, roleRecordRules, roleNamesToIdsMap);
 		}
 	}
@@ -654,8 +654,16 @@ public inherited sharing class FormulaShareService {
 
 			// ...otherwise, if no ownership and we're allowed to remove sharing, create a new share with access level of the rule
 			else {
-				System.debug('/// Existing share exists, create one with max levels of rule and this share: '+share);
-				populateMapNewShare(recordId, sharedTo, shareKey, rule, contactIsControlledByAccount);
+				
+				// ...keep if all access levels for the share are identical
+				if(rule.shareEqualToRule(type, share, contactIsControlledByAccount)) {
+					System.debug('/// Share exists which is identical to the rule, keep this: '+share);
+				}
+
+				else {
+					System.debug('/// Existing share exists with different level, create one with access levels of the rule instead. Existing share: '+share);
+					populateMapNewShare(recordId, sharedTo, shareKey, rule, contactIsControlledByAccount);
+				}
 			}
 
 			// Remove from map to delete - share will be kept or updated

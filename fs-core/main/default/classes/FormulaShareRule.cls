@@ -76,6 +76,38 @@ public inherited sharing class FormulaShareRule {
     }
 
 
+    // Check if all share levels in a share object are equal to the rule
+    public Boolean shareEqualToRule(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
+
+        FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
+        String objectAccess = (String) share.get(objectUtils.accessLevelFieldName());
+
+        if(accessLevel != objectAccess) {
+            return false;
+        }
+
+        // If object is account need to check related objects
+        if(objectUtils.objectName == 'Account') {
+
+            // If case or opportunity access is different, return false
+            if(caseAccess != (String) share.get('CaseAccessLevel')) {
+                return false;
+            }
+            else if(opportunityAccess != (String) share.get('OpportunityAccessLevel')) {
+                return false;
+            }
+
+            // If contact is NOT controlled by account and contact access is different, return false
+            else if(!contactIsControlledByAccount && contactAccess != (String) share.get('ContactAccessLevel')) {
+                return false;
+            }
+            return true;
+        }
+        return true;        
+    }
+
+
+    // Check if all share levels in a share object are equal to or provide wider access than the rule
     public Boolean shareEqualOrMorePermissiveThanRule(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
 
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
