@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, FinancialForce.com, inc
+ * Copyright (c) 2014-2016, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -82,5 +82,180 @@ public class fflib_ApexMocksUtilsTest
 
 		System.assertEquals(contact2.Id, contacts[1].Id);
 		System.assertEquals(contact2.DoNotCall, contacts[1].DoNotCall);
+	}
+
+	@isTest
+	private static void makeRelationship_GenericOverload_ReturnsObjectsWithRelationFieldSet() {
+		//Given
+		SObject acc = Schema.getGlobalDescribe().get('Account').newSObject();
+		acc.put('Id', fflib_IDGenerator.generate(acc.getSObjectType()));
+		acc.put('Name', 'AccName');
+		acc.put('NumberOfEmployees', 7);
+
+		SObject contact1 = Schema.getGlobalDescribe().get('Contact').newSObject();
+		contact1.put('Id', fflib_IDGenerator.generate(contact1.getSObjectType()));
+		contact1.put('DoNotCall', true);
+
+		SObject contact2 = Schema.getGlobalDescribe().get('Contact').newSObject();
+		contact2.put('Id', fflib_IDGenerator.generate(contact2.getSObjectType()));
+		contact2.put('DoNotCall', false);
+
+		//When
+		SObject accWithRelationships = ((List<SObject>)fflib_ApexMocksUtils.makeRelationship(
+				'Account',
+				'Contact',
+				new List<SObject> { acc },
+				'AccountId',
+				new List<List<SObject>> { new List<SObject> { contact1, contact2 }}
+
+		))[0];
+
+		//Then
+		System.assertEquals(acc.Id, accWithRelationships.Id);
+		System.assertEquals(acc.get('Name'), accWithRelationships.get('Name'));
+		System.assertEquals(acc.get('NumberOfEmployees'), accWithRelationships.get('NumberOfEmployees'));
+
+		//Assert relationship fields
+		List<SObject> contacts = accWithRelationships.getSObjects('Contacts');
+		System.assertNotEquals(null, contacts);
+		System.assertEquals(2, contacts.size());
+
+		System.assertEquals(contact1.Id, contacts[0].Id);
+		System.assertEquals((Boolean)contact1.get('DoNotCall'), (Boolean)contacts[0].get('DoNotCall'));
+
+		System.assertEquals(contact2.Id, contacts[1].Id);
+		System.assertEquals((Boolean)contact2.get('DoNotCall'), (Boolean)contacts[1].get('DoNotCall'));
+	}
+
+	@isTest
+	private static void makeRelationship_GenericOverload_ThrowsErrorOnInvalidParentType() {
+
+		// Setup parent object
+		SObject acc = Schema.getGlobalDescribe().get('Account').newSObject();
+		acc.put('Id', fflib_IDGenerator.generate(acc.getSObjectType()));
+
+		// Setup child object
+		SObject cont = Schema.getGlobalDescribe().get('Contact').newSObject();
+		cont.put('Id', fflib_IDGenerator.generate(cont.getSObjectType()));
+
+		String errorMessage = '';
+		try {
+			// Call method under test
+			SObject accWithRelationships = ((List<SObject>)fflib_ApexMocksUtils.makeRelationship(
+					'MyInvalidParentType',
+					'Contact',
+					new List<SObject> { acc },
+					'AccountId',
+					new List<List<SObject>> { new List<SObject> { cont }}
+			))[0];
+		} catch (Exception exc) {
+			errorMessage = exc.getMessage();
+		}
+		System.assertEquals('SObject type not found: MyInvalidParentType', errorMessage);
+	}
+
+	@isTest
+	private static void makeRelationship_GenericOverload_ThrowsErrorOnInvalidChildType() {
+
+		// Setup parent object
+		SObject acc = Schema.getGlobalDescribe().get('Account').newSObject();
+		acc.put('Id', fflib_IDGenerator.generate(acc.getSObjectType()));
+
+		// Setup child object
+		SObject cont = Schema.getGlobalDescribe().get('Contact').newSObject();
+		cont.put('Id', fflib_IDGenerator.generate(cont.getSObjectType()));
+
+		String errorMessage = '';
+		try {
+			// Call method under test
+			SObject accWithRelationships = ((List<SObject>)fflib_ApexMocksUtils.makeRelationship(
+					'Account',
+					'MyInvalidChildType',
+					new List<SObject> { acc },
+					'AccountId',
+					new List<List<SObject>> { new List<SObject> { cont }}
+			))[0];
+		} catch (Exception exc) {
+			errorMessage = exc.getMessage();
+		}
+		System.assertEquals('SObject type not found: MyInvalidChildType', errorMessage);
+	}
+
+	@isTest
+	private static void makeRelationship_GenericOverload_ThrowsErrorOnInvalidFieldName() {
+
+		// Setup parent object
+		SObject acc = Schema.getGlobalDescribe().get('Account').newSObject();
+		acc.put('Id', fflib_IDGenerator.generate(acc.getSObjectType()));
+
+		// Setup child object
+		SObject cont = Schema.getGlobalDescribe().get('Contact').newSObject();
+		cont.put('Id', fflib_IDGenerator.generate(cont.getSObjectType()));
+
+		String errorMessage = '';
+		try {
+			// Call method under test
+			SObject accWithRelationships = ((List<SObject>)fflib_ApexMocksUtils.makeRelationship(
+					'Account',
+					'Contact',
+					new List<SObject> { acc },
+					'MyInvalidField',
+					new List<List<SObject>> { new List<SObject> { cont }}
+			))[0];
+		} catch (Exception exc) {
+			errorMessage = exc.getMessage();
+		}
+		System.assertEquals('SObject field not found: MyInvalidField', errorMessage);
+	}
+
+	@isTest
+	static void setReadOnlyFields_CreatedByIdSetToCurrentUserId_IdFieldSetSuccessfully() {
+		
+		Account acc = new Account();
+		Id userId = fflib_IDGenerator.generate((new User()).getSObjectType());
+
+		Test.startTest();
+		acc = (Account)fflib_ApexMocksUtils.setReadOnlyFields(
+				acc,
+				Account.class,
+				new Map<SObjectField, Object>{Account.CreatedById => userId}
+		);
+		Test.stopTest();
+
+		System.assertEquals(userId, acc.CreatedById);
+	}
+
+	@isTest
+	static void setReadOnlyFields_LastReferencedDateSetOnAccount_DateTimeFieldSetSuccessfully() {
+		
+		Account acc = new Account();
+		DateTime lastRefDate = DateTime.newInstanceGmt(2020, 1, 7, 23, 30, 0);
+
+		Test.startTest();
+		acc = (Account)fflib_ApexMocksUtils.setReadOnlyFields(
+				acc,
+				Account.class,
+				new Map<SObjectField, Object> {Account.LastReferencedDate => lastRefDate}
+		);
+		Test.stopTest();
+
+		System.assertEquals(lastRefDate, acc.LastReferencedDate);
+	}
+
+	@isTest
+	static void setReadOnlyFields_IsDeletedSetOnAccount_BooleanFieldSetSuccessfully() {
+
+		Account acc = new Account();
+		Boolean isDeleted = true;
+
+		Test.startTest();
+		acc = (Account)fflib_ApexMocksUtils.setReadOnlyFields(
+				acc,
+				Account.class,
+				new Map<SObjectField, Object> {Account.IsDeleted => isDeleted}
+		);
+		Test.stopTest();
+
+		System.assertEquals(isDeleted, acc.IsDeleted);
 	}
 }

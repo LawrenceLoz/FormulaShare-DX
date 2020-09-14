@@ -2,22 +2,22 @@
  * Copyright (c), FinancialForce.com, inc
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
+ * Redistribution and use in source and binary forms, with or without modification, 
  *   are permitted provided that the following conditions are met:
  *
- * - Redistributions of source code must retain the above copyright notice,
+ * - Redistributions of source code must retain the above copyright notice, 
  *      this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
+ * - Redistributions in binary form must reproduce the above copyright notice, 
+ *      this list of conditions and the following disclaimer in the documentation 
  *      and/or other materials provided with the distribution.
- * - Neither the name of the FinancialForce.com, inc nor the names of its contributors
- *      may be used to endorse or promote products derived from this software without
+ * - Neither the name of the FinancialForce.com, inc nor the names of its contributors 
+ *      may be used to endorse or promote products derived from this software without 
  *      specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
- *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
+ *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
  *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
@@ -46,6 +46,8 @@ private with sharing class fflib_SObjectUnitOfWorkTest
 
         fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(MY_SOBJECTS);
 
+        uow.m_emailWork = new Mock_SendEmailWork();
+
         Opportunity opp = new Opportunity();
         opp.Name = testRecordName;
         opp.StageName = 'Open';
@@ -60,8 +62,8 @@ private with sharing class fflib_SObjectUnitOfWorkTest
 
         List<Opportunity> opps = [select Id, Name, (Select Id from OpportunityLineItems) from Opportunity where Name = :testRecordName order by Name];
 
-        // assert that an email was sent
-        system.assertEquals(1, Limits.getEmailInvocations());
+        // assert that mock email functionality was called
+        system.assert(((Mock_SendEmailWork) uow.m_emailWork).doWorkWasCalled);
 
         System.assertEquals(1, opps.size());
     }
@@ -69,7 +71,7 @@ private with sharing class fflib_SObjectUnitOfWorkTest
     @isTest
     private static void testUnitOfWorkNewDirtyDelete()
     {
-        // Insert Opporunities with UnitOfWork
+        // Insert Opportunities with UnitOfWork
         {
             fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(MY_SOBJECTS);
             for(Integer o=0; o<10; o++)
@@ -242,11 +244,15 @@ private with sharing class fflib_SObjectUnitOfWorkTest
 
         assertEvents(new List<String> {
                 'onCommitWorkStarting'
+                , 'onPublishBeforeEventsStarting'
+                , 'onPublishBeforeEventsFinished'
                 , 'onDMLStarting'
                 , 'onDMLFinished'
                 , 'onDoWorkStarting'
                 , 'onDoWorkFinished'
                 , 'onCommitWorkFinishing'
+                , 'onPublishAfterSuccessEventsStarting'
+                , 'onPublishAfterSuccessEventsFinished'
                 , 'onCommitWorkFinished - true'
             }
             , uow.getCommitWorkEventsFired(), new Set<Schema.SObjectType>(MY_SOBJECTS), uow.getRegisteredTypes());
@@ -284,7 +290,11 @@ private with sharing class fflib_SObjectUnitOfWorkTest
 
         assertEvents(new List<String> {
                 'onCommitWorkStarting'
+                , 'onPublishBeforeEventsStarting'
+                , 'onPublishBeforeEventsFinished'
                 , 'onDMLStarting'
+                , 'onPublishAfterFailureEventsStarting'
+                , 'onPublishAfterFailureEventsFinished'
                 , 'onCommitWorkFinished - false'
             }
             , uow.getCommitWorkEventsFired(), new Set<Schema.SObjectType>(MY_SOBJECTS), uow.getRegisteredTypes());
@@ -330,9 +340,13 @@ private with sharing class fflib_SObjectUnitOfWorkTest
 
         assertEvents(new List<String> {
                 'onCommitWorkStarting'
+                , 'onPublishBeforeEventsStarting'
+                , 'onPublishBeforeEventsFinished'
                 , 'onDMLStarting'
                 , 'onDMLFinished'
                 , 'onDoWorkStarting'
+                , 'onPublishAfterFailureEventsStarting'
+                , 'onPublishAfterFailureEventsFinished'
                 , 'onCommitWorkFinished - false'
             }
             , uow.getCommitWorkEventsFired(), new Set<Schema.SObjectType>(MY_SOBJECTS), uow.getRegisteredTypes());
@@ -384,6 +398,174 @@ private with sharing class fflib_SObjectUnitOfWorkTest
         opp = [select Name, Amount from Opportunity where Id = :opp.Id];
         System.assertEquals(opp.Name, nameUpdate.Name);
         System.assertEquals(opp.Amount, amountUpdate.Amount);
+    }
+
+    /**
+     * Try registering a single field as dirty on multiple records.
+     *
+     */
+    @isTest
+    private static void testRegisterDirtyRecordsWithDirtyFields()
+    {
+        // GIVEN a list of existing records
+        Opportunity opportunityA = new Opportunity(
+                Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+                Name = 'test name A',
+                StageName = 'Open',
+                CloseDate = System.today());
+        Opportunity opportunityB = new Opportunity(
+                Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+                Name = 'test name B',
+                StageName = 'Open',
+                CloseDate = System.today());
+
+        MockDML mockDML = new MockDML();
+        fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(MY_SOBJECTS, mockDML);
+        uow.registerDirty(new List<Opportunity>{ opportunityA, opportunityB });
+
+        // WHEN we register the records again with different fields updated
+        List<Opportunity> recordsWithStageUpdate = new List<Opportunity>
+        {
+                new Opportunity(Id = opportunityA.Id, StageName = 'Closed'),
+                new Opportunity(Id = opportunityB.Id, StageName = 'Closed')
+        };
+        List<Opportunity> recordsWithAmountUpdate = new List<Opportunity>
+        {
+                new Opportunity(Id = opportunityA.Id, Amount = 250),
+                new Opportunity(Id = opportunityB.Id, Amount = 250)
+        };
+        uow.registerDirty(recordsWithStageUpdate, new List<SObjectField> { Opportunity.StageName });
+        uow.registerDirty(recordsWithAmountUpdate, new List<SObjectField> { Opportunity.Amount });
+        uow.commitWork();
+
+        // THEN the records should be registered with both changed values for Amount and StageName
+        System.assert(
+                new fflib_MatcherDefinitions.SObjectsWith(
+                        new List<Map<SObjectField, Object>>{
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityA.Id,
+                                     Opportunity.Amount => 250,
+                                     Opportunity.StageName => 'Closed'
+                                },
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityB.Id,
+                                     Opportunity.Amount => 250,
+                                     Opportunity.StageName => 'Closed'
+                                }
+                        }
+                )
+                        .matches(mockDML.recordsForUpdate),
+                'Records not registered with the correct values'
+        );
+    }    /**
+     * Try registering a single field as dirty on multiple records.
+     *
+     */
+    @isTest
+    private static void testRegisterDirtyRecordsWithDirtyFields_failing()
+    {
+        // GIVEN a list of existing records
+        Opportunity opportunityA = new Opportunity(
+                Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+                Name = 'test name A',
+                StageName = 'Open',
+                CloseDate = System.today());
+        Opportunity opportunityB = new Opportunity(
+                Id = fflib_IDGenerator.generate(Opportunity.SObjectType),
+                Name = 'test name B',
+                StageName = 'Open',
+                CloseDate = System.today());
+
+        MockDML mockDML = new MockDML();
+        fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(MY_SOBJECTS, mockDML);
+        uow.registerDirty(new List<Opportunity>{ opportunityA, opportunityB });
+
+        // WHEN we register the records again with different fields updated
+        List<Opportunity> recordsWithStageUpdate = new List<Opportunity>
+        {
+                new Opportunity(Id = opportunityA.Id, StageName = 'Closed'),
+                new Opportunity(Id = opportunityB.Id, StageName = 'Closed')
+        };
+        List<Opportunity> recordsWithAmountUpdate = new List<Opportunity>
+        {
+                new Opportunity(Id = opportunityA.Id, Amount = 250),
+                new Opportunity(Id = opportunityB.Id, Amount = 250)
+        };
+        uow.registerDirty(recordsWithStageUpdate, new List<SObjectField> { Opportunity.StageName });
+        uow.registerDirty(recordsWithAmountUpdate, new List<SObjectField> { Opportunity.Amount });
+        uow.registerDirty( // Register again the original record, should overwrite the one with the dirty fields
+                new Opportunity(
+                Id = OpportunityB.Id,
+                Name = 'test name B',
+                StageName = 'Open',
+                CloseDate = System.today())
+        ); 
+        uow.commitWork();
+
+        // THEN only the first record should be registered with both changed values for Amount and StageName and the second should be the original
+        System.assert(
+                !new fflib_MatcherDefinitions.SObjectsWith(
+                        new List<Map<SObjectField, Object>>{
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityA.Id,
+                                     Opportunity.Amount => 250,
+                                     Opportunity.StageName => 'Closed'
+                                },
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityB.Id,
+                                     Opportunity.Amount => 250,
+                                     Opportunity.StageName => 'Closed'
+                                }
+                        }
+                )
+                        .matches(mockDML.recordsForUpdate),
+                'Not all records should not be registered with the dirty values'
+        );
+        System.assert(
+                new fflib_MatcherDefinitions.SObjectsWith(
+                        new List<Map<SObjectField, Object>>{
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityA.Id,
+                                     Opportunity.Amount => 250,
+                                     Opportunity.StageName => 'Closed'
+                                },
+                                new Map<SObjectField, Object>
+                                {
+                                     Opportunity.Id => opportunityB.Id,
+                                     Opportunity.StageName => 'Open'
+                                }
+                        }
+                )
+                        .matches(mockDML.recordsForUpdate),
+                'The second record should be registered with the original values'
+        );
+    }
+
+    @isTest
+    private static void testRegisterUpsert() {
+        Opportunity existingOpp = new Opportunity(Name = 'Existing Opportunity', StageName = 'Open', CloseDate = System.today());
+        insert existingOpp;
+
+        existingOpp.StageName = 'Closed';
+
+        Opportunity newOpportunity = new Opportunity(Name = 'New Opportunity', StageName = 'Closed', CloseDate = System.today());
+
+        System.assertEquals(1, [SELECT COUNT() FROM Opportunity]);
+        System.assertEquals(0, [SELECT COUNT() FROM Opportunity WHERE StageName = 'Closed']);
+        
+        Test.startTest();
+            fflib_SObjectUnitOfWork uow = new fflib_SObjectUnitOfWork(MY_SOBJECTS);
+            uow.registerUpsert(new List<Opportunity>{existingOpp, newOpportunity});
+            uow.commitWork();
+        Test.stopTest();
+
+        System.assertEquals(2, [SELECT COUNT() FROM Opportunity]);
+        System.assertEquals(2, [SELECT COUNT() FROM Opportunity WHERE StageName = 'Closed']);
     }
 
     /**
@@ -474,6 +656,16 @@ private with sharing class fflib_SObjectUnitOfWorkTest
             addEvent('onCommitWorkStarting');
         }
 
+        public override void onPublishBeforeEventsStarting()
+        {
+            addEvent('onPublishBeforeEventsStarting');
+        }
+
+        public override void onPublishBeforeEventsFinished()
+        {
+            addEvent('onPublishBeforeEventsFinished');
+        }
+
         public override void onDMLStarting()
         {
             addEvent('onDMLStarting');
@@ -499,9 +691,87 @@ private with sharing class fflib_SObjectUnitOfWorkTest
             addEvent('onCommitWorkFinishing');
         }
 
+        public override void onPublishAfterSuccessEventsStarting()
+        {
+            addEvent('onPublishAfterSuccessEventsStarting');
+        }
+
+        public override void onPublishAfterSuccessEventsFinished()
+        {
+            addEvent('onPublishAfterSuccessEventsFinished');
+        }
+
+        public override void onPublishAfterFailureEventsStarting()
+        {
+            addEvent('onPublishAfterFailureEventsStarting');
+        }
+
+        public override void onPublishAfterFailureEventsFinished()
+        {
+            addEvent('onPublishAfterFailureEventsFinished');
+        }
+
         public override void onCommitWorkFinished(Boolean wasSuccessful)
         {
             addEvent('onCommitWorkFinished - ' + wasSuccessful);
+        }
+    }
+
+    /**
+     * Mock implementation of fflib_SObjectUnitOfWork.SendEmailWork
+     **/
+    private class Mock_SendEmailWork implements fflib_SObjectUnitOfWork.IEmailWork
+    {
+        public Mock_SendEmailWork()
+        {
+        }
+
+        public void registerEmail(Messaging.Email email)
+        {
+        }
+
+        public void doWork()
+        {
+            doWorkWasCalled = true;
+            // The code in the fflib_SObjectUnitOfWork class
+            // causes unit test failures in Orgs that do not
+            // have email enabled.
+        }
+
+        private boolean doWorkWasCalled = false;
+    }
+
+    private class MockDML implements fflib_SObjectUnitOfWork.IDML
+    {
+        public List<SObject> recordsForInsert = new List<SObject>();
+        public List<SObject> recordsForUpdate = new List<SObject>();
+        public List<SObject> recordsForDelete = new List<SObject>();
+        public List<SObject> recordsForRecycleBin = new List<SObject>();
+        public List<SObject> recordsForEventPublish = new List<SObject>();
+
+        public void dmlInsert(List<SObject> objList)
+        {
+            this.recordsForInsert.addAll(objList);
+        }
+
+        public void dmlUpdate(List<SObject> objList)
+        {
+            this.recordsForUpdate.addAll(objList);
+        }
+
+        public void dmlDelete(List<SObject> objList)
+        {
+            this.recordsForDelete.addAll(objList);
+        }
+
+        public void eventPublish(List<SObject> objList)
+        {
+            this.recordsForEventPublish.addAll(objList);
+        }
+
+        public void emptyRecycleBin(List<SObject> objList)
+        {
+            this.recordsForRecycleBin.addAll(objList);
         }
     }
 
