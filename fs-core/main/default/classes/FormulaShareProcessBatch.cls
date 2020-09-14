@@ -54,7 +54,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			system.debug('query locator: ' + ql);
 
 			// Establish unit of work for batch log and rules in batch
-			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
 
 			FormulaShare_Log__c log = new FormulaShare_Log__c();
 			logsList = new List<FormulaShare_Log__c>();
@@ -196,7 +196,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 		try {
 			// Unit of work to update batch logs, and insert/update logs and metrics
-			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
 
 			// Set batch logs
 			uow.registerDirty(fsLogs.setFinalisedLogs());
@@ -296,7 +296,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		Exception metricsException;
 		try {
 			// Update batch log records
-			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
 			uow.registerDirty(fsLogs.setFinalisedLogs());
 
 			// Indicate batch failure in metrics if any failed batches
@@ -354,7 +354,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		metricsException.setMessage('Issue capturing logs or metrics. Message from Salesforce: ' + metricsException.getMessage());
 		fsLogs.logException(metricsException);
 		
-		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance();
+		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
 		uow.registerDirty(fsLogs.Records);
 		uow.commitWork();
 	}

@@ -32,7 +32,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     public static void processForEvents(List<FormulaShare_Processed_Share_Event__e> pseList, String eventContext) {
         System.debug('pseList: '+ pseList);
         context = eventContext;
-        uow = FormulaShareApplication.unitOfWork.newInstance();
+        uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
         process(pseList);
         uow.commitWork();   // Commit all DML
     }

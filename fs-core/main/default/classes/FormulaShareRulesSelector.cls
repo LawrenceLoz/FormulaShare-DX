@@ -131,7 +131,8 @@ public inherited sharing class FormulaShareRulesSelector {
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
             Contact_Access__c, Case_Access__c, Opportunity_Access__c,
             Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
-			FROM FormulaShare_Rule__mdt];
+            FROM FormulaShare_Rule__mdt
+            WHERE Object_Shared__c != null];
 
 		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
 
@@ -153,7 +154,8 @@ public inherited sharing class FormulaShareRulesSelector {
             Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
             Contact_Access__c, Case_Access__c, Opportunity_Access__c,
             Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
-			FROM FormulaShare_Rule__mdt WHERE Id = :ruleId WITH SECURITY_ENFORCED LIMIT 1];
+            FROM FormulaShare_Rule__mdt
+            WHERE Id = :ruleId WITH SECURITY_ENFORCED LIMIT 1];
 
 		return rule;
     }
