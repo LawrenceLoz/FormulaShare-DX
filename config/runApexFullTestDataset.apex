@@ -1,5 +1,5 @@
 // Generate test data
-FSSampleAppDataGenerationService.run(16);
+FSSampleAppDataGenerationService.run(730);
 
 // Schedule batch job once per day
 System.schedule('FormulaShare Job', '0 0 22 * * ? *', new FormulaShareProcessSchedulable());

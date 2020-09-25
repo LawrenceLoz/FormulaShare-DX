@@ -9,6 +9,10 @@
         <visible>true</visible>
     </applicationVisibilities>
     <classAccesses>
+        <apexClass>DMLManager</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareApplication</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -225,11 +229,19 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareUnitOfWorkDML</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareUtilities</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>FormulaShareUtilitiesTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>Test_DMLManager</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

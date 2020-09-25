@@ -146,22 +146,12 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
                 ruleType = 'child';
             }
 
+            Boolean isAccountRule = ruleToCopy.Object_Shared__c == 'Account';
+
             // Map field values from records in map
             for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
-                
-                // If standard rule, set all child fields to blank
-                if(ruleType == 'standard' && (
-                    ruleFieldValue.field == namespacePrefix + 'Child_Object_Lookup_Field__c'
-                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_Shared_To_Field__c'
-                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_Shared_To_Field_Type__c'
-                    || ruleFieldValue.field == namespacePrefix + 'Child_Object_with_Shared_To_Field__c')) {
-                    ruleFieldValue.value = null;
-                }
 
-                // If child rule, set all standard fields to blank
-                else if(ruleType == 'child' && (
-                    ruleFieldValue.field == namespacePrefix + 'Shared_To__c'
-                    || ruleFieldValue.field == namespacePrefix + 'Shared_To_Field_Type__c')) {
+                if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
                     ruleFieldValue.value = null;
                 }
 
@@ -177,6 +167,26 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         }
 
         return container;
+    }
+
+
+    private Boolean fieldShouldBeCleared(Metadata.CustomMetadataValue ruleFieldValue, String ruleType, Boolean isAccountRule) {
+
+        // Strip namespace (this is needed to support namespaced scratch orgs, which don't seem to recognise this in queried custom metadata)
+        String fieldWithoutNamespace = ruleFieldValue.field.remove(namespacePrefix);
+
+        switch on fieldWithoutNamespace {
+            when 'Child_Object_Lookup_Field__c'         { return ruleType == 'standard'; }
+            when 'Child_Object_Shared_To_Field__c'      { return ruleType == 'standard'; }
+            when 'Child_Object_Shared_To_Field_Type__c' { return ruleType == 'standard'; }
+            when 'Child_Object_with_Shared_To_Field__c' { return ruleType == 'standard'; }
+            when 'Shared_To__c'                         { return ruleType == 'child';}
+            when 'Shared_To_Field_Type__c'              { return ruleType == 'child';}
+            when 'Contact_Access__c'                    { return !isAccountRule;}
+            when 'Case_Access__c'                       { return !isAccountRule;}
+            when 'Opportunity_Access__c'                { return !isAccountRule;}
+            when else {return false;}
+        }
     }
 
 

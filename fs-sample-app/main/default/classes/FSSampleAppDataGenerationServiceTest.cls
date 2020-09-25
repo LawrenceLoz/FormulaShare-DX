@@ -6,7 +6,7 @@ public with sharing class FSSampleAppDataGenerationServiceTest {
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        FSSampleAppDataGenerationService.run();
+        FSSampleAppDataGenerationService.run(1);
 
         // Check right number of countries created
         List<FS_Sample_App_Country__mdt> countriesMeta = [SELECT DeveloperName, Finance_Manager_Role__c FROM FS_Sample_App_Country__mdt];

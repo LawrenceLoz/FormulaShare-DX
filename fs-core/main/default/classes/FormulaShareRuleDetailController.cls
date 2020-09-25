@@ -132,6 +132,12 @@ public with sharing class FormulaShareRuleDetailController {
 
     @AuraEnabled(cacheable=true)
     public static String getSampleData(String objectApiName, String fieldApiName) {
+        
+        // Return null if called without parameters set (happens when object cleared)
+        if(objectApiName == null || fieldApiName == null) {
+            return null;
+        }
+
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(objectApiName);
         Schema.SOBjectField field = FormulaShareUtilities.getSObjectFieldFromName(fieldApiName, type);
         Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};

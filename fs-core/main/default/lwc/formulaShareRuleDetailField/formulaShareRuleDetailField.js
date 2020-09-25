@@ -43,6 +43,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             }
         }
         this._objectWithShareField = value;
+        console.log('Set object with share field: '+this._objectWithShareField);
     }
     _objectWithShareField;
 
@@ -187,14 +188,13 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
-                this.updateShareFieldType('Id');
                 this.fieldTypeIsReadOnly = true;
                 break;
             case 'Public Groups':
                 console.log('updated to public groups');
                 this.shareFieldTypeOptions = [
-                    { label: 'Id of public group', value: 'Id' },
                     { label: 'Name of public group', value: 'Name' },
+                    { label: 'Id of public group', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
                 break;
@@ -203,10 +203,19 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Roles, Internal and Portal Subordinates':
                 console.log('updated to roles');
                 this.shareFieldTypeOptions = [
-                    { label: 'Id of role', value: 'Id' },
                     { label: 'Name of role', value: 'Name' },
+                    { label: 'Id of role', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
+        }
+    }
+
+    setDefaultFieldType() {
+        if(this._shareWith === 'Users') {
+            this.updateShareFieldType('Id');
+        }
+        else {
+            this.updateShareFieldType('Name');
         }
     }
 
@@ -233,6 +242,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         });
         this.dispatchEvent(evt);
         this.updateShareFieldTypeOptions();
+        this.setDefaultFieldType();
         this.setFieldOptions();
         console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
     }

@@ -42,6 +42,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     @api isEdit;
     @api shareWith;
+    @api shareFieldType;
 
 //    @track rule = {"Id":"m057E0000005OHSQA2","Access_Level__c":"Edit","Object_Shared__c":"01I7E00000108uj","Shared_To__c":"01I7E00000108uj.00N7E000009M1fs","Share_With__c":"Public Groups","Sharing_Reason__c":"Thematic_Area_Coordination_Group__c","Active__c":true,"Shared_To_Field_Type__c":"Name","Child_Object_Shared_To_Field_Type__c":"Id","MasterLabel":"Share to Theme Coordination Group","DeveloperName":"Share_to_Theme_Coordination_Group","Object_Shared__r":{"QualifiedApiName":"Donation__c","MasterLabel":"Donation","Id":"000000000000000AAA","DurableId":"01I7E00000108uj"},"Shared_To__r":{"QualifiedApiName":"Thematic_Area_Coordination_Group__c","MasterLabel":"Thematic Area Coordination Group","Id":"000000000000000AAA","DurableId":"01I7E00000108uj.00N7E000009M1fs"}};
     @track rule;
@@ -55,7 +56,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @track ruleType;
     @track relatedObjectSelected;   // Holds object|lookupField
     @track shareField;
-    @track shareFieldType;
     @track accessLevel;
     @track contactAccess;
     @track caseAccess;
@@ -131,7 +131,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
                     }
 
                     // Keep API name of related object
-                    else if(key === relatedObject) {
+                    if(key === relatedObject) {
                         this.relatedObjectApiName = objectApiNamesMap[key];
                     }
                 }
@@ -141,6 +141,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
                     this.ruleType = 'child';
                     this.objectWithShareField = this.relatedObjectApiName;
                     this.shareFieldType = data[prefix + 'Child_Object_Shared_To_Field_Type__c'];
+                    console.log('Setting shareFieldType to '+this.shareFieldType);
                 }
 
                 else {
@@ -267,17 +268,21 @@ export default class FormulaShareRuleDetail extends LightningElement {
     }
 
     handleSharedObjectChange(event) {
-        this.handleSetSharedObjectDetail(event);    // Capture object details
 
         // On change of shared object, assume that rule will be standard
         // Clear any object specific fields
         this.ruleType = 'standard';
-        this.objectWithShareField = this.sharedObjectApiName;
         this.relatedObjectSelected = null;
-        this.contactAcess = null;
-        this.caseAcess = null;
-        this.opportunityAcess = null;
-        this.fireEventWithRule();
+        this.contactAccess = null;
+        this.caseAccess = null;
+        this.opportunityAccess = null;
+
+        // Default object with share field to be the selected object (ensures field list populates)
+        this.objectWithShareField = event.detail.objectApiName;
+
+        console.log('Cleared values after shared obj change');
+
+        this.handleSetSharedObjectDetail(event);    // Capture object details
     }
 
     @track accountRelatedOwd;

@@ -20,7 +20,7 @@
     </values>
     <values>
         <field>Days_to_Retain_Batch_Logs__c</field>
-        <value xsi:type="xsd:double">31.0</value>
+        <value xsi:type="xsd:double">365.0</value>
     </values>
     <values>
         <field>Days_to_Retain_Record_Logs__c</field>
