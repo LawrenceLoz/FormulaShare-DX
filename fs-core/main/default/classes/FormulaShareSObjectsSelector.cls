@@ -39,13 +39,26 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
 
     public List<SObject> selectWithFieldsForObjectList(List<RelatedObjectDetails> rodList, Set<Id> sharedObjIdSet) {
+
         fflib_QueryFactory sharedObjQueryFactory = newQueryFactory();
+        system.debug('*SOQL before loop: '+sharedObjQueryFactory.toSOQL());
 
         // If child object sharing is required, add relationship sub-selects for fields on related objects
         for(RelatedObjectDetails rod : rodList) {
             system.debug('rod.relationshipName '+rod.relationshipName);
-            FormulaShareSObjectsSelector relatedObjSelector = new FormulaShareSObjectsSelector(true, rod.type, rod.fields);
-            
+
+            try {
+                FormulaShareSObjectsSelector relatedObjSelector = new FormulaShareSObjectsSelector(true, rod.type, rod.fields);
+                fflib_QueryFactory relatedObjQueryFactory = relatedObjSelector.addQueryFactorySubselect(sharedObjQueryFactory, rod.relationshipName);
+            }
+            catch(Exception e) {
+                e.setMessage('Issue constructing related object subquery for rule sharing object '
+                    + type.getDescribe().getName() + ' based on field in object '
+                    + rod.type.getDescribe().getName() + '. This could be due to an invalid FormulaShare rule configuration '
+                    + '(Exception: '+e.getMessage()+')');
+                throw e;
+            }
+
             // Exclude records which don't have any shared to field populated - commented out as not possible to 
             // add conditions to subselects with current fflibs version
 //            String condition = '';
@@ -58,20 +71,15 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 //                    condition = condition + ' OR ' + fieldName + ' != null';
 //                }
 //            }
-
-            fflib_QueryFactory relatedObjQueryFactory = relatedObjSelector.addQueryFactorySubselect(sharedObjQueryFactory, rod.relationshipName);
 //            relatedObjQueryFactory.setCondition(condition);
         }
-        
+
+        // Restrict to specific shared records in scope
         String sharedObjIdsString = FormulaShareUtilities.buildStringFromSetQuotes(sharedObjIdSet);
+        sharedObjQueryFactory.setCondition('Id IN (' + sharedObjIdsString + ')');
+        system.debug('SOQL with condition: '+sharedObjQueryFactory.toSOQL());
 
-        system.debug('query as soql: '+sharedObjQueryFactory.setCondition('Id IN (' + sharedObjIdsString + ')').toSOQL());
-
-        return Database.query(
-            sharedObjQueryFactory
-            .setCondition('Id IN (' + sharedObjIdsString + ')')
-            .toSOQL()
-        );
+        return Database.query(sharedObjQueryFactory.toSOQL());
     }
 
 
