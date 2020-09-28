@@ -27,6 +27,9 @@
         <titleSize>18</titleSize>
     </chart>
     <columns>
+        <field>CUST_NAME</field>
+    </columns>
+    <columns>
         <field>FormulaShare_Record_Log__c.Object__c</field>
     </columns>
     <columns>
