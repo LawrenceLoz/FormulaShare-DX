@@ -1,4 +1,1 @@
-.slds-modal__container {
-    max-width: 70rem;
-    width: 70%;
-}
+@import 'c/formulaShareCssLibrary';

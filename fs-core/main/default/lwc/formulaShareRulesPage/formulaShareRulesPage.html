@@ -60,6 +60,9 @@
     <c-formula-share-rules-list-view
         onruleload={handleRulesLoad}>
     </c-formula-share-rules-list-view>
+    <template if:true={processingRulesLoad}>
+      <lightning-spinner alternative-text="Loading" size="x-large"></lightning-spinner>
+    </template>
 
     <template if:true={rulesNotSetUp}>
       <c-formula-share-no-rules-illustration

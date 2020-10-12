@@ -70,6 +70,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
         this.dispatchEvent(new CustomEvent('close'));
     }
 
+    spinnerClasses;
     saveMethod() {
         var allValid = this.template.querySelector('c-formula-share-rule-detail').checkValidity();
 
@@ -78,9 +79,15 @@ export default class FormulaShareRuleCreate extends LightningElement {
         if(allValid) {
             console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
             this.processing = true;
+            this.spinnerClasses = 'processingMessage';
             submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
                 .then(() => {
                     console.log('submitted fsRuleString');
+
+                    // After submitting, wait 5 seconds and add class to display 
+                    setTimeout(() => {
+                        this.spinnerClasses = 'processingMessage afterProcessingMessage';
+                    }, 5000);
                 })
                 .catch(error => {
                     this.processing = false;

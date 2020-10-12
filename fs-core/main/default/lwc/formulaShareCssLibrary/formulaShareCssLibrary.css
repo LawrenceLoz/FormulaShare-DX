@@ -1,0 +1,49 @@
+.wideModal {
+    max-width: 70rem;
+    width: 70%;
+}
+
+.processingMessage::before {
+    position: absolute;
+    content: 'Updating rule metadata';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 2.5em);
+}
+
+.afterProcessingMessage::after {
+    position: absolute;
+    content: 'This can sometimes take a while... refresh to continue deployment in the background';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 4em);
+
+    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+       -moz-animation: fadein 1s; /* Firefox < 16 */
+        -ms-animation: fadein 1s; /* Internet Explorer */
+         -o-animation: fadein 1s; /* Opera < 12.1 */
+            animation: fadein 1s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

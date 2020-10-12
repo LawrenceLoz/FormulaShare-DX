@@ -23,6 +23,7 @@ export default class FormulaShareRulesPage extends LightningElement {
     @track noRules;
     @track pluralise = 's';
     @track rulesNotSetUp = false;
+    @track processingRulesLoad = true;
     handleRulesLoad(event) {
         this.noRules = event.detail;
         if(this.noRules === 0) {
@@ -37,5 +38,6 @@ export default class FormulaShareRulesPage extends LightningElement {
             this.rulesNotSetUp = false;
         }
         console.log('this.rulesNotSetUp '+ this.rulesNotSetUp);
+        this.processingRulesLoad = false;
     }
 }

@@ -10,7 +10,7 @@
             expanded-rows={currentExpanded}>
         </lightning-tree-grid>
         <template if:true={processingLoad}>
-            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="medium"></lightning-spinner>
         </template>
     </template>
 
