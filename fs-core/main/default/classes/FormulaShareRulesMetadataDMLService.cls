@@ -42,7 +42,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
             container = createRulesContainer(rulesMap);
         }
         else {
-            container = updateRulesContainer(rulesMap);
+            container = updateRulesContainer(rulesMap, type);
         }
         RuleCallback callback = new RuleCallback(type);
         Id asyncResultId = Metadata.Operations.enqueueDeployment(container, callback);
@@ -103,7 +103,7 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     }
 
 
-    public Metadata.DeployContainer updateRulesContainer(Map<String,FormulaShare_Rule__mdt> rulesMap) {
+    public Metadata.DeployContainer updateRulesContainer(Map<String,FormulaShare_Rule__mdt> rulesMap, String type) {
         
         // Build metadata API format full names and retrieve metadata
         List<String> ruleFullNames = new List<String>();
@@ -112,53 +112,40 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
             ruleFullNames.add(namespacePrefix + mdNamePrefix + recordName);
         }
         
-        List<Metadata.Metadata> records;
+        List<Metadata.Metadata> retrievedRecords;
         if(!Test.isRunningTest()) {
-            records = Metadata.Operations.retrieve(Metadata.MetadataType.CustomMetadata, ruleFullNames);
+            retrievedRecords = Metadata.Operations.retrieve(Metadata.MetadataType.CustomMetadata, ruleFullNames);
         }
         else {
-            records = testRecords;
+            retrievedRecords = testRecords;
         }
 
         // Create a metadata container for deployment
         Metadata.DeployContainer container = new Metadata.DeployContainer();
 
         // Loop through rules and assign values supplied
-        for(Metadata.Metadata record : records) {
+        for(Metadata.Metadata record : retrievedRecords) {
             Metadata.CustomMetadata rule = (Metadata.CustomMetadata) record;
 
             String ruleRecordName = rule.fullName.substringAfter('.');
-            FormulaShare_Rule__mdt ruleToCopy = rulesMap.get(ruleRecordName);
+            FormulaShare_Rule__mdt ruleNewValues = rulesMap.get(ruleRecordName);
 
             // If developer name and label are populated, set these in the metadata rule
-            if(ruleToCopy.DeveloperName != null && ruleToCopy.MasterLabel != null) {
-                rule.fullName = namespacePrefix + mdNamePrefix + ruleToCopy.DeveloperName;
-                rule.label = ruleToCopy.MasterLabel;
-                system.debug('MasterLabel: '+ruleToCopy.MasterLabel);
+            if(ruleNewValues.DeveloperName != null && ruleNewValues.MasterLabel != null) {
+                rule.fullName = namespacePrefix + mdNamePrefix + ruleNewValues.DeveloperName;
+                rule.label = ruleNewValues.MasterLabel;
+                system.debug('MasterLabel: '+ruleNewValues.MasterLabel);
                 system.debug('rule.fullName: '+rule.fullName);
             }
 
-            String ruleType;
-            if(ruleToCopy.Shared_To__c != null) {
-                ruleType = 'standard';
-            }
-            else if(ruleToCopy.Child_Object_with_Shared_To_Field__c != null) {
-                ruleType = 'child';
-            }
-
-            Boolean isAccountRule = ruleToCopy.Object_Shared__c == 'Account';
-
-            // Map field values from records in map
-            for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
-
-                if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
-                    ruleFieldValue.value = null;
+            // Set and clear other fields as appropriate
+            switch on type {
+                when 'activate', 'deactivate' {
+                    rule = mapAllFields(rule, ruleNewValues);
                 }
-
-                // Otherwise, check to see if a value for this field was supplied
-                else if(ruleToCopy.get(ruleFieldValue.field) != null) {
-                    system.debug('adding '+ruleFieldValue.field+' setting to : '+ruleToCopy.get(ruleFieldValue.field));
-                    ruleFieldValue.value = ruleToCopy.get(ruleFieldValue.field);
+                when 'edit' {
+                    rule = mapAllFields(rule, ruleNewValues);
+                    rule = clearInvalidFields(rule, ruleNewValues);
                 }
             }
 
@@ -167,6 +154,47 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         }
 
         return container;
+    }
+
+
+    private Metadata.CustomMetadata mapAllFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
+
+        // Loop through field values
+        for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
+
+            // If a value for this field was supplied, set this in the rule
+            if(ruleNewValues.get(ruleFieldValue.field) != null) {
+                system.debug('adding '+ruleFieldValue.field+' setting to : '+ruleNewValues.get(ruleFieldValue.field));
+                ruleFieldValue.value = ruleNewValues.get(ruleFieldValue.field);
+            }
+        }
+        return rule;
+    }
+
+
+    private Metadata.CustomMetadata clearInvalidFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
+        String ruleType;
+        if(ruleNewValues.Shared_To__c != null) {
+            ruleType = 'standard';
+        }
+        else if(ruleNewValues.Child_Object_with_Shared_To_Field__c != null) {
+            ruleType = 'child';
+        }
+
+        System.debug('ruleNewValues: '+ruleNewValues);
+        System.debug('ObjectShared: '+ruleNewValues.Object_Shared__c);
+
+        Boolean isAccountRule = ruleNewValues.Object_Shared__c == 'Account';
+
+        // Loop through field values
+        for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
+
+            // Clear field if it's not valid for this kind of rule
+            if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
+                ruleFieldValue.value = null;
+            }
+        }
+        return rule;
     }
 
 

@@ -42,7 +42,7 @@ public with sharing class FormulaShareRulesMetadataDMLServiceTest {
         Metadata.DeployContainer containerForTest = service.createRulesContainer(ruleMap);
         service.testRecords = containerForTest.getMetadata();
 
-        Metadata.DeployContainer container = service.updateRulesContainer(ruleMap);
+        Metadata.DeployContainer container = service.updateRulesContainer(ruleMap, 'edit');
 
         List<Metadata.Metadata> contents = container.getMetadata();
         System.assertEquals(1, contents.size(), 'Expected one rule in deployment container');
