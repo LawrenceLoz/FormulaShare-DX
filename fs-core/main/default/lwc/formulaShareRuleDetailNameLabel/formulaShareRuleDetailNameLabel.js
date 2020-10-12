@@ -9,19 +9,19 @@ export default class FormulaShareRuleDetailNameLabel extends LightningElement {
 
     // If name is blank, replace with label with special characters replaced with underscores
     autoPopulateName() {
-        console.log('autopop username');
+        //console.log('autopop username');
         if(!this.ruleName && this.ruleLabel) {
-            console.log(this.ruleLabel.replace(/[^a-zA-Z0-9]/g,'_').replace(/_{2,}/g,'_'));
+            //console.log(this.ruleLabel.replace(/[^a-zA-Z0-9]/g,'_').replace(/_{2,}/g,'_'));
             this.ruleName = this.ruleLabel.replace(/[^a-zA-Z0-9]/g,'_').replace(/_{2,}/g,'_');
 
             // Remove leading underscore if needed
-            console.log('first char ' +this.ruleName.charAt(0));
+            //console.log('first char ' +this.ruleName.charAt(0));
             if(this.ruleName.charAt(0) === '_') {
                 this.ruleName = this.ruleName.substring(1);
             }
 
             // Remove final underscore if needed
-            console.log('last char ' +this.ruleName.charAt(this.ruleName.length -1));
+            //console.log('last char ' +this.ruleName.charAt(this.ruleName.length -1));
             if(this.ruleName.charAt(this.ruleName.length -1) === '_') {
                 this.ruleName = this.ruleName.substring(0, this.ruleName.length -1);
             }
@@ -68,13 +68,13 @@ export default class FormulaShareRuleDetailNameLabel extends LightningElement {
 
     @api
     checkValidity() {
-        console.log('checking name valid ');
+        //console.log('checking name valid ');
         const arr = [...this.template.querySelectorAll('lightning-input')];
         arr.concat([...this.template.querySelectorAll('lightning-textarea')]);
-        console.log('arr '+JSON.stringify(arr));
+        //console.log('arr '+JSON.stringify(arr));
         const allValid = arr
             .reduce((validSoFar, inputCmp) => {
-                console.log('inputCmp '+JSON.stringify(inputCmp));
+                //console.log('inputCmp '+JSON.stringify(inputCmp));
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
             }, true);

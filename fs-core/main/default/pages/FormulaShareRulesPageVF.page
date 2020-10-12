@@ -27,11 +27,9 @@
                 appendMessageTypeToURL: false
             });
 
-            console.log('before handshake')
             $.cometd.websocketEnabled = false;
 
             $.cometd.handshake();
-            console.log('before addListener');
 
             // Subscribe to DML and list update events and reload page when required
             $.cometd.addListener('/meta/handshake', function (message) {

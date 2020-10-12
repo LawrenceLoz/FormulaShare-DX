@@ -66,27 +66,27 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     @api
     checkValidity() {
-        console.log('checking validity');
+        //console.log('checking validity');
         var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
         var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
         var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
         var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
         var ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
-        console.log('ruleDetailValid '+ruleDetailValid);
+        //console.log('ruleDetailValid '+ruleDetailValid);
         return ruleDetailValid;
     }
 
     connectedCallback() {
         refreshApex(this.ruleDetails);
-        console.log('refreshing!');
+        //console.log('refreshing!');
     }
 
         
     populateRule() {
-        console.log('_ruleId '+this._ruleid);
+        //console.log('_ruleId '+this._ruleid);
         getSpecificRule({ ruleId : this._ruleId })
         .then((data) => {
-            console.log('retrieved rule: '+JSON.stringify(data));
+            //console.log('retrieved rule: '+JSON.stringify(data));
             var prefix = '';
             if(data.sdfs__Object_Shared__c) {
                 prefix = 'sdfs__';
@@ -114,16 +114,16 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 objectsToCheck.push(relatedObject);
             }
 
-            console.log('objects to check: '+JSON.stringify(objectsToCheck));
+            //console.log('objects to check: '+JSON.stringify(objectsToCheck));
             
             // Call apex to get API names for the entity IDs held on rule metadata
             getObjectApiNames({ objectEntityIds : objectsToCheck })
             .then((objectApiNamesMap) => {
-                console.log('objectApiNamesMap: '+JSON.stringify(objectApiNamesMap));
+                //console.log('objectApiNamesMap: '+JSON.stringify(objectApiNamesMap));
 
                 // Iterate objects with details returned
                 for(var key in objectApiNamesMap){
-                    console.log('objectApiName: '+key,objectApiNamesMap[key]);
+                    //console.log('objectApiName: '+key,objectApiNamesMap[key]);
 
                     // Set API name of shared object
                     if(key === objectShared) {
@@ -141,7 +141,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
                     this.ruleType = 'child';
                     this.objectWithShareField = this.relatedObjectApiName;
                     this.shareFieldType = data[prefix + 'Child_Object_Shared_To_Field_Type__c'];
-                    console.log('Setting shareFieldType to '+this.shareFieldType);
+                    //console.log('Setting shareFieldType to '+this.shareFieldType);
                 }
 
                 else {
@@ -165,43 +165,43 @@ export default class FormulaShareRuleDetail extends LightningElement {
                     fieldsToCheck.push(lookupFieldRelated);
                 }
 
-                console.log('fieldsToCheck: '+ JSON.stringify(fieldsToCheck));
+                //console.log('fieldsToCheck: '+ JSON.stringify(fieldsToCheck));
                 
                 // Call apex to get API names
                 getFieldApiNames({ fieldEntityIds : fieldsToCheck })
                 .then((fieldApiNamesMap) => {
 
-                    console.log('field names: '+fieldApiNamesMap);
+                    //console.log('field names: '+fieldApiNamesMap);
 
                     for(var key in fieldApiNamesMap) {
-                        console.log('key',key);
+                        //console.log('key',key);
 
                         // Set share to field based on what's set in rule
                         if(key === sharedToField || key === sharedToFieldRelated) {
                             this.shareField = fieldApiNamesMap[key];
-                            console.log('this.shareField: '+this.shareField);
+                            //console.log('this.shareField: '+this.shareField);
                         }
 
                         // Set related object selected based on what's set in rule
                         if(key === lookupFieldRelated) {
                             this.relatedObjectSelected = this.relatedObjectApiName + '|' + fieldApiNamesMap[key];
-                            console.log('this.relatedObjectSelected: '+this.relatedObjectSelected);
+                            //console.log('this.relatedObjectSelected: '+this.relatedObjectSelected);
                         }
                     }
 
                     this.fireEventWithRule();
                 })
                 .catch(error => {
-                    console.log('Error building field map ',JSON.stringify(error));
+                    //console.log('Error building field map ',JSON.stringify(error));
                 });
 
             })
             .catch(error => {
-                console.log('Error building object map ',JSON.stringify(error));
+                //console.log('Error building object map ',JSON.stringify(error));
             });
         })
         .catch(error => {
-            console.log('Error retrieving rule details from Salesforce',JSON.stringify(error));
+            //console.log('Error retrieving rule details from Salesforce',JSON.stringify(error));
             this.showError(error, 'Error retrieving rule details from Salesforce');
         });
     }
@@ -256,7 +256,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     // Called directly on component load to pass back shared object information
     handleSetSharedObjectDetail(event) {
-        console.log('handling handleSetSharedObjectDetail event ',event.detail);
+        //console.log('handling handleSetSharedObjectDetail event ',event.detail);
         this.sharedObject = event.detail;
 
         // Fire event for create component to disable button
@@ -280,7 +280,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         // Default object with share field to be the selected object (ensures field list populates)
         this.objectWithShareField = event.detail.objectApiName;
 
-        console.log('Cleared values after shared obj change');
+        //console.log('Cleared values after shared obj change');
 
         this.handleSetSharedObjectDetail(event);    // Capture object details
     }
@@ -319,7 +319,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.fireEventWithRule();
     }
     handleShareWithChange(event) {
-        console.log('sharewith change');
+        //console.log('sharewith change');
         this.shareWith = event.detail;
         this.fireEventWithRule();
     }
@@ -341,7 +341,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     }
     handleCaseAccessChange(event) {
         this.caseAccess = event.detail;
-        console.log('case access change: '+JSON.stringify(event.detail));
+        //console.log('case access change: '+JSON.stringify(event.detail));
         this.fireEventWithRule();
     }
     handleOpportunityAccessChange(event) {
@@ -357,7 +357,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     
     // Called to trigger a toast message including a system error
     showError(error, toastTitle) {
-        console.log('Error received: ' + JSON.stringify(error));
+        //console.log('Error received: ' + JSON.stringify(error));
 
         let errorMessage = 'Unknown error';
         if (Array.isArray(error.body)) {

@@ -18,7 +18,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
         const messageCallback = (response) => {
             this.processing = false;
             if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
-                console.log('Create Successful');
+                //console.log('Create Successful');
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'FormulaShare Rule created',
@@ -29,7 +29,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
             }
 
             else {
-                console.log('Create Failed');
+                //console.log('Create Failed');
                 var errorMessage;
                 if(response.data.payload.sdfs__Error__c) {
                     errorMessage = response.data.payload.sdfs__Error__c
@@ -52,11 +52,11 @@ export default class FormulaShareRuleCreate extends LightningElement {
             .then((prefix) => {
                 // Invoke subscribe method of empApi. Pass reference to messageCallback
                 subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, messageCallback).then(response => {
-                    console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                    //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
                 });
             })
             .catch(error => {
-                console.log('Error getting namespace prefix');
+                //console.log('Error getting namespace prefix');
                 this.showError(error, 'Error getting namespace prefix');
             });
     }
@@ -74,15 +74,15 @@ export default class FormulaShareRuleCreate extends LightningElement {
     saveMethod() {
         var allValid = this.template.querySelector('c-formula-share-rule-detail').checkValidity();
 
-        console.log('allValid '+ allValid);
+        //console.log('allValid '+ allValid);
 
         if(allValid) {
-            console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
+            //console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
             this.processing = true;
             this.spinnerClasses = 'processingMessage';
             submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
                 .then(() => {
-                    console.log('submitted fsRuleString');
+                    //console.log('submitted fsRuleString');
 
                     // After submitting, wait 5 seconds and add class to display 
                     setTimeout(() => {
@@ -91,7 +91,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
                 })
                 .catch(error => {
                     this.processing = false;
-                    console.log('Error saving rule: '+error);
+                    //console.log('Error saving rule: '+error);
                     this.dispatchEvent(
                         new ShowToastEvent({
                             title: 'Error saving rule',

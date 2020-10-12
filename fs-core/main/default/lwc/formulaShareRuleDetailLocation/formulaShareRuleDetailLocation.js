@@ -18,7 +18,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         }
     }
     get isChild() {
-        console.log('checking whether std ',this.ruleType);
+        //console.log('checking whether std ',this.ruleType);
         if(this.ruleType === 'child') {
             return true;
         }
@@ -47,7 +47,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     @wire(getChildRelationships, { parentObjectAPIName : '$sharedObjectApiName'} )
         childRelationships({ error, data }) {
             if(data) {
-                console.log('getting related for '+this.sharedObjectApiName);
+                //console.log('getting related for '+this.sharedObjectApiName);
                 
                 let relatedObjList = [];
                 data.forEach((obj) => {
@@ -60,7 +60,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
 
                 // Manage enabling / disabling related object option
                 var relatedOptionDisabled = this.template.querySelectorAll('input')[1].disabled;
-                console.log('relatedOptionDisabled ', relatedOptionDisabled);
+                //console.log('relatedOptionDisabled ', relatedOptionDisabled);
                 if(relatedObjList.length === 0 && !relatedOptionDisabled) {
                     this.template.querySelectorAll('input')[1].disabled = true;
                 }
@@ -80,7 +80,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     handleRelatedObjectChange(event) {
         this.relatedObjectSelected = event.detail.value;
         this.relatedObjectApiName = this.getRelationshipSelected().objectApiName;
-        console.log('changed to ', this.relatedObjectApiName);
+        //console.log('changed to ', this.relatedObjectApiName);
 
         const relationshipDetail = {
             relatedObjectSelected: this.relatedObjectSelected,
@@ -96,12 +96,12 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     // Custom validation to check that related object selected when needed
     @api
     checkValidity() {
-        console.log('checking location valid');
+        //console.log('checking location valid');
         var relatedObjCmp = this.template.querySelector('lightning-combobox');
-        console.log('relatedObjCmp '+relatedObjCmp);
-        console.log('this.relatedObjectSelected '+this.relatedObjectSelected );
+        //console.log('relatedObjCmp '+relatedObjCmp);
+        //console.log('this.relatedObjectSelected '+this.relatedObjectSelected );
         if(relatedObjCmp && !this.relatedObjectSelected) {
-            console.log('checking location valid');
+            //console.log('checking location valid');
             relatedObjCmp.setCustomValidity('Complete this field.');
             relatedObjCmp.reportValidity();
             return false;

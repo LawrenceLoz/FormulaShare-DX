@@ -69,7 +69,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     get accountRelatedOwd() {}
     set accountRelatedOwd(value) {
         this._accountRelatedOwd = value;
-        console.log('accountrelated OWD: ' +JSON.stringify(this._accountRelatedOwd));
+        //console.log('accountrelated OWD: ' +JSON.stringify(this._accountRelatedOwd));
         this.assessAccountRelatedAccess();
     }
     _accountRelatedOwd;
@@ -105,7 +105,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
             }, true);
-        console.log('Access valid: '+allValid);
+        //console.log('Access valid: '+allValid);
         return allValid;
     }
 
@@ -119,7 +119,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     connectedCallback() {
         getClassicDomain()
         .then((domainName) => {
-            console.log('found dom '+domainName);
+            //console.log('found dom '+domainName);
             this.classicDomain = domainName;
             this.buildSharingReasonsSetupLink();
         });
@@ -191,7 +191,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     updateRelatedAccess(type, value) {
         switch (type) {
             case 'contact':
-                console.log('contact access updated');
+                //console.log('contact access updated');
                 this.contactAccess = value;
                 break;
             case 'case':
@@ -278,20 +278,20 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
 //    // Check that a share record can be instantiated with this reason
 //    handleSharingReasonValidation(event) {
-//        console.log('event '+JSON.stringify(event));
+//        //console.log('event '+JSON.stringify(event));
 //
-//        console.log('id and reason ' + this.sharedObjectApiName, this.sharingReason);
+//        //console.log('id and reason ' + this.sharedObjectApiName, this.sharingReason);
 //
 //        validateShareable({ objectApiName : this.sharedObjectApiName, sharingReason : this.sharingReason})
 //        .then((isShareable) => {
-//            console.log('isShareable '+isShareable);
+//            //console.log('isShareable '+isShareable);
 //
 //            // Find attribute by custom data-* attribtue as this is available in the DOM
 //            let sharingReasonField = this.template.querySelector("[data-id='sharingReason']");
 //
 //            // Show error if share cannot be created with this reason
 //            if(isShareable) {
-//                console.log('setting valitity');
+//                //console.log('setting valitity');
 //                sharingReasonField.setCustomValidity("No sharing reason found with this name");
 //                sharingReasonField.reportValidity();
 //            }
@@ -302,7 +302,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 //            }
 //        })
 //        .catch(error => {
-//            console.log('Error checking shareable ',JSON.stringify(error));
+//            //console.log('Error checking shareable ',JSON.stringify(error));
 //        });
 //        
 //    }
@@ -316,7 +316,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         this.reasons = value;
         const { data, error } = value;
         if(data) {
-            console.log('retrieved options: '+JSON.stringify(data));
+            //console.log('retrieved options: '+JSON.stringify(data));
 
             this.sharingReasonOptions = [];
             this.oneOrMoreReasons = false;
@@ -335,7 +335,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     
     
     refreshReasons() {
-        console.log('Getting more reasons');
+        //console.log('Getting more reasons');
         this.loadingReasons = true;
         refreshApex(this.reasons)
         .then(() => {

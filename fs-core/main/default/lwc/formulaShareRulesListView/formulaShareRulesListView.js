@@ -119,8 +119,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
-            console.log('this.treeItems: '+JSON.stringify(this.treeItems));
-            console.log('loading data');
+            //console.log('this.treeItems: '+JSON.stringify(this.treeItems));
+            //console.log('loading data');
 
             this.setColumns();
             this.countRows(tempjson);
@@ -142,7 +142,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
 
         else if(error) {
-            console.log('Error fetching data from Salesforce');
+            //console.log('Error fetching data from Salesforce');
             this.showError(error, 'Error fetching data from Salesforce');
         }
     }
@@ -169,7 +169,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         const evt = new CustomEvent('ruleload', {
             detail: noRules
         });
-        console.log('noRules '+noRules);
+        //console.log('noRules '+noRules);
         this.dispatchEvent(evt);
     }
 
@@ -195,32 +195,32 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         // Get namespace prefix
         getNamespacePrefix()
             .then((prefix) => {
-                console.log('Got namespace: '+prefix);
+                //console.log('Got namespace: '+prefix);
 
                 // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
-                    console.log('Received Refresh Event');
+                    //console.log('Received Refresh Event');
                     this.refreshView();
                 };
                 subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
-                    console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                    //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
                 });
 
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
                     if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
-                        console.log('Received FormulaShare_Rule_DML__e');
+                        //console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
                     }
                 };
                 subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
-                    console.log('List component subscribed to : ', JSON.stringify(response.channel));
+                    //console.log('List component subscribed to : ', JSON.stringify(response.channel));
                 });
 
             })
             .catch(error => {
-                console.log('Error getting namespace prefix');
+                //console.log('Error getting namespace prefix');
                 this.showError(error, 'Error getting namespace prefix');
             });
     }
@@ -231,7 +231,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         const rowApiName = row['objectApiName'];
 
         // Check the retention days before populating (this is used in an action label)
-        console.log('loading actions');
+        //console.log('loading actions');
 
         const actions =[];
         const isActive = row['active'];
@@ -277,7 +277,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             doneCallback(actions);
         }, 200);
 
-        console.log('loaded actions');
+        //console.log('loaded actions');
     }
 
 
@@ -292,7 +292,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
 
-        console.log('action: '+actionName);
+        //console.log('action: '+actionName);
 
         switch (actionName) {
             case 'recalculate':
@@ -314,7 +314,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     scheduleWarningsUrl;
     openScheduleModal = false;
     doOpenScheduleModal() {
-        console.log('opening schedule modal');
+        //console.log('opening schedule modal');
         this.openScheduleModal = true;
     }
     closeScheduleModal() {
@@ -324,8 +324,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Action method to trigger FormulaShareBatch for the specified object
     submitForRecalc(row) {
 
-        console.log('last calc: ' + row['batchIsProcessing']);
-        console.log('key: ' + row['key']);
+        //console.log('last calc: ' + row['batchIsProcessing']);
+        //console.log('key: ' + row['key']);
 
         if(row['batchIsProcessing']) {
             return this.dispatchEvent(
@@ -346,7 +346,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.refreshView();
             })
             .catch(error => {
-                console.log('Error submitting for recalculation');
+                //console.log('Error submitting for recalculation');
                 this.showError(error, 'Error submitting for recalculation')
             });
     }
@@ -372,7 +372,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 }, 5000);
             })
             .catch(error => {
-                console.log('Error changing activation status');
+                //console.log('Error changing activation status');
                 this.showError(error, 'Error changing activation status')
             });
     }
@@ -425,7 +425,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     @track openModal
     @track rowRuleId
     editRule(row) {
-        console.log('row: ' + JSON.stringify(row));
+        //console.log('row: ' + JSON.stringify(row));
         this.rowRuleId = row['ruleId'];
         this.openModal = true;
     }

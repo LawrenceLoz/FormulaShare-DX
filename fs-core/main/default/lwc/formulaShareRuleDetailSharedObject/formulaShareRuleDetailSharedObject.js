@@ -81,14 +81,14 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
                 .then((contactControlledByAccount) => {
 
                     // Set contact related sharing if controlled by parent
-                    console.log('controlled by account: '+contactControlledByAccount);
+                    //console.log('controlled by account: '+contactControlledByAccount);
                     if(contactControlledByAccount) {
                         this.contactAccess = 'ControlledByParent';
                     }
 
                     // Build list of options to populate in shared object dropdown
                     this.shareableObjectOptions = [];
-                    console.log('geting shared objects');
+                    //console.log('geting shared objects');
                     data.forEach((obj) => {
                         this.apiNameToObjectDetailsMap.set(obj.objectApiName, obj);
 
@@ -139,7 +139,7 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             }
 
             else if(error) {
-                console.log('error '+ JSON.stringify(error));
+                //console.log('error '+ JSON.stringify(error));
             }
         }
 

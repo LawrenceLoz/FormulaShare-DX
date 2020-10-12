@@ -43,7 +43,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             }
         }
         this._objectWithShareField = value;
-        console.log('Set object with share field: '+this._objectWithShareField);
+        //console.log('Set object with share field: '+this._objectWithShareField);
     }
     _objectWithShareField;
 
@@ -54,7 +54,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     set shareWith(value) {
         // Update options for field type if necessary
         if(this._shareWith != value) {
-            console.log('setting share with: ',value);
+            //console.log('setting share with: ',value);
             this._shareWith = value;
             this.updateShareFieldTypeOptions();
         }
@@ -127,7 +127,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.shareFieldOptions = value;
         const { data, error } = value;
         if(data) {
-            console.log('getting fields for '+this._objectWithShareField);
+            //console.log('getting fields for '+this._objectWithShareField);
 
             // Refresh lists in case previously populated from another object
             this.fieldsMap.clear();
@@ -152,12 +152,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.updateFieldDetails();
         }
         else if(error) {
-            console.log('Error getting fields for object ',JSON.stringify(error));
+            //console.log('Error getting fields for object ',JSON.stringify(error));
         }
     }
 
     refreshFields() {
-        console.log('refreshing');
+        //console.log('refreshing');
         this.loadingFields = true;
         refreshApex(this.shareFieldOptions)
         .then(() => {
@@ -168,11 +168,11 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     // Set options to include id fields (user lookups) only if "Users" selected
     setFieldOptions() {
         if(this.shareWith === 'Users') {
-            console.log('setting to full list ',this.fullFieldList);
+            //console.log('setting to full list ',this.fullFieldList);
             this.fieldOptions = this.fullFieldList;
         }
         else {
-            console.log('setting to names only list ',this.namesOnlyFieldList);
+            //console.log('setting to names only list ',this.namesOnlyFieldList);
             this.fieldOptions = this.namesOnlyFieldList;
         }
         this.loadingFields = false;
@@ -181,17 +181,17 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     @track shareFieldTypeOptions;
     @track fieldTypeIsReadOnly;
     updateShareFieldTypeOptions() {
-        console.log('this._shareWith ',this._shareWith);
+        //console.log('this._shareWith ',this._shareWith);
         switch (this._shareWith) {
             case 'Users':
-                console.log('updated to users');
+                //console.log('updated to users');
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
                 this.fieldTypeIsReadOnly = true;
                 break;
             case 'Public Groups':
-                console.log('updated to public groups');
+                //console.log('updated to public groups');
                 this.shareFieldTypeOptions = [
                     { label: 'Name of public group', value: 'Name' },
                     { label: 'Id of public group', value: 'Id' },
@@ -201,7 +201,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Roles':
             case 'Roles and Internal Subordinates':
             case 'Roles, Internal and Portal Subordinates':
-                console.log('updated to roles');
+                //console.log('updated to roles');
                 this.shareFieldTypeOptions = [
                     { label: 'Name of role', value: 'Name' },
                     { label: 'Id of role', value: 'Id' },
@@ -236,7 +236,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
     handleShareWithChange(event) {
         this._shareWith = event.detail.value;
-        console.log('share with changed: ',this._shareWith);
+        //console.log('share with changed: ',this._shareWith);
         const evt = new CustomEvent('sharewithchange', {
             detail: this._shareWith
         });
@@ -244,7 +244,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.updateShareFieldTypeOptions();
         this.setDefaultFieldType();
         this.setFieldOptions();
-        console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
+        //console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
     }
 
     handleShareFieldChange(event) {
@@ -271,13 +271,13 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.fieldFormula = null;
             this.viewFieldDetails = null;
             this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
-            console.log('cleared text '+this.fieldDetailsToggleText);
+            //console.log('cleared text '+this.fieldDetailsToggleText);
         }
 
         // Otherwise, if field details map is built then set details for this field
         else if(this.fieldsMap.get(this._shareField)) {
             var fieldOption = this.fieldsMap.get(this._shareField);
-            console.log('fieldOption: '+JSON.stringify(fieldOption));
+            //console.log('fieldOption: '+JSON.stringify(fieldOption));
             this.fieldType = fieldOption.type;
             this.fieldFormula = fieldOption.formula;
         }
@@ -313,7 +313,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
         else if(error) {
             this.fieldSample = error.body.message;   // Show warning message inside box - consider using a warning popover box in future
-            console.log(JSON.stringify(error));
+            //console.log(JSON.stringify(error));
         }
         this.loadingSample = false;
     }
@@ -337,7 +337,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 inputCmp.reportValidity();
                 return validSoFar && inputCmp.checkValidity();
             }, true);
-        console.log('Detail field valid? '+allValid);
+        //console.log('Detail field valid? '+allValid);
         return allValid;
     }
 

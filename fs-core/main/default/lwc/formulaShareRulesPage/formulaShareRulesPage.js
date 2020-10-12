@@ -37,7 +37,7 @@ export default class FormulaShareRulesPage extends LightningElement {
             this.pluralise = 's';
             this.rulesNotSetUp = false;
         }
-        console.log('this.rulesNotSetUp '+ this.rulesNotSetUp);
+        //console.log('this.rulesNotSetUp '+ this.rulesNotSetUp);
         this.processingRulesLoad = false;
     }
 }
