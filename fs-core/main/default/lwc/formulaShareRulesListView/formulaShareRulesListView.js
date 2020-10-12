@@ -197,7 +197,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             .then((prefix) => {
                 //console.log('Got namespace: '+prefix);
 
-                // Scubscribe to list update events (raised by batch job and on rule activate/deactivate)
+                // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
                     //console.log('Received Refresh Event');
                     this.refreshView();
@@ -324,9 +324,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Action method to trigger FormulaShareBatch for the specified object
     submitForRecalc(row) {
 
-        //console.log('last calc: ' + row['batchIsProcessing']);
-        //console.log('key: ' + row['key']);
-
+        // Check whether recalculation in progress, show error and return if so
         if(row['batchIsProcessing']) {
             return this.dispatchEvent(
                 new ShowToastEvent({
@@ -337,14 +335,32 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             );
         }
 
-        const rowApiName = row['objectApiName'];
-        const rowObjectLabel = row['key'];
+        // Update tree items to show that recalculation has been submitted
+        var newTreeItems = JSON.parse(JSON.stringify(this.treeItems));
+        for(var rowNo in newTreeItems) {
 
+            // If object matches the one clicked...
+            if(newTreeItems[rowNo].key === row['key']) {
+
+                // Set flag indicating processing started
+                newTreeItems[rowNo].batchIsProcessing = true;
+
+                // Update processing status to show this is submitted
+                for(var ruleRowNo in newTreeItems[rowNo]._children) {
+                    newTreeItems[rowNo]._children[ruleRowNo].lastCalcStatus = 'Processing...';
+                    newTreeItems[rowNo]._children[ruleRowNo].iconName = 'standard:product_transfer';
+                    newTreeItems[rowNo]._children[ruleRowNo].iconAlt = 'Currently Processing';
+                }
+            }
+        }
+        this.treeItems = newTreeItems;
+
+        //console.log('last calc: ' + row['batchIsProcessing']);
+        //console.log('key: ' + row['key']);
+
+        // Submit object for processing
+        const rowApiName = row['objectApiName'];
         recalculateSharing({ objectApiName : rowApiName })
-            .then(() => {
-                // Refresh table to reflect processing status
-                this.refreshView();
-            })
             .catch(error => {
                 //console.log('Error submitting for recalculation');
                 this.showError(error, 'Error submitting for recalculation')

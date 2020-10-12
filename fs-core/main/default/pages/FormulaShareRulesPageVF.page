@@ -41,10 +41,10 @@
                     window.location.reload();
                 });
                 // Managed package namespace event listeners
-                $.cometd.subscribe('/event/sfds__FormulaShare_Rule_DML__e', function (message) {
+                $.cometd.subscribe('/event/sdfs__FormulaShare_Rule_DML__e', function (message) {
                     window.location.reload();
                 });
-                $.cometd.subscribe('/event/sfds__FormulaShare_List_Update__e', function (message) {
+                $.cometd.subscribe('/event/sdfs__FormulaShare_List_Update__e', function (message) {
                     window.location.reload();
                 });
             });
