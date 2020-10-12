@@ -1,84 +1,74 @@
 <template>
 
-    <div class="slds-page-header">
-        <div class="slds-page-header__row">
-          <div class="slds-page-header__col-title">
-            <div class="slds-media">
-                <span class="highlights-icon-container slds-avatar slds-m-right_small icon">
-                  <img src={rulesPageIcon} title="FormulaShare Rules">
-<!--
-                  <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
-                    <use xlink:href="/assets/icons/standard-sprite/svg/symbols.svg#custom"></use>
-                  </svg>  -->
-                </span>
-              <div class="slds-media__body">
-                <div class="slds-page-header__name">
-                  <div class="slds-page-header__name-title">
-                    <h1>
-                      <span class="slds-page-header__title slds-truncate" title="FormulaShare Rules">
-                        FormulaShare Rules
-                      </span>
-                    </h1>
-                    <p class="slds-page-header__meta-text slds-text-body--small slds-m-top_xxx-small">
-                        {noRules} item{pluralise}
-                    </p>
-                </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="slds-page-header__col-actions">
-            <div class="slds-page-header__controls">
-              <div class="slds-page-header__control">
-                <ul class="slds-button-group">
-                  <template if:false={rulesNotSetUp}>
-                    <lightning-button 
-                        class="slds-button"
-                        variant="neutral"
-                        label="About" 
-                        onclick={handleAbout}>
-                    </lightning-button>
-                    <lightning-button 
-                        class="slds-button slds-p-left_xx-small"
-                        variant="neutral"
-                        label="New Rule" 
-                        onclick={handleNewRule}>
-                    </lightning-button>
-                  </template>
-                </ul>
+  <div class="slds-page-header">
+    <div class="slds-page-header__row">
+      <div class="slds-page-header__col-title">
+        <div class="slds-media">
+          <span class="highlights-icon-container slds-avatar slds-m-right_small icon">
+            <img src={rulesPageIcon} title="FormulaShare Rules">
+          </span>
+          <div class="slds-media__body">
+            <div class="slds-page-header__name">
+              <div class="slds-page-header__name-title">
+                <h1>
+                  <span class="slds-page-header__title slds-truncate" title="FormulaShare Rules">
+                    FormulaShare Rules
+                  </span>
+                </h1>
+                <p class="slds-page-header__meta-text slds-text-body--small slds-m-top_xxx-small">
+                  {noRules} item{pluralise}
+                </p>
               </div>
             </div>
           </div>
         </div>
-<!--        <div class="slds-page-header__row">
-          <div class="slds-page-header__col-meta">
-            <p class="slds-page-header__meta-text slds-text-body--small">{noRules} items</p>
+      </div>
+      <div class="slds-page-header__col-actions">
+        <div class="slds-page-header__controls">
+          <div class="slds-page-header__control">
+            <ul class="slds-button-group">
+
+              <lightning-button 
+                class="slds-button" 
+                variant="base" 
+                label="Help & About" 
+                onclick={handleAbout}>
+              </lightning-button>
+
+              <template if:false={rulesNotSetUp}>
+                <lightning-button 
+                  class="slds-button slds-p-left_x-small" 
+                  variant="neutral" 
+                  label="New Rule"
+                  onclick={handleNewRule}>
+                </lightning-button>
+              </template>
+
+            </ul>
           </div>
-        </div>  -->
+        </div>
+      </div>
     </div>
+  </div>
 
-    <c-formula-share-rules-list-view
-        onruleload={handleRulesLoad}>
-    </c-formula-share-rules-list-view>
-    <template if:true={processingRulesLoad}>
-      <lightning-spinner alternative-text="Loading" size="x-large"></lightning-spinner>
-    </template>
+  <c-formula-share-rules-list-view onruleload={handleRulesLoad}>
+  </c-formula-share-rules-list-view>
+  <template if:true={processingRulesLoad}>
+    <lightning-spinner alternative-text="Loading" size="x-large"></lightning-spinner>
+  </template>
 
-    <template if:true={rulesNotSetUp}>
-      <c-formula-share-no-rules-illustration
-        onnewrule={handleNewRule}>
-      </c-formula-share-no-rules-illustration>
-    </template>
+  <template if:true={rulesNotSetUp}>
+    <c-formula-share-no-rules-illustration onnewrule={handleNewRule}>
+    </c-formula-share-no-rules-illustration>
+  </template>
 
-    <template if:true={openAboutModal}>
-      <c-formula-share-about
-        onclose={closeAboutModal}>
-      </c-formula-share-about>
-    </template>
+  <template if:true={openAboutModal}>
+    <c-formula-share-about onclose={closeAboutModal}>
+    </c-formula-share-about>
+  </template>
 
-    <template if:true={openNewRuleModal}>
-        <c-formula-share-rule-create 
-            onclose={closeNewRuleModal}>
-        </c-formula-share-rule-create>
-    </template>
+  <template if:true={openNewRuleModal}>
+    <c-formula-share-rule-create onclose={closeNewRuleModal}>
+    </c-formula-share-rule-create>
+  </template>
 </template>
