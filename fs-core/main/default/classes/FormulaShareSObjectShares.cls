@@ -59,6 +59,7 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
         List<SObject> shares = Records;
 
         // Check that object can be created by current or requesting user (or bypass if this is a test run)
+        // Note there's no need to check field security as this can't be set on share records
         if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
             // Insert the sharing record
             // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
