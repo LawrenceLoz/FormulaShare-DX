@@ -74,7 +74,6 @@ public with sharing class FormulaShareRulesListViewController {
             rulesMap.put(rule.developerName, rule);
             
             List<RuleWrapper> rwList;
-            system.debug('Shared_To__c: '+rule.sharedToFieldToken);
 
             String objectName = rule.objectSharedAPIName;
 
@@ -92,7 +91,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.tableLabel = rule.label;
             rw.label = rule.label;
             rw.objectLabel = rule.objectSharedLabel;
-            rw.controllingObject = rule.controllingObjectLabelForRuleType;
+            rw.controllingObject = rule.controllingObjectLabel;
             rw.shareWith = rule.shareWith;
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
@@ -102,19 +101,19 @@ public with sharing class FormulaShareRulesListViewController {
             rw.setMetricsDetails(objectName, metricsMap);
 
             // Set URL for shared to field if populated
-            if(!String.isBlank(rule.sharedToTokenForRuleType) && rule.sharedToTokenForRuleType.contains('.')) {
+            if(!String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
                 
                 // Build URL to field from token (includes object and field id, separated by full stop)
-                Integer sharedToPoint = rule.sharedToTokenForRuleType.indexOf('.');
-                String objectId = rule.sharedToTokenForRuleType.left(sharedToPoint);
-                String fieldId = rule.sharedToTokenForRuleType.mid(sharedToPoint + 1, 15);
+                Integer sharedToPoint = rule.controllingObjectSharedToFieldToken.indexOf('.');
+                String objectId = rule.controllingObjectSharedToFieldToken.left(sharedToPoint);
+                String fieldId = rule.controllingObjectSharedToFieldToken.mid(sharedToPoint + 1, 15);
                 rw.sharedToLink = FormulaShareUtilities.getLightningDomain() 
                     + '/lightning/setup/ObjectManager/' 
                     + objectId
                     + '/FieldsAndRelationships/' 
                     + fieldId 
                     + '/view';
-                rw.sharedToLinkLabel = rule.sharedToLabelRuleType;
+                rw.sharedToLinkLabel = rule.controllingObjectSharedToFieldLabel;
             }
 
             // Set calculation status depending on most recent logs

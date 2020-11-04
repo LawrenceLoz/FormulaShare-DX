@@ -115,10 +115,13 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			for(SObject obj : scope) {
 				sharedObjIdSet.add((Id) obj.get('Id'));
 			}
-			List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
+
+			FormulaShareSObjectsRetrievalService rs = new FormulaShareSObjectsRetrievalService(typeInThisBatch, rulesForType);
+			rs.setRecordIds(sharedObjIdSet);
+			List<FormulaShareRetrievedRecordDetails> recordDetails = rs.getDetailsForSharing();
 
 			// Populate records in batch scope into wrapper
-			fsService.addToRecordsMap(records);
+			fsService.setSharedRecordDetails(recordDetails);
 		}
 
 		catch(Exception e) {

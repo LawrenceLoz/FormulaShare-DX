@@ -23,35 +23,250 @@
 // Class variables are primitive types representing the FormulaShareRule custom metadata
 // fields. This is required because mocking of custom metadata relationships isn't possible
 
-public inherited sharing class FormulaShareRule {
+public virtual inherited sharing class FormulaShareRule {
 
 	public class FormulaShareException extends Exception{}
 
+    // Basic rule details
     public Id ruleId;
-    public String objectSharedAPIName;
-    public String objectSharedLabel;
-	public String sharedToAPIName;
-	public String sharedToLabel;
-	public String sharedToFieldToken;
-	public String sharedToFieldType;
-	public String shareWith;
-	public String accessLevel;
-	public Boolean active;
-	public String sharingReason;
-    public String childObjectWithSharedToFieldAPIName;
-    public String childObjectWithSharedToFieldLabel;
-    public String childObjectLookupFieldAPIName;
-    public String childObjectSharedToFieldAPIName;
-    public String childObjectSharedToFieldLabel;
-    public String childObjectSharedToFieldToken;
-    public String childObjectSharedToFieldType;
     public String label;
     public String developerName;
     public String description;
+	public Boolean active;
+
+    // Sharing configuration
+    public String shareWith;
+	public String accessLevel;
+    public String sharingReason;
     public String contactAccess;
     public String caseAccess;
     public String opportunityAccess;
 
+    // Object to share, and relationship path to object with controlling field (if not shared object)
+    public String objectSharedAPIName;
+    public String objectSharedLabel;
+    public FormulaShareSObjectRelationship relationship;
+    public String type;
+
+    // Details of controlling object and field
+    // This will be on the shared object if no relationships
+    // Or the last entry of the relationship tree if populated
+    public String controllingObjectApiName;
+    public String controllingObjectLabel;
+    public String controllingObjectSharedToFieldAPIName;
+    public String controllingObjectSharedToFieldLabel;
+    public String controllingObjectSharedToFieldToken;
+    public String controllingObjectSharedToFieldType;
+
+    // Populates with the field which might be relevant to a sharing change for a trigger
+    // Set to:
+    // - Shared to field for standard rule
+    // - Path from shared object to first parent for ancestor rule
+    // - Path from bottom object to first object towards shared object for descendant / inlaw
+    public String firstQueryStepApiName;
+
+    // Populates with the path from the queried object to shared to field
+    // Set to:
+    // - Shared to field for standard, sibling and descendant
+    // - Path from shared object to shared to field on top object for ancestor rule
+    // - Path from bottom object to shared to field on top object for inlaw rule
+    public String pathToSharedToField;
+
+    // Allow direct construction from test context only
+    @TestVisible
+    private FormulaShareRule() {}
+
+    // Constructor manages mapping from rule metadata
+    public FormulaShareRule(FormulaShare_Rule__mdt rule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
+
+        // Basic rule details
+        ruleId = rule.Id;
+        label = rule.MasterLabel;
+        developerName = rule.DeveloperName;
+        description = rule.Description__c;
+        active = rule.Active__c;
+        
+        // Sharing configuration
+        shareWith = rule.Share_With__c;
+        accessLevel = rule.Access_Level__c;
+        sharingReason = rule.Sharing_Reason__c;
+        contactAccess = rule.Contact_Access__c;
+        caseAccess = rule.Case_Access__c;
+        opportunityAccess = rule.Opportunity_Access__c;
+
+        // Object to share
+        objectSharedAPIName = rule.Object_Shared__r.QualifiedApiName;
+        objectSharedLabel = rule.Object_Shared__r.MasterLabel;
+        relationship = rel;
+
+        // Controlling type and fields
+        controllingObjectApiName = tacf.controllingObjectApiName;
+        controllingObjectLabel = tacf.controllingObjectLabel;
+        controllingObjectSharedToFieldAPIName = tacf.controllingObjectSharedToFieldAPIName;
+        controllingObjectSharedToFieldLabel = tacf.controllingObjectSharedToFieldLabel;
+        controllingObjectSharedToFieldToken = tacf.controllingObjectSharedToFieldToken;
+    }
+
+
+    // Returns a rule of the approriate object
+    public static FormulaShareRule getRule(FormulaShare_Rule__mdt mdRule) {
+        
+        // Establish relationship object, and get the controlling fields and rule type
+        FormulaShareSObjectRelationship rel = getrelationship(mdRule);
+        TypeAndControllingFields tacf = getControllingFieldsAndType(rel);
+
+        // Instantiate rule of appropriate type (constructors populate type specific variables)
+        FormulaShareRule rule;
+        switch on tacf.ruleType {
+            when 'standard' {
+                rule = new FormulaShareRuleStandard(mdRule, rel, tacf);
+            }
+            when 'child' {
+                rule = new FormulaShareRuleChild(mdRule, rel, tacf);
+            }
+            when 'descendant' {
+                rule = new FormulaShareRuleDescendant(mdRule, rel, tacf);
+            }
+            when 'ancestor' {
+                rule = new FormulaShareRuleAncestor(mdRule, rel, tacf);
+            }
+            when 'sibling' {
+                rule = new FormulaShareRuleSibling(mdRule, rel, tacf);
+            }
+            when 'inlaw' {
+                rule = new FormulaShareRuleInlaw(mdRule, rel, tacf);
+            }
+        }
+
+        return rule;
+    }
+
+
+    public class TypeAndControllingFields {
+        String ruleType;
+        String controllingObjectApiName;
+        String controllingObjectLabel;
+        String controllingObjectSharedToFieldAPIName;
+        String controllingObjectSharedToFieldLabel;
+        String controllingObjectSharedToFieldToken;
+    }
+
+
+    // Set controlling field details - find deepest relationship and set shared to details from this
+    private static TypeAndControllingFields getControllingFieldsAndType(FormulaShareSObjectRelationship relationship) {
+        TypeAndControllingFields tacf = new TypeAndControllingFields();
+        tacf.ruleType = 'standard';
+        FormulaShareSObjectRelationship rel = relationship;
+        Boolean previousObjectIsChild = false;
+        Boolean previousObjectIsParent = false;
+        while(rel.nextRelationship != null) {
+            rel = rel.nextRelationship;
+
+            // If this object is a parent of the previous one...
+            if(rel.lookupFromPrevObjectToken != null) {
+
+                // ...if the previous one was a child, then sibling
+                if(previousObjectIsParent) {
+                    tacf.ruleType = 'inlaw';
+                    break;
+                }
+                // ...otherwise ancestor
+                else {
+                    tacf.ruleType = 'ancestor';
+                }
+                previousObjectIsChild = true;
+                previousObjectIsParent = false;
+            }
+
+            // If this object is a child of the previous one...
+            else if(rel.lookupToPrevObjectToken != null) {
+
+                // ...if the previous one was a parent, then sibling
+                if(previousObjectIsChild) {
+                    tacf.ruleType = 'sibling';
+                    break;
+                }
+                // ...otherwise child (if we're on first object down) or descendant
+                else {
+                    tacf.ruleType = tacf.ruleType == 'standard' ? 'child' : 'descendant';
+                }
+                previousObjectIsParent = true;
+                previousObjectIsChild = false;
+            }
+        }
+        tacf.controllingObjectApiName = rel.thisObjectApiName;
+        tacf.controllingObjectLabel = rel.thisObjectLabel;
+        tacf.controllingObjectSharedToFieldAPIName = rel.sharedToFieldAPIName;
+        tacf.controllingObjectSharedToFieldLabel = rel.sharedToFieldLabel;
+        tacf.controllingObjectSharedToFieldToken = rel.sharedToFieldToken;
+
+        return tacf;
+    }
+
+    
+    // Populate nested relationship object. Need retrieve fields individually from api names
+    // Because attributes of field / object definitions can't be refrerenced with dynamic map notation
+    private static FormulaShareSObjectRelationship getrelationship(FormulaShare_Rule__mdt rule) {
+
+        FormulaShareSObjectRelationship relationship = new FormulaShareSObjectRelationship();
+
+        relationship.thisObjectToken           = rule.Object_Shared__c;
+        relationship.thisObjectApiName         = rule.Object_Shared__r.QualifiedApiName;
+        relationship.thisObjectLabel           = rule.Object_Shared__r.MasterLabel;
+        if(rule.Child_Object_with_Shared_To_Field__c == null) {
+            relationship.sharedToFieldToken        = rule.Shared_To__c;
+            relationship.sharedToFieldApiName      = rule.Shared_To__r.QualifiedApiName;
+            relationship.sharedToFieldLabel        = rule.Shared_To__r.MasterLabel;
+            return relationship;
+        }
+
+        FormulaShareSObjectRelationship rfc1 = new FormulaShareSObjectRelationship();
+        rfc1.thisObjectToken            = rule.Child_Object_with_Shared_To_Field__c;
+        rfc1.thisObjectApiName          = rule.Child_Object_with_Shared_To_Field__r.QualifiedApiName;
+        rfc1.thisObjectLabel            = rule.Child_Object_with_Shared_To_Field__r.MasterLabel;
+        rfc1.lookupFromPrevObjectToken  = rule.Related_Object_1_Lookup_from_Shared_Obj__c;
+        rfc1.lookupFromPrevObjectApiName= rule.Related_Object_1_Lookup_from_Shared_Obj__r.QualifiedApiName;
+        rfc1.lookupToPrevObjectToken    = rule.Child_Object_Lookup_Field__c;
+        rfc1.lookupToPrevObjectApiName  = rule.Child_Object_Lookup_Field__r.QualifiedApiName;
+        relationship.nextRelationship = rfc1;
+        if(rule.Related_Object_2__c == null) {
+            rfc1.sharedToFieldToken         = rule.Child_Object_Shared_To_Field__c;
+            rfc1.sharedToFieldApiName       = rule.Child_Object_Shared_To_Field__r.QualifiedApiName;
+            rfc1.sharedToFieldLabel         = rule.Child_Object_Shared_To_Field__r.MasterLabel;
+            return relationship;
+        }
+
+        FormulaShareSObjectRelationship rfc2 = new FormulaShareSObjectRelationship();
+        rfc2.thisObjectToken            = rule.Related_Object_2__c;
+        rfc2.thisObjectApiName          = rule.Related_Object_2__r.QualifiedApiName;
+        rfc2.thisObjectLabel            = rule.Related_Object_2__r.MasterLabel;
+        rfc2.lookupFromPrevObjectToken  = rule.Related_Object_2_Lookup_from_RO1__c;
+        rfc2.lookupFromPrevObjectApiName= rule.Related_Object_2_Lookup_from_RO1__r.QualifiedApiName;
+        rfc2.lookupToPrevObjectToken    = rule.Related_Object_2_Lookup_to_RO1__c;
+        rfc2.lookupToPrevObjectApiName  = rule.Related_Object_2_Lookup_to_RO1__r.QualifiedApiName;
+        rfc1.nextRelationship = rfc2;
+        if(rule.Related_Object_3__c == null) {
+            rfc2.sharedToFieldToken         = rule.Related_Object_2_Shared_To_Field__c;
+            rfc2.sharedToFieldApiName       = rule.Related_Object_2_Shared_To_Field__r.QualifiedApiName;
+            rfc2.sharedToFieldLabel         = rule.Related_Object_2_Shared_To_Field__r.MasterLabel;
+            return relationship;
+        }
+        
+        FormulaShareSObjectRelationship rfc3 = new FormulaShareSObjectRelationship();
+        rfc3.thisObjectToken            = rule.Related_Object_3__c;
+        rfc3.thisObjectApiName          = rule.Related_Object_3__r.QualifiedApiName;
+        rfc3.thisObjectLabel            = rule.Related_Object_3__r.MasterLabel;
+        rfc3.lookupFromPrevObjectToken  = rule.Related_Object_3_Lookup_from_RO2__c;
+        rfc3.lookupFromPrevObjectApiName= rule.Related_Object_3_Lookup_from_RO2__r.QualifiedApiName;
+        rfc3.lookupToPrevObjectToken    = rule.Related_Object_3_Lookup_to_RO2__c;
+        rfc3.lookupToPrevObjectApiName  = rule.Related_Object_3_Lookup_to_RO2__r.QualifiedApiName;
+        rfc2.nextRelationship = rfc3;
+        rfc3.sharedToFieldToken         = rule.Related_Object_3_Shared_To_Field__c;
+        rfc3.sharedToFieldApiName       = rule.Related_Object_3_Shared_To_Field__r.QualifiedApiName;
+        rfc3.sharedToFieldLabel         = rule.Related_Object_3_Shared_To_Field__r.MasterLabel;
+
+        return relationship;
+    }
 
     
     // Used to create a share at the access levels of the rule, and appropriate values for the record and shared to entity
@@ -227,17 +442,6 @@ public inherited sharing class FormulaShareRule {
 	}
 
 
-    public String type {
-        get {
-            if(childObjectWithSharedToFieldAPIName != null) {
-                return 'child';
-            }
-            else {
-                return 'standard';
-            }
-        }
-    }
-
     public Boolean sharedObjectIsCustom {
         get {
             if(FormulaShareUtilities.describe(objectSharedAPIName).isCustom()) {
@@ -249,78 +453,28 @@ public inherited sharing class FormulaShareRule {
         }
     }
 
-    public String sharedToAPINameForType {
-        get {
-            if(type == 'child') {
-                return childObjectSharedToFieldAPIName;
-            }
-            else {
-                return sharedToAPIName;
-            }
-        }
-    }
 
-    public String controllingObjectLabelForRuleType {
-        get {
-            if(type == 'child') {
-                return childObjectWithSharedToFieldLabel;
-            }
-            else {
-                return objectSharedLabel;
-            }
-        }
-    }
-    public String sharedToTokenForRuleType {
-        get {
-            return type == 'child' ? childObjectSharedToFieldToken : sharedToFieldToken;
-        }
-    }
-    public String sharedToLabelRuleType {
-        get {
-            return type == 'child' ? childObjectSharedToFieldLabel : sharedToLabel;
-        }
-    }
-
-    public String sharedToFieldTypeForRuleType {
-        get {
-            if(type == 'child') {
-                return childObjectSharedToFieldType;
-            }
-            else {
-                return sharedToFieldType;
-            }
-        }
-    }
-
-    public Boolean isValid {
-        get {
-            if(type == 'child'
-                && childObjectWithSharedToFieldAPIName != null
-                && childObjectLookupFieldAPIName != null
-                && childObjectSharedToFieldAPIName != null
-                && childObjectSharedToFieldType != null
-                && passesBasicValidation()) {
-                return true;
-            }
-
-            else if(type == 'standard'
-                && sharedToAPIName != null
-                && sharedToFieldType != null) {
-                return true;
-            }
-
-            else return false;
-        }
-    }
-
-    private Boolean passesBasicValidation() {
+    // Overriden and referenced for non-standard implementations
+    public virtual Boolean isValid() {
         if(objectSharedAPIName != null
+            && controllingObjectSharedToFieldAPIName != null
+            && controllingObjectSharedToFieldType != null
             && shareWith != null
             && accessLevel != null
             && (!sharedObjectIsCustom || sharingReason != null)) {
             return true;
         }
-        else return false;
+
+        else {
+            System.debug('isValid() fail: One or more of the following is null: '
+            + 'objectSharedAPIName: '+objectSharedAPIName
+            + ', controllingObjectSharedToFieldAPIName: '+controllingObjectSharedToFieldAPIName
+            + ', controllingObjectSharedToFieldType: '+controllingObjectSharedToFieldType
+            + ', shareWith: '+shareWith
+            + ', accessLevel: '+accessLevel
+            + ', sharingReason: '+sharingReason);
+            return false;
+        }
     }
 
 }

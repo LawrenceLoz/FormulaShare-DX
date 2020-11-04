@@ -27,12 +27,13 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     public static String roleSubName = 'Rule_sub_rule';
     public static String roleRuleName = 'Rule_rule';
     public static String childUserRuleName = 'Child_user_rule';
+    private String prefix;
 
     public Object handleMethodCall(Object stubbedObject, String stubbedMethodName, 
         Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames, 
         List<Object> listOfArgs) {
 
-        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        prefix = FormulaShareTestUtils.getNamespacePrefix();
 
         // You can use the method name and return type to determine which method was called.
         System.debug('Name of stubbed method: ' + stubbedMethodName);
@@ -96,8 +97,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return rules;
         }
 
-        else if(stubbedMethodName == 'getStandardRulesThisObjectControls') {
-            system.debug('getStandardRulesThisObjectControls stub');
+        else if(stubbedMethodName == 'getStandardAncestorSiblingRulesSharingObject') {
+            system.debug('getStandardAncestorSiblingRulesSharingObject stub');
             List<FormulaShareRule> rules = new List<FormulaShareRule>();
 
            // Will add a sharing record for the public group with the group name in Type_In_Scope__c field
@@ -288,11 +289,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         FormulaShareRule userRule = getBasicRule();
         userRule.developerName = userRuleName;
-        userRule.sharedToFieldType = 'Id';
+
         userRule.accessLevel = 'Edit';
-        userRule.sharedToAPIName = prefix + 'Exception_Type__c';
-        userRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         userRule.shareWith = 'Users';
+        userRule.controllingObjectApiName = userRule.objectSharedAPIName;
+        userRule.controllingObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
+        userRule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        userRule.controllingObjectSharedToFieldType = 'Id';
+        userRule.relationship = getRelationshipStandardRule(userRule);
+
         return userRule;
     }
 
@@ -300,11 +305,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         FormulaShareRule groupRule = getBasicRule();
         groupRule.developerName = groupRuleName;
-        groupRule.sharedToFieldType = 'Name';
+
         groupRule.accessLevel = 'Edit';
-        groupRule.sharedToAPIName = prefix + 'Type_In_Scope__c';
-        groupRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         groupRule.shareWith = 'Public Groups';
+        groupRule.controllingObjectApiName = groupRule.objectSharedAPIName;
+        groupRule.controllingObjectSharedToFieldAPIName = prefix + 'Type_In_Scope__c';
+        groupRule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        groupRule.controllingObjectSharedToFieldType = 'Name';
+        groupRule.relationship = getRelationshipStandardRule(groupRule);
+
         return groupRule;
     }
 
@@ -312,11 +321,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         FormulaShareRule roleSubRule = getBasicRule();
         roleSubRule.developerName = roleSubName;
-        roleSubRule.sharedToFieldType = 'Name';
+
         roleSubRule.accessLevel = 'Read';
-        roleSubRule.sharedToAPIName = prefix + 'Failed_Batches__c';
-        roleSubRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         roleSubRule.shareWith = 'Roles and Internal Subordinates';
+        roleSubRule.controllingObjectApiName = roleSubRule.objectSharedAPIName;
+        roleSubRule.controllingObjectSharedToFieldAPIName = prefix + 'Failed_Batches__c';
+        roleSubRule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        roleSubRule.controllingObjectSharedToFieldType = 'Name';
+        roleSubRule.relationship = getRelationshipStandardRule(roleSubRule);
+        
         return roleSubRule;
     }
 
@@ -324,11 +337,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         FormulaShareRule roleRule = getBasicRule();
         roleRule.developerName = roleRuleName;
-        roleRule.sharedToFieldType = 'Id';
+
         roleRule.accessLevel = 'Edit';
-        roleRule.sharedToAPIName = prefix + 'Context__c';
-        roleRule.sharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         roleRule.shareWith = 'Roles';
+        roleRule.controllingObjectApiName = roleRule.objectSharedAPIName;
+        roleRule.controllingObjectSharedToFieldAPIName = prefix + 'Context__c';
+        roleRule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        roleRule.controllingObjectSharedToFieldType = 'Id';
+        roleRule.relationship = getRelationshipStandardRule(roleRule);
+        
         return roleRule;
     }
 
@@ -336,15 +353,18 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
         FormulaShareRule childUserRule = getBasicRule();
         childUserRule.developerName = childUserRuleName;
+
         childUserRule.accessLevel = 'Edit';
         childUserRule.shareWith = 'Users';
-        childUserRule.childObjectWithSharedToFieldAPIName = prefix + 'FormulaShare_Log__c';
-        childUserRule.childObjectLookupFieldAPIName = prefix + 'Related_Log_Required_for_Test_Class__c';
-        childUserRule.childObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
-        childUserRule.childObjectSharedToFieldType = 'Id';
-        childUserRule.childObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        childUserRule.controllingObjectApiName = prefix + 'FormulaShare_Log__c';    // Based on a self-lookup
+        childUserRule.controllingObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
+        childUserRule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        childUserRule.controllingObjectSharedToFieldType = 'Id';
+        childUserRule.relationship = getRelationshipChildRule(childUserRule);
+
         return childUserRule;
     }
+
 
     private FormulaShareRule getBasicRule() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
@@ -355,4 +375,29 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         return rule;
     }
 
+    private FormulaShareSObjectRelationship getRelationshipStandardRule(FormulaShareRule rule) {
+        FormulaShareSObjectRelationship rel = new FormulaShareSObjectRelationship();
+        rel.thisObjectToken = 'objecttoken1234';
+        rel.thisObjectApiName = rule.controllingObjectApiName;
+        rel.sharedToFieldToken = rule.controllingObjectSharedToFieldToken;
+        rel.sharedToFieldApiName = rule.controllingObjectSharedToFieldAPIName;
+        return rel;
+    }
+
+    private FormulaShareSObjectRelationship getRelationshipChildRule(FormulaShareRule rule) {
+        FormulaShareSObjectRelationship rel1 = new FormulaShareSObjectRelationship();
+        rel1.thisObjectToken = 'objecttoken1234';
+        rel1.thisObjectApiName = rule.objectSharedAPIName;
+
+        FormulaShareSObjectRelationship rel2 = new FormulaShareSObjectRelationship();
+        rel2.thisObjectToken = 'objecttoken1234';
+        rel2.thisObjectApiName = rule.controllingObjectApiName;
+        rel2.lookupToPrevObjectToken = 'objecttoken1234.lookuptoken1234';
+        rel2.lookupFromPrevObjectApiName = prefix + 'Related_Log_Required_for_Test_Class__c';   // Lookup field to parent log
+        rel2.sharedToFieldToken = rule.controllingObjectSharedToFieldToken;
+        rel2.sharedToFieldApiName = rule.controllingObjectSharedToFieldAPIName;
+
+        rel1.nextRelationship = rel2;
+        return rel1;
+    }
 }
