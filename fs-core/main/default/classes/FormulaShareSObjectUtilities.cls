@@ -1,4 +1,4 @@
-public with sharing class FormulaShareSObjectUtilities {
+public inherited sharing class FormulaShareSObjectUtilities {
 
     public Schema.SObjectType type;
     public Schema.DescribeSObjectResult typeDescribe;

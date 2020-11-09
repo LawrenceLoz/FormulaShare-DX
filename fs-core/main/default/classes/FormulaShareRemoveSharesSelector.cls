@@ -1,4 +1,4 @@
-public with sharing class FormulaShareRemoveSharesSelector {
+public inherited sharing class FormulaShareRemoveSharesSelector {
 
     public static FormulaShareRemoveSharesSelector construct() {
         return new FormulaShareRemoveSharesSelector();

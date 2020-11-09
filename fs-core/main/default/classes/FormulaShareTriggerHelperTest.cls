@@ -22,47 +22,23 @@
 @IsTest
 public with sharing class FormulaShareTriggerHelperTest {
 
-    public static void setMocks() {
-        FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-        FormulaShareService.mock = mockFSService;
+    @TestSetup
+    static void setup() {
+        List<UserRole> roles = FormulaShareTestDataFactory.getRoles(3);
+        insert roles;
+        List<User> usersList = FormulaShareTestDataFactory.getUsers(1, roles[0].Id);
+        insert usersList;
+    }
+
+    static void setMocks() {
+//        FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
+//        FormulaShareService.mock = mockFSService;
 
         FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
         FormulaShareRulesSelector.mock = mockFSRulesSelector;
     }
 
-
-   @TestSetup
-    public static void setup() {
-    
-        // Insert a user role
-        UserRole role = new UserRole();
-        role.DeveloperName = 'TestRoleFormulaShare';
-        role.Name = 'TestRoleFormulaShare';
-        insert role;
-
-        // Set and insert user
-        Profile pf= [Select Id from profile where Name='System Administrator']; 
-        String orgId=UserInfo.getOrganizationId(); 
-        String dateString=String.valueof(Datetime.now()).replace(' ','').replace(':','').replace('-','');
-        Integer randomId = Integer.valueOf(Math.rint(Math.random()*1000000)); 
-        String uniqueName = orgId+dateString+randomId; 
-
-        User u = new User(
-            firstname = 'FormulaShareTestUser', 
-            lastName = 'OnlyForUnitTests', 
-            email = 'FS' + uniqueName + '@test' + orgId + '.org', 
-            Username = 'FS' + uniqueName + '@test' + orgId + '.org', 
-            EmailEncodingKey = 'ISO-8859-1', 
-            Alias = 'FS' + uniqueName.substring(18, 21), 
-            TimeZoneSidKey = 'America/Los_Angeles', 
-            LocaleSidKey = 'en_US', 
-            LanguageLocaleKey = 'en_US', 
-            ProfileId = pf.Id, 
-            UserRoleId = role.Id);
-        insert u;
-    }
-
-
+/*
     @IsTest
     public static void testStandardRuleOnInsert() {
         setMocks();
@@ -70,26 +46,32 @@ public with sharing class FormulaShareTriggerHelperTest {
 
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
+        // Create log which should be considered for sharing
         FormulaShare_Log__c log1 = FormulaShareTestDataFactory.getBatchLog();
         Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
-        log1.Type_In_Scope__c = grp.Id;      // Should trigger sharing rule
+        log1.Type_In_Scope__c = grp.Id;      // Should trigger group sharing rule
         insert log1;
 
+        // Create log which shouldn't be considered for sharing (all fields involved in sharing set to null)
         FormulaShare_Log__c log2 = FormulaShareTestDataFactory.getBatchLog();
-        log2.Number_Of_Rules__c = 14;      // Should not trigger sharing rule
+        log2.Context__c = null;
+        log2.Type_In_Scope__c = null;
+        log2.Exception_Type__c = null;
+        log2.Failed_Batches__c = null;
         insert log2;
 
         Map<Id,SObject> newRecords = new Map<Id,SObject>();
         newRecords.put(log1.Id, log1);
         newRecords.put(log2.Id, log2);
 
-        helper.handleChanges(fsLogType, null, newRecords);
+        helper.setServiceObjectsWithRecords(fsLogType, null, newRecords);
 
         // Check that class variables populated as expected
         System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
         System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
         
-        List<FormulaShareRetrievedRecordDetails> details = helper.populatedFsServiceList[0].recordDetails;
+        FormulaShareService service = helper.populatedFsServiceList[0];
+        List<FormulaShareRetrievedRecordDetails> details = service.recordDetails;
         System.assertEquals(1, details.size(), 'Expected one record in processing map');
 
         FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
@@ -130,7 +112,7 @@ public with sharing class FormulaShareTriggerHelperTest {
         newRecords.put(log2New.Id, log2New);
 
         // Call helper method
-        helper.handleChanges(fsLogType, existingRecords, newRecords);
+        helper.setServiceObjectsWithRecords(fsLogType, existingRecords, newRecords);
 
         // Check that class variables populated as expected
         System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
@@ -143,44 +125,105 @@ public with sharing class FormulaShareTriggerHelperTest {
         System.assertEquals(log1New.Id, record.Id, 'Record included isn\'t the one we expected');
         System.assertEquals('something different', record.Type_In_Scope__c, 'Modified field value not set to new version');
     }
+*/
 
     @IsTest
-    public static void testChildRuleOnDelete() {
+    public static void testDescendantRuleOnCreate() {
         setMocks();
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-
-        // Get the inserted user to share record to
-        User u = [SELECT Id FROM User WHERE Firstname = 'FormulaShareTestUser' AND LastName = 'OnlyForUnitTests'][0];
-
-        // Create parent log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c parentLog = FormulaShareTestDataFactory.getBatchLog();
-        parentLog.OwnerId = UserInfo.getUserId();     // Make sure owner is different to the user we want to share with
-        insert parentLog;
-
-        FormulaShare_Log__c childLog = FormulaShareTestDataFactory.getBatchLog();
-        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
-        childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
-        insert childLog;
+        List<User> users = [SELECT Id FROM User WHERE FirstName LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%' LIMIT 2];
 
         FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        // Populate old records only (to simulate deletion)
-        Map<Id,SObject> existingRecords = new Map<Id,SObject>();
-        existingRecords.put(childLog.Id, childLog);
+        List<FormulaShare_Log__c> parentLogs = FormulaShareTestDataFactory.getBatchLogs(2);
+        insert parentLogs;
+        Id sharedRecordId = parentLogs[0].Id;
 
-        // Call helper method
-        helper.handleChanges(fsLogType, existingRecords, null);
+        // Should create records to share with both supplied users
+        List<FormulaShare_Log__c> childLogsWithSharing = FormulaShareTestDataFactory.getChildLogsSharingParent(sharedRecordId, users, 4);
+        insert childLogsWithSharing;
+
+        // Should create records which shouldn't impact sharing
+        List<FormulaShare_Log__c> childLogsNoSharing = FormulaShareTestDataFactory.getChildLogsNoSharingImpact(sharedRecordId, 5);
+        insert childLogsNoSharing;
+
+
+        List<FormulaShare_Log__c> childLogs = new List<FormulaShare_Log__c>();
+        childLogs.addAll(childLogsWithSharing);
+        childLogs.addAll(childLogsNoSharing);
+
+        Map<Id,SObject> newRecords = new Map<Id,SObject>();
+        for(FormulaShare_Log__c log : childLogs) {
+            newRecords.put(log.Id, log);
+        }
+
+        helper.setServiceObjectsWithRecords(fsLogType, null, newRecords);
 
         // Check that class variables populated as expected
         System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
         System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
         
-        List<FormulaShareRetrievedRecordDetails> details = helper.populatedFsServiceList[0].recordDetails;
-        System.assertEquals(1, details.size(), 'Expected one record in processing map');
+        FormulaShareService service = helper.populatedFsServiceList[0];
+        List<FormulaShareRetrievedRecordDetails> details = service.recordDetails;
+        
+        FormulaShareRetrievedRecordDetails detail;
+        for(FormulaShareRetrievedRecordDetails thisDetail : details) {
+            if(thisDetail.sharedRecord.get('Id') == sharedRecordId) {
+                detail = thisDetail;
+            }
+        }
+        System.assert(detail != null, 'Expected the shared parent in processing map');
 
         FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
-        System.assertEquals(parentLog.Id, record.Id, 'Record included isn\'t the one we expected');
+        System.assertEquals(sharedRecordId, record.Id, 'Record included isn\'t the one we expected');
+
+        Map<String,List<SObject>> objectsForRulesMap = details[0].controllingRecordsForRulesMap;
+        System.assertEquals(1, objectsForRulesMap.size(), 'Only the child rule should be included');
+        List<SObject> controllingObjects = objectsForRulesMap.get(FormulaShareMockProvider.childUserRuleName);
+        System.assertEquals(4, controllingObjects.size(), 'The 4 child records with sharing details should be included');
     }
+
+
+// Replace to check no effect for delete
+//    @IsTest
+//    public static void testChildRuleOnDelete() {
+//        setMocks();
+//        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+//
+//        // Get the inserted user to share record to
+//        User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
+//
+//        // Create parent log object and set fields which have test rules created within apex class
+//        FormulaShare_Log__c parentLog = FormulaShareTestDataFactory.getBatchLog();
+//        parentLog.OwnerId = UserInfo.getUserId();     // Make sure owner is different to the user we want to share with
+//        insert parentLog;
+//
+//        FormulaShare_Log__c childLog = FormulaShareTestDataFactory.getBatchLog();
+//        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
+//        childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
+//        insert childLog;
+//
+//        FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
+//
+//        // Populate old records only (to simulate deletion)
+//        Map<Id,SObject> existingRecords = new Map<Id,SObject>();
+//        existingRecords.put(childLog.Id, childLog);
+//
+//        // Call helper method
+//        helper.handleChanges(fsLogType, existingRecords, null);
+//
+//        // Check that class variables populated as expected
+//        System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
+//        System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
+//        
+//        List<FormulaShareRetrievedRecordDetails> details = helper.populatedFsServiceList[0].recordDetails;
+//        System.assertEquals(1, details.size(), 'Expected one record in processing map');
+//
+//        FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
+//        System.assertEquals(parentLog.Id, record.Id, 'Record included isn\'t the one we expected');
+//    }
+
+
 
     @IsTest
     public static void testGetSharesToInsert() {

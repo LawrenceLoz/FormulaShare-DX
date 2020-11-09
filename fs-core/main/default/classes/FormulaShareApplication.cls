@@ -1,4 +1,4 @@
-public with sharing class FormulaShareApplication {
+public inherited sharing class FormulaShareApplication {
 
 	// Standard unit of work for logs and metrics
 	public static final fflib_Application.UnitOfWorkFactory unitOfWork =

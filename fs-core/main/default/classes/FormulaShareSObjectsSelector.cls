@@ -84,6 +84,8 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(parentIdSet);
         String queryCondition = parentFieldPath + ' IN (' + parentIdsString + ')';
 
+        system.debug('|SOQL before fields added: '+controllingObjQueryFactory.toSOQL());
+
         // If fields are supplied, we'll select these and restrict to records with one or more populated
         if(!fieldStrings.isEmpty()) {
             queryCondition += ' AND (';
@@ -91,6 +93,8 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
             // Add fields provided as strings (this would be all fields controlling sharing)
             Boolean firstField = true;
             for(String fieldString : fieldStrings) {
+                System.debug('|SOQL Adding query field: '+fieldString);
+
                 controllingObjQueryFactory.selectField(fieldString);
                 if(firstField) {
                     firstField = false;
@@ -104,6 +108,8 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
             queryCondition += ')';
         }
+
+        System.debug('Full query condition: '+queryCondition);
 
         controllingObjQueryFactory.setCondition(queryCondition);
 
@@ -125,16 +131,23 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
         // Add fields provided as strings (lookups would be added this way)
         for(String fieldString : fieldStrings) {
+            System.debug('Adding field in selector: '+fieldString);
             factory.selectField(fieldString);
-            System.debug('Adding field: '+fieldString);
+            System.debug('Added field in selector: '+fieldString);
         }
 
         // Restrict to specific records in scope
         String recordIdsString = FormulaShareUtilities.buildStringFromSetQuotes(recordIdSet);
-        factory.setCondition('Id IN (' + recordIdsString + ')');
-        system.debug('SOQL with condition: '+factory.toSOQL());
 
-        return Database.query(factory.toSOQL());
+        System.debug('recordIdsString: '+ recordIdsString);
+
+        factory.setCondition('Id IN (' + recordIdsString + ')');
+        System.debug('SOQL with condition: '+factory.toSOQL());
+
+        List<SObject> queriedRecords = Database.query(factory.toSOQL());
+        System.debug('Result: '+queriedRecords);
+
+        return queriedRecords;
     }
 
 

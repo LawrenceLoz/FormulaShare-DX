@@ -1,4 +1,8 @@
-public with sharing class FormulaShareRuleStandard extends FormulaShareRule {
+public inherited sharing class FormulaShareRuleStandard extends FormulaShareRule {
+
+    // Allow direct construction from test context only
+    @TestVisible
+    private FormulaShareRuleStandard() {}
 
     public FormulaShareRuleStandard(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);

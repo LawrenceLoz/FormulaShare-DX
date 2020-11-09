@@ -28,6 +28,15 @@ public abstract inherited sharing class FormulaShareHelperBase {
 	
     @TestVisible
     protected void handleChanges(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
+		setServiceObjectsWithRecords(type, oldRecords, newRecords);
+
+		for(FormulaShareService fsService : populatedFsServiceList) {
+			fsService.processFormulaShares();
+		}
+	}
+
+	@TestVisible
+	private void setServiceObjectsWithRecords(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
         // Check records for possible sharing impact, query for extra lookups if needed, and get rules and record details
 		FormulaShareHelperService helperService = new FormulaShareHelperService(type, oldRecords, newRecords);
@@ -35,6 +44,11 @@ public abstract inherited sharing class FormulaShareHelperBase {
 
         // Iterate through objects which may need sharing changes and assess what these should be
 		for(FormulaShareServiceDetailsForType details : detailsForTypes) {
+
+			System.debug('Full details ' + details);
+			for(FormulaShareRetrievedRecordDetails retDetails : details.retrieveRecordDetails.values()) {
+				System.debug('Shared record: '+retDetails.sharedRecord+' | controlling records: '+retDetails.controllingRecordsForRulesMap);
+			}
 
 			// Instantiate processing service with record sharing details
 			FormulaShareService fsService = FormulaShareService.construct(details.sharedType, details.rules);
@@ -46,11 +60,9 @@ public abstract inherited sharing class FormulaShareHelperBase {
 			system.debug('Processing ' + fsService.getType());
 			system.debug('records ' + details.retrieveRecordDetails);
 
-			// Assess sharing and populate map
-			fsService.processFormulaShares();
 			populatedFsServiceList.add(fsService);
         }
-    }
+	}
 
 
 	public List<SObject> getSharesToDelete() {

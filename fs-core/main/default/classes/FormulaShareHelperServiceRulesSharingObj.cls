@@ -16,11 +16,13 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
 
     public void processInsert(SObject newRecord) {
         for(FormulaShareRule rule : rules) {
+			System.debug('processInsert for rule: ' + rule.developerName);
                     
             // If path to top field (the shared to field for a standard rule or lookup for ancestor)
             // is populated, we might need to check
             if(rule.isValid() && rule.active 
                 && newRecord.get(rule.firstQueryStepApiName) != null) {
+				System.debug('Adding record ' + newRecord.get('Id') + ' for processing for rule: ' + rule.developerName + '. First query step(' + rule.firstQueryStepApiName + '): '+newRecord.get(rule.firstQueryStepApiName));
 				addToSets(newRecord, rule);
 				addToFullSets(rule);
             }

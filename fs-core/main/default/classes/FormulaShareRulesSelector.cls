@@ -187,17 +187,6 @@ public inherited sharing class FormulaShareRulesSelector {
                 + ' WITH SECURITY_ENFORCED';
             String query = getQueryWithCondition(condition);
             rules = Database.query(query);
-//        rules = [SELECT Id, Access_Level__c, 
-//			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-//			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
-//            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-//            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
-//            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
-//            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-//            Contact_Access__c, Case_Access__c, Opportunity_Access__c,
-//            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
-//			FROM FormulaShare_Rule__mdt
-//			WHERE Object_Shared__r.QualifiedApiName = :objectName];
         }
         
 		// Create list of all jobs with relevant details for assessing scope
@@ -248,7 +237,7 @@ public inherited sharing class FormulaShareRulesSelector {
                 }
                 when 'inlaw' {
                     FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) rule;
-                    if(inlawRule.bottomObject == objectName) {
+                    if(inlawRule.bottomObjectApiName == objectName) {
                         rulesToReturn.add(rule);
                     }
                 }
@@ -258,26 +247,6 @@ public inherited sharing class FormulaShareRulesSelector {
 		return rulesToReturn;
     }    
 
-//    // Returns rules where type in scope is the child object in a child object rule
-//    // Used by trigger helper to get rules which might be affected by object DML
-//    public List<FormulaShareRule> getChildRulesThisObjectControls(String objectName) {
-//        String condition = 'Child_Object_with_Shared_To_Field__c != NULL AND Child_Object_Lookup_Field__c != NULL'
-//            + ' WITH SECURITY_ENFORCED';
-//        String query = getQueryWithCondition(condition);
-//        List<FormulaShare_Rule__mdt> rules = Database.query(query);
-//
-//        List<FormulaShareRule> rulesFromQuery = mapMetadataRulesToWrapper(rules);
-//        List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
-//
-//        // Check for any rules where this object is the controlling object
-//        for(FormulaShareRule rule : rulesFromQuery) {
-//            if(rule.controllingObjectApiName == objectName) {
-//                rulesToReturn.add(rule);
-//            }
-//        }
-//
-//		return rulesToReturn;
-//    }
 
     // Returns rules where type in scope is the child object in a child object rule
     // Used by trigger helper to get rules which might be affected by object DML
@@ -285,18 +254,6 @@ public inherited sharing class FormulaShareRulesSelector {
         String condition = 'Object_Shared__c != null';
         String query = getQueryWithCondition(condition);
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
-
-//        List<FormulaShare_Rule__mdt> rules = [SELECT Id, Access_Level__c, 
-//			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-//			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
-//            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-//            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
-//            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
-//            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-//            Contact_Access__c, Case_Access__c, Opportunity_Access__c,
-//            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
-//            FROM FormulaShare_Rule__mdt
-//            WHERE Object_Shared__c != null];
 
         List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
 
@@ -312,18 +269,6 @@ public inherited sharing class FormulaShareRulesSelector {
         String query = getQueryWithCondition(condition);
         FormulaShare_Rule__mdt rule = Database.query(query);
         FormulaShareRule ruleToReturn = FormulaShareRule.getRule(rule);
-
-//        FormulaShare_Rule__mdt rule = [SELECT Id, Access_Level__c, 
-//			Object_Shared__r.QualifiedApiName, Shared_To__r.QualifiedApiName, 
-//			Share_With__c, Sharing_Reason__c, Active__c, Shared_To_Field_Type__c,
-//            Child_Object_with_Shared_To_Field__r.QualifiedApiName, Child_Object_Lookup_Field__r.QualifiedApiName,
-//            Child_Object_Shared_To_Field__r.QualifiedApiName, Child_Object_Shared_To_Field_Type__c,
-//            Object_Shared__r.MasterLabel, Child_Object_with_Shared_To_Field__r.MasterLabel, 
-//            Shared_To__r.MasterLabel, Child_Object_Shared_To_Field__r.MasterLabel,
-//            Contact_Access__c, Case_Access__c, Opportunity_Access__c,
-//            Shared_To__c, Child_Object_Shared_To_Field__c, MasterLabel, DeveloperName, Description__c
-//            FROM FormulaShare_Rule__mdt
-//            WHERE Id = :ruleId WITH SECURITY_ENFORCED LIMIT 1];
 
 		return ruleToReturn;
     }

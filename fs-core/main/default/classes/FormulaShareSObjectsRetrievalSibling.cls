@@ -1,4 +1,4 @@
-public with sharing class FormulaShareSObjectsRetrievalSibling {
+public inherited sharing class FormulaShareSObjectsRetrievalSibling {
 
     List<FormulaShareRuleSibling> siblingRules;
     List<SObject> sharedRecords;
@@ -44,6 +44,43 @@ public with sharing class FormulaShareSObjectsRetrievalSibling {
         return returnMap;
     }
 
+
+    private List<SObject> retrieveSiblings(SiblingObjectDetails sod, List<SObject> sharedRecords) {
+
+        // Get set of top object ids from shared object query
+        Set<Id> topObjIds = new Set<Id>();
+        for(SObject record : sharedRecords) {
+
+            System.debug('path from shared to top: '+ sod.pathFromSharedObjToTopObj);
+            System.debug('path from record: '+record.get(sod.pathFromSharedObjToTopObj));
+
+            if(record.get(sod.pathFromSharedObjToTopObj) != null) {
+                Id topObjId = (Id) record.get(sod.pathFromSharedObjToTopObj);
+                topObjIds.add(topObjId);
+            }
+        }
+
+        // If no ids populated for top objects (i.e. empty lookups), no need to query
+        if(topObjIds.isEmpty()) {
+            return new List<SObject>();
+        }
+
+        // Create selector for the sibling object
+        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(sod.controllingObjectApiName);
+        FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
+
+        // Add fields from sibling
+        Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(sod.controllingObjectApiName);
+        for(String fieldName : sod.fieldApiNames) {
+            System.debug('Looking for: '+fieldName);
+            selector.addFieldString(fieldName);
+        }
+
+        // Select filters on top object ids
+        List<SObject> siblingRecords = selector.selectPopulatedRecordsBasedOnParentPath(sod.pathFromControllingObjToTopObj, topObjIds);
+        return siblingRecords;
+    }
+        
 
     private Map<Id,Map<String,List<SObject>>> getSiblingRecordsForRuleForSharedRecord(Map<String,SiblingObjectDetails> siblingsMap) {
         Map<Id,Map<String,List<SObject>>> siblingRecordsForRuleForSharedRecord = new Map<Id,Map<String,List<SObject>>>();
@@ -116,43 +153,6 @@ public with sharing class FormulaShareSObjectsRetrievalSibling {
 
         return returnMap;
     }
-
-
-    private List<SObject> retrieveSiblings(SiblingObjectDetails sod, List<SObject> sharedRecords) {
-
-        // Get set of top object ids from shared object query
-        Set<Id> topObjIds = new Set<Id>();
-        for(SObject record : sharedRecords) {
-
-            System.debug('path from shared to top: '+ sod.pathFromSharedObjToTopObj);
-            System.debug('path from record: '+record.get(sod.pathFromSharedObjToTopObj));
-
-            if(record.get(sod.pathFromSharedObjToTopObj) != null) {
-                Id topObjId = (Id) record.get(sod.pathFromSharedObjToTopObj);
-                topObjIds.add(topObjId);
-            }
-        }
-
-        // If no ids populated for top objects (i.e. empty lookups), no need to query
-        if(topObjIds.isEmpty()) {
-            return new List<SObject>();
-        }
-
-        // Create selector for the sibling object
-        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(sod.controllingObjectApiName);
-        FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
-
-        // Add fields from sibling
-        Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(sod.controllingObjectApiName);
-        for(String fieldName : sod.fieldApiNames) {
-            System.debug('Looking for: '+fieldName);
-            selector.addFieldString(fieldName);
-        }
-
-        // Select filters on top object ids
-        List<SObject> siblingRecords = selector.selectPopulatedRecordsBasedOnParentPath(sod.pathFromControllingObjToTopObj, topObjIds);
-        return siblingRecords;
-    }    
 
 
     private class SiblingObjectDetails {

@@ -1,4 +1,4 @@
-public with sharing class FormulaShareSObjectsRetrievalService {
+public inherited sharing class FormulaShareSObjectsRetrievalService {
     
     Schema.SObjectType type;
     List<FormulaShareRule> rules;
@@ -6,8 +6,9 @@ public with sharing class FormulaShareSObjectsRetrievalService {
     List<SObject> sharedRecords = new List<SObject>();
     
     List<FormulaShareRuleSibling> siblingRules = new List<FormulaShareRuleSibling>();
-    List<FormulaShareRuleDescendant> descendantRules = new List<FormulaShareRuleDescendant>();
-    List<FormulaShareRuleInlaw> inlawRules = new List<FormulaShareRuleInlaw>();
+    List<FormulaShareRuleBottomObject> bottomObjRules = new List<FormulaShareRuleBottomObject>();
+//    List<FormulaShareRuleDescendant> descendantRules = new List<FormulaShareRuleDescendant>();
+//    List<FormulaShareRuleInlaw> inlawRules = new List<FormulaShareRuleInlaw>();
 
     List<FormulaShareRetrievedRecordDetails> sharedRecordWithControllingDetails = new List<FormulaShareRetrievedRecordDetails>();
     
@@ -40,11 +41,16 @@ public with sharing class FormulaShareSObjectsRetrievalService {
 
         populateRelatedRulesLists();
 
-        // Retrieve sibling and bottom level records involved in sharing
+        // Retrieve sibling and bottom level records involved in sharing and add these to record maps
         if(!siblingRules.isEmpty()) {
             FormulaShareSObjectsRetrievalSibling siblingService = new FormulaShareSObjectsRetrievalSibling(siblingRules, sharedRecords);
             Map<Id,Map<String,List<SObject>>> siblingRecords = siblingService.getControllingRecordsMap();
             addControllingRecordsToMap(siblingRecords);
+        }
+        if(!bottomObjRules.isEmpty()) {
+            FormulaShareSObjectsRetrievalBottomObj bottomObjService = new FormulaShareSObjectsRetrievalBottomObj(bottomObjRules, sharedRecords);
+            Map<Id,Map<String,List<SObject>>> bottomObjRecords = bottomObjService.getControllingRecordsMap();
+            addControllingRecordsToMap(bottomObjRecords);
         }
 
         System.debug('All shared record detais: ' + sharedRecordWithControllingDetails);
@@ -59,11 +65,14 @@ public with sharing class FormulaShareSObjectsRetrievalService {
                 when 'sibling' {
                     siblingRules.add((FormulaShareRuleSibling) rule);
                 }
+//                when 'descendant', 'inlaw' {
+//                    bottomObjRules.add((FormulaShareRuleBottomObject) rule);
+//                }
                 when 'descendant' {
-                    descendantRules.add((FormulaShareRuleDescendant) rule);
+                    bottomObjRules.add((FormulaShareRuleDescendant) rule);
                 }
                 when 'inlaw' {
-                    inlawRules.add((FormulaShareRuleInlaw) rule);
+                    bottomObjRules.add((FormulaShareRuleInlaw) rule);
                 }
             }
         }

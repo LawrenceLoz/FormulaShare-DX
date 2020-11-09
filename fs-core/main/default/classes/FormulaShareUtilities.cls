@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareUtilities {
+public inherited sharing class FormulaShareUtilities {
 
     public static FormulaShareUtilities mock;
     public static FormulaShareUtilities construct() {

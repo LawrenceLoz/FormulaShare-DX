@@ -74,7 +74,7 @@ public virtual inherited sharing class FormulaShareRule {
 
     // Allow direct construction from test context only
     @TestVisible
-    private FormulaShareRule() {}
+    protected FormulaShareRule() {}
 
     // Constructor manages mapping from rule metadata
     public FormulaShareRule(FormulaShare_Rule__mdt rule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
@@ -120,9 +120,6 @@ public virtual inherited sharing class FormulaShareRule {
         switch on tacf.ruleType {
             when 'standard' {
                 rule = new FormulaShareRuleStandard(mdRule, rel, tacf);
-            }
-            when 'child' {
-                rule = new FormulaShareRuleChild(mdRule, rel, tacf);
             }
             when 'descendant' {
                 rule = new FormulaShareRuleDescendant(mdRule, rel, tacf);
@@ -186,9 +183,9 @@ public virtual inherited sharing class FormulaShareRule {
                     tacf.ruleType = 'sibling';
                     break;
                 }
-                // ...otherwise child (if we're on first object down) or descendant
+                // ...otherwise descendant
                 else {
-                    tacf.ruleType = tacf.ruleType == 'standard' ? 'child' : 'descendant';
+                    tacf.ruleType = 'descendant';
                 }
                 previousObjectIsParent = true;
                 previousObjectIsChild = false;

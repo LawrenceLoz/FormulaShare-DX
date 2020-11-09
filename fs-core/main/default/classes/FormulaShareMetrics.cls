@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareMetrics extends fflib_SObjectDomain {
+public inherited sharing class FormulaShareMetrics extends fflib_SObjectDomain {
 
     // Values to augment onto metrics
     public class Increment {

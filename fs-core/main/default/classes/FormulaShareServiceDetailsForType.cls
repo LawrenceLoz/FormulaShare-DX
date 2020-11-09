@@ -11,9 +11,7 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 		this.removeExistingShares = removeExistingShares;
 	}
 
-	public Map<String,Map<Id,FormulaShareRetrievedRecordDetails>> detailsForTypeMap = new Map<String,Map<Id,FormulaShareRetrievedRecordDetails>>();
-
-    // Sets standard and ancestor rules in core detailsForTypeMap
+    // Sets standard and ancestor rules in core retrieveRecordDetails
 	public void setSharedObjectRetrievedRecord(String sharedObjectApiName, SObject sharedRecord) {
 
         FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(retrieveRecordDetails, sharedRecord.Id);
@@ -24,13 +22,12 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 
 		// Update map with details
 		retrieveRecordDetails.put(sharedRecord.Id, details);
-    }
+	}
     
 
 	public void setRetrievedRecordWithRelatedDetails(SObject relatedRecord, Id sharedObjectId, FormulaShareRule rule) {
 
-        Map<Id,FormulaShareRetrievedRecordDetails> sharedRecordMap = getSharedRecordsMap(detailsForTypeMap, rule.objectSharedAPIName);
-        FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(sharedRecordMap, sharedObjectId);
+		FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(retrieveRecordDetails, sharedObjectId);
 
         // Set shared record if it isn't already set
         if(details.sharedRecord == null) {
@@ -48,22 +45,9 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 
 		// Set all the map items
 		details.controllingRecordsForRulesMap.put(rule.developerName, relatedRecords);
-		sharedRecordMap.put(sharedObjectId, details);
-		detailsForTypeMap.put(rule.objectSharedAPIName, sharedRecordMap);
+		retrieveRecordDetails.put(sharedObjectId, details);
 	}
 
-
-    // Get or create related type details for this shared object
-    private Map<Id,FormulaShareRetrievedRecordDetails> getSharedRecordsMap(Map<String,Map<Id,FormulaShareRetrievedRecordDetails>> detailsForTypeMap, String sharedObjectApiName) {
-		Map<Id,FormulaShareRetrievedRecordDetails> sharedRecordMap;
-		if(detailsForTypeMap.containsKey(sharedObjectApiName)) {
-			sharedRecordMap = detailsForTypeMap.get(sharedObjectApiName);
-		}
-		else{
-			sharedRecordMap = new Map<Id,FormulaShareRetrievedRecordDetails>();
-        }
-        return sharedRecordMap;
-    }
 
     // Get or create details map
     private FormulaShareRetrievedRecordDetails getRetrievedRecordDetails(Map<Id,FormulaShareRetrievedRecordDetails> sharedRecordMap, Id sharedRecordId) {

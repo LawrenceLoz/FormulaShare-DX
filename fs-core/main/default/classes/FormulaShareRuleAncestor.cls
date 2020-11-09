@@ -1,5 +1,9 @@
 public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaShareRuleRelatedObject {
 
+    // Allow direct construction from test context only
+    @TestVisible
+    private FormulaShareRuleAncestor() {}
+        
     public FormulaShareRuleAncestor(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'ancestor';
@@ -44,25 +48,15 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
     }
 
 
-    // Required to dynamically get the 
+    // Dynamically gets the value through in a set of lookups from a supplied record
+    // Required because simple Contact__r.Account.Name style notation isn't supported for dyanmic checks
     public String getSharedToValueFromRecord(SObject record) {
-        // Iterate through fields until we're at the top object
-        for(Schema.SObjectField field : lookupFieldList) {
-            System.debug('Checking for field: '+field.getDescribe().getName()+' in record: '+record);
-            record = record.getSObject(field);
-            System.debug('record now: '+ record);
 
-            // Return null if no record returned for this lookup. This could be the case if
-            // relationship wasn't queried because lookup was cleared
-            if(record == null) {
-                return null;
-            }
-        }
+        FormulaShareRecordUtilities recordUtils = new FormulaShareRecordUtilities(record);
+        SObject topRecord = recordUtils.getTopRecordFromLookup(lookupFieldList);
 
         // Return the shared to field from this object
-        return (String) record.get(controllingObjectSharedToFieldAPIName);
+        return (String) topRecord?.get(controllingObjectSharedToFieldAPIName);
     }
-
-
 
 }

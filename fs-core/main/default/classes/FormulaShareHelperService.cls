@@ -34,7 +34,8 @@ public inherited sharing class FormulaShareHelperService {
 		}
 		else {
 			opType = OperationType.AFTER_UPDATE;
-        }
+		}
+		System.debug('opType: '+opType);
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
         setRuleServices();
@@ -117,7 +118,9 @@ public inherited sharing class FormulaShareHelperService {
 			}
 		}
 
-        // Add records shared by standard rules
+		// Add records shared by standard rules
+		System.debug('rulesSharingObjectService: '+rulesSharingObjectService);
+		System.debug('rulesSharingObjectService.recordsSharedByStandardRules: '+rulesSharingObjectService.recordsSharedByStandardRules);
 		for(SObject record : rulesSharingObjectService.recordsSharedByStandardRules) {
 
 			// If we'd queried this record for another type of rule, use the queried version with populated instead
@@ -264,7 +267,8 @@ public inherited sharing class FormulaShareHelperService {
 		else {
 			Boolean removeForThisType = removeSharesForThisType(sharedObjectName);
 			System.debug('Removal settings for: '+sharedObjectName+' = ' + removeForThisType);
-			details = new FormulaShareServiceDetailsForType(type, removeForThisType);
+			Schema.SObjectType sharedObjectType = FormulaShareUtilities.getSObjectTypeFromName(sharedObjectName);
+			details = new FormulaShareServiceDetailsForType(sharedObjectType, removeForThisType);
 		}
 
 		return details;

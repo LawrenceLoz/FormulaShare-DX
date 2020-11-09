@@ -4,7 +4,7 @@ public inherited sharing class FormulaShareHelperServiceDescendant extends Formu
 
     public FormulaShareHelperServiceDescendant(List<FormulaShareRule> rules) {
 		for(FormulaShareRule rule : rules) {
-			if(rule.isValid() && rule.active && rule.type == 'inlaw') {
+			if(rule.isValid() && rule.active && rule.type == 'descendant') {
                 this.rules.add((FormulaShareRuleDescendant) rule);
 			}
 		}
@@ -12,12 +12,15 @@ public inherited sharing class FormulaShareHelperServiceDescendant extends Formu
 
 
 	public void processInsert(SObject newRecord) {
+		System.debug('Descendant process insert');
 		for(FormulaShareRuleDescendant rule : rules) {
+			System.debug('Checking record ' + newRecord.get('Id') + ' for processing for descendant rule: ' + rule.developerName + '. First query step(' + rule.controllingObjectSharedToFieldAPIName + '): '+newRecord.get(rule.controllingObjectSharedToFieldAPIName));
 
 			// If lookup towards shared on a descendant rule is populated, we might need to assess sharing for the shared object
 			if(newRecord.get(rule.lookupFromBottomObjTowardsSharedObj) != null 
 				&& newRecord.get(rule.controllingObjectSharedToFieldAPIName) != null) {
-                addToSets(newRecord, rule);
+				System.debug('Adding record ' + newRecord.get('Id') + ' for processing for descendant rule: ' + rule.developerName + '. First query step(' + rule.controllingObjectSharedToFieldAPIName + '): '+newRecord.get(rule.controllingObjectSharedToFieldAPIName));
+				addToSets(newRecord, rule);
 			}
 		}
     }

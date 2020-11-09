@@ -1,5 +1,9 @@
 public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleRelatedObject {
 
+    // Allow direct construction from test context only
+    @TestVisible
+    private FormulaShareRuleSibling() {}
+    
     public FormulaShareRuleSibling(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'sibling';
@@ -48,6 +52,6 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
             pathFromControllingObjToTopObj = field.getDescribe().getRelationshipName() + '.' + pathFromControllingObjToTopObj;
         }
 
-    }    
+    }
 
 }
