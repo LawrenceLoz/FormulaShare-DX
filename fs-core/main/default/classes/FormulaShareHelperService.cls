@@ -103,18 +103,12 @@ public inherited sharing class FormulaShareHelperService {
 
 			// Add details for descendant records
 			for(FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule : descendantRulesService.recordRules) {
-				SObject bottomRecord = fullQueriedRecords.get(recordRule.bottomObjectRecordId);
-				FormulaShareRuleDescendant descRule = (FormulaShareRuleDescendant) recordRule.rule;
-				Id sharedRecordId = (Id) bottomRecord.get(descRule.pathFromBottomObjToSharedObj);
-				setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, recordRule.rule);
+				getRelatedRecordDetailsAndSetInMap(fullQueriedRecords, recordRule);
 			}
 
 			// And details for inlaw rules
 			for(FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule : inlawRulesService.recordRules) {
-				SObject bottomRecord = fullQueriedRecords.get(recordRule.bottomObjectRecordId);
-				FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) recordRule.rule;
-				Id sharedRecordId = (Id) bottomRecord.get(inlawRule.pathFromBottomObjToSharedObj);
-				setRetrievedRecordwithRelatedDetails(bottomRecord, sharedRecordId, recordRule.rule);
+				getRelatedRecordDetailsAndSetInMap(fullQueriedRecords, recordRule);
 			}
 		}
 
@@ -194,13 +188,19 @@ public inherited sharing class FormulaShareHelperService {
 			// Add field paths from all relevant rules
 			for(FormulaShareRule rule : descendantRulesService.relevantRules) {
                 FormulaShareRuleDescendant descRule = (FormulaShareRuleDescendant) rule;
+				System.debug('Adding descRule.pathFromBottomObjToSharedObj: ' + descRule.pathFromBottomObjToSharedObj);
+				System.debug('Adding descRule.controllingObjectSharedToFieldAPIName: ' + descRule.controllingObjectSharedToFieldAPIName);
 				selector.addFieldString(descRule.pathFromBottomObjToSharedObj);
 				selector.addFieldString(descRule.controllingObjectSharedToFieldAPIName);
+				selectOwnerIdIfNeeded(selector, rule);
 			}
 			for(FormulaShareRule rule : inlawRulesService.relevantRules) {
-                FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) rule;
+				FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) rule;
+				System.debug('Adding inlawRule.pathFromBottomObjToSharedObj: ' + inlawRule.pathFromBottomObjToSharedObj);
+				System.debug('Adding inlawRule.pathToSharedToField: ' + inlawRule.pathToSharedToField);
 				selector.addFieldString(inlawRule.pathFromBottomObjToSharedObj);
 				selector.addFieldString(inlawRule.pathToSharedToField);
+				selectOwnerIdIfNeeded(selector, rule);
 			}
 
 			// For ancestor and standard, if we're planning to remove sharing then we need to query for anything relevant
@@ -216,14 +216,15 @@ public inherited sharing class FormulaShareHelperService {
 			}
 
 			for(FormulaShareRuleStandard rule : standardRules) {
+				System.debug('Adding standard rule controllingObjectSharedToFieldAPIName: ' + rule.controllingObjectSharedToFieldAPIName);
 				selector.addFieldString(rule.controllingObjectSharedToFieldAPIName);
+				selectOwnerIdIfNeeded(selector, rule);
 			}
 			for(FormulaShareRuleAncestor rule : ancestorRules) {
+				System.debug('Adding ancestor rule pathToSharedToField: ' + rule.pathToSharedToField);
 				selector.addFieldString(rule.pathToSharedToField);
+				selectOwnerIdIfNeeded(selector, rule);
 			}
-
-			// Add ownerid - this will be used if rules share to users
-			selector.addFieldString('OwnerId');
 
 			List<SObject> queriedList = selector.selectWithFields(recordsToQuery);
             Map<Id,SObject> fullQueriedRecords = new Map<Id,SObject>((List<SObject>) queriedList);
@@ -232,6 +233,22 @@ public inherited sharing class FormulaShareHelperService {
         }
         
         return new Map<Id,SObject>();
+	}
+
+
+	// If rule shares with users, adds the owner id from the shared object
+	private void selectOwnerIdIfNeeded(FormulaShareSObjectsSelector selector, FormulaShareRule rule) {
+		if(rule.shareWith == 'Users') {
+			switch on rule.type {
+				when 'standard', 'ancestor' {
+					selector.addFieldString('OwnerId');
+				}
+				when 'descendant', 'inlaw' {
+					FormulaShareRuleBottomObject boRule = (FormulaShareRuleBottomObject) rule;
+					selector.addFieldString(boRule.pathFromBottomObjToOwnerIdOnSharedObj);
+				}
+			}
+		}
 	}
 
 
@@ -251,10 +268,23 @@ public inherited sharing class FormulaShareHelperService {
 		setDetailsForType(objectName, details);
 	}
 
-	private void setRetrievedRecordWithRelatedDetails(SObject bottomRecord, Id sharedRecordId, FormulaShareRule rule) {
-		FormulaShareServiceDetailsForType details = getDetailsForType(rule.objectSharedAPIName);
-		details.setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, rule);
-		setDetailsForType(rule.objectSharedAPIName, details);
+	
+	private void getRelatedRecordDetailsAndSetInMap(Map<Id,SObject> fullQueriedRecords, FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule) {
+
+		// Get shared record id
+		SObject bottomRecord = fullQueriedRecords.get(recordRule.bottomObjectRecordId);
+		FormulaShareRuleBottomObject boRule = (FormulaShareRuleBottomObject) recordRule.rule;
+		Id sharedRecordId = (Id) bottomRecord.get(boRule.pathFromBottomObjToSharedObj);
+
+		// Get ownerId if rule shares with users (might not have been queried otherwise)
+		Id ownerId;
+		if(boRule.shareWith == 'Users') {
+			ownerId = boRule.getOwnerOfSharedObjectFromBottomObject(bottomRecord);
+		}
+
+		FormulaShareServiceDetailsForType details = getDetailsForType(boRule.objectSharedAPIName);
+		details.setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, ownerId, boRule);
+		setDetailsForType(boRule.objectSharedAPIName, details);
 	}
 
 	private FormulaShareServiceDetailsForType getDetailsForType(String sharedObjectName) {

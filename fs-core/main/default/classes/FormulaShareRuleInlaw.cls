@@ -12,7 +12,9 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
 
     // Set pathToSharedToField to path from bottom object to shared to field on top object for inlaw rule
     public String lookupFromBottomObjTowardsControllingObj;
-    private List<Schema.SObjectField> lookupFieldList = new List<Schema.SObjectField>();
+
+    @TestVisible
+    private List<Schema.SObjectField> lookupFromBottomObjToControllingObjFieldList = new List<Schema.SObjectField>();
 
     private void setVars() {
 
@@ -28,7 +30,7 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
         pathToSharedToField = '';
         while(rel.nextRelationship != null) {
             Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
-            lookupFieldList.add(field);
+            lookupFromBottomObjToControllingObjFieldList.add(field);
             pathToSharedToField += field.getDescribe().getRelationshipName() + '.';
             type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
     
@@ -42,7 +44,7 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
     public String getSharedToValueFromRecord(SObject record) {
 
         FormulaShareRecordUtilities recordUtils = new FormulaShareRecordUtilities(record);
-        SObject controllingRecord = recordUtils.getTopRecordFromLookup(lookupFieldList);
+        SObject controllingRecord = recordUtils.getTopRecordFromLookup(lookupFromBottomObjToControllingObjFieldList);
 
         // Return the shared to field from this object
         return (String) controllingRecord?.get(controllingObjectSharedToFieldAPIName);

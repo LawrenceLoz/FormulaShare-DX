@@ -33,6 +33,7 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
     // Can be used to populate based on field API name, or a lookup path to a parent object
     public void addFieldString(String fieldString) {
+        System.debug('Adding field in selector: '+fieldString);
         fieldStrings.add(fieldString);
     }
 
@@ -131,7 +132,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
         // Add fields provided as strings (lookups would be added this way)
         for(String fieldString : fieldStrings) {
-            System.debug('Adding field in selector: '+fieldString);
             factory.selectField(fieldString);
             System.debug('Added field in selector: '+fieldString);
         }

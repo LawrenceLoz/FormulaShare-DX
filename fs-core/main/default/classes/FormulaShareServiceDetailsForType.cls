@@ -25,7 +25,7 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 	}
     
 
-	public void setRetrievedRecordWithRelatedDetails(SObject relatedRecord, Id sharedObjectId, FormulaShareRule rule) {
+	public void setRetrievedRecordWithRelatedDetails(SObject relatedRecord, Id sharedObjectId, Id sharedObjectOwnerId, FormulaShareRule rule) {
 
 		FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(retrieveRecordDetails, sharedObjectId);
 
@@ -33,6 +33,7 @@ public inherited sharing class FormulaShareServiceDetailsForType {
         if(details.sharedRecord == null) {
 			SObject sharedRecord = FormulaShareUtilities.getSObjectTypeFromName(rule.objectSharedAPIName).newSObject();
 			sharedRecord.Id = sharedObjectId;
+			sharedRecord.put('OwnerId', sharedObjectOwnerId);
 			details.sharedRecord = sharedRecord;
         }
 

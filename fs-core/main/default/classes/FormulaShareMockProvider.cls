@@ -302,7 +302,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         FormulaShareRuleDescendant childUserRule = getChildUserRule();
         rules.add(childUserRule);
 
-        // Shares FS Batch Log with the group name specified as the first name of the owner of related FS Record Logs
+        // Shares FS Batch Log with the group name specified as FormulaShare_Rule_Name__c of the parent rule in batch record of related FS Record Logs
         FormulaShareRuleInlaw inlawGroupRule = getInlawGroupRule();
         rules.add(inlawGroupRule);
 
@@ -426,36 +426,39 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     }
 
 
-    // Will add a sharing record for the user with the user id in Exception_Type__c field for all related log records
-    private FormulaShareRuleDescendant getChildUserRule() {
+    // Shares FS Record Log with owner of the parent FS Batch Log
+    private FormulaShareRuleAncestor getAncestorUserRule() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
-        FormulaShareRuleDescendant rule = new FormulaShareRuleDescendant();
-        rule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
-        rule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
+        FormulaShareRuleAncestor rule = new FormulaShareRuleAncestor();
+        rule.objectSharedAPIName = prefix + 'FormulaShare_Record_Log__c';
+        rule.sharingReason = prefix + 'FormulaShare_Record_Log_Share__c';
         rule.active = true;
 
-        rule.developerName = childUserRuleName;
+        rule.developerName = ancestorUserRuleName;
 
-        rule.type = 'descendant';
+        rule.type = 'ancestor';
         rule.accessLevel = 'Edit';
         rule.shareWith = 'Users';
-        rule.controllingObjectApiName = prefix + 'FormulaShare_Log__c';    // Based on a self-lookup
-        rule.controllingObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
+        rule.controllingObjectApiName = prefix + 'FormulaShare_Log__c';
+        rule.controllingObjectSharedToFieldAPIName = 'OwnerId';
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.controllingObjectSharedToFieldType = 'Id';
-        rule.relationship = getRelationshipChildRule(rule);
 
-        rule.bottomObjectApiName = prefix + 'FormulaShare_Log__c';
-        rule.pathFromBottomObjToSharedObj = prefix + 'Related_Log_Required_for_Test_Class__c';
-        rule.lookupFromBottomObjTowardsSharedObj = prefix + 'Related_Log_Required_for_Test_Class__c';
-        rule.pathToSharedToField = prefix + 'Exception_Type__c';
-        rule.firstQueryStepApiName = rule.lookupFromBottomObjTowardsSharedObj;
+        rule.pathToSharedToField = prefix + 'FormulaShare_Batch_Log__r.' + prefix + 'OwnerId';
+        rule.firstQueryStepApiName = prefix + 'FormulaShare_Batch_Log__c';
+
+        // Populate lookup field lists
+        Schema.SObjectType sharedType = FormulaShareUtilities.getSObjectTypeFromName(rule.objectSharedAPIName);
+        Schema.SObjectField lookupToControlling = FormulaShareUtilities.getSObjectFieldFromName(rule.firstQueryStepApiName, sharedType);
+        rule.lookupFromSharedObjToControllingObjFieldList.add(lookupToControlling);
+
+        rule.relationship = getRelationshipAncestorRule(rule);
 
         return rule;
     }
 
-    private FormulaShareSObjectRelationship getRelationshipChildRule(FormulaShareRule rule) {
+    private FormulaShareSObjectRelationship getRelationshipAncestorRule(FormulaShareRuleAncestor rule) {
         FormulaShareSObjectRelationship rel1 = new FormulaShareSObjectRelationship();
         rel1.thisObjectToken = 'objecttoken1234';
         rel1.thisObjectApiName = rule.objectSharedAPIName;
@@ -463,17 +466,18 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         FormulaShareSObjectRelationship rel2 = new FormulaShareSObjectRelationship();
         rel2.thisObjectToken = 'objecttoken1234';
         rel2.thisObjectApiName = rule.controllingObjectApiName;
-        rel2.lookupToPrevObjectToken = 'objecttoken1234.lookuptoken1234';
-        rel2.lookupFromPrevObjectApiName = prefix + 'Related_Log_Required_for_Test_Class__c';   // Lookup field to parent log
+        rel2.lookupFromPrevObjectToken = 'objecttoken1234.lookuptoken1234';
+        rel2.lookupFromPrevObjectApiName = rule.firstQueryStepApiName;
         rel2.sharedToFieldToken = rule.controllingObjectSharedToFieldToken;
         rel2.sharedToFieldApiName = rule.controllingObjectSharedToFieldAPIName;
 
         rel1.nextRelationship = rel2;
         return rel1;
     }
+    
+    
 
-
-    // Shares FS Record Log with owner of FormulaShare Rule in Batch related via the parent FS Batch Log
+    // Shares FS Record Log with the user specified in FormulaShare_Rule_Name__c on the FormulaShare Rule in Batch related via the parent FS Batch Log
     private FormulaShareRuleSibling getSiblingUserRule() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
@@ -526,34 +530,42 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     }
 
 
-    // Shares FS Record Log with owner of the parent FS Batch Log
-    private FormulaShareRuleAncestor getAncestorUserRule() {
+
+    // Will add a sharing record for the user with the user id in Exception_Type__c field for all related log records
+    private FormulaShareRuleDescendant getChildUserRule() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
-        FormulaShareRuleAncestor rule = new FormulaShareRuleAncestor();
-        rule.objectSharedAPIName = prefix + 'FormulaShare_Record_Log__c';
-        rule.sharingReason = prefix + 'FormulaShare_Record_Log_Share__c';
+        FormulaShareRuleDescendant rule = new FormulaShareRuleDescendant();
+        rule.objectSharedAPIName = prefix + 'FormulaShare_Log__c';
+        rule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
         rule.active = true;
 
-        rule.developerName = ancestorUserRuleName;
+        rule.developerName = childUserRuleName;
 
-        rule.type = 'ancestor';
+        rule.type = 'descendant';
         rule.accessLevel = 'Edit';
         rule.shareWith = 'Users';
-        rule.controllingObjectApiName = prefix + 'FormulaShare_Log__c';
-        rule.controllingObjectSharedToFieldAPIName = 'OwnerId';
+        rule.controllingObjectApiName = prefix + 'FormulaShare_Log__c';    // Based on a self-lookup
+        rule.controllingObjectSharedToFieldAPIName = prefix + 'Exception_Type__c';
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.controllingObjectSharedToFieldType = 'Id';
+        rule.relationship = getRelationshipChildRule(rule);
 
-        rule.pathToSharedToField = prefix + 'FormulaShare_Batch_Log__r.' + prefix + 'FormulaShare_Rule_Name__c';
-        rule.firstQueryStepApiName = prefix + 'FormulaShare_Batch_Log__c';
+        rule.bottomObjectApiName = prefix + 'FormulaShare_Log__c';
+        rule.pathFromBottomObjToSharedObj = prefix + 'Related_Log_Required_for_Test_Class__c';
+        rule.pathFromBottomObjToOwnerIdOnSharedObj = prefix + 'Related_Log_Required_for_Test_Class__r.OwnerId';
+        rule.lookupFromBottomObjTowardsSharedObj = prefix + 'Related_Log_Required_for_Test_Class__c';
+        rule.pathToSharedToField = prefix + 'Exception_Type__c';
+        rule.firstQueryStepApiName = rule.lookupFromBottomObjTowardsSharedObj;
 
-        rule.relationship = getRelationshipAncestorRule(rule);
+        Schema.SObjectType boType = FormulaShareUtilities.getSObjectTypeFromName(rule.bottomObjectApiName);
+        Schema.SObjectField lookupToShared = FormulaShareUtilities.getSObjectFieldFromName(rule.pathFromBottomObjToSharedObj, boType);
+        rule.lookupFromBottomObjToSharedObjFieldList.add(lookupToShared);
 
         return rule;
     }
 
-    private FormulaShareSObjectRelationship getRelationshipAncestorRule(FormulaShareRuleAncestor rule) {
+    private FormulaShareSObjectRelationship getRelationshipChildRule(FormulaShareRule rule) {
         FormulaShareSObjectRelationship rel1 = new FormulaShareSObjectRelationship();
         rel1.thisObjectToken = 'objecttoken1234';
         rel1.thisObjectApiName = rule.objectSharedAPIName;
@@ -561,8 +573,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         FormulaShareSObjectRelationship rel2 = new FormulaShareSObjectRelationship();
         rel2.thisObjectToken = 'objecttoken1234';
         rel2.thisObjectApiName = rule.controllingObjectApiName;
-        rel2.lookupFromPrevObjectToken = 'objecttoken1234.lookuptoken1234';
-        rel2.lookupFromPrevObjectApiName = rule.firstQueryStepApiName;
+        rel2.lookupToPrevObjectToken = 'objecttoken1234.lookuptoken1234';
+        rel2.lookupFromPrevObjectApiName = prefix + 'Related_Log_Required_for_Test_Class__c';   // Lookup field to parent log
         rel2.sharedToFieldToken = rule.controllingObjectSharedToFieldToken;
         rel2.sharedToFieldApiName = rule.controllingObjectSharedToFieldAPIName;
 
@@ -571,8 +583,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     }
 
 
-
-    // Shares FS Batch Log with the group name specified as the first name of the owner of related FS Record Logs
+    // Shares FS Batch Log with the group name specified as FormulaShare_Rule_Name__c of the parent rule in batch record of related FS Record Logs
     private FormulaShareRuleInlaw getInlawGroupRule() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
@@ -594,10 +605,19 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         rule.lookupFromBottomObjTowardsControllingObj = prefix + 'FormulaShare_Rule_in_Batch__c';
         rule.bottomObjectApiName = prefix + 'FormulaShare_Record_Log__c';
         rule.pathFromBottomObjToSharedObj = prefix + 'FormulaShare_Batch_Log__c';
+        rule.pathFromBottomObjToOwnerIdOnSharedObj = prefix + 'FormulaShare_Batch_Log__r.OwnerId';
         rule.lookupFromBottomObjTowardsSharedObj = prefix + 'FormulaShare_Batch_Log__c';
         rule.firstQueryStepApiName = rule.lookupFromBottomObjTowardsSharedObj;
 
         rule.pathToSharedToField = prefix + 'FormulaShare_Rule_in_Batch__r.' + prefix + 'FormulaShare_Rule_Name__c';
+
+        // Populate lookup field lists
+        Schema.SObjectType boType = FormulaShareUtilities.getSObjectTypeFromName(rule.bottomObjectApiName);
+        Schema.SObjectField lookupToShared = FormulaShareUtilities.getSObjectFieldFromName(rule.pathFromBottomObjToSharedObj, boType);
+        rule.lookupFromBottomObjToSharedObjFieldList.add(lookupToShared);
+
+        Schema.SObjectField lookupToControlling = FormulaShareUtilities.getSObjectFieldFromName(rule.lookupFromBottomObjTowardsControllingObj, boType);
+        rule.lookupFromBottomObjToControllingObjFieldList.add(lookupToControlling);
     
         rule.relationship = getRelationshipInlawRule(rule);
 

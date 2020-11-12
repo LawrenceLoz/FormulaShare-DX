@@ -38,18 +38,20 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
 
 				// If sharing field specified on a standard rule has changed, we might need to assess sharing for this record
 				if(oldRecord.get(rule.firstQueryStepApiName) != newRecord.get(rule.firstQueryStepApiName)) {
+					System.debug('Adding record ' + newRecord.get('Id') + ' for processing for standard or ancestor rule: ' + rule.developerName + '. firstQueryStepApiName(' + rule.firstQueryStepApiName + '): '+newRecord.get(rule.firstQueryStepApiName));
 					addToSets(newRecord, rule);
 					addToFullSets(rule);
 				}
 
 				// If owner of shared standard object has changed we might need to check if this owner still requires sharing
 				else if(oldRecord.get('OwnerId') != newRecord.get('OwnerId') && !rule.sharedObjectIsCustom) {
+					System.debug('Adding record ' + newRecord.get('Id') + ' for processing for standard or ancestor rule: ' + rule.developerName + '. OwnerId: '+newRecord.get('OwnerId'));
 					addToSets(newRecord, rule);
 					addToFullSets(rule);
 				}
 
 				// And also add to full set of rules if relevant sharing might already be in place
-				// (this may need to be assessed for deletions)
+				// (this may need to be assessed to ensure sharing isn't removed if deletion allowed)
 				else if(newRecord.get(rule.firstQueryStepApiName) != null) {
 					addToFullSets(rule);
 				}

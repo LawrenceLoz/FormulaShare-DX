@@ -320,21 +320,23 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		// If any exceptions updating logs, ensure batch is closed
 		catch(Exception e) {
 			metricsException = e;
+
+			try {
+				fsLogs.setFinalisedLogs();
+				updateLogAfterMetricsFail(fsLogs, metricsException);
+			}
+			catch(Exception exp) {
+				System.debug('Error updating batch log after metrics error: '+exp.getMessage());
+			}
 		}
 
-		// If there are more types to process, submit another batch
-		if(types.size() > 1) {
-			types.remove(0);
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
-			system.debug('Submitted next batch, Id = ' + batchJobId);
-		}
-
-		try {
-			fsLogs.setFinalisedLogs();
-			updateLogAfterMetricsFail(fsLogs, metricsException);
-		}
-		catch(Exception e) {
-			System.debug('Error updating batch log after metrics error');
+		finally {
+			// If there are more types to process, submit another batch
+			if(types.size() > 1) {
+				types.remove(0);
+				Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+				system.debug('Submitted next batch, Id = ' + batchJobId);
+			}
 		}
 
 	}

@@ -35,11 +35,13 @@ public inherited sharing class FormulaShareHelperServiceDescendant extends Formu
 				
 				// If lookup towards shared object has changed, we might need to assess for the new parent
 				if(oldRecord.get(rule.lookupFromBottomObjTowardsSharedObj) != newRecord.get(rule.lookupFromBottomObjTowardsSharedObj)) {
+					System.debug('Adding record ' + newRecord.get('Id') + ' for processing for descendant rule: ' + rule.developerName + '. Lookup change(' + rule.lookupFromBottomObjTowardsSharedObj + '): '+newRecord.get(rule.lookupFromBottomObjTowardsSharedObj));
 					addToSets(newRecord, rule);
 				}
 
 				// For descendant rules, if shared to field has changed, might need to assess
 				else if(oldRecord.get(rule.controllingObjectSharedToFieldAPIName) != newRecord.get(rule.controllingObjectSharedToFieldAPIName)) {
+					System.debug('Adding record ' + newRecord.get('Id') + ' for processing for descendant rule: ' + rule.developerName + '. First query step(' + rule.controllingObjectSharedToFieldAPIName + '): '+newRecord.get(rule.controllingObjectSharedToFieldAPIName));
 					addToSets(newRecord, rule);
 				}
 			}

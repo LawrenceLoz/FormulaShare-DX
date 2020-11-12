@@ -60,7 +60,7 @@ public inherited sharing class FormulaShareService {
 
 	private Boolean contactIsControlledByAccount;
 
-	private Schema.SObjectType type;
+	@TestVisible private Schema.SObjectType type;
 	@TestVisible private List<FormulaShareRule> rules = new List<FormulaShareRule>();
 	Boolean removeExistingShares = true;
 	
@@ -234,7 +234,7 @@ public inherited sharing class FormulaShareService {
 
 			system.debug('this rule: '+rule);
 			system.debug('*** the record: '+recordRule.recordWithSharedToDetails);
-			system.debug('*** sharedToAPINAme'+rule.pathToSharedToField);
+			system.debug('*** sharedToAPIName: '+rule.pathToSharedToField);
 			system.debug('shared to string: ' + sharedToString);
 			
 			if(rule.isValid() && rule.active) {
@@ -702,16 +702,22 @@ public inherited sharing class FormulaShareService {
 			typesSet.add(type);
 		}
 
-		if(!Test.isRunningTest()) {
-			for(SObjectType type : typesSet) {
-				typesList.add(type);
-			}
+		for(SObjectType type : typesSet) {
+			typesList.add(type);
 		}
 
-		// If running test return list with FormulaShareRule to enable execution of other code
-		else {
-			typesList.add(FormulaShare_Log__c.SObjectType);
-		}
+
+
+//		if(!Test.isRunningTest()) {
+//			for(SObjectType type : typesSet) {
+//				typesList.add(type);
+//			}
+//		}
+//
+//		// If running test return list with FormulaShareRule to enable execution of other code
+//		else {
+//			typesList.add(FormulaShare_Log__c.SObjectType);
+//		}
 
 		return typesList;
 	}

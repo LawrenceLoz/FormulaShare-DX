@@ -69,6 +69,55 @@ public inherited sharing class FormulaShareTestDataFactory {
         return childLogs;
     }
 
+
+    //--------------------------------- Record logs and ribs factory ------------------------------------------------
+
+    public static List<FormulaShare_Record_Log__c> getRecordLogsForBatchLog(Id batchLogId, Integer noLogs) {
+        List<FormulaShare_Record_Log__c> recordLogs = new List<FormulaShare_Record_Log__c>();
+
+        for(Integer i=0; i < noLogs; i++) {
+            FormulaShare_Record_Log__c log = new FormulaShare_Record_Log__c();
+            log.FormulaShare_Batch_Log__c = batchLogId;
+            recordLogs.add(log);
+        }
+        return recordLogs;
+    }
+
+    public static List<FormulaShare_Record_Log__c> getSharingRecordLogsForInlawRule(Id batchLogId, Id ruleInBatchId, Integer noLogs) {
+        List<FormulaShare_Record_Log__c> recordLogs = getRecordLogsForBatchLog(batchLogId, noLogs);
+
+        for(FormulaShare_Record_Log__c log : recordLogs) {
+            log.FormulaShare_Rule_in_Batch__c = ruleInBatchId;
+        }
+        return recordLogs;
+    }
+    
+    public static List<FormulaShare_Rule_in_Batch__c> getRuleInBatchRecords(Id batchLogId, Integer noRecords) {
+        List<FormulaShare_Rule_in_Batch__c> ribs = new List<FormulaShare_Rule_in_Batch__c>();
+
+        for(Integer i=0; i < noRecords; i++) {
+            FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
+            rib.FormulaShare_Log__c = batchLogId;
+            rib.FormulaShare_Rule_Name__c = FormulaShareTestUtils.sharedGroupName;
+            ribs.add(rib);
+        }
+        return ribs;
+    }
+
+    public static List<FormulaShare_Rule_in_Batch__c> getRuleInBatchRecordsForSiblingRule(Id batchLogId, List<User> users, Integer noRecords) {
+        List<FormulaShare_Rule_in_Batch__c> ribs = getRuleInBatchRecords(batchLogId, noRecords);
+
+        Integer i = 0;
+        for(FormulaShare_Rule_in_Batch__c rib : ribs) {
+            rib.FormulaShare_Rule_Name__c = users[Math.mod(i, users.size())].Id;
+            i++;
+        }
+        return ribs;
+    }
+
+
+    //--------------------------------- Share records factory ------------------------------------------------
+
     public static FormulaShare_Log__Share getShareForBatchLog(Id batchLogId, Id userOrGroupId, String accessLevel) {
         return getSharesForBatchLog(batchLogId, new List<Id>{userOrGroupId}, accessLevel)[0];
     }
@@ -81,7 +130,7 @@ public inherited sharing class FormulaShareTestDataFactory {
             share.AccessLevel = accessLevel;
             share.ParentId = batchLogId;
             share.UserOrGroupId = userOrGroupId;
-            share.RowCause = prefix + 'FormulaShare_Log_Share__c';
+            share.RowCause = FormulaShareTestUtils.batchLogRowCause;
             sharesList.add(share);
         }
         return sharesList;

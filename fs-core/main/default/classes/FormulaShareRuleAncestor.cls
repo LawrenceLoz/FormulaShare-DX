@@ -11,7 +11,8 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
     }
 
     // Sequence of lookup fields needed to get from shared object to top object
-    private List<Schema.SObjectField> lookupFieldList = new List<Schema.SObjectField>();
+    @TestVisible
+    private List<Schema.SObjectField> lookupFromSharedObjToControllingObjFieldList = new List<Schema.SObjectField>();
 
     private void setVars() {
 
@@ -29,7 +30,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
             if(rel.lookupFromPrevObjectApiName != null) {
                 Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(prevObjApiName);
                 Schema.SObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
-                lookupFieldList.add(field);
+                lookupFromSharedObjToControllingObjFieldList.add(field);
                 fieldPath += field.getDescribe().getRelationshipName() + '.';
             }
     
@@ -40,7 +41,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
         // Add relationship and shared to field from final relationship
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(prevObjApiName);
         Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
-        lookupFieldList.add(field);
+        lookupFromSharedObjToControllingObjFieldList.add(field);
         fieldPath += field.getDescribe().getRelationshipName() + '.';
         fieldPath += rel.sharedToFieldApiName;
 
@@ -53,7 +54,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
     public String getSharedToValueFromRecord(SObject record) {
 
         FormulaShareRecordUtilities recordUtils = new FormulaShareRecordUtilities(record);
-        SObject topRecord = recordUtils.getTopRecordFromLookup(lookupFieldList);
+        SObject topRecord = recordUtils.getTopRecordFromLookup(lookupFromSharedObjToControllingObjFieldList);
 
         // Return the shared to field from this object
         return (String) topRecord?.get(controllingObjectSharedToFieldAPIName);
