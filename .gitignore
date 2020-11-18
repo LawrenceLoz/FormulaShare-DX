@@ -27,3 +27,6 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+# FormulaShare Rules (ignored to avoid unwanted namespace updates)
+fs-sample-app/main/default/customMetadata/
