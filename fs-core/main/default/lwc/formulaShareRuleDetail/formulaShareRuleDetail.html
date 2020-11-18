@@ -2,10 +2,10 @@
 
     <h3 class="slds-section-title--divider ">Rule name</h3>
     <c-formula-share-rule-detail-name-label
-        rule-name={ruleName}
-        rule-label={ruleLabel}
-        rule-description={ruleDescription}
-        rule-active={ruleActive}
+        rule-name={rule.developerName}
+        rule-label={rule.label}
+        rule-description={rule.description}
+        rule-active={rule.active}
         is-edit={isEdit}
         onlabelchange={handleLabelChange}
         onnamechange={handleNameChange}
@@ -15,23 +15,26 @@
 
     <h3 class="slds-section-title--divider ">Object to share</h3>
     <c-formula-share-rule-detail-shared-object 
-        shared-object-api-name={sharedObjectApiName}
+        shared-object-api-name={rule.objectSharedAPIName}
         onsetsharedobjectdetail={handleSetSharedObjectDetail}
         onsharedobjectchange={handleSharedObjectChange}
         onaccountrelatedowd={handleSetAccountRelatedOwd}
         >
     </c-formula-share-rule-detail-shared-object>
 
-    <template if:true={sharedObject}>
+    <template if:true={rule.relationship}>
         <div class="slds-p-top_medium">
             <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
+<!--
+            related-object-selected={rule.controllingObjectApiName}
+            rule-type={rule.type} 
+            shared-object={sharedObject}
+            shared-object-api-name={rule.objectSharedAPIName}
+            onrelatedobjectchange={handleRelatedObjectChange}
+-->
             <c-formula-share-rule-detail-location 
-                rule-type={ruleType} 
-                shared-object={sharedObject}
-                shared-object-api-name={sharedObjectApiName}
-                related-object-selected={relatedObjectSelected}
-                onruletypechange={handleRuleTypeChange}
-                onrelatedobjectchange={handleRelatedObjectChange}>
+                relationship={rule.relationship}
+                onrelationshipchange={handleRelationshipChange}>
             </c-formula-share-rule-detail-location>
         </div>
     </template>
@@ -39,12 +42,12 @@
     <template if:true={sharedObject}>
         <h3 class="slds-section-title--divider">Share with</h3>
         <c-formula-share-rule-detail-field 
-            object-with-share-field={objectWithShareField}
-            share-with={shareWith}
+            object-with-share-field={rule.controllingObjectApiName}
+            share-with={rule.shareWith}
             internal-sharing-model={sharedObject.internalSharingModel}
             external-sharing-model={sharedObject.externalSharingModel}
-            share-field={shareField}
-            share-field-type={shareFieldType}
+            share-field={rule.controllingObjectSharedToFieldAPIName}
+            share-field-type={rule.controllingObjectSharedToFieldType}
             onsharewithchange={handleShareWithChange}
             onsharefieldchange={handleShareFieldChange}
             onsharefieldtypechange={handleShareFieldTypeChange}>
@@ -61,11 +64,11 @@
             shared-object-id={sharedObject.objectId}
             shared-object-label={sharedObject.objectLabel}
             shared-object-api-name={sharedObjectApiName}
-            access-level={accessLevel}
-            contact-access={contactAccess}
-            case-access={caseAccess}
-            opportunity-access={opportunityAccess}
-            sharing-reason={sharingReason}
+            access-level={rule.accessLevel}
+            contact-access={rule.contactAccess}
+            case-access={rule.caseAccess}
+            opportunity-access={rule.opportunityAccess}
+            sharing-reason={rule.sharingReason}
             onaccesslevelchange={handleAccessLevelChange}
             onsharingreasonchange={handleSharingReasonChange}
             oncontactaccesschange={handleContactAccessChange}

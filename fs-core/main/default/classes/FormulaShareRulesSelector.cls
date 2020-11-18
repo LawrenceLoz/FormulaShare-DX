@@ -267,8 +267,10 @@ public inherited sharing class FormulaShareRulesSelector {
     public static FormulaShareRule getSpecificRule(Id ruleId) {
         String condition = 'Id = \'' + ruleId + '\' WITH SECURITY_ENFORCED LIMIT 1';
         String query = getQueryWithCondition(condition);
+        System.debug('specific rule query: '+ query);
         FormulaShare_Rule__mdt rule = Database.query(query);
         FormulaShareRule ruleToReturn = FormulaShareRule.getRule(rule);
+        System.debug('ruleToReturn: '+ ruleToReturn);
 
 		return ruleToReturn;
     }

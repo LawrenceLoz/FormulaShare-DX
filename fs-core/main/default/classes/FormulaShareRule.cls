@@ -28,35 +28,35 @@ public virtual inherited sharing class FormulaShareRule {
 	public class FormulaShareException extends Exception{}
 
     // Basic rule details
-    public Id ruleId;
-    public String label;
-    public String developerName;
-    public String description;
-	public Boolean active;
+    @AuraEnabled public Id ruleId;
+    @AuraEnabled public String label;
+    @AuraEnabled public String developerName;
+    @AuraEnabled public String description;
+	@AuraEnabled public Boolean active;
 
     // Sharing configuration
-    public String shareWith;
-	public String accessLevel;
-    public String sharingReason;
-    public String contactAccess;
-    public String caseAccess;
-    public String opportunityAccess;
+    @AuraEnabled public String shareWith;
+	@AuraEnabled public String accessLevel;
+    @AuraEnabled public String sharingReason;
+    @AuraEnabled public String contactAccess;
+    @AuraEnabled public String caseAccess;
+    @AuraEnabled public String opportunityAccess;
 
     // Object to share, and relationship path to object with controlling field (if not shared object)
-    public String objectSharedAPIName;
-    public String objectSharedLabel;
-    public FormulaShareSObjectRelationship relationship;
-    public String type;
+    @AuraEnabled public String objectSharedAPIName;
+    @AuraEnabled public String objectSharedLabel;
+    @AuraEnabled public FormulaShareSObjectRelationship relationship;
+    @AuraEnabled public String type;
 
     // Details of controlling object and field
     // This will be on the shared object if no relationships
     // Or the last entry of the relationship tree if populated
-    public String controllingObjectApiName;
-    public String controllingObjectLabel;
-    public String controllingObjectSharedToFieldAPIName;
-    public String controllingObjectSharedToFieldLabel;
-    public String controllingObjectSharedToFieldToken;
-    public String controllingObjectSharedToFieldType;
+    @AuraEnabled public String controllingObjectApiName;
+    @AuraEnabled public String controllingObjectLabel;
+    @AuraEnabled public String controllingObjectSharedToFieldAPIName;
+    @AuraEnabled public String controllingObjectSharedToFieldLabel;
+    @AuraEnabled public String controllingObjectSharedToFieldToken;
+    @AuraEnabled public String controllingObjectSharedToFieldType;
 
     // Populates with the field which might be relevant to a sharing change for a trigger
     // Set to:

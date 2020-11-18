@@ -1,17 +1,17 @@
 public inherited sharing class FormulaShareSObjectRelationship {
 
+    @AuraEnabled public String thisObjectApiName;
+    @AuraEnabled public String lookupFromPrevObjectApiName;
+    @AuraEnabled public String lookupToPrevObjectApiName;
+    @AuraEnabled public String sharedToFieldApiName;
     public String thisObjectToken;
-    public String thisObjectApiName;
     public String thisObjectLabel;
     public String lookupFromPrevObjectToken;
-    public String lookupFromPrevObjectApiName;
     public String lookupToPrevObjectToken;
-    public String lookupToPrevObjectApiName;
     public String sharedToFieldToken;
-    public String sharedToFieldApiName;
     public String sharedToFieldLabel;
 
-    public FormulaShareSObjectRelationship nextRelationship;
+    @AuraEnabled public FormulaShareSObjectRelationship nextRelationship;
 
     public Boolean isValid() {
         if(thisObjectApiName == null) {

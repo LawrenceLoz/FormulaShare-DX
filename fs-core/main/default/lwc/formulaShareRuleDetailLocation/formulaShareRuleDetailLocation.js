@@ -3,48 +3,136 @@ import getChildRelationships from '@salesforce/apex/FormulaShareRuleDetailContro
 
 export default class FormulaShareRuleDetailLocation extends LightningElement {
 
-    @api ruleType;
-    @api sharedObject;
-    @api sharedObjectApiName;
-    @api relatedObjectSelected;
-    @api relatedObjectApiName;
+//    @api ruleType;
+//    @api sharedObject;
+//    @api sharedObjectApiName;
+//    @api relatedObjectApiName;
 
-    get isStandard() {
-        if(this.ruleType === 'standard') {
-            return true;
-        }
-        else {
-            return false;
-        }
+    @api
+    get relationship() {
+        return this._relationship;
     }
-    get isChild() {
-        //console.log('checking whether std ',this.ruleType);
-        if(this.ruleType === 'child') {
-            return true;
+    set relationship(value) {
+        this._relationship = value;
+        this.setSelectedValues();
+    }
+    @track _relationship;
+
+
+    relatedObjectSelected;
+    parentObjectSelected;
+    setSelectedValues() {
+        var nextRel = this._relationship.nextRelationship;
+        if(this._relationship.sharedToFieldApiName) {
+            this.setSelectedLocation('thisObject');
         }
-        else {
-            return false;
+        else if(nextRel) {
+            if(nextRel.lookupFromPrevObjectApiName) {
+                this.parentObjectSelected = nextRel.thisObjectApiName + '|' + nextRel.lookupFromPrevObjectApiName;
+                this.setSelectedLocation('parentObject');
+            }
+            else if(nextRel.lookupToPrevObjectApiName) {
+                this.relatedObjectSelected = nextRel.thisObjectApiName + '|' + nextRel.lookupToPrevObjectApiName;
+                console.log('this.relatedObjectSelected: '+this.relatedObjectSelected);
+                this.setSelectedLocation('relatedObject');
+            }
         }
     }
 
-    handleSelectedStandard() {
-        this.ruleType = 'standard';
-        this.fireRuleTypeChange();
+    fieldIsOnThisObject;
+    fieldIsOnParentObject;
+    fieldIsOnRelatedObject;
+
+    get isfieldOnThisObject() {
+        return this.fieldIsOnThisObject ? true : false;
     }
-    handleSelectedChild() {
-        this.ruleType = 'child';
-        this.fireRuleTypeChange();
+//
+//    get fieldIsOnThisObject() {
+//        if(!this._relationship.nextRelationship || this.selectedLocation === 'thisObject') {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+//    get fieldIsOnParentObject() {
+//        //console.log('checking whether std ',this.ruleType);
+//        if(this._relationship.nextRelationship.lookupFromPrevObjectApiName || this.selectedLocation === 'parentObject') {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+//    get fieldIsOnRelatedObject() {
+//        //console.log('checking whether std ',this.ruleType);
+//        if((this._relationship.nextRelationship && this._relationship.nextRelationship.lookupToPrevObjectApiName)
+//            || this.selectedLocation === 'relatedObject') {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+//
+
+    selectedLocation;
+    handleSelectedThisObject() {
+        this.setSelectedLocation('thisObject');
+        this._relationship.nextRelationship = false;
+        this.fireRelationshipChange(this._relationship.thisObjectApiName);
+    }
+    handleSelectedParentObject() {
+        this.setSelectedLocation('parentObject');
+        this._relationship.nextRelationship = false;
+        this.fireRelationshipChange(null);
+    }
+    handleSelectedRelatedObject() {
+        this.setSelectedLocation('relatedObject');
+        this._relationship.nextRelationship = false;
+        this.fireRelationshipChange(null);
     }
 
-    fireRuleTypeChange() {
+    setSelectedLocation(selectedLocation) {
+        switch (selectedLocation) {
+            case 'thisObject':
+                this.fieldIsOnThisObject = true;
+                this.fieldIsOnParentObject = false;
+                this.fieldIsOnRelatedObject = false;
+                break;
+            case 'parentObject':
+                this.fieldIsOnThisObject = false;
+                this.fieldIsOnParentObject = true;
+                this.fieldIsOnRelatedObject = false;
+                break;
+            case 'relatedObject':
+                this.fieldIsOnThisObject = false;
+                this.fieldIsOnParentObject = false;
+                this.fieldIsOnRelatedObject = true;
+                break;
+        }
+    }
+
+    fireRelationshipChange(controllingObjectApiName) {
+        const relationshipDetails = {
+            relationship: this._relationship,
+            controllingObjectApiName: controllingObjectApiName
+        };
         const selection = new CustomEvent('ruletypechange', {
-            detail: this.ruleType
+            detail: relationshipDetails
         });
         this.dispatchEvent(selection);
     }
 
+    handleRelationshipChange(event) {
+        console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
+        this._relationship.nextRelationship = event.detail.relationship;
+        this.fireRelationshipChange(event.detail.controllingObjectApiName);
+    }
+
+
     @track relatedObjectOptions;
-    @wire(getChildRelationships, { parentObjectAPIName : '$sharedObjectApiName'} )
+    @wire(getChildRelationships, { parentObjectAPIName : '$_relationship.thisObjectApiName'} )
         childRelationships({ error, data }) {
             if(data) {
                 //console.log('getting related for '+this.sharedObjectApiName);
@@ -55,6 +143,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
                         label: obj.childObjectApiName + ' (related by ' + obj.childFieldApiName + ')',
                         value: obj.childObjectApiName + '|' + obj.childFieldApiName
                     };
+                    console.log('Option value: '+obj.childObjectApiName + '|' + obj.childFieldApiName);
                     relatedObjList.push(option);
                 });
 
@@ -69,6 +158,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
                 }
 
                 this.relatedObjectOptions = relatedObjList;
+                this.setSelectedValues();
             }
         }
 
@@ -78,19 +168,30 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     }
     
     handleRelatedObjectChange(event) {
-        this.relatedObjectSelected = event.detail.value;
-        this.relatedObjectApiName = this.getRelationshipSelected().objectApiName;
-        //console.log('changed to ', this.relatedObjectApiName);
 
-        const relationshipDetail = {
-            relatedObjectSelected: this.relatedObjectSelected,
-            relatedObjectApiName: this.relatedObjectApiName
+        // Set relationship object based on selected field
+        this.relatedObjectSelected = event.detail.value;
+        var relationshipSelected = this.getRelationshipSelected();
+        this._relationship.nextRelationship = {
+            thisObjectApiName : relationshipSelected.objectApiName,
+            lookupToPrevObjectApiName : relationshipSelected.relationshipFieldApiName 
         };
 
-        const selection = new CustomEvent('relatedobjectchange', {
-            detail: relationshipDetail
-        });
-        this.dispatchEvent(selection);
+        this.fireRelationshipChange(relationshipSelected);
+
+//        this.relatedObjectSelected = event.detail.value;
+//        this.relatedObjectApiName = this.getRelationshipSelected().objectApiName;
+//        //console.log('changed to ', this.relatedObjectApiName);
+//
+//        const relationshipDetail = {
+//            relatedObjectSelected: this.relatedObjectSelected,
+//            relatedObjectApiName: this.relatedObjectApiName
+//        };
+//
+//        const selection = new CustomEvent('relatedobjectchange', {
+//            detail: relationshipDetail
+//        });
+//        this.dispatchEvent(selection);
     }
 
     // Custom validation to check that related object selected when needed

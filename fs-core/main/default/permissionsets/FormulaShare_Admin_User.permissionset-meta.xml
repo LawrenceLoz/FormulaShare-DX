@@ -710,6 +710,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.FormulaShare_Rule_in_Batch__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>FormulaShare_Record_Log__c.Number_Processed_Record_Share_Deletes__c</field>
         <readable>true</readable>
