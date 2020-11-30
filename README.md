@@ -1,10 +1,10 @@
 # FormulaShare, apex sharing for admins
 
-**Note**: FormulaShare is published as a free managed package on the AppExchange https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. As of September 2020, the package is installed and active in 44 Enterprise, Unlimited and Professional production orgs (excludes sandboxes and developer edition orgs).
+**Note**: FormulaShare is published as a free managed package on the AppExchange https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. As of November 2020, the package is installed and active in 49 Enterprise, Unlimited and Professional production orgs (excludes sandboxes and developer edition orgs).
 
 FormulaShare enables click-and-configure setup of rules to share records based on field values in related objects. Salesforce provides great in-platform options for sharing - ownership based, criteria based, manual sharing and apex sharing, but there's a key feature missing - sharing based on records associated to the one to be shared.
 
-FormulaShare let's you do that and more without resorting to complex development!
+FormulaShare let's you do that and more without resorting to complex development.
 
 * Records are shared to a user, role or group specified in a formula, lookup or text field on either the record itself, or a record related by a lookup relationship
 * Sharing changes are assessed in real time where possible (this is done by calling FormulaShare from trigger handlers)
@@ -79,7 +79,11 @@ FormulaShare creates entries in the object's share table with a sharing reason, 
 For standard objects, sharing reasons aren't available. As an alternative, FormulaShare provides options to process rules either as additive (so object sharing is not removed if data conditions change), or fully managed (meaning FormulaShare assumes all records in the object's share table are provided by the configured rule and removes sharing which doesn't meet the criteria of the rule).
 
 ### Create FormulaShare rule record
-Rules are set up from the FormulaShare Rules tab of the FormulaShare app. For full details around what can be set here, check the [online guide](https://cloudsundial.com/formulashare-creating-a-rule).
+Rules are set up from the FormulaShare Rules tab of the FormulaShare app.
+
+![Creating a rule](img/CreateRule.gif)
+
+For full details around what can be set here, check the [online guide](https://cloudsundial.com/formulashare-creating-a-rule).
 
 ### Test configuration
 
@@ -87,7 +91,9 @@ Create a record in the shared object. As a system admin, the easiest way to chec
 
 ### Logs and monitoring
 
-Two [logging objects](https://cloudsundial.com/formulashare-monitoring) (FormulaShare Batch Logs and FormulaShare Record Logs) capture information relevant to successful processing and any errors or warnings. The summary of logs is represented on the FormulaShare Dashboard tab of the Lightning app.
+[Logging objects](https://cloudsundial.com/formulashare-monitoring) are used to capture information relevant to successful processing and any errors or warnings, and the summary of logs is represented on the FormulaShare Dashboard tab of the Lightning app. The data structure used for logs is below:
+
+![Logging and metrics objects](img/LogsERD.png)
 
 Logs are removed based on a retention schedule, which by default is 8 days for Record Logs and 365 days for Batch Logs. These parameters can be changed, or logging disabled, using a [FormulaShare Settings override](https://cloudsundial.com/formulashare-settings-overrides).
 
