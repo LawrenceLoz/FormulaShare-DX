@@ -1,0 +1,62 @@
+<template>
+    <div class="slds-grid slds-gutters">
+        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+            <span>
+                <div class="slds-form slds-form_stacked">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <lightning-input 
+                                id="ruleLabel" 
+                                type="text" 
+                                label="Label" 
+                                value={ruleLabel}
+                                max-length="40"
+                                variant="label-inline"
+                                onchange={handleLabelChange}
+                                onblur={autoPopulateName}
+                                required>
+                            </lightning-input>
+
+                            <lightning-input 
+                                id="ruleName" 
+                                type="text" 
+                                label="API Name" 
+                                value={ruleName}
+                                max-length="40"
+                                variant="label-inline"
+                                onchange={handleNameChange}
+                                disabled={isEdit}
+                                required>
+                            </lightning-input>
+                        </div>
+                    </div>
+                </div>
+            </span>
+        </div>
+
+        <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+            <span>
+                <div class="slds-form slds-form_stacked">
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <lightning-textarea 
+                                id="ruleDescription" 
+                                label="Description" 
+                                value ={ruleDescription}
+                                onchange={handleDescriptionChange}
+                                max-length="255">
+                            </lightning-textarea>
+
+<!--                            <lightning-input type="toggle"
+                                id="ruleActive" 
+                                label="Active"
+                                value={ruleActive}
+                                onchange={handleActiveChange}>
+                            </lightning-input>  -->
+                        </div>
+                    </div>
+                </div>
+            </span>
+        </div>
+    </div>
+</template>

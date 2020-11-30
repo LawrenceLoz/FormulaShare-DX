@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Processed_Record__c</fullName>
+    <externalId>false</externalId>
+    <label>Processed Record</label>
+    <referenceTo>FormulaShare_Record_Log__c</referenceTo>
+    <relationshipLabel>Processed Record Shares</relationshipLabel>
+    <relationshipName>FormulaShare_Processed_Record_Shares</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

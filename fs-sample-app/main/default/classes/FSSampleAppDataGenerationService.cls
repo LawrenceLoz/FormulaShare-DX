@@ -21,7 +21,7 @@
 
 public with sharing class FSSampleAppDataGenerationService {
     
-    public static void run() {
+    public static void run(Integer noDonations) {
         List<Country__c> countries = new List<Country__c>();
         Map<String,Id> countriesMap = new Map<String,Id>();
         List<Theme__c> themes = new List<Theme__c>();
@@ -64,18 +64,28 @@ public with sharing class FSSampleAppDataGenerationService {
         insert progs;
 
         // insert donations
-        for(FS_Sample_App_First_Name__mdt firstNameMeta : [SELECT DeveloperName FROM FS_Sample_App_First_Name__mdt]) {
-            for(FS_Sample_App_Surname__mdt surnameMeta : [SELECT DeveloperName FROM FS_Sample_App_Surname__mdt]) {
-                Donation__c d = new Donation__c();
-
-                Integer randomAmount = Math.Round(Math.Random() * 1000);
-                Integer randomIndex = Math.Round(Math.Random() * (progs.size() - 1));  
-                system.debug('this random index: '+randomIndex);
-
-                d.Donor_Name__c = firstNameMeta.DeveloperName + ' ' + surnameMeta.DeveloperName;
-                d.Amount__c = randomAmount;
-                d.Programme_to_Support__c = progs[randomIndex].Id;
-                donations.add(d);
+        Integer count = 0;
+        while(count < noDonations) {
+            for(FS_Sample_App_First_Name__mdt firstNameMeta : [SELECT DeveloperName FROM FS_Sample_App_First_Name__mdt]) {
+                for(FS_Sample_App_Surname__mdt surnameMeta : [SELECT DeveloperName FROM FS_Sample_App_Surname__mdt]) {
+                    Donation__c d = new Donation__c();
+    
+                    Integer randomAmount = Math.Round(Math.Random() * 1000);
+                    Integer randomIndex = Math.Round(Math.Random() * (progs.size() - 1));  
+                    system.debug('this random index: '+randomIndex);
+    
+                    d.Donor_Name__c = firstNameMeta.DeveloperName + ' ' + surnameMeta.DeveloperName;
+                    d.Amount__c = randomAmount;
+                    if(randomAmount < 300) {
+                        d.External_Sharing_Role__c = 'Programme_Manager';
+                    }
+                    else if(randomAmount < 600) {
+                        d.External_Sharing_Role__c = 'Business_Development_Manager';
+                    }
+                    d.Programme_to_Support__c = progs[randomIndex].Id;
+                    donations.add(d);
+                    count++;
+                }
             }
         }
         insert donations;

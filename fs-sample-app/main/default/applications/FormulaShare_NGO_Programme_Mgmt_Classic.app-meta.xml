@@ -9,4 +9,5 @@
     <tabs>Country__c</tabs>
     <tabs>Theme__c</tabs>
     <tabs>FormulaShare_Log__c</tabs>
+    <tabs>FormulaShare_Rules_VF</tabs>
 </CustomApplication>

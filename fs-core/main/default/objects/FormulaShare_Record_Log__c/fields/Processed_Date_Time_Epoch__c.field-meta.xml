@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Processed_Date_Time_Epoch__c</fullName>
+    <externalId>false</externalId>
+    <formula>(Processed_Date_Time__c -  DATETIMEVALUE(&quot;1970-01-01 00:00:00&quot;)) * (24 * 60 * 60)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Processed Date / Time Epoch</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, FinancialForce.com, inc
+ * Copyright (c) 2014-2016, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -64,12 +64,61 @@ public class fflib_ApexMocksUtils
 	 *		        }
 	 * 		]
 	 */
-	public static Object makeRelationship(Type parentsType, List<SObject> parents, SObjectField relationshipField, List<List<SObject>> children)
-	{
-		// Find out more about this relationship... 
+	public static Object makeRelationship(Type parentsType, List<SObject> parents, SObjectField relationshipField, List<List<SObject>> children) {
+
+		// Find out more about this relationship...
 		String relationshipFieldName = relationshipField.getDescribe().getName();
 		DescribeSObjectResult parentDescribe = parents.getSObjectType().getDescribe();
+		return deserializeParentsAndChildren(parentsType, parentDescribe, relationshipField, parents, children);
+	}
+
+	/**
+	 * Generic overload to makeRelationship. Enables creation of
+	 * relationships in a loosely-coupled manner. 
+	 */
+	public static Object makeRelationship(
+			String parentTypeName,
+			String childTypeName,
+			List<SObject> parents,
+			String relationshipFieldName,
+			List<List<SObject>> children) {
+
+		// Find out more about this relationship...
+		SObjectType parentType = getType(parentTypeName);
+		SObjectField relationshipField = getField(childTypeName, relationshipFieldName);
+		DescribeSObjectResult parentDescribe = parentType.getDescribe();
+		Type parentsType = List<SObject>.class;
+		return deserializeParentsAndChildren(parentsType, parentDescribe, relationshipField, parents, children);
+	}
+
+	/**
+	 * Gives the ability to set test values on formula
+	 * and other read-only fields of mock SObjects
+	 */
+	public static Object setReadOnlyFields(SObject objInstance, Type deserializeType, Map<SObjectField, Object> properties) {
+
+		Map<String, Object> mergedMap = new Map<String, Object>(objInstance.getPopulatedFieldsAsMap());
+		for (SObjectField field : properties.keySet()) {
+			// Merge the values from the properties map into the fields already set on the object
+			mergedMap.put(field.getDescribe().getName(), properties.get(field));
+		}
+		// Serialize the merged map, and then deserialize it as the desired object type.
+		String jsonString = JSON.serializePretty(mergedMap);
+		return (SObject) JSON.deserialize(jsonString, deserializeType);
+	} 
+
+	/**
+	 * Helper Methods
+	 */
+	private static Object deserializeParentsAndChildren(
+		Type parentsType,
+		DescribeSObjectResult parentDescribe,
+		SObjectField relationshipField,
+		List<SObject> parents,
+		List<List<SObject>> children
+	) {
 		List<Schema.ChildRelationship> childRelationships = parentDescribe.getChildRelationships();
+
 		String relationshipName = null;
 		for(Schema.ChildRelationship childRelationship : childRelationships) {
 			if(childRelationship.getField() == relationshipField) {
@@ -91,7 +140,7 @@ public class fflib_ApexMocksUtils
 	/**
 	 * Monitors stream events for end of object for each SObject contained in the parent list
 	 *   then injects the respective childs record list into the stream
-	 **/
+	 */
 	private class InjectChildrenEventHandler implements JSONParserEvents
 	{
 		private JSONParser childrenParser;
@@ -124,7 +173,7 @@ public class fflib_ApexMocksUtils
 
 	/**
 	 * Utility function to stream tokens from a reader to a write, while providing a basic eventing model
-	 **/
+	 */
 	private static void streamTokens(JSONParser fromStream, JSONGenerator toStream, JSONParserEvents events)
 	{
 		Integer depth = 0;
@@ -167,9 +216,35 @@ public class fflib_ApexMocksUtils
 
 	/**
 	 * Basic event used during the above streaming
-	 **/
+	 */
 	private interface JSONParserEvents
 	{
 		void nextToken(JSONParser fromStream, Integer depth, JSONGenerator toStream);
+	}
+
+	/**
+	 * Gets the SObjectType by name
+	 */
+	private static Schema.SObjectType getType(String typeName) {
+		Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
+		SObjectType sobjType = gd.get(typeName);
+		if (sobjType == null) {
+			throw new fflib_ApexMocks.ApexMocksException('SObject type not found: ' + typeName);
+		}
+		return sobjType;
+	}
+
+	/**
+	 * Gets the SObjectField of an object by name
+	 */
+	private static Schema.SObjectField getField(String objectName, String fieldName) {
+
+		SObjectType sobjType = getType(objectName);
+		Map<String, Schema.SObjectField> objectFields = sobjType.getDescribe().fields.getMap();
+		Schema.SObjectField sobjField = objectFields.get(fieldName);
+		if (sobjField == null) {
+			throw new fflib_ApexMocks.ApexMocksException('SObject field not found: ' + fieldName);
+		}
+		return sobjField;
 	}
 }

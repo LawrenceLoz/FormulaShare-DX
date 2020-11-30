@@ -127,7 +127,7 @@ private with sharing class fflib_SObjectDomainTest
 				fflib_SObjectDomain.triggerHandler(fflib_SObjectDomain.TestSObjectDomainConstructor.class);
 				System.assert(false, 'Expected access denied exception');						
 			} catch (Exception e) {
-				System.assertEquals('Permission to udpate an Opportunity denied.', e.getMessage());
+				System.assertEquals('Permission to update an Opportunity denied.', e.getMessage());
 			}		
 			
 			// Test Delete object security
@@ -206,8 +206,107 @@ private with sharing class fflib_SObjectDomainTest
 		} catch (Exception e) {
 			System.assertEquals('onValidate called', e.getMessage());
 		}
-	}	
-	
+	}
+
+	@IsTest
+	private static void testGetChangedFieldsAsStrings()
+	{
+		Account acct1 = new Account ( Id = '001E0000006mkRP', Name = 'Test1', AccountNumber = '12345', Site = 'Here'),
+		        acct2 = new Account ( Id = '001E0000006mkRQ', Name = 'Test2', AccountNumber = '54321', Site = 'There');
+		System.assertEquals(false, fflib_SObjectDomain.Test.Database.hasRecords());
+		fflib_SObjectDomain.Test.Database.onInsert(new Account[] { acct1, acct2 } );
+		System.assertEquals(true, fflib_SObjectDomain.Test.Database.hasRecords());
+		fflib_SObjectDomain.triggerHandler(fflib_SObjectDomain.TestSObjectChangedRecordsConstructor.class);
+		Account acct1changed = acct1.clone(),
+		        acct2changed = acct2.clone();
+		acct1changed.Name = 'Test1changed';
+		fflib_SObjectDomain.Test.Database.onUpdate(
+			new Account[]{ acct1, acct2},
+			new Map<Id, Account>{
+				acct1changed.Id => acct1,
+				acct2changed.Id => acct2
+			}
+		);
+	}
+
+
+	@IsTest
+	private static void itShouldReturnTheChangedRecordsBySObjectFields()
+	{
+		// GIVEN a domain with old and changed records
+
+		Id idLuke = fflib_IDGenerator.generate(Account.SObjectType);
+		Id idHan = fflib_IDGenerator.generate(Account.SObjectType);
+		Id idLeia = fflib_IDGenerator.generate(Account.SObjectType);
+		List<Account> oldRecords = new List<Account>
+		{
+				new Account(Id = idLuke, Name = 'Luke', Description = 'Jedi'),
+				new Account(Id = idHan, Name = 'Han', Description = 'Pilot'),
+				new Account(Id = idLeia, Name = 'Leia')
+		};
+
+		List<Account> newRecords = oldRecords.deepClone(true, true, true);
+		newRecords.get(0).Name = 'Luke SkyWalker';
+		newRecords.get(0).Description = 'Jedi Master';
+		newRecords.get(1).Name = 'Han Solo';
+		Accounts accounts = new Accounts(newRecords);
+		accounts.ExistingRecords = new Map<Id, SObject>(oldRecords);
+
+		// WHEN we create a domain with ExistingRecords and request the changed records
+		List<SObject> result = accounts.getChangedRecords(
+				new Set<Schema.SObjectField>
+				{
+						Account.Name,
+						Account.Description
+				}
+		);
+
+		// THEN it should only return the changed records
+		Map<Id, SObject> resultMap = new Map<Id, SObject>(result);
+		System.assertEquals(2, result.size());
+		System.assert(resultMap.containsKey(idLuke));
+		System.assert(resultMap.containsKey(idHan));
+	}
+
+	@IsTest
+	private static void itShouldReturnTheChangedRecordsByStringFields()
+	{
+		// GIVEN a domain with old and changed records
+
+		Id idLuke = fflib_IDGenerator.generate(Account.SObjectType);
+		Id idHan = fflib_IDGenerator.generate(Account.SObjectType);
+		Id idLeia = fflib_IDGenerator.generate(Account.SObjectType);
+		List<Account> oldRecords = new List<Account>
+		{
+				new Account(Id = idLuke, Name = 'Luke', Description = 'Jedi'),
+				new Account(Id = idHan, Name = 'Han', Description = 'Pilot'),
+				new Account(Id = idLeia, Name = 'Leia')
+		};
+
+		List<Account> newRecords = oldRecords.deepClone(true, true, true);
+		newRecords.get(0).Name = 'Luke SkyWalker';
+		newRecords.get(0).Description = 'Jedi Master';
+		newRecords.get(1).Name = 'Han Solo';
+		Accounts accounts = new Accounts(newRecords);
+		fflib_SObjectDomain.Test.Database.onUpdate(newRecords, new Map<Id, SObject>(oldRecords));
+
+		// WHEN we create a domain with ExistingRecords and request the changed records
+		List<SObject> result = accounts.getChangedRecords(
+				new Set<String>
+				{
+						'Name',
+						'Description'
+				}
+		);
+
+		// THEN it should only return the changed records
+		Map<Id, SObject> resultMap = new Map<Id, SObject>(result);
+		System.assertEquals(2, result.size());
+		System.assert(resultMap.containsKey(idLuke));
+		System.assert(resultMap.containsKey(idHan));
+	}
+
+
 	/**
 	 * Create test user
 	 **/
@@ -391,5 +490,15 @@ private with sharing class fflib_SObjectDomainTest
 			System.assertEquals('onValidate called', e.getMessage());
 		}
 		*/
+	}
+
+
+
+	private class Accounts extends fflib_SObjectDomain
+	{
+		public Accounts(List<SObject> records)
+		{
+			super(records);
+		}
 	}
 }

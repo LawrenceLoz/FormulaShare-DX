@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Account_related_object_access_case</fullName>
+    <active>true</active>
+    <errorConditionFormula>Object_Shared__r.DeveloperName = &apos;Account&apos; &amp;&amp; ISBLANK(TEXT(Case_Access__c))</errorConditionFormula>
+    <errorDisplayField>Case_Access__c</errorDisplayField>
+    <errorMessage>Case Access must be set for account sharing. Select a level of sharing which is the same or more permissive than the org-wide default for cases</errorMessage>
+</ValidationRule>

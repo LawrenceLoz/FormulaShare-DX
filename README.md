@@ -1,59 +1,68 @@
 # FormulaShare, apex sharing for admins
 
-**Note**: FormulaShare is published as a free managed package on the AppExchange https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. As of September 2020, the package is installed and active in 44 Enterprise, Unlimited and Professional production orgs (excludes sandboxes and developer edition orgs).
+**Note**: FormulaShare is published as a free managed package on the AppExchange https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. As of November 2020, the package is installed and active in 49 Enterprise, Unlimited and Professional production orgs (excludes sandboxes and developer edition orgs).
 
 Click-and-configure rules to share records based on related data. Salesforce provides great in-platform options for sharing records - ownership based, criteria based, manual sharing and apex sharing, but there's a key feature missing - sharing to users identified through related data.
 
-FormulaShare let's you do that and more without resorting to complex development!
+FormulaShare let's you do that and more without resorting to complex development.
 
-* Records are shared to a user, role or group specified in a formula, lookup or text field
-* Sharing changes are assessed in real time as shared records are created and modified
-* Records can be shared with Read or Edit levels of access
-* Rules are custom metadata, so can be managed by admins and packaged for deployment
+* Records are shared to a user, role or group specified in a formula, lookup or text field on either the record itself, or a record related by a lookup relationship
+* Sharing changes are assessed in real time where possible (this is done by calling FormulaShare from trigger handlers)
+* A regular batch applies all sharing changes which result from changes not supported in real time processing
 * Standard and custom objects are supported
-* Works with Classic and Lightning
+* Setup and management is done through a custom app available in Classic and Lightning
+* Rules are custom metadata, so can be managed by admins and packaged for deployment
+* Log records are created for monitoring and reporting (these are subsequently purged within customisable retention periods)
 * Powered by Salesforce apex / managed sharing
-
-This repo is in DX metadata format - a metadata API format repo is also maintained.
 
 ## Example applications
 
-* In a recruitment system, share job records and applications to the relevant hiring manager user and recruitment team
+* In a recruitment system, share job records and applications to the relevant hiring manager user
+* In a global org, share records to the relevant roles specified on a linked custom country object
 * Share cases to account executive teams, but only when these are not flagged as containing sensitive data
-* In a global org, share records to the relevant roles specified on a linked custom country object with a single rule
 * Share records to all users with the same role as the record owner
+* Share accounts and their related records to the public groups specified on related opportunities
 * Conditionally share records based on the value in a lookup or formula field (field types not available in standard sharing rules)
-* Provide a field on a record for users to share ad hoc to colleagues
+* Provide a user lookup field on a record to support ad hoc sharing to colleagues collaborating on a record
 
 ## How does it work?
 
 By leveraging standard formula fields, FormulaShare lets admins quickly specify how records should be shared using a familiar feature. Complex relationships and conditions can be set where needed. Rules in custom metadata point FormulaShare to the relevant fields and objects.
 
-Suppose custom objects A (representing a country, for example) and B (for instance a job opportunity for that country) are related through a lookup. If we want the to make sure users linked to object A should have access to related records in object B, that's not possible with out of the box Salesforce functionality.
+Once established, the rule will recalculate relevant sharing in real time when possible, and catch up on any other changes with scheduled batch jobs. Full details of when this sharing will and won't apply are outlined here: https://cloudsundial.com/rule-types-and-application
 
-With FormulaShare, we can set a rule to reference a formula field on object B which specifies who the record should be shared with. The field could be a formula populating with a user, role or a group which is indicated on object A.
+#### Sharing based on information in a parent record
 
-We can even reference parents or grandparent objects of object A - up to 5 levels are supported.
+Suppose a custom object (representing a country, for example) and another custom object (say a job opportunity for that country) are related through a lookup. If we want the to make sure users, roles or groups specified on the country have access to related job opportunities, that's not possible with out of the box Salesforce functionality.
 
-Once established, the rule will recalculate relevant sharing in real time when object B records are created or changed, and catch up on any other changes with scheduled batch jobs.
+With FormulaShare, we can set a rule to reference a formula field on the job opportunity which specifies who the record should be shared with. The field can be a formula populating with a user, role or a group which is indicated on the country.
+
+Formula fields enable referencing parents or grandparent objects of object A - up to 5 levels are supported.
+
+#### Sharing based on information in a child record
+
+FormulaShare also includes the option to share based on the field values in related records. In our scenario, imagine job opportunities are managed by several named members of a recruitment team. The recruitment team can be represented as a junction object with one lookup to job opportunity, and a second lookup to user, to link each person requiring access. For this setup, we can use a rule specifying a related object to share job opportunities to all members of the recruitment team specified on the junction object records.
 
 ## Design approach
 
-A batch job is scheduled in the subscriber org to assess all record sharing on a regular basis. Real time assessment of sharing if needed is kicked off from apex triggers - just 3 lines of code need to be added to a trigger or handler class.
-
 Apex sharing is notoriously difficult to implement well - FormulaShare processes the core scenarios where real time recalculation is needed (for example creation of records and changes to formula field values), and handles all other changes which in a catch-up batch job (this includes changes to parent objects referenced in the formula field).
+
+The batch job is scheduled to assess all record sharing on a regular basis. Real time assessment of sharing if needed is called from apex triggers - just 3 lines of code need to be added to a trigger or handler class.
 
 ## Technical configuration
 
-Once code from the repo is implemented, two key steps are needed to set up FormulaShare:
+Unless there's a good reason not to, we recommend installing the free security reviewed [AppEchange package](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) to implement FormulaShare. This ensures you can benefit from additional platform limits and automatic package upgrades. For more details on post-installation setup [check the guide](https://cloudsundial.com/node/40).
 
-* **Call FormulaShareService from shared object triggers** The following code can be added to any trigger or trigger handler code to manage sharing changes for this object:
+The steps below outline how to implement when code in this repo is added directly to an org.
+
+* **Assign permissions** Assign the permission set FormulaShare Admin
+* **Call FormulaShareService from shared object triggers** The following code can be added to any trigger or trigger handler code called during the after insert, update, delete and undelete invocations of a trigger to manage sharing changes for this object:
 ```
 sdfs.FormulaShareHelper helper = new FormulaShareHelper();
 insert helper.getSharesToInsert();
 delete helper.getSharesToDelete();
 ```
-If you use a trigger framework with a central delegating handler, the code can be added in the delegating class instead of each object's trigger.
+If you use a trigger framework with a central delegating handler, the code can be added in a central delegating class instead of individually for each object.
 
 * **Schedule batch recalculation of FormulaShare rules** [Schedule the apex class](https://help.salesforce.com/articleView?id=code_schedule_batch_apex.htm&type=5) FormulaShareProcessSchedulable to recalculate all rules on a regular basis
 
@@ -70,34 +79,27 @@ FormulaShare creates entries in the object's share table with a sharing reason, 
 For standard objects, sharing reasons aren't available. As an alternative, FormulaShare provides options to process rules either as additive (so object sharing is not removed if data conditions change), or fully managed (meaning FormulaShare assumes all records in the object's share table are provided by the configured rule and removes sharing which doesn't meet the criteria of the rule).
 
 ### Create FormulaShare rule record
-From the Setup menu, type "Custom Metadata Types" and click "Manage Records" for FormulaShare Rule. Each of the custom metadata records are the settings for a single rule. The following fields define the setup of each rule:
-* **Name** and **Label**: Add something to distinguish this rule from others
-* **Shared Object**: Select the object with records to be shared. Object must be set to Private (for Read or Edit access levels) or Public Read Only (for Edit access level), and must support sharing - child objects in a master-detail relationship and some standard objects do not support independent sharing rules
-* **Shared To Field**: Select the field on the object which identifies who to share records with. The field can return either the Salesforce 15 or 18 character Id of the entity to be shared to, or the role or group name (developer name) when the rule provides this sharing
-* **Shared_To_Field_Type**: Either "Id" or "Name", depending on return type of the Shared To Field
-* **Share With**: The type of entity this rule should share with. Options are "Users", "Roles", "Roles and Internal Subordinates" and "Public Groups"
-* **Sharing Reason**: For custom objects, the "Reason Name" of the sharing reason related to the rule
-* **Access Level**: Set to Read or Edit
+Rules are set up from the FormulaShare Rules tab of the FormulaShare app.
+
+![Creating a rule](img/CreateRule.gif)
+
+For full details around what can be set here, check the [online guide](https://cloudsundial.com/formulashare-creating-a-rule).
 
 ### Test configuration
 
 Create a record in the shared object. As a system admin, the easiest way to check that the sharing is set up is to use the "Sharing" button from the record detail page (Classic interface only). The summary should include a share record for the user, role, role and subordinates or public group which is linked through the shared to field.
 
+### Logs and monitoring
+
+[Logging objects](https://cloudsundial.com/formulashare-monitoring) are used to capture information relevant to successful processing and any errors or warnings, and the summary of logs is represented on the FormulaShare Dashboard tab of the Lightning app. The data structure used for logs is below:
+
+![Logging and metrics objects](img/LogsERD.png)
+
+Logs are removed based on a retention schedule, which by default is 8 days for Record Logs and 365 days for Batch Logs. These parameters can be changed, or logging disabled, using a [FormulaShare Settings override](https://cloudsundial.com/formulashare-settings-overrides).
+
 ### Limitations
 
-There are some known limitations to be aware of:
-* 10000 DML rows per transaction: This Salesforce limit prevents synchronous transactions from creating, deleting or updating more than 10000 records in a single transaction. If data changes cause triggers for shared objects using the FormulaShare trigger code to attempt to process very substantial sharing changes (over 10000 records), this could result in failed transactions. This is only likely to occur if parent object updates cause cascading updates to very large numbers of child objects.
-* 50 million records per object: The FormulaShare batch recalculation assesses whether sharing changes are needed on every record in each shared object. To do this, for each object is constructs a query locator and cycles through the results, checking every record in the object. Due to a Salesforce limitation, the maximum number of records that can be returned in a batch query locator is 50 million, so to work correctly FormulaShare can only be used on objects with less than this number of records in total.
-
-
-## Areas for future development
-
-The project is now launched, and the app approved and published on the Salesforce AppExchange. The following is a list of features and areas which may be worked on in future:
-* Lightning interface for metadata rule configuration
-* Automated deployment of triggers and sharing reasons using metadata API (a la the wonderful [DeclareativeLookupRollupSummary](https://github.com/afawcett/declarative-lookup-rollup-summaries))
-* Managed scheduling of batch job and configuration parameters in managed package setup
-* Support for account teams and territory groups
-* Support for assessing user roles directly without a formula field being needed
+Known limitations are outlined in the guide: https://cloudsundial.com/formulashare-limits-and-limitations
 
 ## Ethos
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Deleted_Sharing_Successful__c</fullName>
+    <externalId>false</externalId>
+    <formula>Number_Processed_Record_Share_Deletes__c = Number_Successful_Record_Share_Deletes__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>All Deleted Sharing Successful</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

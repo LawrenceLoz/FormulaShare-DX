@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, FinancialForce.com, inc
+ * Copyright (c) 2014-2017, FinancialForce.com, inc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -830,8 +830,8 @@ public with sharing class fflib_MatcherDefinitions
 						{
 							return false;
 						}
-						return true;
 					}
+					return true;
 				}
 				else
 				{	

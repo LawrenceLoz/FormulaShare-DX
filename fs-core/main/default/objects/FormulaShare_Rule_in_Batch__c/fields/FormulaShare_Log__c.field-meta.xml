@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FormulaShare_Log__c</fullName>
+    <externalId>false</externalId>
+    <label>FormulaShare Log</label>
+    <referenceTo>FormulaShare_Log__c</referenceTo>
+    <relationshipLabel>Rules in Batch</relationshipLabel>
+    <relationshipName>FormulaShare_Rules_in_Batch</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

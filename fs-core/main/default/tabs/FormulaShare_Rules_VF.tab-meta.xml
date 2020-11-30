@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Configure the rules used to dynamically share records</description>
+    <label>FormulaShare Rules (Classic)</label>
+    <motif>Custom19: Wrench</motif>
+    <page>FormulaShareRulesPageVF</page>
+</CustomTab>

@@ -1,0 +1,78 @@
+<template>
+
+    <h3 class="slds-section-title--divider ">Rule name</h3>
+    <c-formula-share-rule-detail-name-label
+        rule-name={ruleName}
+        rule-label={ruleLabel}
+        rule-description={ruleDescription}
+        rule-active={ruleActive}
+        is-edit={isEdit}
+        onlabelchange={handleLabelChange}
+        onnamechange={handleNameChange}
+        ondescriptionchange={handleDescriptionChange}
+        onactivechange={handleActiveChange}>
+    </c-formula-share-rule-detail-name-label>
+
+    <h3 class="slds-section-title--divider ">Object to share</h3>
+    <c-formula-share-rule-detail-shared-object 
+        shared-object-api-name={sharedObjectApiName}
+        onsetsharedobjectdetail={handleSetSharedObjectDetail}
+        onsharedobjectchange={handleSharedObjectChange}
+        onaccountrelatedowd={handleSetAccountRelatedOwd}
+        >
+    </c-formula-share-rule-detail-shared-object>
+
+    <template if:true={sharedObject}>
+        <div class="slds-p-top_medium">
+            <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
+            <c-formula-share-rule-detail-location 
+                rule-type={ruleType} 
+                shared-object={sharedObject}
+                shared-object-api-name={sharedObjectApiName}
+                related-object-selected={relatedObjectSelected}
+                onruletypechange={handleRuleTypeChange}
+                onrelatedobjectchange={handleRelatedObjectChange}>
+            </c-formula-share-rule-detail-location>
+        </div>
+    </template>
+
+    <template if:true={sharedObject}>
+        <h3 class="slds-section-title--divider">Share with</h3>
+        <c-formula-share-rule-detail-field 
+            object-with-share-field={objectWithShareField}
+            share-with={shareWith}
+            internal-sharing-model={sharedObject.internalSharingModel}
+            external-sharing-model={sharedObject.externalSharingModel}
+            share-field={shareField}
+            share-field-type={shareFieldType}
+            onsharewithchange={handleShareWithChange}
+            onsharefieldchange={handleShareFieldChange}
+            onsharefieldtypechange={handleShareFieldTypeChange}>
+        </c-formula-share-rule-detail-field>
+    </template>
+
+    <template if:true={sharedObject}>
+        <h3 class="slds-section-title--divider">Sharing provided</h3>
+        <c-formula-share-rule-detail-access 
+            internal-sharing-model={sharedObject.internalSharingModel}
+            external-sharing-model={sharedObject.externalSharingModel}
+            account-related-owd={accountRelatedOwd}
+            is-custom={sharedObject.isCustom}
+            shared-object-id={sharedObject.objectId}
+            shared-object-label={sharedObject.objectLabel}
+            shared-object-api-name={sharedObjectApiName}
+            access-level={accessLevel}
+            contact-access={contactAccess}
+            case-access={caseAccess}
+            opportunity-access={opportunityAccess}
+            sharing-reason={sharingReason}
+            onaccesslevelchange={handleAccessLevelChange}
+            onsharingreasonchange={handleSharingReasonChange}
+            oncontactaccesschange={handleContactAccessChange}
+            oncaseaccesschange={handleCaseAccessChange}
+            onopportunityaccesschange={handleOpportunityAccessChange}
+            >
+        </c-formula-share-rule-detail-access>            
+    </template>
+
+</template>

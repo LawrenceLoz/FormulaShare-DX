@@ -1,0 +1,155 @@
+<template>
+    <div class="slds-grid slds-gutters slds-wrap">
+        <div class="slds-col slds-size_5-of-12 slds-var-p-horizontal_medium slds-var-p-top_medium">
+            <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <lightning-combobox 
+                            id="accessLevel" 
+                            name="accessLevel"
+                            label={accessLevelLabel} 
+                            value={accessLevel}
+                            options={accessLevelOptions}
+                            placeholder="Select"
+                            onchange={handleAccessLevelChange}
+                            read-only={accessLevelIsReadOnly}
+                            field-level-help={accessLevelHelpText}
+                            required>
+                        </lightning-combobox>
+
+                        <template if:true={showAccountRelatedAccess}>
+                            <div class="slds-p-top_medium">
+                                <lightning-combobox 
+                                    id="contactAccess" 
+                                    name="contactAccess"
+                                    label="Contact Access"
+                                    value={contactAccess}
+                                    options={contactAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleContactAccessChange}
+                                    read-only={contactAccessIsReadOnly}
+                                    field-level-help={contactAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+
+                                <lightning-combobox 
+                                    id="opportunityAccess" 
+                                    name="opportunityAccess"
+                                    label="Opportunity Access"
+                                    value={opportunityAccess}
+                                    options={opportunityAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleOpportunityAccessChange}
+                                    read-only={opportunityAccessIsReadOnly}
+                                    field-level-help={opportunityAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+
+                                <lightning-combobox 
+                                    id="caseAccess" 
+                                    name="caseAccess"
+                                    label="Case Access"
+                                    value={caseAccess}
+                                    options={caseAccessOptions}
+                                    placeholder="Select"
+                                    onchange={handleCaseAccessChange}
+                                    read-only={caseAccessIsReadOnly}
+                                    field-level-help={caseAccessHelpText}
+                                    required>
+                                </lightning-combobox>
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-col slds-size_7-of-12 slds-var-p-horizontal_medium slds-var-p-top_medium">
+            <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <template if:true={isCustom}>
+
+                            <div style="display:flex; align-items:flex-end;">
+                                <lightning-combobox 
+                                    id="sharingReason" 
+                                    name="sharingReason"
+                                    label="Sharing Reason" 
+                                    value={sharingReason}
+                                    options={sharingReasonOptions}
+                                    placeholder="Select"
+                                    onchange={handleSharingReasonChange}
+                                    required>
+                                </lightning-combobox>
+
+                                <div class="slds-m-left_x-small" onclick={refreshReasons}>
+                                    <lightning-icon 
+                                        icon-name="action:refresh" 
+                                        alternative-text="Refresh" 
+                                        title="Refresh list of sharing reasons" 
+                                        size="x-small">
+                                    </lightning-icon>
+                                    <template if:true={loadingReasons}>
+                                        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                    </template>
+                                </div>
+
+                            </div>
+
+                            <template if:true={oneOrMoreReasons}>
+                                <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleSharingReasonsHelpBox}>
+                                    Manage Apex Sharing Reasons
+                                </div>
+                            </template>
+
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-col slds-size_2-of-12 slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+        </div>
+
+        <div class="slds-col slds-size_10-of-12 slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+            <template if:true={sharingReasonsHelpBox}>
+                <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_xx-small slds-float_right">
+                    <div style="display:flex; align-items:center;">
+                        <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                        <div class="slds-m-left_medium">
+                            Sharing reasons are used in both Lightning and Classic, but must be created
+                            from the object's setup page in Salesforce Classic. 
+                            <lightning-formatted-url 
+                                value={sharingReasonsSetupLink} 
+                                label=" Click here " 
+                                target="_blank"></lightning-formatted-url>
+                            to open the Apex Sharing Reasons related list for {_sharedObjectLabel} in a new tab
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isCustom}>
+                <template if:false={oneOrMoreReasons}>
+                    <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_xx-small slds-float_right">
+
+                        <div style="display:flex; align-items:center;">
+                            <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                            <div class="slds-m-left_medium">
+                                No sharing reasons are set up yet for {_sharedObjectLabel}. 
+                                    <lightning-formatted-url 
+                                        value={sharingReasonsSetupLink} 
+                                        label=" Click here " 
+                                        target="_blank"></lightning-formatted-url>
+                                to open the object setup, and click "New" in the Apex Sharing Reasons related list to create one.
+                                Once this is set up, click refresh above to update the options
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+
+</template>

@@ -22,21 +22,8 @@
 @IsTest
 public inherited sharing class FormulaShareTestUtils {
 
-    static String classInPackage = 'FormulaShareService';
-    static String namespacePrefix = '';
-    static Boolean hasRun = false;
-
-    // Method returns the namespace of the package with underscores appended
-    // Used to determine what to add to object and field names
     public static String getNamespacePrefix() {
-        if(!hasRun) {
-            ApexClass cs = [SELECT NamespacePrefix from ApexClass where Name = :classInPackage LIMIT 1][0];
-            if(!String.isBlank(cs.NamespacePrefix)) {
-                namespacePrefix = cs.NamespacePrefix + '__';
-            }
-            hasRun = true;
-        }
-        return namespacePrefix;
+        return FormulaShareUtilities.getNamespacePrefix();
     }
 
 }

@@ -6,9 +6,6 @@
 **profiles
 AppSwitcher.appMenu
 package.xml
-
-# LWC VSCode autocomplete
-**/lwc/jsconfig.json
 **/jsconfig.json
 
 **/.eslintrc.json

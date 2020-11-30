@@ -1,0 +1,57 @@
+<apex:page>
+
+    <apex:includeLightning />
+
+    <apex:includeScript value="{!$Resource.cometd}"/>
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    <apex:includeScript value="{!$Resource.json2}"/>
+    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
+
+    <div id="lightningvf" />
+
+    <script>
+        $Lightning.use("sdfs:FormulaShareLightningOutApp", function () {
+            $Lightning.createComponent("sdfs:formulaShareRulesPage",
+                {},
+                "lightningvf",
+                function (cmp) { }
+            );
+        });
+
+        (function($){
+        $(document).ready(function() {
+        
+            $.cometd.configure({
+                url: window.location.protocol + '//' + window.location.hostname + '/cometd/49.0',
+                requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}' },
+                appendMessageTypeToURL: false
+            });
+
+            $.cometd.websocketEnabled = false;
+
+            $.cometd.handshake();
+
+            // Subscribe to DML and list update events and reload page when required
+            $.cometd.addListener('/meta/handshake', function (message) {
+                // Unpackaged (no namespace) event listeners
+                $.cometd.subscribe('/event/FormulaShare_Rule_DML__e', function (message) {
+                    window.location.reload();
+                });
+                $.cometd.subscribe('/event/FormulaShare_List_Update__e', function (message) {
+                    window.location.reload();
+                });
+                // Managed package namespace event listeners
+                $.cometd.subscribe('/event/sdfs__FormulaShare_Rule_DML__e', function (message) {
+                    window.location.reload();
+                });
+                $.cometd.subscribe('/event/sdfs__FormulaShare_List_Update__e', function (message) {
+                    window.location.reload();
+                });
+            });
+
+        });
+        })(jQuery)
+
+    </script>
+
+</apex:page>

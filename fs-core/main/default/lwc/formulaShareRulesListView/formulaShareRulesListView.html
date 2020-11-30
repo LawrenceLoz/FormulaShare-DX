@@ -1,0 +1,30 @@
+<template>
+
+    <template if:false={rulesNotSetUp}>
+        <lightning-tree-grid 
+            data={treeItems} 
+            columns={columns} 
+            key-field="key" 
+            hide-checkbox-column="true" 
+            onrowaction={handleRowAction}
+            expanded-rows={currentExpanded}>
+        </lightning-tree-grid>
+        <template if:true={processingLoad}>
+            <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+    </template>
+
+    <template if:true={openModal}>
+        <c-formula-share-rule-edit 
+            rule-id={rowRuleId}
+            onclose={closeModal}>
+        </c-formula-share-rule-edit>
+    </template>
+
+    <template if:true={openScheduleModal}>
+        <c-formula-share-schedule-job-description 
+            setup-url={scheduleWarningsUrl}
+            onclose={closeScheduleModal}>
+        </c-formula-share-schedule-job-description>
+    </template>
+</template>
