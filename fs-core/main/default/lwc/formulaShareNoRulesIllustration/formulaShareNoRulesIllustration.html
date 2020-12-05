@@ -1,5 +1,5 @@
 <template>
-    <article class="slds-card">
+    <lightning-card>
         <div class="slds-illustration slds-illustration_small slds-p-top_large" aria-hidden="true">
         <img src="/img/chatter/OpenRoad.svg" class="slds-illustration__svg slds-illustration_small" alt=""/>
             <div class="slds-text-color_weak">
@@ -9,13 +9,13 @@
             </div>
         </div>
 
-        <footer class="slds-card__footer">
+        <div slot="footer">
             <lightning-button 
                 class="slds-button"
                 variant="brand"
                 label="Create Rule" 
                 onclick={handleNewRule}>
             </lightning-button>
-        </footer>
-    </article>
+        </div>
+    </lightning-card>
 </template>
