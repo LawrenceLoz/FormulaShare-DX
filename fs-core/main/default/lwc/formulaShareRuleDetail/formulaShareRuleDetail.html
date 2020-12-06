@@ -14,24 +14,18 @@
     </c-formula-share-rule-detail-name-label>
 
     <h3 class="slds-section-title--divider ">Object to share</h3>
+
     <c-formula-share-rule-detail-shared-object 
         shared-object-api-name={rule.objectSharedAPIName}
         onsetsharedobjectdetail={handleSetSharedObjectDetail}
         onsharedobjectchange={handleSharedObjectChange}
-        onaccountrelatedowd={handleSetAccountRelatedOwd}
-        >
+        onaccountrelatedowd={handleSetAccountRelatedOwd}>
     </c-formula-share-rule-detail-shared-object>
 
     <template if:true={rule.relationship}>
         <div class="slds-p-top_medium">
             <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
-<!--
-            related-object-selected={rule.controllingObjectApiName}
-            rule-type={rule.type} 
-            shared-object={sharedObject}
-            shared-object-api-name={rule.objectSharedAPIName}
-            onrelatedobjectchange={handleRelatedObjectChange}
--->
+            
             <c-formula-share-rule-detail-location 
                 relationship={rule.relationship}
                 onrelationshipchange={handleRelationshipChange}>

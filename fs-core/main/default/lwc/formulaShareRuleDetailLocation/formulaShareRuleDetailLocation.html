@@ -1,101 +1,93 @@
 <template>
-<!--    <template if:true={_relationship.thisObjectApiName}>    -->
-        <fieldset class="slds-form-element">
+    <fieldset class="slds-form-element">
+        <div class="slds-p-around_small">
             <div class="slds-form-element__control">
-                <div class="slds-grid slds-gutters">
-                    <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
 
-                        <div class="slds-visual-picker">
+                    <div class="slds-visual-picker">
 
-                            <input 
-                                type="radio" 
-                                id="standard" 
-                                value="standard" 
-                                name="ruleType" 
-                                checked={fieldIsOnThisObject} 
-                                onchange={handleSelectedThisObject} />
-                            <label for="standard">
-                                <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                        <input 
+                            type="radio" 
+                            id="standard"
+                            value="standard"
+                            name="ruleType"
+                            checked={fieldIsOnThisObject} 
+                            onchange={handleSelectedThisObject} />
+                        <label for="standard">
+                            <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
-                                    <div class="slds-media slds-media_center">
-                                        <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">     
-                                            <lightning-icon icon-name="standard:contact_list" alternative-text="Standard" title="Standard" size="medium"></lightning-icon>
-                                        </span>
-                                        <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
-                                            <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {_relationship.thisObjectApiName} Object</h2>
-                                            <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the user, role or group specified in a field on each record</p>
-                                        </span>
-                                    </div>
+                                <div class="slds-media slds-media_center">
+                                    <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">     
+                                        <lightning-icon icon-name="standard:contact_list" alternative-text="Standard" title="Standard" size="medium"></lightning-icon>
+                                    </span>
+                                    <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
+                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {_relationship.thisObjectApiName} Object</h2>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the user, role or group specified in a field on each record</p>
+                                    </span>
+                                </div>
 
-                                </span>
-                                <span class="slds-icon_container slds-visual-picker__text-check">
-                                    <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
-                                        icon-name="utility:check" 
-                                        size="x-small"
-                                        variant="inverse"
-                                        alternative-text="Check" 
-                                        title="Check">
-                                    </lightning-icon>
-                                </span>
-                            </label>
-                        </div>
+                            </span>
+                            <span class="slds-icon_container slds-visual-picker__text-check">
+                                <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
+                                    icon-name="utility:check" 
+                                    size="x-small"
+                                    variant="inverse"
+                                    alternative-text="Check" 
+                                    title="Check">
+                                </lightning-icon>
+                            </span>
+                        </label>
                     </div>
+                </div>
 
-                    <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
-                        <div class="slds-visual-picker">
-                            <input 
-                                type="radio" 
-                                id="child" 
-                                value="child" 
-                                name="ruleType" 
-                                checked={fieldIsOnRelatedObject} 
-                                onchange={handleSelectedRelatedObject} />
-                            <label for="child">
-                                <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
+                <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
+                    <div class="slds-visual-picker">
+                        <input 
+                            type="radio" 
+                            id="related" 
+                            value="related" 
+                            name="ruleType" 
+                            checked={fieldIsOnRelatedObject} 
+                            onchange={handleSelectedRelatedObject} />
+                        <label for="related">
+                            <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
-                                    <div class="slds-media slds-media_center">
-                                        <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">
-                                            <lightning-icon icon-name="standard:hierarchy" alternative-text="Related" title="Related" size="medium"></lightning-icon>
-                                        </span>
-                                        <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
-                                            <h2 class="slds-truncate slds-text-heading_small" title="A Related Object">A Related Object</h2>
-                                            <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the users, roles or groups specified in a field on related records</p>
-                                        </span>
-                                    </div>
+                                <div class="slds-media slds-media_center">
+                                    <span class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_medium">
+                                        <lightning-icon icon-name="standard:hierarchy" alternative-text="Related" title="Related" size="medium"></lightning-icon>
+                                    </span>
+                                    <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
+                                        <h2 class="slds-truncate slds-text-heading_small" title="A Related Object">A Related Object</h2>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the users, roles or groups specified in a field on related records</p>
+                                    </span>
+                                </div>
 
-                                </span>
-                                <span class="slds-icon_container slds-visual-picker__text-check">
-                                    <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
-                                        icon-name="utility:check" 
-                                        size="x-small"
-                                        variant="inverse"
-                                        alternative-text="Check" 
-                                        title="Check">
-                                    </lightning-icon>
-                                </span>
-                            </label>
-                        </div>
-
-                        <template if:true={fieldIsOnRelatedObject}>
-                            <lightning-combobox
-                                name="relatedObject"
-                                placeholder="Select Object"
-                                options={relatedObjectOptions}
-                                value={relatedObjectSelected}
-                                onchange={handleRelatedObjectChange}>
-                            </lightning-combobox>
-                        </template>
-
+                            </span>
+                            <span class="slds-icon_container slds-visual-picker__text-check">
+                                <lightning-icon class="slds-icon slds-icon-text-check slds-icon_x-small" 
+                                    icon-name="utility:check" 
+                                    size="x-small"
+                                    variant="inverse"
+                                    alternative-text="Check" 
+                                    title="Check">
+                                </lightning-icon>
+                            </span>
+                        </label>
                     </div>
                 </div>
             </div>
-        </fieldset>
+        </div>
+        </div>
+    </fieldset>
 
-        <template if:true={_relationship.nextRelationship}>
-            <c-formula-share-rule-detail-location 
-                relationship={_relationship.nextRelationship}
-                onrelationshipchange={handleRelationshipChange}>
-            </c-formula-share-rule-detail-location>
-        </template>
+    <template if:true={fieldIsOnRelatedObject}>
+        <c-formula-share-relationship-object 
+            relationship={_relationship}
+            traverse={initialTraverse}
+            is-shared-object={initialTraverse}
+            onrelationshipchange={handleRelationshipChange}>
+        </c-formula-share-relationship-object>
+    </template>
 
 </template>

@@ -1,11 +1,11 @@
 public inherited sharing class FormulaShareSObjectRelationship {
 
     @AuraEnabled public String thisObjectApiName;
+    @AuraEnabled public String thisObjectLabel;
     @AuraEnabled public String lookupFromPrevObjectApiName;
     @AuraEnabled public String lookupToPrevObjectApiName;
     @AuraEnabled public String sharedToFieldApiName;
     public String thisObjectToken;
-    public String thisObjectLabel;
     public String lookupFromPrevObjectToken;
     public String lookupToPrevObjectToken;
     public String sharedToFieldToken;

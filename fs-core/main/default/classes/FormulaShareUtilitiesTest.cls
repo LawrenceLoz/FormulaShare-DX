@@ -94,11 +94,11 @@ public with sharing class FormulaShareUtilitiesTest {
     @IsTest
     public static void checkChildRelationships() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
-        List<FormulaShareUtilities.ChildRelationshipDetails> crds = FormulaShareUtilities.getChildRelationships(prefix + 'FormulaShare_Log__c');
+        List<FormulaShareUtilities.RelationshipDetails> crds = FormulaShareUtilities.getChildRelationships(prefix + 'FormulaShare_Log__c');
         Boolean foundRibRelationship = false;
-        for(FormulaShareUtilities.ChildRelationshipDetails crd : crds) {
-            if(crd.childObjectApiName.contains('FormulaShare_Rule_in_Batch__c')) {
-                System.assert(crd.childFieldApiName.contains('FormulaShare_Log__c'), 'Relationship name is different to the one expected');
+        for(FormulaShareUtilities.RelationshipDetails crd : crds) {
+            if(crd.relatedObjectApiName.contains('FormulaShare_Rule_in_Batch__c')) {
+                System.assert(crd.relatedFieldApiName.contains('FormulaShare_Log__c'), 'Relationship name is different to the one expected');
                 foundRibRelationship = true;
             }
         }

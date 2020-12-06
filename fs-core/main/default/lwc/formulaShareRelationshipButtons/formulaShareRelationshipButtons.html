@@ -1,0 +1,61 @@
+<template>
+    <div style="display: flex; justify-content: center">
+
+        <template if:true={showParentButton}>
+            <div class={parentButtonClasses}
+                style="text-align: right"
+                id="parentButtonDiv">
+                <lightning-button 
+                    label={parentLabel} 
+                    variant="brand"
+                    id="parentButton" 
+                    onclick={handleSelectedParent}
+                    disabled={parentButtonDisabled}>
+                </lightning-button>
+
+                <template if:true={parentButtonMessage}>
+                    <div class="parentButtonMessage">
+                        {parentButtonMessage}
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <template if:true={showTwoButtons}>
+            <div style="width: 40px"></div>
+        </template>
+
+        <template if:true={showChildButton}>
+            <div class={childButtonClasses}
+                id="childButtonDiv">
+                <lightning-button 
+                    label={childLabel}
+                    variant="brand"
+                    id="childButton" 
+                    onclick={handleSelectedChild}
+                    disabled={childButtonDisabled}>
+                </lightning-button>
+
+                <template if:true={childButtonMessage}>
+                    <div class="childButtonMessage">
+                        {childButtonMessage}
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <template if:true={typeSelected}>
+        <div class="slds-p-top_small centreCombobox">
+            <lightning-combobox
+                name="relatedObject"
+                placeholder="Select Object"
+                variant="label-hidden"
+                options={relatedObjectOptions}
+                value={relatedObjectSelected}
+                onchange={handleRelatedObjectChange}>
+            </lightning-combobox>
+        </div>
+    </template>
+
+</template>

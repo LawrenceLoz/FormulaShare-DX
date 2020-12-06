@@ -1,0 +1,50 @@
+<template>
+
+    <template if:true={nextObjectIsParent}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="diagonalTopLeft"></div>
+            <div class="verticalJoin" style="height: 25px"></div>
+            <div class="diagonalTopRight"></div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
+    </template>
+
+    <template if:false={nextObjectIsParent}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="verticalJoin" style="height: 15px"></div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
+    </template>
+
+    <div style="display: flex; align-items: baseline">
+        <div style="width: 120px; flex-grow: 1"></div>
+            <div class="baselineIconStyle linkIconStyle">
+                <lightning-icon 
+                    icon-name="utility:link"
+                    alternative-text="Object relationship"
+                    size="x-small">
+                </lightning-icon>
+            </div>
+        <div style="width: 120px; flex-grow: 1"></div>
+    </div>
+
+    <template if:false={nextObjectIsParent}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="diagonalBottomLeft"></div>
+            <div class="verticalJoin" style="height: 25px"></div>
+            <div class="diagonalBottomRight"></div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
+    </template>
+
+    <template if:true={nextObjectIsParent}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="verticalJoin" style="height: 15px"></div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
+    </template>
+</template>

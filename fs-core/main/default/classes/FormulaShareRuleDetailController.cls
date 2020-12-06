@@ -91,9 +91,15 @@ public with sharing class FormulaShareRuleDetailController {
 
 
     @AuraEnabled(cacheable=true)
-    public static List<FormulaShareUtilities.ChildRelationshipDetails> getChildRelationships(String parentObjectAPIName) {
+    public static List<FormulaShareUtilities.RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
         return FormulaShareUtilities.getChildRelationships(parentObjectAPIName);
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<FormulaShareUtilities.RelationshipDetails> getParentRelationships(String childObjectAPIName) {
+        return FormulaShareUtilities.getParentRelationships(childObjectAPIName);
+    }
+
 
     @AuraEnabled(cacheable=true)
     public static List<ShareFieldOption> getShareFieldOptions(String objectApiName){

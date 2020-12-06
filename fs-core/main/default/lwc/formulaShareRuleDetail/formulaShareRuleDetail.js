@@ -76,7 +76,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     checkValidity() {
         //console.log('checking validity');
         var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
-        var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
+//        var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
         var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
         var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
         var ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
@@ -92,6 +92,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 //    }
 
     rule = {};
+//    rule = {"accessLevel":"Read","active":true,"caseAccess":"None","contactAccess":"None","controllingObjectApiName":"sdfs__Programme_Support_Officer__c","controllingObjectLabel":"Programme Support Officer","controllingObjectSharedToFieldAPIName":"sdfs__User__c","controllingObjectSharedToFieldLabel":"User","controllingObjectSharedToFieldToken":"01I26000000cvxA.00N260000063Lub","controllingObjectSharedToFieldType":"Id","developerName":"Share_Countries_with_Prog_Support_Office","label":"Share Countries with Prog Support Office","objectSharedAPIName":"sdfs__Country__c","objectSharedLabel":"Country","opportunityAccess":"None","relationship":{"nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Country__c","nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Programme__c","sharedToFieldApiName":"sdfs__User__c","thisObjectApiName":"sdfs__Programme_Support_Officer__c"},"thisObjectApiName":"sdfs__Programme__c"},"thisObjectApiName":"sdfs__Country__c"},"ruleId":"m00260000000nmlAAA","shareWith":"Users","type":"descendant"};
     populateRule() {
         //console.log('_ruleId '+this._ruleid);
         getSpecificRule({ ruleId : this._ruleId })

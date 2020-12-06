@@ -1,0 +1,53 @@
+@import 'c/formulaShareCssLibrary';
+
+.baselineIconStyle {
+    display: inline-block;
+    border: solid #dddbda;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 35px;
+    padding: 0.2em 0.4em;
+}
+
+.linkIconStyle {
+    background-color: #E8E8E8;
+    border-color: #E8E8E8;
+}
+
+.verticalJoin {
+    width: 1px;
+    height: 20px;
+    border-right: 2px solid #dddbda;
+}
+
+.diagonalTopLeft {
+    position:relative;
+    border-top:2px solid #dddbda;
+    width:15px;
+    transform: translate(1.5px, -13px) rotate(45deg);
+    transform-origin: top right;
+}
+
+.diagonalTopRight {
+    position:relative;
+    border-top:2px solid #dddbda;
+    width:15px;
+    transform: translate(-1.5px, -13px) rotate(-45deg);
+    transform-origin: top left;
+}
+
+.diagonalBottomLeft {
+    position:relative;
+    border-top:2px solid #dddbda;
+    width:15px;
+    transform: translate(0px, -8px) rotate(-45deg);
+    transform-origin: top right;
+}
+
+.diagonalBottomRight {
+    position:relative;
+    border-top:2px solid #dddbda;
+    width:15px;
+    transform: translate(0px, -8px) rotate(45deg);
+    transform-origin: top left;
+}

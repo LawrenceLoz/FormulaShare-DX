@@ -146,22 +146,49 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
-	public static List<ChildRelationshipDetails> getChildRelationships(String parentObjectAPIName) {
-		List<ChildRelationshipDetails> crdList = new List<ChildRelationshipDetails>();
+	// Returns details of all objects associated through a lookup
+	public static List<RelationshipDetails> getParentRelationships(String childObjectAPIName) {
+		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
+
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(childObjectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+
+			// If it's a lookup field, check whether the lookup object is user (only lookup type which could control sharing)
+			if(fieldType == Schema.DisplayType.REFERENCE) {
+
+				List<Schema.SObjectType> parentObjTypes = fieldDesc.getReferenceTo();
+				// Only consider fields which can reference a single object
+				if(parentObjTypes.size() == 1) {
+					RelationshipDetails rd = new RelationshipDetails();
+					rd.relatedObjDesc = parentObjTypes[0].getDescribe();
+					rd.relatedObjectLabel = rd.relatedObjDesc.getLabel();
+					rd.relatedObjectApiName = rd.relatedObjDesc.getName();
+					rd.relatedFieldApiName = fieldDesc.getName();
+					crdList.add(rd);
+				}
+			}
+		}
+		return crdList;
+	}
+
+	public static List<RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
+		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
 
 		List<Schema.ChildRelationship> allChildRelationships = parentObjDesc.getChildRelationships();
 
 		// build CRD objects
-		List<ChildRelationshipDetails> allCrds = new List<ChildRelationshipDetails>();
+		List<RelationshipDetails> allCrds = new List<RelationshipDetails>();
 		List<String> childObjApiNames = new List<String>();
 		for(Schema.ChildRelationship cr : allChildRelationships) {
 
 			// Exclude child relationships with a null relationship name (these can't be processed by FormulaShareService)
 			if(cr.getRelationshipName() != null) {
-				ChildRelationshipDetails crd = convertToChildRelationshipDetails(cr);
+				RelationshipDetails crd = convertToRelationshipDetails(cr);
 				allCrds.add(crd);
-				childObjApiNames.add(crd.childObjectApiName);
+				childObjApiNames.add(crd.relatedObjectApiName);
 			}
 		}
 
@@ -175,37 +202,37 @@ public inherited sharing class FormulaShareUtilities {
 		// Build list of crds which are valid for use as child objects
 		// Objects aren't included unless they're triggerable and customisable 
 		// (these don't seem to be acceptable entity definitions for custom metadata)
-		List<ChildRelationshipDetails> eligibleCrds = new List<ChildRelationshipDetails>();
-		for(ChildRelationshipDetails crd : allCrds) {
-			if(edMap.containsKey(crd.childObjectApiName)) {
-				EntityDefinition ed = edMap.get(crd.childObjectApiName);
+		List<RelationshipDetails> eligibleCrds = new List<RelationshipDetails>();
+		for(RelationshipDetails crd : allCrds) {
+			if(edMap.containsKey(crd.relatedObjectApiName)) {
+				EntityDefinition ed = edMap.get(crd.relatedObjectApiName);
 				if(ed.IsApexTriggerable && ed.IsCustomizable) {
 					eligibleCrds.add(crd);
 				}
 			}
 		}
 
-		List<ChildRelationshipDetails> customChildRelationships = new List<ChildRelationshipDetails>();
-		List<ChildRelationshipDetails> standardChildRelationships = new List<ChildRelationshipDetails>();
+		List<RelationshipDetails> customChildRelationships = new List<RelationshipDetails>();
+		List<RelationshipDetails> standardChildRelationships = new List<RelationshipDetails>();
 
 		// Build lists of custom and standard child relationship details
-		for(ChildRelationshipDetails crd : eligibleCrds) {
+		for(RelationshipDetails crd : eligibleCrds) {
 //			if(cr.getRelationshipName() != null) {
-			if(crd.childObjDesc.isCustom()) {
+			if(crd.relatedObjDesc.isCustom()) {
 				customChildRelationships.add(crd);
 			}
-			else if(crd.childObjDesc.isQueryable()) {
+			else if(crd.relatedObjDesc.isQueryable()) {
 				standardChildRelationships.add(crd);
 			}
 		}
 
 		// Add all child relationships for custom objects
-		for(ChildRelationshipDetails crd : customChildRelationships) {
+		for(RelationshipDetails crd : customChildRelationships) {
 			crdList.add(crd);
 		}
 
 		// Then add all child relationships for queryable standard objects (ensures shows custom then standard)
-		for(ChildRelationshipDetails crd : standardChildRelationships) {
+		for(RelationshipDetails crd : standardChildRelationships) {
 			crdList.add(crd);
 		}
 
@@ -213,15 +240,15 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 	
-	private static ChildRelationshipDetails convertToChildRelationshipDetails(Schema.ChildRelationship cr) {
+	private static RelationshipDetails convertToRelationshipDetails(Schema.ChildRelationship cr) {
 
-		ChildRelationshipDetails crd = new ChildRelationshipDetails();
-		crd.childObjFieldDesc = cr.getField().getDescribe();
-		crd.childObjDesc = cr.getChildSObject().getDescribe();
-		crd.childObjectLabel = crd.childObjFieldDesc.getLabel();
-		crd.childFieldApiName = crd.childObjFieldDesc.getName();
-		crd.childObjectApiName = crd.childObjDesc.getName();
-		crd.childObjectLabel = crd.childObjDesc.getLabel();
+		RelationshipDetails crd = new RelationshipDetails();
+		crd.relatedObjFieldDesc = cr.getField().getDescribe();
+		crd.relatedObjDesc = cr.getChildSObject().getDescribe();
+		crd.relatedObjectLabel = crd.relatedObjFieldDesc.getLabel();
+		crd.relatedFieldApiName = crd.relatedObjFieldDesc.getName();
+		crd.relatedObjectApiName = crd.relatedObjDesc.getName();
+		crd.relatedObjectLabel = crd.relatedObjDesc.getLabel();
 
 		return crd;
 	}
@@ -495,21 +522,21 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
-    public class ChildRelationshipDetails {
-		private Schema.DescribeFieldResult childObjFieldDesc;
-		private Schema.DescribeSObjectResult childObjDesc;
+    public class RelationshipDetails {
+		private Schema.DescribeFieldResult relatedObjFieldDesc;
+		private Schema.DescribeSObjectResult relatedObjDesc;
         @AuraEnabled
-        public String childObjectLabel {get;set;}
+        public String relatedObjectLabel {get;set;}
         @AuraEnabled
-        public String childObjectApiName {get;set;}
+        public String relatedObjectApiName {get;set;}
+//        @AuraEnabled
+//        public String childObjectId {get;set;}
+//        @AuraEnabled
+//        public String childFieldLabel {get;set;}
         @AuraEnabled
-        public String childObjectId {get;set;}
-        @AuraEnabled
-        public String childFieldLabel {get;set;}
-        @AuraEnabled
-        public String childFieldApiName {get;set;}
-        @AuraEnabled
-		public String childFieldId {get;set;}
+        public String relatedFieldApiName {get;set;}
+//        @AuraEnabled
+//		public String childFieldId {get;set;}
     }
 
 }
