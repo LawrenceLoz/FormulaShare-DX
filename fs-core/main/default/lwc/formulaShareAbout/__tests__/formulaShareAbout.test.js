@@ -36,7 +36,7 @@ describe('c-formula-share-about', () => {
 
         // Find all lightning-button within footer.
         const listOfLightningButtonInFooter = element.shadowRoot.querySelectorAll('footer > lightning-button');
-        expect(listOfLightningButtonInFooter.length).toBe(1);
+        expect(listOfLightningButtonInFooter).toHaveLength(1);
 
         // Check attributes from lightning-button.
         const closeButton = listOfLightningButtonInFooter[0];
