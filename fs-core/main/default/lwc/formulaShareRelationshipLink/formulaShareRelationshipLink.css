@@ -10,8 +10,37 @@
 }
 
 .linkIconStyle {
+    position: relative;
     background-color: #E8E8E8;
     border-color: #E8E8E8;
+}
+
+.relationshipLabel {
+    position: absolute;
+    right: 40px;
+    min-width: 450px;
+    text-align: right;
+    font-style: italic;
+}
+
+.deleteIconStyle {
+    position: absolute;
+    left: 28px;
+    top: 0px;
+/*    background-color: #EF6E64;
+    border-radius: 5px;
+    padding: 0.0em 0.2em;
+*/
+    /*
+    position: absolute;
+    top: -12px;
+    left: 30px;
+    background-color: #EF6E64;
+    border: #EF6E64;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 20px;
+    padding: 0.1em 0.2em;   */
 }
 
 .verticalJoin {

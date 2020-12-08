@@ -28,7 +28,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
 
     nextRelationship;
     objectFrameClasses;
-
+    fadeOutDuration = 700;
 
     processNextRelationship(nextRel) {
         console.log('Relationship provided: '+JSON.stringify(nextRel));
@@ -41,6 +41,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         if(nextRel) {
             this.nextRelationship = nextRel;
             this.setNextRelationshipTraverse();
+            this.setDetailsForLinkLabel();
             this.closeButtonsAndAddLink();
         }
 
@@ -53,6 +54,19 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         }
     }
 
+    // Populate the name of the relationship field between this object and the next one and the object this field sits on
+    relationshipField;
+    relationshipFieldOnObject;
+    setDetailsForLinkLabel() {
+        if(this.nextRelationship.lookupFromPrevObjectApiName) {
+            this.relationshipField = this.nextRelationship.lookupFromPrevObjectApiName;
+            this.relationshipFieldOnObject = this._relationship.thisObjectApiName;
+        }
+        else if(this.nextRelationship.lookupToPrevObjectApiName) {
+            this.relationshipField = this.nextRelationship.lookupToPrevObjectApiName;
+            this.relationshipFieldOnObject = this.nextRelationship.thisObjectApiName;
+        }
+    }
 
     // Set traverse details to provide for the next object component
     nextRelationshipTraverse = {};
@@ -86,36 +100,75 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
 
     // When relationship selected in dropdown, set details for next relationship
     handleRelationshipSelected(event) {
-        var rel = {
+        var newNextRelationship = {
             thisObjectApiName: event.detail.objectApiName,
             thisObjectLabel: event.detail.objectLabel
         };
 
         if(event.detail.relationshipType === 'parent') {
-            rel['lookupFromPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+            newNextRelationship['lookupFromPrevObjectApiName'] = event.detail.relationshipFieldApiName;
         }
         else {
-            rel['lookupToPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+            newNextRelationship['lookupToPrevObjectApiName'] = event.detail.relationshipFieldApiName;
         }
 
-        this.processNextRelationship(rel);
-        this.fireRelationshipChange(event.detail.objectApiName);
+        var newRelationship = this.getCopyOfRelationship(newNextRelationship);
+        console.log('newRel: '+JSON.stringify(newRelationship));
+        this.childComponentClasses = '';  // Set component to fade in when added
+        this.childComponentClasses = 'fadeIn';  // Set component to fade in when added
+        this.processNextRelationship(newNextRelationship);
+        this.fireRelationshipChange(event.detail.objectApiName, newRelationship);   // newRelationship or newNextRelationship?
     }
 
     // If relationship updated in child component, communicate to parent
     handleRelationshipChange(event) {
         console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
-        this._relationship.nextRelationship = event.detail.relationship;
-        this.fireRelationshipChange(event.detail.controllingObjectApiName);
+
+        var newRelationship = this.getCopyOfRelationship(event.detail.relationship);
+//        this._relationship = newRelationship;
+
+        this.fireRelationshipChange(event.detail.controllingObjectApiName, newRelationship);
+    }
+
+    // When delete button beside link icon is clicked, clear next relationship
+    childComponentClasses;
+    handleDeleteRelationship() {
+
+        // Fade child components and remove from DOM after fade time (0.7s)
+        this.childComponentClasses = 'fadeOut';
+        setTimeout(() => {
+            this.linkToNext = false;
+    
+            console.log('handling delete');
+            console.log('this._relationship after del: '+JSON.stringify(this._relationship));
+            var newRelationship = this.getCopyOfRelationship(null);
+    
+            // Revert all attributes which were set when relationship added
+    //        this.processNextRelationship(null);
+            this.fireRelationshipChange(newRelationship.thisObjectApiName, newRelationship);
+        }, this.fadeOutDuration);
+    }
+    
+    // Creates new object to replace relationship
+    // Required to avoid exception changing inner properties of _relationship in this context
+    getCopyOfRelationship(newNextRelationship) {
+        var newRelationship = {
+            thisObjectApiName: this._relationship.thisObjectApiName,
+            thisObjectLabel: this._relationship.thisObjectLabel,
+            lookupToPrevObjectApiName: this._relationship.lookupToPrevObjectApiName,
+            lookupFromPrevObjectApiName: this._relationship.lookupFromPrevObjectApiName,
+            nextRelationship: newNextRelationship
+        };
+        return newRelationship;
     }
 
     // Fire event for parent component to be made aware of changes to relationship
-    fireRelationshipChange(controllingObjectApiName) {
+    fireRelationshipChange(controllingObjectApiName, thisRel) {
         const relationshipDetails = {
-            relationship: this._relationship,
+            relationship: thisRel,
             controllingObjectApiName: controllingObjectApiName
         };
-        const selection = new CustomEvent('ruletypechange', {
+        const selection = new CustomEvent('relationshipchange', {
             detail: relationshipDetails
         });
         this.dispatchEvent(selection);
@@ -129,11 +182,16 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
     iconVariant = 'inverse';
     handleIconClicked() {
         if(this.iconType === 'plus') {
+            this.childComponentClasses = '';    // Removes fadeOut if previously applied
             this.openButtonsAndIconToCross();
         }
         else if(this.iconType === 'cross') {
-            this.closeButtonsAndIconToPlus();
-            this.addBlueFrame();
+            this.childComponentClasses = 'fadeOut';
+            setTimeout(() => {
+                this.linkToNext = false;
+                this.closeButtonsAndIconToPlus();
+                this.addBlueFrame();
+            }, this.fadeOutDuration);
         }
     }
 

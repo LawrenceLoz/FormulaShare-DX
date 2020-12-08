@@ -21,12 +21,37 @@
     <div style="display: flex; align-items: baseline">
         <div style="width: 120px; flex-grow: 1"></div>
             <div class="baselineIconStyle linkIconStyle">
-                <lightning-icon 
-                    icon-name="utility:link"
-                    alternative-text="Object relationship"
-                    size="x-small">
-                </lightning-icon>
+                <template if:true={showRelationshipDetails}>
+                    <div class={relationshipLabelClasses}>
+                        Related by {lookupApiName} on {objectApiName}
+                    </div>
+                </template>
+
+                <div onmouseover={handleMouseOverLink}
+                    onmouseleave={handleMouseLeaveLink}>
+                    <lightning-icon 
+                        icon-name="utility:link"
+                        alternative-text="Object relationship"
+                        size="x-small">
+                    </lightning-icon>
+                </div>
+
+                <template if:true={showRelationshipDetails}>
+                    <div class={deleteIconClasses}
+                        onmouseover={handleMouseOverLink}
+                        onmouseleave={handleMouseLeaveLink}>
+                        <lightning-button-icon
+                            icon-name="utility:delete"
+                            variant="bare"
+                            tooltip="Remove relationship"
+                            size="medium"
+                            class="slds-m-left_x-small"
+                            onclick={handleDeleteRelationship}>
+                        </lightning-button-icon>
+                    </div>
+                </template>
             </div>
+
         <div style="width: 120px; flex-grow: 1"></div>
     </div>
 

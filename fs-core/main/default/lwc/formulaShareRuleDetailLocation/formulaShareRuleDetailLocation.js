@@ -60,13 +60,28 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     // Detect and fire event for parent when change in relationship-object components
     handleRelationshipChange(event) {
         console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
-        this._relationship.nextRelationship = event.detail.relationship;
-        this.fireRelationshipChange(event.detail.controllingObjectApiName);
+
+//        // Create new object to replace relationship
+//        // (required to avoid exception changing inner properties of _relationship in this context)
+//        var newRelationship = {
+//            thisObjectApiName: this._relationship.thisObjectApiName,
+//            thisObjectLabel: this._relationship.thisObjectLabel,
+//            lookupToPrevObjectApiName: this._relationship.lookupToPrevObjectApiName,
+//            lookupFromPrevObjectApiName: this._relationship.lookupFromPrevObjectApiName,
+//            nextRelationship: event.detail.relationship,
+//        };
+//
+//        // Set new relationship at top level of relationship-object component chain
+//        this._relationship = newRelationship;
+
+        this._relationship = event.detail.relationship;
+
+        this.fireRelationshipChange(event.detail.controllingObjectApiName, this._relationship);
     }
 
-    fireRelationshipChange(controllingObjectApiName) {
+    fireRelationshipChange(controllingObjectApiName, newRelationship) {
         const relationshipDetails = {
-            relationship: this._relationship,
+            relationship: newRelationship,
             controllingObjectApiName: controllingObjectApiName
         };
         const selection = new CustomEvent('ruletypechange', {

@@ -31,24 +31,31 @@
         </div>
     </template>
 
-    <template if:true={showButtons}>
-        <div style="position: relative; transform: translate(0%, -0.5em);">
-            <c-formula-share-relationship-buttons 
-                traverse={_traverse}
-                object-api-name={_relationship.thisObjectApiName}
-                object-label={_relationship.thisObjectLabel}
-                onrelationshipselected={handleRelationshipSelected}>
-            </c-formula-share-relationship-buttons>
-        </div>
-    </template>
+    <div class={childComponentClasses}>
+        <template if:true={showButtons}>
+            <div style="position: relative; transform: translate(0%, -0.5em);">
+                <c-formula-share-relationship-buttons 
+                    traverse={_traverse}
+                    object-api-name={_relationship.thisObjectApiName}
+                    object-label={_relationship.thisObjectLabel}
+                    onrelationshipselected={handleRelationshipSelected}>
+                </c-formula-share-relationship-buttons>
+            </div>
+        </template>
 
-    <template if:true={linkToNext}>
-        <c-formula-share-relationship-link
-            next-object-is-parent={nextObjectIsParent}>
-        </c-formula-share-relationship-link>
-        <c-formula-share-relationship-object 
-            relationship={nextRelationship}
-            traverse={nextRelationshipTraverse}>
-        </c-formula-share-relationship-object>
-    </template>
+        <template if:true={linkToNext}>
+            <c-formula-share-relationship-link
+                next-object-is-parent={nextObjectIsParent}
+                lookup-api-name={relationshipField}
+                object-api-name={relationshipFieldOnObject}
+                ondeleterelationship={handleDeleteRelationship}>
+            </c-formula-share-relationship-link>
+            
+            <c-formula-share-relationship-object 
+                relationship={nextRelationship}
+                traverse={nextRelationshipTraverse}
+                onrelationshipchange={handleRelationshipChange}>
+            </c-formula-share-relationship-object>
+        </template>
+    </div>
 </template>
