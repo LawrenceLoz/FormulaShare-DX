@@ -52,6 +52,10 @@
 }
 
 .centreCombobox {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    z-index: 2;    
     width: 50%;
     display: block;
     margin-left: auto;

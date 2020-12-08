@@ -91,7 +91,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 //        console.log('refreshed!');
 //    }
 
-    rule = {};
+    @track rule = {};
 //    rule = {"accessLevel":"Read","active":true,"caseAccess":"None","contactAccess":"None","controllingObjectApiName":"sdfs__Programme_Support_Officer__c","controllingObjectLabel":"Programme Support Officer","controllingObjectSharedToFieldAPIName":"sdfs__User__c","controllingObjectSharedToFieldLabel":"User","controllingObjectSharedToFieldToken":"01I26000000cvxA.00N260000063Lub","controllingObjectSharedToFieldType":"Id","developerName":"Share_Countries_with_Prog_Support_Office","label":"Share Countries with Prog Support Office","objectSharedAPIName":"sdfs__Country__c","objectSharedLabel":"Country","opportunityAccess":"None","relationship":{"nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Country__c","nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Programme__c","sharedToFieldApiName":"sdfs__User__c","thisObjectApiName":"sdfs__Programme_Support_Officer__c"},"thisObjectApiName":"sdfs__Programme__c"},"thisObjectApiName":"sdfs__Country__c"},"ruleId":"m00260000000nmlAAA","shareWith":"Users","type":"descendant"};
     populateRule() {
         //console.log('_ruleId '+this._ruleid);
@@ -102,131 +102,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
             this.fireEventWithRule();
         });
     }
-
-//    populateRule() {
-//        //console.log('_ruleId '+this._ruleid);
-//        getSpecificRule({ ruleId : this._ruleId })
-//        .then((data) => {
-//            console.log('retrieved rule: '+JSON.stringify(data));
-//            var prefix = '';
-//            if(data.sdfs__Object_Shared__c) {
-//                prefix = 'sdfs__';
-//            }
-//            this.rule = data;
-//            this.ruleLabel         = data.label;
-//            this.ruleName          = data.developerName;
-//            this.ruleDescription   = data.description;
-//            this.ruleActive        = data.active;
-//            this.shareWith         = data.shareWith;
-//            this.accessLevel       = data.accessLevel;
-//            this.sharingReason     = data.sharingReason;
-//            this.contactAccess     = data.contactAccess;
-//            this.caseAccess        = data.caseAccess;
-//            this.opportunityAccess = data.opportunityAccess;
-//
-//            // Create array of objects to query for details
-//            var objectsToCheck = [];
-//            const objectShared = data.objectSharedAPIName;
-//            if(objectShared) {
-//                objectsToCheck.push(objectShared);
-//            }
-//            const relatedObject = data[prefix + 'Child_Object_with_Shared_To_Field__c'];
-//            if(relatedObject) {
-//                objectsToCheck.push(relatedObject);
-//            }
-//
-//            //console.log('objects to check: '+JSON.stringify(objectsToCheck));
-//            
-//            // Call apex to get API names for the entity IDs held on rule metadata
-//            getObjectApiNames({ objectEntityIds : objectsToCheck })
-//            .then((objectApiNamesMap) => {
-//                //console.log('objectApiNamesMap: '+JSON.stringify(objectApiNamesMap));
-//
-//                // Iterate objects with details returned
-//                for(var key in objectApiNamesMap){
-//                    //console.log('objectApiName: '+key,objectApiNamesMap[key]);
-//
-//                    // Set API name of shared object
-//                    if(key === objectShared) {
-//                        this.sharedObjectApiName = objectApiNamesMap[key];
-//                    }
-//
-//                    // Keep API name of related object
-//                    if(key === relatedObject) {
-//                        this.relatedObjectApiName = objectApiNamesMap[key];
-//                    }
-//                }
-//
-//                // If related object was populated, set field to indicate child rule type
-//                if(this.relatedObjectApiName) {
-//                    this.ruleType = 'child';
-//                    this.objectWithShareFieldApiName = this.relatedObjectApiName;
-//                    this.shareFieldType = data[prefix + 'Child_Object_Shared_To_Field_Type__c'];
-//                    //console.log('Setting shareFieldType to '+this.shareFieldType);
-//                }
-//
-//                else {
-//                    this.ruleType = 'standard';
-//                    this.objectWithShareFieldApiName = this.sharedObjectApiName;
-//                    this.shareFieldType = data[prefix + 'Shared_To_Field_Type__c'];
-//                }
-//                
-//                // Create array of fields to query
-//                var fieldsToCheck = [];
-//                const sharedToField = data[prefix + 'Shared_To__c'];
-//                if(sharedToField) {
-//                    fieldsToCheck.push(sharedToField);
-//                }
-//                const sharedToFieldRelated = data[prefix + 'Child_Object_Shared_To_Field__c'];
-//                if(sharedToFieldRelated) {
-//                    fieldsToCheck.push(sharedToFieldRelated);
-//                }
-//                const lookupFieldRelated = data[prefix + 'Child_Object_Lookup_Field__c'];
-//                if(lookupFieldRelated) {
-//                    fieldsToCheck.push(lookupFieldRelated);
-//                }
-//
-//                //console.log('fieldsToCheck: '+ JSON.stringify(fieldsToCheck));
-//                
-//                // Call apex to get API names
-//                getFieldApiNames({ fieldEntityIds : fieldsToCheck })
-//                .then((fieldApiNamesMap) => {
-//
-//                    //console.log('field names: '+fieldApiNamesMap);
-//
-//                    for(var key in fieldApiNamesMap) {
-//                        //console.log('key',key);
-//
-//                        // Set share to field based on what's set in rule
-//                        if(key === sharedToField || key === sharedToFieldRelated) {
-//                            this.shareField = fieldApiNamesMap[key];
-//                            //console.log('this.shareField: '+this.shareField);
-//                        }
-//
-//                        // Set related object selected based on what's set in rule
-//                        if(key === lookupFieldRelated) {
-//                            this.relatedObjectSelected = this.relatedObjectApiName + '|' + fieldApiNamesMap[key];
-//                            //console.log('this.relatedObjectSelected: '+this.relatedObjectSelected);
-//                        }
-//                    }
-//
-//                    this.fireEventWithRule();
-//                })
-//                .catch(error => {
-//                    //console.log('Error building field map ',JSON.stringify(error));
-//                });
-//
-//            })
-//            .catch(error => {
-//                //console.log('Error building object map ',JSON.stringify(error));
-//            });
-//        })
-//        .catch(error => {
-//            //console.log('Error retrieving rule details from Salesforce',JSON.stringify(error));
-//            this.showError(error, 'Error retrieving rule details from Salesforce');
-//        });
-//    }
-    
     
     // Fire event with all details in rule
     fireEventWithRule() {
@@ -277,7 +152,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     // Called directly on component load to pass back shared object information
     handleSetSharedObjectDetail(event) {
-        //console.log('handling handleSetSharedObjectDetail event ',event.detail);
         this.sharedObjectDetail = event.detail;
 
         // Fire event for create component to disable button
@@ -289,20 +163,20 @@ export default class FormulaShareRuleDetail extends LightningElement {
     }
 
     handleSharedObjectChange(event) {
-
+        
         // On change of shared object, assume that rule will be standard
-        // Clear any object specific fields
+        // Default object with share field to be the selected object (ensures field list populates)
+        this.rule.controllingObjectApiName = event.detail.objectApiName;
+        this.rule.relationship = {thisObjectApiName: this.rule.controllingObjectApiName, thisObjectLabel: event.detail.objectLabel};
+        this.template.querySelector('c-formula-share-rule-detail-location').setSelectedLocationToThisObject();
         this.rule.type = 'standard';
-        this.rule.relationship = null;
-//        this.relatedObjectSelected = null;
+
+        // Clear any object specific fields
         this.rule.contactAccess = null;
         this.rule.caseAccess = null;
         this.rule.opportunityAccess = null;
 
-        // Default object with share field to be the selected object (ensures field list populates)
-        this.rule.controllingObjectApiName = event.detail.objectApiName;
-
-        //console.log('Cleared values after shared obj change');
+        console.log('Cleared values after shared obj change. Current rule: '+JSON.stringify(this.rule));
 
         this.handleSetSharedObjectDetail(event);    // Capture object details
     }
@@ -322,26 +196,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.rule.controllingObjectApiName = event.detail.controllingObjectApiName;
         this.fireEventWithRule();
     }
-
-//    handleRuleTypeChange(event) {
-//        this.rule.type = event.detail;
-//
-//        // Set object with share field based on rule type
-//        if(this.ruleType === 'standard') {
-//            this.objectWithShareFieldApiName = this.sharedObjectApiName;
-//        }
-//        else if(this.ruleType === 'child') {
-//            this.objectWithShareFieldApiName = this.relatedObjectApiName;  // Will be null unless pre-selected from previous action
-//        }
-//        this.fireEventWithRule();
-//    }
-//
-//    handleRelatedObjectChange(event) {
-//        this.relatedObjectSelected = event.detail.relatedObjectSelected;
-//        this.relatedObjectApiName = event.detail.relatedObjectApiName;
-//        this.objectWithShareFieldApiName = this.relatedObjectApiName;
-//        this.fireEventWithRule();
-//    }
 
     //--------------------- Event handlers for Field component ---------------------// 
 

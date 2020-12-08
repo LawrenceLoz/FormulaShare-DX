@@ -7,12 +7,22 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         return this._relationship;
     }
     set relationship(value) {
-        this._relationship = value;
-        this.setSelectedValues();
+        // Reset relationship only if shared object has changed
+        if(!this._relationship || this._relationship.thisObjectApiName != value.thisObjectApiName) {
+            this._relationship = value;
+            this.setSelectedValues();
+        }
     }
     @track _relationship;
 
     selectedLocation;
+    controllingObjectApiName;
+
+    // Called when shared object is changed
+    @api
+    setSelectedLocationToThisObject() {
+        this.selectedLocation = 'thisObject';
+    }
 
     // Check the relationship and determine whether sharing based on this object or a related object
     setSelectedValues() {
@@ -35,21 +45,42 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
 
     // Event handlers for button selection of rule type. Update type and fire event to parent
     handleSelectedThisObject() {
+        console.log('handleSelectedThisObject');
         this.selectedLocation = 'thisObject';
-        this._relationship.nextRelationship = false;
-        this.fireRelationshipChange(this._relationship.thisObjectApiName);
+
+        // Copy top level (shared object) relationship without subordinate relationships removed
+        // We won't overwrite _relationship or controllingObjectApiName so these can be referenced later if the button is switched again
+        var relCopy = {
+            thisObjectApiName: this._relationship.thisObjectApiName,
+            thisObjectLabel: this._relationship.thisObjectLabel
+        };
+        var controllingObject = relCopy.thisObjectApiName;
+
+        this.fireRelationshipChange(controllingObject, relCopy);
     }
     handleSelectedRelatedObject() {
+        console.log('handleSelectedRelatedObject: '+JSON.stringify(this._relationship));
         this.selectedLocation = 'relatedObject';
-        this._relationship.nextRelationship = false;
-        this.fireRelationshipChange(null);
+        
+        var controllingObject = this.controllingObjectApiName;
+
+        this.fireRelationshipChange(controllingObject, this._relationship);
         this.scrollDown();  // Scroll to ensure relationship component is in view
+    }
+
+    // Clones relationship to pass to shared object
+    // We use a copy and keep original relationship in case button switched back
+    updateRelationshipWithControllingObjectAsSharedObject() {
+        var relCopy = { ..._relationship }  // Should return shallow clone, but we'll remove nextRelationship property just in case
+        delete relCopy.nextRelationship;
+
+        var controllingObject = relCopy.thisObjectApiName;
+        this.fireRelationshipChange(controllingObject, relCopy);
     }
 
     // Scroll after 50 ms
     scrollDown() {
         setTimeout(() => {
-            console.log('trying to scroll');
             if(this.template.querySelector('c-formula-share-relationship-object')) {
                 console.log('found element');
                 this.template.querySelector('c-formula-share-relationship-object').scrollIntoView();
@@ -60,31 +91,18 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     // Detect and fire event for parent when change in relationship-object components
     handleRelationshipChange(event) {
         console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
-
-//        // Create new object to replace relationship
-//        // (required to avoid exception changing inner properties of _relationship in this context)
-//        var newRelationship = {
-//            thisObjectApiName: this._relationship.thisObjectApiName,
-//            thisObjectLabel: this._relationship.thisObjectLabel,
-//            lookupToPrevObjectApiName: this._relationship.lookupToPrevObjectApiName,
-//            lookupFromPrevObjectApiName: this._relationship.lookupFromPrevObjectApiName,
-//            nextRelationship: event.detail.relationship,
-//        };
-//
-//        // Set new relationship at top level of relationship-object component chain
-//        this._relationship = newRelationship;
-
         this._relationship = event.detail.relationship;
-
+        this.controllingObjectApiName = event.detail.controllingObjectApiName;
         this.fireRelationshipChange(event.detail.controllingObjectApiName, this._relationship);
     }
 
     fireRelationshipChange(controllingObjectApiName, newRelationship) {
+        console.log('notifying parent detail component');
         const relationshipDetails = {
             relationship: newRelationship,
             controllingObjectApiName: controllingObjectApiName
         };
-        const selection = new CustomEvent('ruletypechange', {
+        const selection = new CustomEvent('relationshipchange', {
             detail: relationshipDetails
         });
         this.dispatchEvent(selection);

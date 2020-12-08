@@ -8,6 +8,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         return this._relationship;
     }
     set relationship(value) {
+        console.log('called setter');
         this._relationship = value;
         this.processNextRelationship(this._relationship.nextRelationship);
     }
@@ -27,6 +28,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
     _traverse;
 
     nextRelationship;
+    linkToNext;     // Controls whether child components are rendered
     objectFrameClasses;
     fadeOutDuration = 700;
 
@@ -42,7 +44,8 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
             this.nextRelationship = nextRel;
             this.setNextRelationshipTraverse();
             this.setDetailsForLinkLabel();
-            this.closeButtonsAndAddLink();
+            this.closeButtonsAndIconToPlus();   // Change button to plus (shown again if relationship cancelled or removed)
+            this.linkToNext = true;
         }
 
         // Otherwise, set icon to display a plus button
@@ -51,6 +54,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
             this.objectTextClasses += ' slds-p-bottom_medium';
             this.objectFrameClasses += ' slds-p-bottom_medium';
             this.addBlueFrame();
+            this.linkToNext = false;
         }
     }
 
@@ -193,12 +197,6 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
                 this.addBlueFrame();
             }, this.fadeOutDuration);
         }
-    }
-
-    linkToNext;
-    closeButtonsAndAddLink() {
-        this.linkToNext = true;
-        this.closeButtonsAndIconToPlus();
     }
     
     openButtonsAndIconToCross() {

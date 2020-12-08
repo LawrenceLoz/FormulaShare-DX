@@ -4,7 +4,8 @@
         <div style="width: 1px; flex-grow: 1"></div>
 
         <div class={objectFrameClasses}>
-            <div class={objectTextClasses}>
+            <div class={objectTextClasses}
+                title={_relationship.thisObjectApiName}>
                 {_relationship.thisObjectLabel}
             </div>
         </div>
@@ -33,7 +34,8 @@
 
     <div class={childComponentClasses}>
         <template if:true={showButtons}>
-            <div style="position: relative; transform: translate(0%, -0.5em);">
+            <div style="position: relative; transform: translate(0%, -0.5em);"
+                class="slds-p-bottom_large">
                 <c-formula-share-relationship-buttons 
                     traverse={_traverse}
                     object-api-name={_relationship.thisObjectApiName}

@@ -13,7 +13,7 @@
                             value="standard"
                             name="ruleType"
                             checked={fieldIsOnThisObject} 
-                            onchange={handleSelectedThisObject} />
+                            onclick={handleSelectedThisObject} />
                         <label for="standard">
                             <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
@@ -22,8 +22,8 @@
                                         <lightning-icon icon-name="standard:contact_list" alternative-text="Standard" title="Standard" size="medium"></lightning-icon>
                                     </span>
                                     <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
-                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {_relationship.thisObjectApiName} Object</h2>
-                                        <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the user, role or group specified in a field on each record</p>
+                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {_relationship.thisObjectLabel} Object</h2>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectLabel} records will be shared to the user, role or group specified in a field on each record</p>
                                     </span>
                                 </div>
 
@@ -49,7 +49,7 @@
                             value="related" 
                             name="ruleType" 
                             checked={fieldIsOnRelatedObject} 
-                            onchange={handleSelectedRelatedObject} />
+                            onclick={handleSelectedRelatedObject} />
                         <label for="related">
                             <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
@@ -59,7 +59,7 @@
                                     </span>
                                     <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
                                         <h2 class="slds-truncate slds-text-heading_small" title="A Related Object">A Related Object</h2>
-                                        <p class="slds-m-top_small">{_relationship.thisObjectApiName} records will be shared to the users, roles or groups specified in a field on related records</p>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectLabel} records will be shared to the users, roles or groups specified in a field on related records</p>
                                     </span>
                                 </div>
 

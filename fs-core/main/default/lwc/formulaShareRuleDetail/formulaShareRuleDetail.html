@@ -23,23 +23,24 @@
     </c-formula-share-rule-detail-shared-object>
 
     <template if:true={rule.relationship}>
-        <div class="slds-p-top_medium">
+        <div class="slds-p-top_medium stackOrderTop">
             <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
             
             <c-formula-share-rule-detail-location 
                 relationship={rule.relationship}
+                onruletypechange={handleRuleTypeChange}
                 onrelationshipchange={handleRelationshipChange}>
             </c-formula-share-rule-detail-location>
         </div>
     </template>
 
-    <template if:true={sharedObject}>
+    <template if:true={sharedObjectDetail}>
         <h3 class="slds-section-title--divider">Share with</h3>
         <c-formula-share-rule-detail-field 
             object-with-share-field={rule.controllingObjectApiName}
             share-with={rule.shareWith}
-            internal-sharing-model={sharedObject.internalSharingModel}
-            external-sharing-model={sharedObject.externalSharingModel}
+            internal-sharing-model={sharedObjectDetail.internalSharingModel}
+            external-sharing-model={sharedObjectDetail.externalSharingModel}
             share-field={rule.controllingObjectSharedToFieldAPIName}
             share-field-type={rule.controllingObjectSharedToFieldType}
             onsharewithchange={handleShareWithChange}
