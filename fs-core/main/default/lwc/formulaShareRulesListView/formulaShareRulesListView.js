@@ -407,7 +407,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
 
         // Open report in a new tab
-        this[NavigationMixin.Navigate]({
+        this[NavigationMixin.GenerateUrl]({
             type: 'standard__recordPage',
             attributes: {
                 recordId: row['recordLogsReportId'],
@@ -415,10 +415,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 actionName: 'view',
             },
             state: params   //  Filter set via query string parameter
-        })
-        /*.then(url => {
+        }).then(url => {
              window.open(url);
-        });*/
+        });
     }
 
 
