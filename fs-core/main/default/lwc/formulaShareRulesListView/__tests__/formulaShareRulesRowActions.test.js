@@ -194,13 +194,7 @@ describe('c-formula-share-rules-list-view', () => {
 
     it('Test navigate to report (Positive).', () => {
         // https://salesforce.stackexchange.com/questions/285021/lightning-web-component-unit-testing-issue-with-testing-row-action-event
-        
         jest.spyOn(window, 'open').mockReturnValue();
-
-        // Nav param values to test later
-        const NAV_TYPE = 'standard__recordPage';
-        const NAV_OBJECT_API_NAME = 'Report';
-        const NAV_ACTION_NAME = 'view';
 
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
@@ -231,7 +225,6 @@ describe('c-formula-share-rules-list-view', () => {
                     }
             });
             
-            //https://testfirma3-dev-ed.lightning.force.com/lightning/r/Report/00O09000001luVyEAI/view?fv0=Share_Programmes_to_Major_Donor_Manager&fv1=a0009000002kUCrAAM&fv2=1607288404
             // Trigger row action in lightning-tree-grid.
             treeGrid.dispatchEvent(rowActionEvent);
         })
