@@ -3,6 +3,7 @@ import FormulaShareRulesListView from 'c/formulaShareRulesListView';
 
 import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
+import { activateDeactivate } from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 
 // Use a mocked navigation plugin.
 // See fs-core/test/jest-mocks/lightning/navigation.js for the mock
@@ -21,23 +22,9 @@ const batchIsProcessingFalse = require('./data/batchIsProcessingFalse.json');
 
 // Register a test wire adapter.
 const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
+//const activateDeactivateWireAdapter = registerLdsTestWireAdapter(activateDeactivate);
 
 describe('c-formula-share-rules-list-view', () => {
-    // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/navToNewRecord/__tests__/navToNewRecord.test.js
-     const { open } = window;
-
-    /*beforeAll(() => {
-        // Delete the existing
-        delete window.open;
-        // Replace with the custom value
-        window.open = jest.fn();
-    });
-    
-    afterAll(() => {
-        // Restore original
-        window.open = open;
-    });*/
-    
     afterEach(() => {
         // The jsdom instance is shared across test cases in a single file so reset the DOM
         while (document.body.firstChild) {
@@ -45,7 +32,7 @@ describe('c-formula-share-rules-list-view', () => {
         }
 
         // Prevent data saved on mocks from leaking between tests.
-        //jest.clearAllMocks();
+        jest.clearAllMocks();
     });
 
     it('Test submit for recalculation (Toast) (Positive).', () => {
@@ -231,6 +218,87 @@ describe('c-formula-share-rules-list-view', () => {
         .then(() => {
             // Verify window.open was executed.
             expect(window.open).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('Test edit rule (Positive).', () => {
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(() => {
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            // Extract parents.
+            const parents = treeGrid.data;
+            // Get first child of first parent.
+            const firstChild = parents[0]._children;
+            const firstRowOfFirstChild = firstChild[0];
+
+            const rowActionEvent = new CustomEvent(
+                "rowaction", {
+                    detail: {
+                        action: { name: "edit" },
+                        row: firstRowOfFirstChild
+                    }
+            });
+            
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        })
+        .then(() => {
+            // Verify c-formula-share-rule-edit is present in DOM.
+            const formulaShareRuleEdit = element.shadowRoot.querySelector('c-formula-share-rule-edit');
+            expect(formulaShareRuleEdit).not.toBeNull();
+        });
+    });
+
+    it('Test activate rule (Positive).', () => {
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Mock return value for FormulaShareRulesListViewController.activateDeactivate.
+        //activateDeactivateWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(() => {
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            // Extract parents.
+            const parents = treeGrid.data;
+            // Get first child of first parent.
+            const firstChild = parents[0]._children;
+            const firstRowOfFirstChild = firstChild[0];
+
+            const rowActionEvent = new CustomEvent(
+                "rowaction", {
+                    detail: {
+                        action: { name: "activate" },
+                        row: firstRowOfFirstChild
+                    }
+            });
+            
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        })
+        .then(() => {
+            // Missing assertions. Don't know how to check if spinner appears.
         });
     });
 });
