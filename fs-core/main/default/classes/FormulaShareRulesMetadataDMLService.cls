@@ -35,6 +35,70 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     String namespacePrefix = FormulaShareUtilities.getNamespacePrefix();
     String mdNamePrefix = 'FormulaShare_Rule.';
 
+    // Collections of all field names on custom metadata type
+    List<String> generalFieldNames = new List<String>{
+        namespacePrefix + 'Description__c',
+        namespacePrefix + 'Object_Shared__c',
+        namespacePrefix + 'Shared_To__c',
+        namespacePrefix + 'Share_With__c',
+        namespacePrefix + 'Access_Level__c',
+        namespacePrefix + 'Active__c',
+        namespacePrefix + 'Sharing_Reason__c'
+    };
+
+    // Account related sharing settings will be cleared if account rule changed to share another object
+    Set<String> accountSharingFieldNamesSet = new Set<String>{
+        namespacePrefix + 'Contact_Access__c',
+        namespacePrefix + 'Case_Access__c',
+        namespacePrefix + 'Opportunity_Access__c'
+    };
+
+    // Relationship-specific ones are in a separate set as we'll clear these explicitly if they're not set
+    Set<String> relationshipSpecificFieldsSet = new Set<String> {
+        namespacePrefix + 'Shared_To_Field_Type__c',
+        namespacePrefix + 'Child_Object_Shared_To_Field_Type__c',
+
+        namespacePrefix + 'Child_Object_with_Shared_To_Field__c',
+        namespacePrefix + 'Child_Object_Lookup_Field__c',
+        namespacePrefix + 'Related_Object_1_Lookup_from_Shared_Obj__c',
+        namespacePrefix + 'Child_Object_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_2__c',
+        namespacePrefix + 'Related_Object_2_Lookup_from_RO1__c',
+        namespacePrefix + 'Related_Object_2_Lookup_to_RO1__c',
+        namespacePrefix + 'Related_Object_2_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_3__c',
+        namespacePrefix + 'Related_Object_3_Lookup_from_RO2__c',
+        namespacePrefix + 'Related_Object_3_Lookup_to_RO2__c',
+        namespacePrefix + 'Related_Object_3_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_4__c',
+        namespacePrefix + 'Related_Object_4_Lookup_from_RO3__c',
+        namespacePrefix + 'Related_Object_4_Lookup_to_RO3__c',
+        namespacePrefix + 'Related_Object_4_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_5__c',
+        namespacePrefix + 'Related_Object_5_Lookup_from_RO4__c',
+        namespacePrefix + 'Related_Object_5_Lookup_to_RO4__c',
+        namespacePrefix + 'Related_Object_5_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_6__c',
+        namespacePrefix + 'Related_Object_6_Lookup_from_RO5__c',
+        namespacePrefix + 'Related_Object_6_Lookup_to_RO5__c',
+        namespacePrefix + 'Related_Object_6_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_7__c',
+        namespacePrefix + 'Related_Object_7_Lookup_from_RO6__c',
+        namespacePrefix + 'Related_Object_7_Lookup_to_RO6__c',
+        namespacePrefix + 'Related_Object_7_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_8__c',
+        namespacePrefix + 'Related_Object_8_Lookup_from_RO7__c',
+        namespacePrefix + 'Related_Object_8_Lookup_to_RO7__c',
+        namespacePrefix + 'Related_Object_8_Shared_To_Field__c'
+    };
+
     // Get metadata container and submit for processing
     public Id submitForDml(Map<String,FormulaShare_Rule__mdt> rulesMap, String type) {
         Metadata.DeployContainer container;
@@ -62,23 +126,10 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
             rule.fullName = namespacePrefix + mdNamePrefix + recordName;
             rule.label = fr.MasterLabel;
 
-            List<String> fieldNames = new List<String>{
-                namespacePrefix + 'Object_Shared__c',
-                namespacePrefix + 'Shared_To__c',
-                namespacePrefix + 'Share_With__c',
-                namespacePrefix + 'Access_Level__c',
-                namespacePrefix + 'Active__c',
-                namespacePrefix + 'Shared_To_Field_Type__c',
-                namespacePrefix + 'Sharing_Reason__c',
-                namespacePrefix + 'Contact_Access__c',
-                namespacePrefix + 'Case_Access__c',
-                namespacePrefix + 'Opportunity_Access__c',
-                namespacePrefix + 'Child_Object_with_Shared_To_Field__c',
-                namespacePrefix + 'Child_Object_Lookup_Field__c',
-                namespacePrefix + 'Child_Object_Shared_To_Field__c',
-                namespacePrefix + 'Child_Object_Shared_To_Field_Type__c',
-                namespacePrefix + 'Description__c'
-            };
+            List<String> fieldNames = new List<String>();
+            fieldNames.addAll(generalFieldNames);
+            fieldNames.addAll(accountSharingFieldNamesSet);
+            fieldNames.addAll(relationshipSpecificFieldsSet);
 
             List<Metadata.CustomMetadataValue> valuesList = new List<Metadata.CustomMetadataValue>();
             for(String fieldName : fieldNames) {
@@ -108,7 +159,6 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         // Build metadata API format full names and retrieve metadata
         List<String> ruleFullNames = new List<String>();
         for (String recordName : rulesMap.keySet()) {
-//            ruleFullNames.add(FormulaShareTestUtils.getNamespacePrefix() + 'FormulaShare_Rule.' + recordName);
             ruleFullNames.add(namespacePrefix + mdNamePrefix + recordName);
         }
         
@@ -140,12 +190,14 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
 
             // Set and clear other fields as appropriate
             switch on type {
+
+                // For activate and deavtive, map this field only
                 when 'activate', 'deactivate' {
-                    rule = mapAllFields(rule, ruleNewValues);
+                    rule = mapActivate(rule, type);
                 }
                 when 'edit' {
                     rule = mapAllFields(rule, ruleNewValues);
-                    rule = clearInvalidFields(rule, ruleNewValues);
+//                    rule = clearInvalidFields(rule, ruleNewValues);
                 }
             }
 
@@ -156,41 +208,45 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         return container;
     }
 
+    private Metadata.CustomMetadata mapActivate(Metadata.CustomMetadata rule, String type) {
 
-    private Metadata.CustomMetadata mapAllFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
-
-        // Loop through field values
+        // Loop through field values and set Active based on change made
         for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
-
-            // If a value for this field was supplied, set this in the rule
-            if(ruleNewValues.get(ruleFieldValue.field) != null) {
-                system.debug('adding '+ruleFieldValue.field+' setting to : '+ruleNewValues.get(ruleFieldValue.field));
-                ruleFieldValue.value = ruleNewValues.get(ruleFieldValue.field);
+            if(ruleFieldValue.field.remove(namespacePrefix) == 'Active__c') {
+                ruleFieldValue.value = type == 'activate' ? true : false;
             }
         }
         return rule;
     }
 
 
-    private Metadata.CustomMetadata clearInvalidFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
-        String ruleType;
-        if(ruleNewValues.Shared_To__c != null) {
-            ruleType = 'standard';
-        }
-        else if(ruleNewValues.Child_Object_with_Shared_To_Field__c != null) {
-            ruleType = 'child';
-        }
-
-        System.debug('ruleNewValues: '+ruleNewValues);
-        System.debug('ObjectShared: '+ruleNewValues.Object_Shared__c);
-
-        Boolean isAccountRule = ruleNewValues.Object_Shared__c == 'Account';
+    private Metadata.CustomMetadata mapAllFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
 
         // Loop through field values
         for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
 
-            // Clear field if it's not valid for this kind of rule
-            if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
+            // Namespaces included in package but not in namespaced scratch orgs. Strip out if present and append to be sure it's there
+            String fieldWithoutNamespace = ruleFieldValue.field.remove(namespacePrefix);
+            String fieldWithNamespace = namespacePrefix + fieldWithoutNamespace;
+
+            // If a value for this field was supplied, set this in the rule
+            if(ruleNewValues.get(fieldWithNamespace) != null) {
+                system.debug('adding '+fieldWithNamespace+' setting to : '+ruleNewValues.get(fieldWithNamespace));
+                ruleFieldValue.value = ruleNewValues.get(fieldWithNamespace);
+            }
+
+//            System.debug('fieldWithNamespace: '+fieldWithNamespace);
+//            System.debug('field set: '+relationshipSpecificFieldsSet);
+//
+            // Clear all relationship fields which aren't set explicitly
+            else if(relationshipSpecificFieldsSet.contains(fieldWithNamespace)) {
+                system.debug('clearing '+fieldWithNamespace);
+                ruleFieldValue.value = null;
+            }
+
+            // Clear account share fields if they weren't set (in case account rule changed to share another object)
+            else if(ruleNewValues.Object_Shared__c != 'Account' && accountSharingFieldNamesSet.contains(fieldWithNamespace)) {
+                system.debug('clearing '+fieldWithNamespace);
                 ruleFieldValue.value = null;
             }
         }
@@ -198,24 +254,50 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     }
 
 
-    private Boolean fieldShouldBeCleared(Metadata.CustomMetadataValue ruleFieldValue, String ruleType, Boolean isAccountRule) {
-
-        // Strip namespace (this is needed to support namespaced scratch orgs, which don't seem to recognise this in queried custom metadata)
-        String fieldWithoutNamespace = ruleFieldValue.field.remove(namespacePrefix);
-
-        switch on fieldWithoutNamespace {
-            when 'Child_Object_Lookup_Field__c'         { return ruleType == 'standard'; }
-            when 'Child_Object_Shared_To_Field__c'      { return ruleType == 'standard'; }
-            when 'Child_Object_Shared_To_Field_Type__c' { return ruleType == 'standard'; }
-            when 'Child_Object_with_Shared_To_Field__c' { return ruleType == 'standard'; }
-            when 'Shared_To__c'                         { return ruleType == 'child';}
-            when 'Shared_To_Field_Type__c'              { return ruleType == 'child';}
-            when 'Contact_Access__c'                    { return !isAccountRule;}
-            when 'Case_Access__c'                       { return !isAccountRule;}
-            when 'Opportunity_Access__c'                { return !isAccountRule;}
-            when else {return false;}
-        }
-    }
+//    private Metadata.CustomMetadata clearInvalidFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
+//        String ruleType;
+//        if(ruleNewValues.Shared_To__c != null) {
+//            ruleType = 'standard';
+//        }
+//        else if(ruleNewValues.Child_Object_with_Shared_To_Field__c != null) {
+//            ruleType = 'child';
+//        }
+//
+//        System.debug('ruleNewValues: '+ruleNewValues);
+//        System.debug('ObjectShared: '+ruleNewValues.Object_Shared__c);
+//
+//        Boolean isAccountRule = ruleNewValues.Object_Shared__c == 'Account';
+//
+//        // Loop through field values
+//        for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
+//
+//            // Clear field if it's not valid for this kind of rule
+//            if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
+//                ruleFieldValue.value = null;
+//            }
+//        }
+//        return rule;
+//    }
+//
+//
+//    private Boolean fieldShouldBeCleared(Metadata.CustomMetadataValue ruleFieldValue, String ruleType, Boolean isAccountRule) {
+//
+//        // Strip namespace (this is needed to support namespaced scratch orgs, which don't seem to recognise this in queried custom metadata)
+//        String fieldWithoutNamespace = ruleFieldValue.field.remove(namespacePrefix);
+//
+//        switch on fieldWithoutNamespace {
+//            when 'Child_Object_Lookup_Field__c'         { return ruleType == 'standard'; }
+//            when 'Child_Object_Shared_To_Field__c'      { return ruleType == 'standard'; }
+//            when 'Child_Object_Shared_To_Field_Type__c' { return ruleType == 'standard'; }
+//            when 'Child_Object_with_Shared_To_Field__c' { return ruleType == 'standard'; }
+//            when 'Shared_To__c'                         { return ruleType == 'child';}
+//            when 'Shared_To_Field_Type__c'              { return ruleType == 'child';}
+//            when 'Contact_Access__c'                    { return !isAccountRule;}
+//            when 'Case_Access__c'                       { return !isAccountRule;}
+//            when 'Opportunity_Access__c'                { return !isAccountRule;}
+//            when else {return false;}
+//        }
+//    }
 
 
     // Manage post-callback logic to fire events for component updates

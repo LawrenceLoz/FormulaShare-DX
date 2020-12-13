@@ -6,7 +6,7 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
     public FormulaShareRuleBottomObject(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
-        setVars();
+        setVarsBottom();
         firstQueryStepApiName = lookupFromBottomObjTowardsSharedObj;
     }
 
@@ -21,7 +21,7 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
     protected List<Schema.SObjectField> lookupFromBottomObjToSharedObjFieldList = new List<Schema.SObjectField>();
 
     @TestVisible
-    private void setVars() {
+    private void setVarsBottom() {
 
         // Start from the first related object and field
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;
@@ -34,7 +34,9 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
         // Iterate until we're on the bottom object and add the relationship name (__r) of each lookup
         List<Schema.SobjectField> lookupFieldListReverse = new List<Schema.SobjectField>();
-        while(rel.nextRelationship != null) {
+        while(rel.nextRelationship?.lookupToPrevObjectApiName != null) {
+            System.debug('this rel (going down to bottom): '+rel.nextRelationship);
+
             lookupFieldListReverse.add(field);
 
             rel = rel.nextRelationship;
@@ -54,6 +56,7 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
         pathFromBottomObjToOwnerIdOnSharedObj = relationshipPathFromBottomObjToSharedObj + '.OwnerId';
 
         bottomObjectRelationship = rel;
+        System.debug('bottomObjectRelationship: '+rel);
         lookupFromBottomObjTowardsSharedObj = rel.lookupToPrevObjectApiName;
     }
 

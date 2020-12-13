@@ -36,7 +36,6 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
         // For the final relationship, add the api name
         pathFromSharedObjToTopObj += rel.lookupFromPrevObjectApiName;
 
-
         // Move on to object below the top
         rel = rel.nextRelationship;
 

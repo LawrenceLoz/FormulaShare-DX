@@ -49,28 +49,27 @@ public with sharing class FormulaShareRuleDMLController {
         ComponentRule cr = (ComponentRule) JSON.deserialize(fsRuleString, ComponentRule.class);
 
         FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
-        rule.DeveloperName = cr.ruleName;
-        rule.MasterLabel = cr.ruleLabel;
+        rule.DeveloperName = cr.developerName;
+        rule.MasterLabel = cr.label;
         rule.Description__c = cr.ruleDescription;
+
+        rule.Object_Shared__c = cr.objectSharedAPIName;
+
         rule.Share_With__c = cr.shareWith;
         rule.Access_Level__c = cr.accessLevel;
         rule.Contact_Access__c = cr.contactAccess;
         rule.Case_Access__c = cr.caseAccess;
         rule.Opportunity_Access__c = cr.opportunityAccess;
         rule.Sharing_Reason__c = cr.sharingReason;
-        rule.Object_Shared__c = cr.sharedObject.objectApiName;
 
-        if(cr.ruleType == 'standard') {
-            rule.Shared_To__c = cr.shareField;
-            rule.Shared_To_Field_Type__c = cr.shareFieldType;
+        rule = cr.relationship.mapRelationshipToMetadataRule(rule);
+
+        // Populate appropriate shared to type field depending on whether field is on shared object or related object
+        if(rule.Child_Object_with_Shared_To_Field__c == null) {
+            rule.Shared_To_Field_Type__c = cr.controllingObjectSharedToFieldType;
         }
-
-        if(cr.ruleType == 'child') {
-            system.debug('cr.relatedObjectSelected : '+cr.relatedObjectSelected);
-            rule.Child_Object_with_Shared_To_Field__c = cr.relatedObjectSelected.substringBefore('|');
-            rule.Child_Object_Lookup_Field__c = cr.relatedObjectSelected.substringAfter('|');
-            rule.Child_Object_Shared_To_Field__c = cr.shareField;
-            rule.Child_Object_Shared_To_Field_Type__c = cr.shareFieldType;
+        else {
+            rule.Child_Object_Shared_To_Field_Type__c = cr.controllingObjectSharedToFieldType;
         }
 
         return rule;
@@ -78,33 +77,71 @@ public with sharing class FormulaShareRuleDMLController {
 
     @TestVisible
     private class ComponentRule {
-        @TestVisible String ruleLabel;
-        @TestVisible String ruleName;
+        @TestVisible Boolean active;
+
+        @TestVisible String developerName;
+        @TestVisible String label;
         @TestVisible String ruleDescription;
-        @TestVisible Boolean ruleActive;
-        @TestVisible String sharedObjectApiName;
-        @TestVisible ComponentSharedObject sharedObject;
-        @TestVisible String ruleType;
-        @TestVisible String relatedObjectSelected;
-        @TestVisible String shareField;
+
+        @TestVisible String objectSharedAPIName;
+        @TestVisible FormulaShareSObjectRelationship relationship;
+        @TestVisible String controllingObjectSharedToFieldType;
+//        @TestVisible ComponentSharedObject sharedObject;
+//        @TestVisible String ruleType;
+//        @TestVisible String controllingObjectSharedToFieldAPIName;
+
         @TestVisible String shareWith;
-        @TestVisible String shareFieldType;
         @TestVisible String accessLevel;
         @TestVisible String contactAccess;
         @TestVisible String caseAccess;
         @TestVisible String opportunityAccess;
         @TestVisible String sharingReason;
+
     }
 
-    @TestVisible
-    private class ComponentSharedObject {
-        @TestVisible String detailUrl;
-        @TestVisible String externalSharingModel;
-        @TestVisible String internalSharingModel;
-        @TestVisible Boolean isCustom;
-        @TestVisible String objectApiName;
-        @TestVisible String objectId;
-        @TestVisible String objectLabel;
-        @TestVisible String pluralLabel;
-    }
+
+
+
+//        controllingObjectApiName : "sdfs__Programme_Support_Officer__c"
+//        controllingObjectLabel : "Programme Support Officer"
+//        controllingObjectSharedToFieldAPIName : "sdfs__User__c"
+//        controllingObjectSharedToFieldLabel : "User"
+//        controllingObjectSharedToFieldToken : "01I7E000001TzGu.00N7E00000DpnCc"
+//        controllingObjectSharedToFieldType
+
+
+//accessLevel : "Read"
+//active : true
+//caseAccess : "None"
+//contactAccess : "None"
+//controllingObjectApiName : "sdfs__Programme_Support_Officer__c"
+//controllingObjectLabel : "Programme Support Officer"
+//controllingObjectSharedToFieldAPIName : "sdfs__User__c"
+//controllingObjectSharedToFieldLabel : "User"
+//controllingObjectSharedToFieldToken : "01I7E000001TzGu.00N7E00000DpnCc"
+//developerName : "Share_Donations_with_External_Role"
+//label : "Share Donations with External Role"
+//objectSharedAPIName : "sdfs__Donation__c"
+//objectSharedLabel : "Donation"
+//opportunityAccess : "None"
+//relationship
+//nextRelationship
+//thisObjectApiName : "sdfs__Donation__c"
+//thisObjectLabel : "Donation"
+//ruleId : "m007E0000002whiQAA"
+//shareWith : "Roles, Internal and Portal Subordinates"
+//sharingReason : "sdfs__External_roles__c"
+//type : "sibling"
+
+//    @TestVisible
+//    private class ComponentSharedObject {
+//        @TestVisible String detailUrl;
+//        @TestVisible String externalSharingModel;
+//        @TestVisible String internalSharingModel;
+//        @TestVisible Boolean isCustom;
+//        @TestVisible String objectApiName;
+//        @TestVisible String objectId;
+//        @TestVisible String objectLabel;
+//        @TestVisible String pluralLabel;
+//    }
 }

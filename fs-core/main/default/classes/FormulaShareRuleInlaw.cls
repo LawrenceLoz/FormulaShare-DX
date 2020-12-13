@@ -7,7 +7,7 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
     public FormulaShareRuleInlaw(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'inlaw';
-        setVars();
+        setVarsInlaw();
     }
 
     // Set pathToSharedToField to path from bottom object to shared to field on top object for inlaw rule
@@ -16,10 +16,11 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
     @TestVisible
     private List<Schema.SObjectField> lookupFromBottomObjToControllingObjFieldList = new List<Schema.SObjectField>();
 
-    private void setVars() {
+    private void setVarsInlaw() {
 
         // Navigate to the bottom object relationship and set the object type
         FormulaShareSObjectRelationship rel = bottomObjectRelationship;
+        System.debug('inlaw bottomObjectRelationship: '+bottomObjectRelationship);
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
 
         // Traverse up from here, checking lookup fields

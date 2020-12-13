@@ -112,7 +112,7 @@ public virtual inherited sharing class FormulaShareRule {
     public static FormulaShareRule getRule(FormulaShare_Rule__mdt mdRule) {
         
         // Establish relationship object, and get the controlling fields and rule type
-        FormulaShareSObjectRelationship rel = getrelationship(mdRule);
+        FormulaShareSObjectRelationship rel = getRelationshipFromMetadataRule(mdRule);
         TypeAndControllingFields tacf = getControllingFieldsAndType(rel);
 
         // Instantiate rule of appropriate type (constructors populate type specific variables)
@@ -203,7 +203,7 @@ public virtual inherited sharing class FormulaShareRule {
     
     // Populate nested relationship object. Need retrieve fields individually from api names
     // Because attributes of field / object definitions can't be refrerenced with dynamic map notation
-    private static FormulaShareSObjectRelationship getrelationship(FormulaShare_Rule__mdt rule) {
+    private static FormulaShareSObjectRelationship getRelationshipFromMetadataRule(FormulaShare_Rule__mdt rule) {
 
         FormulaShareSObjectRelationship relationship = new FormulaShareSObjectRelationship();
 
@@ -262,6 +262,7 @@ public virtual inherited sharing class FormulaShareRule {
             rfc3.sharedToFieldToken         = rule.Related_Object_3_Shared_To_Field__c;
             rfc3.sharedToFieldApiName       = rule.Related_Object_3_Shared_To_Field__r.QualifiedApiName;
             rfc3.sharedToFieldLabel         = rule.Related_Object_3_Shared_To_Field__r.MasterLabel;
+            return relationship;
         }
 
         FormulaShareSObjectRelationship rfc4 = new FormulaShareSObjectRelationship();

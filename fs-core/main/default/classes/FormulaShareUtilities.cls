@@ -65,6 +65,7 @@ public inherited sharing class FormulaShareUtilities {
 	// Get describe result and maintain cache
 	public static Schema.DescribeSObjectResult describe(String objectAPIName) {
 		if(cachedDescribes.containsKey(objectAPIName)) {
+			System.debug('Describe: Returning from cache: '+cachedDescribes.get(objectAPIName));
 			return cachedDescribes.get(objectAPIName);
 		}
 		else {
@@ -72,9 +73,11 @@ public inherited sharing class FormulaShareUtilities {
 				Schema.SObjectType objType = globalDescribe.get(objectAPIName);
 				Schema.DescribeSObjectResult describe = objType.getDescribe();
 				cachedDescribes.put(objectAPIName, describe);
+				System.debug('Describe: Returning from global: '+describe);
 				return describe;
 			}
 			else {
+				System.debug('Describe: Couldnt find');
 				return null;
 			}
 		}
@@ -83,6 +86,8 @@ public inherited sharing class FormulaShareUtilities {
 
 	// Return SObjectType token from API name
 	public static Schema.SObjectType getSObjectTypeFromName(String objectAPIName) {
+		System.debug('Checking describe for object: '+objectAPIName);
+		System.debug('Describe: '+describe(objectAPIName));
 		Schema.SObjectType type = describe(objectAPIName).getSobjectType();
 		return type;
 	}
