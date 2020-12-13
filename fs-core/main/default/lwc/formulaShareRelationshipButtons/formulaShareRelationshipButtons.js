@@ -24,7 +24,6 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
     setButtonDivProperties(source) {
         var parentButtonDiv = this.template.querySelector('div[id*="parentButtonDiv"]');
         var childButtonDiv  = this.template.querySelector('div[id*="childButtonDiv"]');
-        console.log('childButtonDiv1: '+ JSON.stringify(childButtonDiv));
 
         // Continue if traverse populated and component rendered for the 
         if(this._traverse && parentButtonDiv && childButtonDiv && 
@@ -73,8 +72,6 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
         this.parentButtonDisabled = true;
         this.parentButtonClasses += ' disabledParent';
         this.parentButtonMessage = message;
-//        var parentButtonDiv  = this.template.querySelector('div[id*="parentButtonDiv"]');
-//        parentButtonDiv.style.setProperty('--parent-button-message', message);
     }
     childButtonClasses = 'slideDownButton';
     childButtonMessage;
@@ -125,7 +122,6 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
     @wire(getParentRelationships, { childObjectAPIName : '$objectApiName'} )
     parentRelationships({ error, data }) {
         if(data) {
-            //console.log('getting related for '+this.sharedObjectApiName);
             
             let relatedObjList = [];
             data.forEach((obj) => {
@@ -139,7 +135,6 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
             });
 
             this.parentObjectOptions = relatedObjList;
-            console.log('parent options: ' + JSON.stringify(this.parentObjectOptions));
         }
     }
 
@@ -174,14 +169,12 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
     }
 
     handleRelatedObjectChange(event) {
-        console.log('received event detail '+ JSON.stringify(event.detail));
 
         // Set relationship object based on selected field
         var splitArray = event.detail.value.split("|");
         var thisObjectName = splitArray[0];
         var thisObjectLabel = this.objectNameToLabelMap.get(thisObjectName);
 
-        console.log('thisObjectLabel: '+ JSON.stringify(thisObjectLabel));
         const relationship = {
             relationshipType: this.typeSelected,
             objectApiName: splitArray[0],

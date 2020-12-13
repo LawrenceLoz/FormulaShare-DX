@@ -2,7 +2,8 @@
     <fieldset class="slds-form-element">
         <div class="slds-p-around_small">
             <div class="slds-form-element__control">
-            <div class="slds-grid slds-gutters">
+            <div class="slds-grid slds-gutters"
+                id="buttonSet">
                 <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
 
                     <div class="slds-visual-picker">
@@ -86,8 +87,20 @@
             relationship={_relationship}
             traverse={initialTraverse}
             onrelationshipchange={handleRelationshipChange}
-            is-shared-object={initialTraverse}>
+            onaddrelationshipcancelled={handleAddRelationshipCancelled}>
         </c-formula-share-relationship-object>
+    </template>
+
+    <template if:true={errorMessage}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="slds-form-element__helper slds-has-error slds-p-bottom_medium">
+                <div class="slds-form-element__help">
+                    {errorMessage}
+                </div>
+            </div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
     </template>
 
 </template>

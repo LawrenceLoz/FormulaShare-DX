@@ -8,15 +8,12 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         return this._relationship;
     }
     set relationship(value) {
-        console.log('called setter');
         this._relationship = value;
         this.processNextRelationship(this._relationship.nextRelationship);
     }
     @track _relationship;
 
-    @api isSharedObject;
-
-    // Receives the current state and direction of the object hierarhcy
+    // Receive current state and direction of the object hierarhcy
     @api
     get traverse() {
         return this._traverse;
@@ -32,8 +29,9 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
     objectFrameClasses;
     fadeOutDuration = 700;
 
+
+    // Set UI details when a nested relationship is provided
     processNextRelationship(nextRel) {
-        console.log('Relationship provided: '+JSON.stringify(nextRel));
 
         // Set object frame and object text css to baseline
         this.objectFrameClasses = 'slds-box';
@@ -58,7 +56,8 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         }
     }
 
-    // Populate the name of the relationship field between this object and the next one and the object this field sits on
+
+    // Populate variables used for the link component labels to describe the relationship
     relationshipField;
     relationshipFieldOnObject;
     setDetailsForLinkLabel() {
@@ -72,13 +71,13 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         }
     }
 
-    // Set traverse details to provide for the next object component
+
+    // Set traverse details to be checked against limits in the next object component
     nextRelationshipTraverse = {};
     setNextRelationshipTraverse() {
 
         // Process only if we have the traverse details, and we've set the next relationship
         if(this._traverse && this.nextRelationship) {
-            console.log('this._traverse: '+JSON.stringify(this._traverse));
 
             // Set direction depending on next relationship
             if(this.nextRelationship.lookupFromPrevObjectApiName) {
@@ -100,97 +99,39 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
             }
         }
     }
-    
 
-    // When relationship selected in dropdown, set details for next relationship
-    handleRelationshipSelected(event) {
-        var newNextRelationship = {
-            thisObjectApiName: event.detail.objectApiName,
-            thisObjectLabel: event.detail.objectLabel
-        };
 
-        if(event.detail.relationshipType === 'parent') {
-            newNextRelationship['lookupFromPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+    // Informs the relationship-link component of the direction of the relationship
+    get nextObjectIsParent() {
+        if(this.nextRelationship.lookupFromPrevObjectApiName) {
+            return true;
         }
         else {
-            newNextRelationship['lookupToPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+            return false;
         }
-
-        var newRelationship = this.getCopyOfRelationship(newNextRelationship);
-        console.log('newRel: '+JSON.stringify(newRelationship));
-        this.childComponentClasses = '';  // Set component to fade in when added
-        this.childComponentClasses = 'fadeIn';  // Set component to fade in when added
-        this.processNextRelationship(newNextRelationship);
-        this.fireRelationshipChange(event.detail.objectApiName, newRelationship);   // newRelationship or newNextRelationship?
     }
 
-    // If relationship updated in child component, communicate to parent
-    handleRelationshipChange(event) {
-        console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
 
-        var newRelationship = this.getCopyOfRelationship(event.detail.relationship);
-//        this._relationship = newRelationship;
-
-        this.fireRelationshipChange(event.detail.controllingObjectApiName, newRelationship);
-    }
-
-    // When delete button beside link icon is clicked, clear next relationship
-    childComponentClasses;
-    handleDeleteRelationship() {
-
-        // Fade child components and remove from DOM after fade time (0.7s)
-        this.childComponentClasses = 'fadeOut';
-        setTimeout(() => {
-            this.linkToNext = false;
-    
-            console.log('handling delete');
-            console.log('this._relationship after del: '+JSON.stringify(this._relationship));
-            var newRelationship = this.getCopyOfRelationship(null);
-    
-            // Revert all attributes which were set when relationship added
-    //        this.processNextRelationship(null);
-            this.fireRelationshipChange(newRelationship.thisObjectApiName, newRelationship);
-        }, this.fadeOutDuration);
-    }
-    
-    // Creates new object to replace relationship
-    // Required to avoid exception changing inner properties of _relationship in this context
-    getCopyOfRelationship(newNextRelationship) {
-        var newRelationship = {
-            thisObjectApiName: this._relationship.thisObjectApiName,
-            thisObjectLabel: this._relationship.thisObjectLabel,
-            lookupToPrevObjectApiName: this._relationship.lookupToPrevObjectApiName,
-            lookupFromPrevObjectApiName: this._relationship.lookupFromPrevObjectApiName,
-            nextRelationship: newNextRelationship
-        };
-        return newRelationship;
-    }
-
-    // Fire event for parent component to be made aware of changes to relationship
-    fireRelationshipChange(controllingObjectApiName, thisRel) {
-        const relationshipDetails = {
-            relationship: thisRel,
-            controllingObjectApiName: controllingObjectApiName
-        };
-        const selection = new CustomEvent('relationshipchange', {
-            detail: relationshipDetails
-        });
-        this.dispatchEvent(selection);
-    }
+    // ----------------- Functions to dynamically update CSS and labels on interaction ----------------- //
 
     showButtons;
     iconClasses = 'baselineIconStyle plusIconStyle';
     iconType = 'plus';
     iconDisplayed = 'utility:add';
     iconTooltip = 'Add another relationship';
-    iconVariant = 'inverse';
+    iconVariant = '';
     handleIconClicked() {
         if(this.iconType === 'plus') {
             this.childComponentClasses = '';    // Removes fadeOut if previously applied
             this.openButtonsAndIconToCross();
         }
         else if(this.iconType === 'cross') {
+            this.iconClasses = 'baselineIconStyle crossIconStyle rotate45Backwards';
             this.childComponentClasses = 'fadeOut';
+
+            // Remove validation message indicating selection was needed if one is set
+            this.dispatchEvent(new CustomEvent('addrelationshipcancelled'));
+    
             setTimeout(() => {
                 this.linkToNext = false;
                 this.closeButtonsAndIconToPlus();
@@ -214,7 +155,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         this.iconDisplayed = 'utility:add';
         this.iconClasses = 'baselineIconStyle plusIconStyle';
         this.iconTooltip = 'Add another relationship';
-        this.iconVariant = 'inverse';
+        this.iconVariant = '';
         this.iconType = 'plus';
     }
 
@@ -225,14 +166,121 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         }
     }
 
-
-    get nextObjectIsParent() {
-        if(this.nextRelationship.lookupFromPrevObjectApiName) {
-            return true;
-        }
-        else {
-            return false;
+    // Add blue background to plus on hover
+    mouseOverIcon() {
+        if(this.iconType === 'plus') {
+            this.iconClasses = 'baselineIconStyle plusIconActive';
+            this.iconVariant = 'inverse';
         }
     }
+    mouseLeaveIcon() {
+        if(this.iconType === 'plus') {
+            this.iconClasses = 'baselineIconStyle plusIconStyle';
+            this.iconVariant = '';
+        }
+    }
+    
+    // ------------------- Handlers for relationship updates in child components -------------- //
 
+    // When relationship selected in dropdown, set details for next relationship
+    handleRelationshipSelected(event) {
+        var newNextRelationship = {
+            thisObjectApiName: event.detail.objectApiName,
+            thisObjectLabel: event.detail.objectLabel
+        };
+
+        if(event.detail.relationshipType === 'parent') {
+            newNextRelationship['lookupFromPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+        }
+        else {
+            newNextRelationship['lookupToPrevObjectApiName'] = event.detail.relationshipFieldApiName;
+        }
+
+        var newRelationship = this.getCopyOfRelationshipWithNewNext(newNextRelationship);
+        this.childComponentClasses = '';  // Set component to fade in when added
+        this.childComponentClasses = 'fadeIn';  // Set component to fade in when added
+        this.processNextRelationship(newNextRelationship);
+        this.fireRelationshipChange(event.detail.objectApiName, newRelationship);   // newRelationship or newNextRelationship?
+    }
+
+
+    // If relationship updated in child component, communicate to parent
+    handleRelationshipChange(event) {
+        var newRelationship = this.getCopyOfRelationshipWithNewNext(event.detail.relationship);
+        this.fireRelationshipChange(event.detail.controllingObjectApiName, newRelationship);
+    }
+
+
+    // When delete button beside link icon is clicked, clear next relationship
+    childComponentClasses;
+    handleDeleteRelationship() {
+
+        // Fade child components and remove from DOM after fade time (0.7s)
+        this.childComponentClasses = 'fadeOut';
+        setTimeout(() => {
+            this.linkToNext = false;
+
+            // Get a copy of this relationship without the nested nextRelationship which was deleted
+            var newRelationship = this.getCopyOfRelationshipWithoutNext();
+            this.fireRelationshipChange(newRelationship.thisObjectApiName, newRelationship);
+        }, this.fadeOutDuration);
+    }
+    
+
+    // Called to get a copy of this relationship with an updated nextRelationship
+    // We need to clone avoid exception changing inner properties of _relationship in this context
+    getCopyOfRelationshipWithNewNext(newNextRelationship) {
+        var newRelationship = this.getCopyOfRelationshipWithoutNext();
+        newRelationship['nextRelationship'] = newNextRelationship;
+        return newRelationship;
+    }
+
+    // Creates new object to replace relationship without nested nextRelationship attribute
+    getCopyOfRelationshipWithoutNext() {
+        var newRelationship = {
+            thisObjectApiName: this._relationship.thisObjectApiName,
+            thisObjectLabel: this._relationship.thisObjectLabel,
+            lookupToPrevObjectApiName: this._relationship.lookupToPrevObjectApiName,
+            lookupFromPrevObjectApiName: this._relationship.lookupFromPrevObjectApiName
+        };
+        return newRelationship;
+    }
+
+    // Fire event for parent component to be made aware of changes to relationship
+    fireRelationshipChange(controllingObjectApiName, thisRel) {
+        const relationshipDetails = {
+            relationship: thisRel,
+            controllingObjectApiName: controllingObjectApiName
+        };
+        const selection = new CustomEvent('relationshipchange', {
+            detail: relationshipDetails
+        });
+        this.dispatchEvent(selection);
+    }
+
+
+    // Report errors from child relationships, or from this relationship if it's the lowest one
+    @api
+    getError() {
+
+        // If another child component, check validity on child
+        if(this.linkToNext) {
+            const childRelationship = this.template.querySelector('c-formula-share-relationship-object');
+            return childRelationship.getError();
+        }
+
+        // If user has clicked to add an object but not selected one yet, indicate object needs to be selected
+        else if(this.showButtons) {
+            return 'Select the object where the field is located';
+        }
+
+        // If no related objects have been selected (only the shared object is shown), then indicate an object needs to be selected
+        else if(this._traverse.sequence === 0 && this._traverse.depth === 0) {
+            return 'Click to add a related object where the field is located';
+        }
+
+        else {
+            return null;
+        }
+    }
 }

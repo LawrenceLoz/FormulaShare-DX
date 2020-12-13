@@ -37,7 +37,6 @@ export default class FormulaShareRelationshipLink extends LightningElement {
     }
 
     handleDeleteRelationship() {
-        console.log('firing delete event');
         this.dispatchEvent(new CustomEvent('deleterelationship'));
     }
 

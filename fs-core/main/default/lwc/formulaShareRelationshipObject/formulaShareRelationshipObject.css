@@ -1,6 +1,11 @@
 @import 'c/formulaShareCssLibrary';
 
 .plusIconStyle {
+    background-color: white;
+    border-color: lightgray;
+}
+
+.plusIconActive {
     background-color: #005fb2;
     border-color: lightgray;
 }
@@ -54,4 +59,18 @@
     transform: rotate(45deg);
     animation-name: rotate45;
     animation-duration: 0.75s;
+}
+
+@keyframes rotate45Back {
+    from {
+        transform: rotate(45deg);
+    }
+    to {
+        transform: rotate(0);
+    }
+}
+.rotate45Backwards {
+    transform: rotate(0);
+    animation-name: rotate45Back;
+    animation-duration: 0.4s;
 }

@@ -28,10 +28,14 @@
             
             <c-formula-share-rule-detail-location 
                 relationship={rule.relationship}
+                controlling-object-api-name={rule.controllingObjectApiName}
+                selected-location={selectedLocation}
                 onruletypechange={handleRuleTypeChange}
                 onrelationshipchange={handleRelationshipChange}>
             </c-formula-share-rule-detail-location>
         </div>
+
+        Relationship detail: {ruleDetail}
     </template>
 
     <template if:true={sharedObjectDetail}>
@@ -49,16 +53,16 @@
         </c-formula-share-rule-detail-field>
     </template>
 
-    <template if:true={sharedObject}>
+    <template if:true={sharedObjectDetail}>
         <h3 class="slds-section-title--divider">Sharing provided</h3>
         <c-formula-share-rule-detail-access 
-            internal-sharing-model={sharedObject.internalSharingModel}
-            external-sharing-model={sharedObject.externalSharingModel}
+            internal-sharing-model={sharedObjectDetail.internalSharingModel}
+            external-sharing-model={sharedObjectDetail.externalSharingModel}
             account-related-owd={accountRelatedOwd}
-            is-custom={sharedObject.isCustom}
-            shared-object-id={sharedObject.objectId}
-            shared-object-label={sharedObject.objectLabel}
-            shared-object-api-name={sharedObjectApiName}
+            is-custom={sharedObjectDetail.isCustom}
+            shared-object-id={sharedObjectDetail.objectId}
+            shared-object-label={sharedObjectDetail.objectLabel}
+            shared-object-api-name={rule.objectSharedAPIName}
             access-level={rule.accessLevel}
             contact-access={rule.contactAccess}
             case-access={rule.caseAccess}

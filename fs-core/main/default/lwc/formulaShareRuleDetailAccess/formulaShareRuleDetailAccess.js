@@ -276,37 +276,6 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
 
 
-//    // Check that a share record can be instantiated with this reason
-//    handleSharingReasonValidation(event) {
-//        //console.log('event '+JSON.stringify(event));
-//
-//        //console.log('id and reason ' + this.sharedObjectApiName, this.sharingReason);
-//
-//        validateShareable({ objectApiName : this.sharedObjectApiName, sharingReason : this.sharingReason})
-//        .then((isShareable) => {
-//            //console.log('isShareable '+isShareable);
-//
-//            // Find attribute by custom data-* attribtue as this is available in the DOM
-//            let sharingReasonField = this.template.querySelector("[data-id='sharingReason']");
-//
-//            // Show error if share cannot be created with this reason
-//            if(isShareable) {
-//                //console.log('setting valitity');
-//                sharingReasonField.setCustomValidity("No sharing reason found with this name");
-//                sharingReasonField.reportValidity();
-//            }
-//
-//            else {
-//                sharingReasonField.setCustomValidity('');
-//                sharingReasonField.reportValidity();
-//            }
-//        })
-//        .catch(error => {
-//            //console.log('Error checking shareable ',JSON.stringify(error));
-//        });
-//        
-//    }
-
     @track oneOrMoreReasons;
     @track sharingReasonOptions = [];
     @track loadingReasons = true;

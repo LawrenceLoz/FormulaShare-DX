@@ -1,5 +1,4 @@
 <template>
-
     <div style="display: flex; align-items: baseline">
         <div style="width: 1px; flex-grow: 1"></div>
 
@@ -24,7 +23,9 @@
                             title={iconTooltip}
                             alternative-text={iconTooltip}
                             variant={iconVariant}
-                            size="small">
+                            size="small"
+                            onmouseover={mouseOverIcon}
+                            onmouseleave={mouseLeaveIcon}>
                         </lightning-icon>
                     </div>
                 <div style="width: 120px; flex-grow: 1"></div>
