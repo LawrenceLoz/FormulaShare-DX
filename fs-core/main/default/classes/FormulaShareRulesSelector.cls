@@ -152,7 +152,29 @@ public inherited sharing class FormulaShareRulesSelector {
                 'Related_Object_8_Lookup_to_RO7__r.QualifiedApiName',
                 'Related_Object_8_Shared_To_Field__c',
                 'Related_Object_8_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_8_Shared_To_Field__r.MasterLabel'
+                'Related_Object_8_Shared_To_Field__r.MasterLabel',
+
+                'Related_Object_9__c',
+                'Related_Object_9__r.QualifiedApiName',
+                'Related_Object_9__r.MasterLabel',
+                'Related_Object_9_Lookup_from_RO8__c',
+                'Related_Object_9_Lookup_from_RO8__r.QualifiedApiName',
+                'Related_Object_9_Lookup_to_RO8__c',
+                'Related_Object_9_Lookup_to_RO8__r.QualifiedApiName',
+                'Related_Object_9_Shared_To_Field__c',
+                'Related_Object_9_Shared_To_Field__r.QualifiedApiName',
+                'Related_Object_9_Shared_To_Field__r.MasterLabel',
+
+                'Related_Object_10__c',
+                'Related_Object_10__r.QualifiedApiName',
+                'Related_Object_10__r.MasterLabel',
+                'Related_Object_10_Lookup_from_RO9__c',
+                'Related_Object_10_Lookup_from_RO9__r.QualifiedApiName',
+                'Related_Object_10_Lookup_to_RO9__c',
+                'Related_Object_10_Lookup_to_RO9__r.QualifiedApiName',
+                'Related_Object_10_Shared_To_Field__c',
+                'Related_Object_10_Shared_To_Field__r.QualifiedApiName',
+                'Related_Object_10_Shared_To_Field__r.MasterLabel'
             };
 
             allFieldsForSelect = String.join(fieldNames, ',');

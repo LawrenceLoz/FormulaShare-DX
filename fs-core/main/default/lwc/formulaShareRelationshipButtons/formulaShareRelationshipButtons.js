@@ -55,7 +55,7 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
         }
 
         // If we've reached maximum depth, disable relevant button
-        if(this._traverse.depth === 4) {
+        if(this._traverse.depth === 5) {
             if(this._traverse.direction === 'childToParent') {
                 this.disableParent('Only 5 consecutive child to parent relationships are supported');
             }

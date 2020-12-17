@@ -96,7 +96,17 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         namespacePrefix + 'Related_Object_8__c',
         namespacePrefix + 'Related_Object_8_Lookup_from_RO7__c',
         namespacePrefix + 'Related_Object_8_Lookup_to_RO7__c',
-        namespacePrefix + 'Related_Object_8_Shared_To_Field__c'
+        namespacePrefix + 'Related_Object_8_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_9__c',
+        namespacePrefix + 'Related_Object_9_Lookup_from_RO8__c',
+        namespacePrefix + 'Related_Object_9_Lookup_to_RO8__c',
+        namespacePrefix + 'Related_Object_9_Shared_To_Field__c',
+
+        namespacePrefix + 'Related_Object_10__c',
+        namespacePrefix + 'Related_Object_10_Lookup_from_RO9__c',
+        namespacePrefix + 'Related_Object_10_Lookup_to_RO9__c',
+        namespacePrefix + 'Related_Object_10_Shared_To_Field__c'
     };
 
     // Get metadata container and submit for processing
@@ -252,52 +262,6 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
         }
         return rule;
     }
-
-
-//    private Metadata.CustomMetadata clearInvalidFields(Metadata.CustomMetadata rule, FormulaShare_Rule__mdt ruleNewValues) {
-//        String ruleType;
-//        if(ruleNewValues.Shared_To__c != null) {
-//            ruleType = 'standard';
-//        }
-//        else if(ruleNewValues.Child_Object_with_Shared_To_Field__c != null) {
-//            ruleType = 'child';
-//        }
-//
-//        System.debug('ruleNewValues: '+ruleNewValues);
-//        System.debug('ObjectShared: '+ruleNewValues.Object_Shared__c);
-//
-//        Boolean isAccountRule = ruleNewValues.Object_Shared__c == 'Account';
-//
-//        // Loop through field values
-//        for (Metadata.CustomMetadataValue ruleFieldValue : rule.values) {
-//
-//            // Clear field if it's not valid for this kind of rule
-//            if(fieldShouldBeCleared(ruleFieldValue, ruleType, isAccountRule)) {
-//                ruleFieldValue.value = null;
-//            }
-//        }
-//        return rule;
-//    }
-//
-//
-//    private Boolean fieldShouldBeCleared(Metadata.CustomMetadataValue ruleFieldValue, String ruleType, Boolean isAccountRule) {
-//
-//        // Strip namespace (this is needed to support namespaced scratch orgs, which don't seem to recognise this in queried custom metadata)
-//        String fieldWithoutNamespace = ruleFieldValue.field.remove(namespacePrefix);
-//
-//        switch on fieldWithoutNamespace {
-//            when 'Child_Object_Lookup_Field__c'         { return ruleType == 'standard'; }
-//            when 'Child_Object_Shared_To_Field__c'      { return ruleType == 'standard'; }
-//            when 'Child_Object_Shared_To_Field_Type__c' { return ruleType == 'standard'; }
-//            when 'Child_Object_with_Shared_To_Field__c' { return ruleType == 'standard'; }
-//            when 'Shared_To__c'                         { return ruleType == 'child';}
-//            when 'Shared_To_Field_Type__c'              { return ruleType == 'child';}
-//            when 'Contact_Access__c'                    { return !isAccountRule;}
-//            when 'Case_Access__c'                       { return !isAccountRule;}
-//            when 'Opportunity_Access__c'                { return !isAccountRule;}
-//            when else {return false;}
-//        }
-//    }
 
 
     // Manage post-callback logic to fire events for component updates
