@@ -178,6 +178,14 @@ public inherited sharing class FormulaShareUtilities {
 		return crdList;
 	}
 
+	static Set<String> excludedRelObjects = new Set<String> {
+		'Event',			// Can't be used in entity relationship field on metadata
+		'RecordAction',		// Can't be used in entity relationship field on metadata
+		'Task',				// Can't be used in entity relationship field on metadata
+		'User',				// Can't be used in entity relationship field on metadata
+		'DuplicateRecordItem'		// Fails as a child in cross-object query
+	};
+
 	public static List<RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
 		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
@@ -192,8 +200,12 @@ public inherited sharing class FormulaShareUtilities {
 			// Exclude child relationships with a null relationship name (these can't be processed by FormulaShareService)
 			if(cr.getRelationshipName() != null) {
 				RelationshipDetails crd = convertToRelationshipDetails(cr);
-				allCrds.add(crd);
-				childObjApiNames.add(crd.relatedObjectApiName);
+
+				// Exclude any which aren't supported for metadata lists, cross-object queries or other complications
+				if(!excludedRelObjects.contains(crd.relatedObjectApiName)) {
+					allCrds.add(crd);
+					childObjApiNames.add(crd.relatedObjectApiName);
+				}
 			}
 		}
 

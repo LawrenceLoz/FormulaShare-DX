@@ -34,7 +34,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
             bod.fieldsToQuery.add(rule.pathFromBottomObjToSharedObj);
 
             // Add controlling field from bottom object or inlaw object (TODO - add this to inlaw check)
-            System.debug('Processing rule: '+bod.rule.pathToSharedToField+' | Adding field: '+rule.pathToSharedToField);
+            System.debug('Processing rule: '+bod.rule.DeveloperName+' | Adding field: '+rule.pathToSharedToField);
             bod.fieldsToQuery.add(rule.pathToSharedToField);
 
             boMap.put(key, bod);
