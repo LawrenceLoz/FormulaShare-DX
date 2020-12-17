@@ -101,6 +101,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.setMetricsDetails(objectName, metricsMap);
 
             // Set URL for shared to field if populated
+            System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
             if(!String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
                 
                 // Build URL to field from token (includes object and field id, separated by full stop)

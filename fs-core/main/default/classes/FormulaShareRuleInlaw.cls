@@ -10,7 +10,7 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
         setVarsInlaw();
     }
 
-    // Set pathToSharedToField to path from bottom object to shared to field on top object for inlaw rule
+    // Set pathToObjectWithSharedToField to path from bottom object to top object for inlaw rule
     public String lookupFromBottomObjTowardsControllingObj;
 
     @TestVisible
@@ -23,20 +23,23 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
         System.debug('inlaw bottomObjectRelationship: '+bottomObjectRelationship);
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
 
-        // Traverse up from here, checking lookup fields
-        rel = rel.nextRelationship;
-        lookupFromBottomObjTowardsControllingObj = rel.lookupFromPrevObjectApiName;
+        // Set first lookup towards the controlling object
+        lookupFromBottomObjTowardsControllingObj = rel.nextRelationship.lookupFromPrevObjectApiName;
 
-        // Iterate up from bottom object until we're one away from controlling object
-        pathToSharedToField = '';
+        // Iterate up from bottom object until we're on controlling object
+        String pathToObjectWithSharedToField = '';
         while(rel.nextRelationship != null) {
+            rel = rel.nextRelationship;
+
             Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
             lookupFromBottomObjToControllingObjFieldList.add(field);
-            pathToSharedToField += field.getDescribe().getRelationshipName() + '.';
+            System.debug('Iterating inlaw rule for rel: '+field.getDescribe().getRelationshipName());
+            pathToObjectWithSharedToField += field.getDescribe().getRelationshipName() + '.';
             type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
-    
-            rel = rel.nextRelationship;
         }
+
+        // Shared to field will be queried from bottom object, so add with relationship prefix
+        pathToSharedToField = pathToObjectWithSharedToField + controllingObjectSharedToFieldAPIName;
     }
 
 
@@ -49,6 +52,6 @@ public inherited sharing class FormulaShareRuleInlaw extends FormulaShareRuleBot
 
         // Return the shared to field from this object
         return (String) controllingRecord?.get(controllingObjectSharedToFieldAPIName);
-    }    
+    }
 
 }

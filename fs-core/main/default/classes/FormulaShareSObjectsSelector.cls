@@ -79,13 +79,12 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         fflib_QueryFactory controllingObjQueryFactory = newQueryFactory();
 
         // Add parent path to select
+        System.debug('Adding field: '+parentFieldPath+' to selector for type: '+type.getDescribe().getName());
         controllingObjQueryFactory.selectField(parentFieldPath);
 
-        // Restrict to specific shared records in scope
+        // Restrict to specific shared records in scope 
         String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(parentIdSet);
         String queryCondition = parentFieldPath + ' IN (' + parentIdsString + ')';
-
-        system.debug('|SOQL before fields added: '+controllingObjQueryFactory.toSOQL());
 
         // If fields are supplied, we'll select these and restrict to records with one or more populated
         if(!fieldStrings.isEmpty()) {
@@ -111,11 +110,9 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         }
 
         System.debug('Full query condition: '+queryCondition);
-
         controllingObjQueryFactory.setCondition(queryCondition);
 
         system.debug('SOQL with condition: '+controllingObjQueryFactory.toSOQL());
-
         return Database.query(controllingObjQueryFactory.toSOQL());
     }
 

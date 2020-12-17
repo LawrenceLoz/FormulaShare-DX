@@ -54,8 +54,9 @@ public inherited sharing class FormulaShareSObjectSharesSelector extends fflib_S
         
         String condition = 'RowCause IN (' + rowCausesString 
             + ') AND '+parentIdFieldName+' IN (' + parentIdsString + ')';
+
         String query = newQueryFactory().setCondition(condition).toSOQL();
-        system.debug('query : '+query);
+        System.debug('query : '+query);
 
         List<SObject> results = Database.query(query);
         system.debug('results: '+results);

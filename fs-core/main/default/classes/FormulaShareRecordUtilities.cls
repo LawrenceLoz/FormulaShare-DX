@@ -25,4 +25,30 @@ public with sharing class FormulaShareRecordUtilities {
         return record;
     }
 
+
+    public static Id getTopRecordIdFromFieldList(List<Schema.SObjectField> fieldList, SObject record) {
+        Integer lastIndex = fieldList.size() - 1;
+
+        // Get the final field from this list - we'll need to check for this lookup on the penultimate record
+        Schema.SObjectField finalLookup = fieldList[lastIndex];
+        String finalLookupApiName = finalLookup.getDescribe().getName();
+
+        // Make a copy of the field list with this field removed
+        List<Schema.SObjectField> fieldsOneFromTop = fieldList.clone();
+        fieldsOneFromTop.remove(lastIndex);
+
+        // Get the object which is one away from the top object (this will contain the queried lookup)
+        SObject penultimateRecord;
+        if(fieldsOneFromTop.isEmpty()) {
+            penultimateRecord = record;
+        }
+        else {
+            FormulaShareRecordUtilities recordUtils = new FormulaShareRecordUtilities(record);
+            penultimateRecord = recordUtils.getTopRecordFromLookup(fieldsOneFromTop);
+        }
+
+        // Return the Id in the lookup to the top object
+        return (Id) penultimateRecord?.get(finalLookupApiName);
+    }    
+
 }

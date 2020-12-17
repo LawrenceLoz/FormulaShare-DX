@@ -25,6 +25,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
                 sod = siblingsMap.get(key);
             }
             else {
+                // It doesn't matter which rule we create with since all with this key have the same paths to controlling & shared objects
                 sod = new SiblingObjectDetails(rule);
             }
             sod.fieldApiNames.add(rule.controllingObjectSharedToFieldAPIName);
@@ -36,6 +37,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
             SiblingObjectDetails sod = siblingsMap.get(key);
             List<SObject> records = retrieveSiblings(sod, sharedRecords);
             sod.siblingRecords = records;
+//            siblingsMap.put(key, sod);
         }
 
         // Construct and return map of records associated to rules for each shared record
@@ -51,12 +53,10 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
         Set<Id> topObjIds = new Set<Id>();
         for(SObject record : sharedRecords) {
 
-            System.debug('path from shared to top: '+ sod.pathFromSharedObjToTopObj);
-            System.debug('path from record: '+record.get(sod.pathFromSharedObjToTopObj));
+            Id topId = sod.rule.getTopObjectIdFromSharedRecord(record);
 
-            if(record.get(sod.pathFromSharedObjToTopObj) != null) {
-                Id topObjId = (Id) record.get(sod.pathFromSharedObjToTopObj);
-                topObjIds.add(topObjId);
+            if(topId != null) {
+                topObjIds.add(topId);
             }
         }
 
@@ -66,18 +66,19 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
         }
 
         // Create selector for the sibling object
-        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(sod.controllingObjectApiName);
+        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(sod.rule.controllingObjectApiName);
         FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
 
         // Add fields from sibling
-        Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(sod.controllingObjectApiName);
+        Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(sod.rule.controllingObjectApiName);
         for(String fieldName : sod.fieldApiNames) {
             System.debug('Looking for: '+fieldName);
             selector.addFieldString(fieldName);
         }
 
         // Select filters on top object ids
-        List<SObject> siblingRecords = selector.selectPopulatedRecordsBasedOnParentPath(sod.pathFromControllingObjToTopObj, topObjIds);
+        List<SObject> siblingRecords = selector.selectPopulatedRecordsBasedOnParentPath(sod.rule.pathFromControllingObjToTopObj, topObjIds);
+        System.debug('siblings from selector: '+siblingRecords);
         return siblingRecords;
     }
         
@@ -88,13 +89,13 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
         Map<String,Map<Id,List<SObject>>> recordsForTopObjIdsForSiblingsMap = getRecordsForTopObjIdsForSiblingsMap(siblingsMap);
         for(SObject record : sharedRecords) {
             System.debug('Shared record: '+record);
-            System.debug('Shared recordId: '+record.Id);
             
             Map<String,List<SObject>> siblingRecordsForRulesMap = new Map<String,List<SObject>>();
 
             for(FormulaShareRuleSibling rule : siblingRules) {
 
-                Id topObjId = (Id) record.get(rule.pathFromSharedObjToTopObj);
+                Id topObjId = rule.getTopObjectIdFromSharedRecord(record);
+                
                 if(topObjId != null) {
         
                     // Get records map for relevant sibling relationship
@@ -107,10 +108,8 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
                     siblingRecordsForRulesMap.put(rule.developerName, sibilngRecords);
                 }
             }
-            System.debug('Shared recordId: '+record.Id);
-            System.debug('records for rules: '+siblingRecordsForRulesMap);
+
             siblingRecordsForRuleForSharedRecord.put(record.Id, siblingRecordsForRulesMap);
-            System.debug('here: ');
         }
 
         return siblingRecordsForRuleForSharedRecord;        
@@ -134,7 +133,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
             SiblingObjectDetails sod = siblingsMap.get(key);
             for(SObject record : sod.siblingRecords) {
 
-                Id topId = (Id) record.get(sod.pathFromControllingObjToTopObj);
+                Id topId = sod.rule.getTopObjectIdFromSiblingRecord(record);
 
                 // Create or get internal records list for this topId
                 List<SObject> records;
@@ -158,15 +157,10 @@ public inherited sharing class FormulaShareSObjectsRetrievalSibling {
     private class SiblingObjectDetails {
 
         SiblingObjectDetails(FormulaShareRuleSibling rule) {
-            controllingObjectApiName = rule.controllingObjectApiName;
-            pathFromSharedObjToTopObj = rule.pathFromSharedObjToTopObj;
-            pathFromControllingObjToTopObj = rule.pathFromControllingObjToTopObj;
-//            fieldApiNames = new Set<String>({rule.pathFromControllingObjToTopObj});
-       }
+            this.rule = rule;
+        }
  
-        String controllingObjectApiName;
-        String pathFromSharedObjToTopObj;
-        String pathFromControllingObjToTopObj;
+        FormulaShareRuleSibling rule;
         Set<String> fieldApiNames = new Set<String>();
         List<SObject> siblingRecords;
     }

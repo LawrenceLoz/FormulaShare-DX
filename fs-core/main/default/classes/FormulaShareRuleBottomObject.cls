@@ -26,38 +26,41 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
         // Start from the first related object and field
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;
         pathFromBottomObjToSharedObj = rel.lookupToPrevObjectApiName;
+        List<Schema.SobjectField> lookupFieldListReverse = new List<Schema.SobjectField>();
 
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
         Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupToPrevObjectApiName, type);
+        lookupFieldListReverse.add(field);
+
         String relationshipPathFromBottomObjToSharedObj = field.getDescribe().getRelationshipName();
-        System.debug('relationshipPathFromBottomObjToSharedObj initially: '+relationshipPathFromBottomObjToSharedObj);
 
         // Iterate until we're on the bottom object and add the relationship name (__r) of each lookup
-        List<Schema.SobjectField> lookupFieldListReverse = new List<Schema.SobjectField>();
         while(rel.nextRelationship?.lookupToPrevObjectApiName != null) {
             System.debug('this rel (going down to bottom): '+rel.nextRelationship);
 
-            lookupFieldListReverse.add(field);
-
             rel = rel.nextRelationship;
+
+            // Add field to sequence of lookups
             type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
             field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupToPrevObjectApiName, type);
-            String relationshipName = field.getDescribe().getRelationshipName();
+            lookupFieldListReverse.add(field);
 
+            // Add to path to shared object
+            String relationshipName = field.getDescribe().getRelationshipName();
             pathFromBottomObjToSharedObj             = relationshipName + '.' + pathFromBottomObjToSharedObj;
             relationshipPathFromBottomObjToSharedObj = relationshipName + '.' + relationshipPathFromBottomObjToSharedObj;
         }
 
-        // Populate lookup field list in correct order
+        // Populate object name and lookup field from final relationship, and set full path to ownerId
+        bottomObjectRelationship = rel;
+        bottomObjectApiName = rel.thisObjectApiName;
+        lookupFromBottomObjTowardsSharedObj = rel.lookupToPrevObjectApiName;
+        pathFromBottomObjToOwnerIdOnSharedObj = relationshipPathFromBottomObjToSharedObj + '.OwnerId';
+
+        // Reverse lookup field list to be in correct order
         for(Integer i=0; i<lookupFieldListReverse.size(); i++) {
             lookupFromBottomObjToSharedObjFieldList.add(lookupFieldListReverse[lookupFieldListReverse.size() - 1 - i]);
         }
-
-        pathFromBottomObjToOwnerIdOnSharedObj = relationshipPathFromBottomObjToSharedObj + '.OwnerId';
-
-        bottomObjectRelationship = rel;
-        System.debug('bottomObjectRelationship: '+rel);
-        lookupFromBottomObjTowardsSharedObj = rel.lookupToPrevObjectApiName;
     }
 
 
@@ -70,6 +73,10 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
         // Return the shared to field from this object
         return (Id) sharedRecord?.get('OwnerId');
+    }
+
+    public Id getSharedObjectIdFromBottomRecord(SObject record) {
+        return FormulaShareRecordUtilities.getTopRecordIdFromFieldList(lookupFromBottomObjToSharedObjFieldList, record);
     }
 
 }

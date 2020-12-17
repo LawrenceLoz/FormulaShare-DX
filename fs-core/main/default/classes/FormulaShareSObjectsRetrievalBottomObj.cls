@@ -11,7 +11,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
 
     public Map<Id,Map<String,List<SObject>>> getControllingRecordsMap() {
 
-        // Populate sibling map with all unique paths between shared object and siblings
+        // Populate bottom object map with all unique paths between shared object and bottom objects
         Map<String,BottomObjectDetails> boMap = new Map<String,BottomObjectDetails>();
         for(FormulaShareRuleBottomObject rule : bottomObjectRules) {
 
@@ -25,9 +25,18 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
                 bod = boMap.get(key);
             }
             else {
+                // It doesn't matter which rule we create with since all with this key have the same paths to controlling & shared objects
                 bod = new BottomObjectDetails(rule);
             }
-            bod.pathsToControllingFields.add(rule.pathToSharedToField);
+
+            // Add path to shared field
+            System.debug('Processing rule: '+bod.rule.DeveloperName+' | Adding field: '+rule.pathFromBottomObjToSharedObj);
+            bod.fieldsToQuery.add(rule.pathFromBottomObjToSharedObj);
+
+            // Add controlling field from bottom object or inlaw object (TODO - add this to inlaw check)
+            System.debug('Processing rule: '+bod.rule.pathToSharedToField+' | Adding field: '+rule.pathToSharedToField);
+            bod.fieldsToQuery.add(rule.pathToSharedToField);
+
             boMap.put(key, bod);
         }
 
@@ -54,17 +63,22 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
         }
 
         // Create selector for the bottom object
-        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(bod.bottomObjectApiName);
+        System.debug('bod.rule: '+ bod.rule);
+        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(bod.rule.bottomObjectApiName);
         FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
 
-        // Add controlling fields
-        for(String fieldPath : bod.pathsToControllingFields) {
+        // Add paths for lookup fields to shared object
+        for(String fieldPath : bod.fieldsToQuery) {
             System.debug('Looking for: '+fieldPath);
             selector.addFieldString(fieldPath);
         }
 
+        // Add owner id from shared object
+        System.debug('Owner id path: '+bod.rule.pathFromBottomObjToOwnerIdOnSharedObj);
+        selector.addFieldString(bod.rule.pathFromBottomObjToOwnerIdOnSharedObj);
+
         // Select filters on top object ids
-        List<SObject> bottomRecords = selector.selectPopulatedRecordsBasedOnParentPath(bod.pathFromBottomObjToSharedObj, sharedObjIds);
+        List<SObject> bottomRecords = selector.selectPopulatedRecordsBasedOnParentPath(bod.rule.pathFromBottomObjToSharedObj, sharedObjIds);
         return bottomRecords;
     }
 
@@ -121,7 +135,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
             BottomObjectDetails bod = boMap.get(key);
             for(SObject record : bod.bottomRecords) {
 
-                Id sharedId = (Id) record.get(bod.pathFromBottomObjToSharedObj);
+                Id sharedId = bod.rule.getSharedObjectIdFromBottomRecord(record);
 
                 // Create or get internal records list for this sharedId
                 List<SObject> records;
@@ -146,15 +160,11 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
     private class BottomObjectDetails {
 
         BottomObjectDetails(FormulaShareRuleBottomObject rule) {
-            bottomObjectApiName = rule.bottomObjectApiName;
-            pathFromBottomObjToSharedObj = rule.pathFromBottomObjToSharedObj;
-//            pathFromControllingObjToTopObj = rule.pathFromControllingObjToTopObj;
-       }
- 
-        String bottomObjectApiName;
-        String pathFromBottomObjToSharedObj;
-//        String pathFromControllingObjToTopObj;
-        Set<String> pathsToControllingFields = new Set<String>();
+            this.rule = rule;
+        }
+
+        FormulaShareRuleBottomObject rule;
+        Set<String> fieldsToQuery = new Set<String>();
         List<SObject> bottomRecords;
     }
 

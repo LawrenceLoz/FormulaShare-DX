@@ -11,6 +11,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
     }
 
     // Sequence of lookup fields needed to get from shared object to top object
+    // pathToObjectWithSharedToField set to relationship between shared object and top object
     @TestVisible
     private List<Schema.SObjectField> lookupFromSharedObjToControllingObjFieldList = new List<Schema.SObjectField>();
 
@@ -21,7 +22,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
 
         String prevObjApiName = objectSharedAPIName;
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;
-        String fieldPath = '';
+        String pathToObjectWithSharedToField = '';
 
         // Iterate until we're at the top (no further relationships, or next relationship isn't a lookup from last)
         while(rel.nextRelationship != null) {
@@ -31,7 +32,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
                 Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(prevObjApiName);
                 Schema.SObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
                 lookupFromSharedObjToControllingObjFieldList.add(field);
-                fieldPath += field.getDescribe().getRelationshipName() + '.';
+                pathToObjectWithSharedToField += field.getDescribe().getRelationshipName() + '.';
             }
     
             prevObjApiName = rel.thisObjectApiName;
@@ -42,10 +43,10 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(prevObjApiName);
         Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
         lookupFromSharedObjToControllingObjFieldList.add(field);
-        fieldPath += field.getDescribe().getRelationshipName() + '.';
-        fieldPath += rel.sharedToFieldApiName;
+        pathToObjectWithSharedToField += field.getDescribe().getRelationshipName() + '.';
 
-        pathToSharedToField = fieldPath;
+        // Shared to field will be queried from shared object, so add with relationship prefix
+        pathToSharedToField = pathToObjectWithSharedToField + controllingObjectSharedToFieldAPIName;
     }
 
 

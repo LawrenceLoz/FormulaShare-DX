@@ -99,16 +99,12 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
    	public void execute(Database.BatchableContext context, List<SObject> scope) {
 		
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
-		String insertStatus;
-		String insertStatusReason;
-		String deleteStatus;
-		String deleteStatusReason;
-		Map<String,Integer> failedInsertsMap = new Map<String,Integer>();
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
 
 		system.debug('*** batch scope : '+ scope);
 
+		// Get set of records which we'll need for sharing assessment and populate into service class
 		try {
 			// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
 			Set<Id> sharedObjIdSet = new Set<Id>();
@@ -124,21 +120,35 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			fsService.setSharedRecordDetails(recordDetails);
 		}
 
+		// Fail batch if exceptions identifying or populating records
 		catch(Exception e) {
 			e.setMessage('Issue populating batch scope. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
 			atLeastOneBatchFailed = true;
+			return;
 		}
 
+		processSharingAssessmentAndLogs(fsService, fsLogs);
+	}
+
+	private void processSharingAssessmentAndLogs(FormulaShareService fsService, FormulaShareLogs fsLogs) {
+		String insertStatus;
+		String insertStatusReason;
+		String deleteStatus;
+		String deleteStatusReason;
+		Map<String,Integer> failedInsertsMap = new Map<String,Integer>();
+
+		// Assess sharing for this object
 		try {
-			// Assess sharing for this object
 			fsService.processFormulaShares();
 		}
 
+		// Fail this batch if any exceptions assessing sharing
 		catch(Exception e) {
 			e.setMessage('FormulaShareService processing error. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
 			atLeastOneBatchFailed = true;
+			return;
 		}
 		
 		// Get insert details and extract list of shares
@@ -160,7 +170,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				insertStatus = 'Error';
 				insertStatusReason = e.getMessage();
 
-				// Populate map of no failed inserts by rule for finish metrics
+				// Populate map of number of failed inserts by rule for finish metrics
 				for(FormulaShareService.ShareDetail sd : insertDetails.values()) {
 					Integer noFails = 0;
 					if(failedInsertsMap.containsKey(sd.rule.developerName)) {

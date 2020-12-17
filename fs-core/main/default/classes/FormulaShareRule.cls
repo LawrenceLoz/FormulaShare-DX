@@ -65,9 +65,9 @@ public virtual inherited sharing class FormulaShareRule {
     // - Path from bottom object to first object towards shared object for descendant / inlaw
     public String firstQueryStepApiName;
 
-    // Populates with the path from the queried object to shared to field
-    // Set to:
-    // - Shared to field for standard, sibling and descendant
+    // pathToSharedToField populates with the full relationship from the queried object to shared to field
+    // This is set in sub-classes to:
+    // - Shared to field on controlling object for standard, sibling and descendant
     // - Path from shared object to shared to field on top object for ancestor rule
     // - Path from bottom object to shared to field on top object for inlaw rule
     public String pathToSharedToField;
@@ -108,11 +108,41 @@ public virtual inherited sharing class FormulaShareRule {
     }
 
 
+    // Map fields back to a metadata record and return this
+    public FormulaShare_Rule__mdt transformRuleToMetadataRule() {
+        FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
+        rule.DeveloperName = developerName;
+        rule.MasterLabel = label;
+        rule.Description__c = description;
+
+        rule.Object_Shared__c = objectSharedAPIName;
+
+        rule.Share_With__c = shareWith;
+        rule.Access_Level__c = accessLevel;
+        rule.Contact_Access__c = contactAccess;
+        rule.Case_Access__c = caseAccess;
+        rule.Opportunity_Access__c = opportunityAccess;
+        rule.Sharing_Reason__c = sharingReason;
+
+        // Relationship class traverses nested relationships and maps to appropriate fields
+        rule = relationship.mapRelationshipToMetadataRule(rule);
+
+        // Populate appropriate shared to type field depending on whether field is on shared object or related object
+        if(rule.Child_Object_with_Shared_To_Field__c == null) {
+            rule.Shared_To_Field_Type__c = controllingObjectSharedToFieldType;
+        }
+        else {
+            rule.Child_Object_Shared_To_Field_Type__c = controllingObjectSharedToFieldType;
+        }
+
+        return rule;
+    }    
+
     // Returns a rule of the approriate object
     public static FormulaShareRule getRule(FormulaShare_Rule__mdt mdRule) {
         
         // Establish relationship object, and get the controlling fields and rule type
-        FormulaShareSObjectRelationship rel = getRelationshipFromMetadataRule(mdRule);
+        FormulaShareSObjectRelationship rel = new FormulaShareSObjectRelationship(mdRule);
         TypeAndControllingFields tacf = getControllingFieldsAndType(rel);
 
         // Instantiate rule of appropriate type (constructors populate type specific variables)
@@ -138,7 +168,6 @@ public virtual inherited sharing class FormulaShareRule {
         return rule;
     }
 
-
     public class TypeAndControllingFields {
         String ruleType;
         String controllingObjectApiName;
@@ -156,16 +185,22 @@ public virtual inherited sharing class FormulaShareRule {
         FormulaShareSObjectRelationship rel = relationship;
         Boolean previousObjectIsChild = false;
         Boolean previousObjectIsParent = false;
+
+        // Iterate through relationships, checking sequence of lookup fields to determine type
+        Boolean finalisedType = false;
         while(rel.nextRelationship != null) {
             rel = rel.nextRelationship;
 
+            System.debug('object considered: '+rel.thisObjectApiName);
+            System.debug('sharedToLabel considered: '+rel.sharedToFieldLabel);
+
             // If this object is a parent of the previous one...
-            if(rel.lookupFromPrevObjectToken != null) {
+            if(rel.lookupFromPrevObjectToken != null && !finalisedType) {
 
                 // ...if the previous one was a child, then sibling
                 if(previousObjectIsParent) {
                     tacf.ruleType = 'inlaw';
-                    break;
+                    finalisedType = true;
                 }
                 // ...otherwise ancestor
                 else {
@@ -176,12 +211,12 @@ public virtual inherited sharing class FormulaShareRule {
             }
 
             // If this object is a child of the previous one...
-            else if(rel.lookupToPrevObjectToken != null) {
+            else if(rel.lookupToPrevObjectToken != null && !finalisedType) {
 
                 // ...if the previous one was a parent, then sibling
                 if(previousObjectIsChild) {
                     tacf.ruleType = 'sibling';
-                    break;
+                    finalisedType = true;
                 }
                 // ...otherwise descendant
                 else {
@@ -191,159 +226,16 @@ public virtual inherited sharing class FormulaShareRule {
                 previousObjectIsChild = false;
             }
         }
+
+        // After loop we'll have the final relationship in scope - set controlling object and field from this
         tacf.controllingObjectApiName = rel.thisObjectApiName;
         tacf.controllingObjectLabel = rel.thisObjectLabel;
         tacf.controllingObjectSharedToFieldAPIName = rel.sharedToFieldAPIName;
         tacf.controllingObjectSharedToFieldLabel = rel.sharedToFieldLabel;
         tacf.controllingObjectSharedToFieldToken = rel.sharedToFieldToken;
+        System.debug('sharedToLabel set: '+rel.sharedToFieldLabel);
 
         return tacf;
-    }
-
-    
-    // Populate nested relationship object. Need retrieve fields individually from api names
-    // Because attributes of field / object definitions can't be refrerenced with dynamic map notation
-    private static FormulaShareSObjectRelationship getRelationshipFromMetadataRule(FormulaShare_Rule__mdt rule) {
-
-        FormulaShareSObjectRelationship relationship = new FormulaShareSObjectRelationship();
-
-        relationship.thisObjectToken           = rule.Object_Shared__c;
-        relationship.thisObjectApiName         = rule.Object_Shared__r.QualifiedApiName;
-        relationship.thisObjectLabel           = rule.Object_Shared__r.MasterLabel;
-        if(rule.Child_Object_with_Shared_To_Field__c == null) {
-            relationship.sharedToFieldToken        = rule.Shared_To__c;
-            relationship.sharedToFieldApiName      = rule.Shared_To__r.QualifiedApiName;
-            relationship.sharedToFieldLabel        = rule.Shared_To__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc1 = new FormulaShareSObjectRelationship();
-        rfc1.thisObjectToken            = rule.Child_Object_with_Shared_To_Field__c;
-        rfc1.thisObjectApiName          = rule.Child_Object_with_Shared_To_Field__r.QualifiedApiName;
-        rfc1.thisObjectLabel            = rule.Child_Object_with_Shared_To_Field__r.MasterLabel;
-        rfc1.lookupFromPrevObjectToken  = rule.Related_Object_1_Lookup_from_Shared_Obj__c;
-        rfc1.lookupFromPrevObjectApiName= rule.Related_Object_1_Lookup_from_Shared_Obj__r.QualifiedApiName;
-        rfc1.lookupToPrevObjectToken    = rule.Child_Object_Lookup_Field__c;
-        rfc1.lookupToPrevObjectApiName  = rule.Child_Object_Lookup_Field__r.QualifiedApiName;
-        relationship.nextRelationship = rfc1;
-        if(rule.Related_Object_2__c == null) {
-            rfc1.sharedToFieldToken         = rule.Child_Object_Shared_To_Field__c;
-            rfc1.sharedToFieldApiName       = rule.Child_Object_Shared_To_Field__r.QualifiedApiName;
-            rfc1.sharedToFieldLabel         = rule.Child_Object_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc2 = new FormulaShareSObjectRelationship();
-        rfc2.thisObjectToken            = rule.Related_Object_2__c;
-        rfc2.thisObjectApiName          = rule.Related_Object_2__r.QualifiedApiName;
-        rfc2.thisObjectLabel            = rule.Related_Object_2__r.MasterLabel;
-        rfc2.lookupFromPrevObjectToken  = rule.Related_Object_2_Lookup_from_RO1__c;
-        rfc2.lookupFromPrevObjectApiName= rule.Related_Object_2_Lookup_from_RO1__r.QualifiedApiName;
-        rfc2.lookupToPrevObjectToken    = rule.Related_Object_2_Lookup_to_RO1__c;
-        rfc2.lookupToPrevObjectApiName  = rule.Related_Object_2_Lookup_to_RO1__r.QualifiedApiName;
-        rfc1.nextRelationship = rfc2;
-        if(rule.Related_Object_3__c == null) {
-            rfc2.sharedToFieldToken         = rule.Related_Object_2_Shared_To_Field__c;
-            rfc2.sharedToFieldApiName       = rule.Related_Object_2_Shared_To_Field__r.QualifiedApiName;
-            rfc2.sharedToFieldLabel         = rule.Related_Object_2_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-        
-        FormulaShareSObjectRelationship rfc3 = new FormulaShareSObjectRelationship();
-        rfc3.thisObjectToken            = rule.Related_Object_3__c;
-        rfc3.thisObjectApiName          = rule.Related_Object_3__r.QualifiedApiName;
-        rfc3.thisObjectLabel            = rule.Related_Object_3__r.MasterLabel;
-        rfc3.lookupFromPrevObjectToken  = rule.Related_Object_3_Lookup_from_RO2__c;
-        rfc3.lookupFromPrevObjectApiName= rule.Related_Object_3_Lookup_from_RO2__r.QualifiedApiName;
-        rfc3.lookupToPrevObjectToken    = rule.Related_Object_3_Lookup_to_RO2__c;
-        rfc3.lookupToPrevObjectApiName  = rule.Related_Object_3_Lookup_to_RO2__r.QualifiedApiName;
-        rfc2.nextRelationship = rfc3;
-        if(rule.Related_Object_4__c == null) {
-            rfc3.sharedToFieldToken         = rule.Related_Object_3_Shared_To_Field__c;
-            rfc3.sharedToFieldApiName       = rule.Related_Object_3_Shared_To_Field__r.QualifiedApiName;
-            rfc3.sharedToFieldLabel         = rule.Related_Object_3_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc4 = new FormulaShareSObjectRelationship();
-        rfc4.thisObjectToken            = rule.Related_Object_4__c;
-        rfc4.thisObjectApiName          = rule.Related_Object_4__r.QualifiedApiName;
-        rfc4.thisObjectLabel            = rule.Related_Object_4__r.MasterLabel;
-        rfc4.lookupFromPrevObjectToken  = rule.Related_Object_4_Lookup_from_RO3__c;
-        rfc4.lookupFromPrevObjectApiName= rule.Related_Object_4_Lookup_from_RO3__r.QualifiedApiName;
-        rfc4.lookupToPrevObjectToken    = rule.Related_Object_4_Lookup_to_RO3__c;
-        rfc4.lookupToPrevObjectApiName  = rule.Related_Object_4_Lookup_to_RO3__r.QualifiedApiName;
-        rfc3.nextRelationship = rfc4;
-        if(rule.Related_Object_5__c == null) {
-            rfc4.sharedToFieldToken         = rule.Related_Object_4_Shared_To_Field__c;
-            rfc4.sharedToFieldApiName       = rule.Related_Object_4_Shared_To_Field__r.QualifiedApiName;
-            rfc4.sharedToFieldLabel         = rule.Related_Object_4_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc5 = new FormulaShareSObjectRelationship();
-        rfc5.thisObjectToken            = rule.Related_Object_5__c;
-        rfc5.thisObjectApiName          = rule.Related_Object_5__r.QualifiedApiName;
-        rfc5.thisObjectLabel            = rule.Related_Object_5__r.MasterLabel;
-        rfc5.lookupFromPrevObjectToken  = rule.Related_Object_5_Lookup_from_RO4__c;
-        rfc5.lookupFromPrevObjectApiName= rule.Related_Object_5_Lookup_from_RO4__r.QualifiedApiName;
-        rfc5.lookupToPrevObjectToken    = rule.Related_Object_5_Lookup_to_RO4__c;
-        rfc5.lookupToPrevObjectApiName  = rule.Related_Object_5_Lookup_to_RO4__r.QualifiedApiName;
-        rfc4.nextRelationship = rfc5;
-        if(rule.Related_Object_6__c == null) {
-            rfc5.sharedToFieldToken         = rule.Related_Object_5_Shared_To_Field__c;
-            rfc5.sharedToFieldApiName       = rule.Related_Object_5_Shared_To_Field__r.QualifiedApiName;
-            rfc5.sharedToFieldLabel         = rule.Related_Object_5_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc6 = new FormulaShareSObjectRelationship();
-        rfc6.thisObjectToken            = rule.Related_Object_6__c;
-        rfc6.thisObjectApiName          = rule.Related_Object_6__r.QualifiedApiName;
-        rfc6.thisObjectLabel            = rule.Related_Object_6__r.MasterLabel;
-        rfc6.lookupFromPrevObjectToken  = rule.Related_Object_6_Lookup_from_RO5__c;
-        rfc6.lookupFromPrevObjectApiName= rule.Related_Object_6_Lookup_from_RO5__r.QualifiedApiName;
-        rfc6.lookupToPrevObjectToken    = rule.Related_Object_6_Lookup_to_RO5__c;
-        rfc6.lookupToPrevObjectApiName  = rule.Related_Object_6_Lookup_to_RO5__r.QualifiedApiName;
-        rfc5.nextRelationship = rfc6;
-        if(rule.Related_Object_7__c == null) {
-            rfc6.sharedToFieldToken         = rule.Related_Object_6_Shared_To_Field__c;
-            rfc6.sharedToFieldApiName       = rule.Related_Object_6_Shared_To_Field__r.QualifiedApiName;
-            rfc6.sharedToFieldLabel         = rule.Related_Object_6_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-
-        FormulaShareSObjectRelationship rfc7 = new FormulaShareSObjectRelationship();
-        rfc7.thisObjectToken            = rule.Related_Object_7__c;
-        rfc7.thisObjectApiName          = rule.Related_Object_7__r.QualifiedApiName;
-        rfc7.thisObjectLabel            = rule.Related_Object_7__r.MasterLabel;
-        rfc7.lookupFromPrevObjectToken  = rule.Related_Object_7_Lookup_from_RO6__c;
-        rfc7.lookupFromPrevObjectApiName= rule.Related_Object_7_Lookup_from_RO6__r.QualifiedApiName;
-        rfc7.lookupToPrevObjectToken    = rule.Related_Object_7_Lookup_to_RO6__c;
-        rfc7.lookupToPrevObjectApiName  = rule.Related_Object_7_Lookup_to_RO6__r.QualifiedApiName;
-        rfc6.nextRelationship = rfc7;
-        if(rule.Related_Object_8__c == null) {
-            rfc7.sharedToFieldToken         = rule.Related_Object_7_Shared_To_Field__c;
-            rfc7.sharedToFieldApiName       = rule.Related_Object_7_Shared_To_Field__r.QualifiedApiName;
-            rfc7.sharedToFieldLabel         = rule.Related_Object_7_Shared_To_Field__r.MasterLabel;
-            return relationship;
-        }
-        
-        FormulaShareSObjectRelationship rfc8 = new FormulaShareSObjectRelationship();
-        rfc8.thisObjectToken            = rule.Related_Object_8__c;
-        rfc8.thisObjectApiName          = rule.Related_Object_8__r.QualifiedApiName;
-        rfc8.thisObjectLabel            = rule.Related_Object_8__r.MasterLabel;
-        rfc8.lookupFromPrevObjectToken  = rule.Related_Object_8_Lookup_from_RO7__c;
-        rfc8.lookupFromPrevObjectApiName= rule.Related_Object_8_Lookup_from_RO7__r.QualifiedApiName;
-        rfc8.lookupToPrevObjectToken    = rule.Related_Object_8_Lookup_to_RO7__c;
-        rfc8.lookupToPrevObjectApiName  = rule.Related_Object_8_Lookup_to_RO7__r.QualifiedApiName;
-        rfc7.nextRelationship = rfc8;
-
-        rfc8.sharedToFieldToken         = rule.Related_Object_8_Shared_To_Field__c;
-        rfc8.sharedToFieldApiName       = rule.Related_Object_8_Shared_To_Field__r.QualifiedApiName;
-        rfc8.sharedToFieldLabel         = rule.Related_Object_8_Shared_To_Field__r.MasterLabel;
-
-        return relationship;
     }
 
     

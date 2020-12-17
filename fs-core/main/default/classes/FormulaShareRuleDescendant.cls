@@ -7,6 +7,9 @@ public inherited sharing class FormulaShareRuleDescendant extends FormulaShareRu
     public FormulaShareRuleDescendant(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'descendant';
-        pathToSharedToField = mdRule.Shared_To__r.QualifiedApiName;
+
+        // Share field will be queried from controlling object, so add without relationship
+        pathToSharedToField = controllingObjectSharedToFieldAPIName;
     }
+
 }

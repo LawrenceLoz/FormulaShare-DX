@@ -7,16 +7,19 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
     public FormulaShareRuleSibling(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'sibling';
-        pathToSharedToField = mdRule.Shared_To__r.QualifiedApiName;
         setVars();
     }
 
     public String pathFromSharedObjToTopObj;
     public String pathFromControllingObjToTopObj;
-    
+
+    private List<Schema.SObjectField> lookupFromSharedObjToTopObjFieldList = new List<Schema.SObjectField>();
+    private List<Schema.SObjectField> lookupFromSiblingObjToTopObjFieldList = new List<Schema.SObjectField>();
+
     private void setVars() {
         String prevObjApiName = objectSharedAPIName;
         System.debug('sibling rel: '+ relationship);
+        List<Schema.SObjectField> lookupFromSiblingObjToTopObjFieldListBackwards = new List<Schema.SObjectField>();
 
         // Start from the first related object
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;
@@ -29,6 +32,9 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
             Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, type);
             pathFromSharedObjToTopObj += field.getDescribe().getRelationshipName() + '.';
 
+            // Add the field to the sequence of lookups to top
+            lookupFromSharedObjToTopObjFieldList.add(field);
+
             prevObjApiName = rel.thisObjectApiName;
             rel = rel.nextRelationship;
         }
@@ -36,11 +42,21 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
         // For the final relationship, add the api name
         pathFromSharedObjToTopObj += rel.lookupFromPrevObjectApiName;
 
+        // And the final field in lookup sequence
+        Schema.SObjectType typeBeforeTopShared = FormulaShareUtilities.getSObjectTypeFromName(prevObjApiName);
+        Schema.sObjectField fieldBeforeTopShared = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupFromPrevObjectApiName, typeBeforeTopShared);
+        lookupFromSharedObjToTopObjFieldList.add(fieldBeforeTopShared);
+
         // Move on to object below the top
         rel = rel.nextRelationship;
 
         // Set path from controlling object to top to the first lookup down from the top object
         pathFromControllingObjToTopObj = rel.lookupToPrevObjectApiName;
+
+        // Add relationship and shared to field from final relationship
+        Schema.SObjectType typeBeforeTopSibling = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
+        Schema.sObjectField fieldBeforeTopSibling = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupToPrevObjectApiName, typeBeforeTopSibling);
+        lookupFromSiblingObjToTopObjFieldListBackwards.add(fieldBeforeTopSibling);
 
         // Iterate from top object - get next object down, set the lookup field as the path
         // Then iterate down, adding to beginning of string
@@ -49,8 +65,27 @@ public inherited sharing class FormulaShareRuleSibling extends FormulaShareRuleR
             Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
             Schema.sObjectField field = FormulaShareUtilities.getSObjectFieldFromName(rel.lookupToPrevObjectApiName, type);
             pathFromControllingObjToTopObj = field.getDescribe().getRelationshipName() + '.' + pathFromControllingObjToTopObj;
+            lookupFromSiblingObjToTopObjFieldListBackwards.add(field);   // Add relationship field
         }
 
+        // List of fields between sibling and top object are backwards, so reverse this
+        for(Integer i = lookupFromSiblingObjToTopObjFieldListBackwards.size() - 1; i >= 0; i--){
+            lookupFromSiblingObjToTopObjFieldList.add(lookupFromSiblingObjToTopObjFieldListBackwards[i]);
+        }
+
+        // Share field will be queried from controlling object, so add without relationship
+        pathToSharedToField = controllingObjectSharedToFieldAPIName;
+    }
+
+
+    // Dynamically gets the value through in a sets of lookups from a supplied record
+    // Required because simple Contact__r.Account.Name style notation isn't supported for dyanmic checks
+    public Id getTopObjectIdFromSharedRecord(SObject record) {
+        return FormulaShareRecordUtilities.getTopRecordIdFromFieldList(lookupFromSharedObjToTopObjFieldList, record);
+    }
+
+    public Id getTopObjectIdFromSiblingRecord(SObject record) {
+        return FormulaShareRecordUtilities.getTopRecordIdFromFieldList(lookupFromSiblingObjToTopObjFieldList, record);
     }
 
 }

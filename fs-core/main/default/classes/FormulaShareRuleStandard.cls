@@ -7,9 +7,13 @@ public inherited sharing class FormulaShareRuleStandard extends FormulaShareRule
     public FormulaShareRuleStandard(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         type = 'standard';
+
+        // Shared to type is in the field relating to a standard rule
         controllingObjectSharedToFieldType = mdRule.Shared_To_Field_Type__c;
-        firstQueryStepApiName = mdRule.Shared_To__r.QualifiedApiName;
-        pathToSharedToField = mdRule.Shared_To__r.QualifiedApiName;
+
+        // Share field will be queried from controlling/shared object, so add without relationship
+        pathToSharedToField = controllingObjectSharedToFieldAPIName;
+        firstQueryStepApiName = controllingObjectSharedToFieldAPIName;
     }
 
 }
