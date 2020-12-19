@@ -1,5 +1,5 @@
 {
-    "orgName": "MyCompany",
+    "orgName": "FormulaShare",
     "edition": "Developer",
     
     "settings": {
@@ -8,6 +8,9 @@
         },
         "mobileSettings": {
             "enableS1EncryptedStoragePref2" : false
+        },
+        "deploymentSettings": {
+            "doesSkipAsyncApexValidation": true
         }
     }
 }
