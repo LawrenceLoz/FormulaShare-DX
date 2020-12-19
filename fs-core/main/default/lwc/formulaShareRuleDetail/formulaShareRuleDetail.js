@@ -118,7 +118,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.rule.relationship = {thisObjectApiName: this.rule.controllingObjectApiName, thisObjectLabel: event.detail.objectLabel};
 
         this.selectedLocation = 'thisObject';
-        this.rule.type = 'standard';
+        this.disableEnableShareFieldSelect();
 
         // Clear any object specific fields
         this.rule.controllingObjectSharedToFieldAPIName = null;
@@ -137,17 +137,30 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.accountRelatedOwd = event.detail;
     }
 
+    disableShareField = false;
+    disableEnableShareFieldSelect() {
+        if(this.selectedLocation === 'relatedObject' && !this.rule.relationship.nextRelationship) {
+            this.disableShareField = true;
+        }
+        else {
+            this.disableShareField = false;
+        }
+    }
+
 
     //--------------------- Event handlers for Location component ---------------------// 
 
     // Replace with handlers for generic change of relationship
     handleRelationshipChange(event) {
+
         console.log('Captured relationship change in top component: '+JSON.stringify(event.detail.relationship));
         this.rule.relationship = event.detail.relationship;
         this.rule.controllingObjectApiName = event.detail.controllingObjectApiName;
+        this.selectedLocation = event.detail.selectedLocation;
+        this.disableEnableShareFieldSelect();
+
         this.fireEventWithRule();
     }
-
 
     //--------------------- Event handlers for Field component ---------------------// 
 

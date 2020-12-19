@@ -98,7 +98,8 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         console.log('notifying parent detail component');
         const relationshipDetails = {
             relationship: newRelationship,
-            controllingObjectApiName: controllingObjectApiName
+            controllingObjectApiName: controllingObjectApiName,
+            selectedLocation: this._selectedLocation
         };
         const selection = new CustomEvent('relationshipchange', {
             detail: relationshipDetails

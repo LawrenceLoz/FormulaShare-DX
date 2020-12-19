@@ -41,6 +41,7 @@
     <template if:true={sharedObjectDetail}>
         <h3 class="slds-section-title--divider">Share with</h3>
         <c-formula-share-rule-detail-field 
+            disable-share-field={disableShareField}
             object-with-share-field={rule.controllingObjectApiName}
             share-with={rule.shareWith}
             internal-sharing-model={sharedObjectDetail.internalSharingModel}

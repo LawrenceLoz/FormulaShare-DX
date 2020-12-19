@@ -29,4 +29,4 @@ ehthumbs.db
 $RECYCLE.BIN/
 
 # FormulaShare Rules (ignored to avoid unwanted namespace updates)
-fs-sample-app/main/default/customMetadata/
+#fs-sample-app/main/default/customMetadata/

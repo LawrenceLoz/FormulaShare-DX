@@ -39,7 +39,6 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     List<String> generalFieldNames = new List<String>{
         namespacePrefix + 'Description__c',
         namespacePrefix + 'Object_Shared__c',
-        namespacePrefix + 'Shared_To__c',
         namespacePrefix + 'Share_With__c',
         namespacePrefix + 'Access_Level__c',
         namespacePrefix + 'Active__c',
@@ -57,6 +56,8 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
     Set<String> relationshipSpecificFieldsSet = new Set<String> {
         namespacePrefix + 'Shared_To_Field_Type__c',
         namespacePrefix + 'Child_Object_Shared_To_Field_Type__c',
+
+        namespacePrefix + 'Shared_To__c',
 
         namespacePrefix + 'Child_Object_with_Shared_To_Field__c',
         namespacePrefix + 'Child_Object_Lookup_Field__c',
@@ -245,9 +246,6 @@ public inherited sharing class FormulaShareRulesMetadataDMLService {
                 ruleFieldValue.value = ruleNewValues.get(fieldWithNamespace);
             }
 
-//            System.debug('fieldWithNamespace: '+fieldWithNamespace);
-//            System.debug('field set: '+relationshipSpecificFieldsSet);
-//
             // Clear all relationship fields which aren't set explicitly
             else if(relationshipSpecificFieldsSet.contains(fieldWithNamespace)) {
                 system.debug('clearing '+fieldWithNamespace);

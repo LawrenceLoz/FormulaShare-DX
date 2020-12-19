@@ -266,7 +266,7 @@ export default class FormulaShareRelationshipSharedObject extends LightningEleme
         // If another child component, check validity on child
         if(this.linkToNext) {
             const childRelationship = this.template.querySelector('c-formula-share-relationship-object');
-            return childRelationship.getError();
+            return childRelationship ? childRelationship.getError() : null;
         }
 
         // If user has clicked to add an object but not selected one yet, indicate object needs to be selected

@@ -57,24 +57,4 @@ public with sharing class FormulaShareRuleDMLController {
         return mdRule;
     }
 
-
-//    // To deseriarlise rule object received from create/edit component
-//    @TestVisible
-//    private class ComponentRule {
-//        @TestVisible String developerName;
-//        @TestVisible String label;
-//        @TestVisible String ruleDescription;
-//
-//        @TestVisible String objectSharedAPIName;
-//        @TestVisible FormulaShareSObjectRelationship relationship;
-//        @TestVisible String controllingObjectSharedToFieldType;
-//
-//        @TestVisible String shareWith;
-//        @TestVisible String accessLevel;
-//        @TestVisible String contactAccess;
-//        @TestVisible String caseAccess;
-//        @TestVisible String opportunityAccess;
-//        @TestVisible String sharingReason;
-//    }
-    
 }
