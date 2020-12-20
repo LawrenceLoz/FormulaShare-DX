@@ -41,7 +41,7 @@ describe('c-formula-share-rules-page', () => {
         })
     });
 
-    it('Test illustration when no rules are available (Positive)', () => {
+    it('Test show illustration (Positive)', () => {
         const element = createElement('c-formula-share-rules-page', {
             is: FormulaShareRulesPage
         });
@@ -101,6 +101,7 @@ describe('c-formula-share-rules-page', () => {
             expect(ruleCreateModal).not.toBeNull();
         })
         .then(() => {
+            // Close modal window for c-formula-share-rule-create.
             const ruleCreateModal = element.shadowRoot.querySelector('c-formula-share-rule-create');
        
             const closeEvent = new CustomEvent("close");
@@ -109,7 +110,7 @@ describe('c-formula-share-rules-page', () => {
             ruleCreateModal.dispatchEvent(closeEvent);
         })
         .then(() => {
-            // Check if modal opened after click on button.
+            // Check if modal is closed.
             const ruleCreateModal = element.shadowRoot.querySelector('c-formula-share-rule-create');
             expect(ruleCreateModal).toBeNull();
         })
