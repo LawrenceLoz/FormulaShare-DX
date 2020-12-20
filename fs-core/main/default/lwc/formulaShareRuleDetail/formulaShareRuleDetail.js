@@ -168,8 +168,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.rule.controllingObjectSharedToFieldAPIName = event.detail;
         
         // Also set field in controlling object in relationship (this is referenced in rule DML)
-        this.setRelationshipSharedField(this.rule.relationship);
-        console.log('relationship field: full rel now: '+JSON.stringify(this.rule.relationship));
+        this.getRelationshipWithNewControllingObject(this.rule.relationship);
         this.fireEventWithRule();
     }
     handleShareWithChange(event) {
@@ -182,16 +181,13 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.fireEventWithRule();
     }
 
-    // Set controllingObjectSharedToFieldAPIName field in the lowest level of relationship
-    setRelationshipSharedField(rel) {
+    // Use iterative method to navigate to bottom object, and update each level using spread
+    getRelationshipWithNewControllingObject(rel) {
         if(rel.nextRelationship) {
-            console.log('relationship field: checking next rel: '+JSON.stringify(rel.nextRelationship));
-            this.setRelationshipSharedField(rel.nextRelationship);
+            return {...rel, nextRelationship: this.getRelWithControllingObject(rel.nextRelationship)};
         }
         else {
-            rel['sharedToFieldApiName'] = this.rule.controllingObjectSharedToFieldAPIName;
-            console.log('relationship field: trying: '+this.rule.controllingObjectSharedToFieldAPIName);
-            console.log('relationship field: setting: '+rel.sharedToFieldApiName);
+            return {...rel, sharedToFieldApiName: this.rule.controllingObjectSharedToFieldAPIName};
         }
     }
 

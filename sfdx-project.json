@@ -23,7 +23,7 @@
     ],
     "namespace": "sdfs",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "48.0",
+    "sourceApiVersion": "50.0",
     "packageAliases": {
         "FormulaShare": "0Ho1n0000004C9wCAE",
         "FormulaShare@0.1.0-1": "04t1n000002NXeOAAW",
