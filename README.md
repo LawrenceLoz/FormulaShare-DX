@@ -51,17 +51,22 @@ The batch job is scheduled to assess all record sharing on a regular basis. Real
 
 ## Technical configuration
 
-Unless there's a good reason not to, we recommend installing the free security reviewed [AppEchange package](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) to implement FormulaShare. This ensures you can benefit from additional platform limits and automatic package upgrades. For more details on post-installation setup [check the guide](https://cloudsundial.com/node/40).
+Unless you're contributing to the product, we strongly recommend installing the free security reviewed [AppEchange package](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) to implement FormulaShare. This ensures you can benefit from additional platform limits and automatic package upgrades. For information on deploying without the package, see the section [Deploying to an Org](#deploying-to-an-org).
 
-The steps below outline how to implement when code in this repo is added directly to an org.
+The steps below outline what to do after FormulaShare has been installed or deployed to get up and running. For more details on post-installation setup [check the guide](https://cloudsundial.com/node/40).
 
 * **Assign permissions** Assign the permission set FormulaShare Admin
 * **Call FormulaShareService from shared object triggers** The following code can be added to any trigger or trigger handler code called during the after insert, update, delete and undelete invocations of a trigger to manage sharing changes for this object:
 ```
-sdfs.FormulaShareHelper helper = new FormulaShareHelper();
+sdfs.FormulaShareHelper helper = new sdfs.FormulaShareHelper();
 insert helper.getSharesToInsert();
 delete helper.getSharesToDelete();
 ```
+Note that if you've deployed metadata from this repo directly rather than installed the managed package, the package namespace should be removed from the first line and this should instead be:
+```
+FormulaShareHelper helper = new FormulaShareHelper();
+```
+
 If you use a trigger framework with a central delegating handler, the code can be added in a central delegating class instead of individually for each object.
 
 * **Schedule batch recalculation of FormulaShare rules** [Schedule the apex class](https://help.salesforce.com/articleView?id=code_schedule_batch_apex.htm&type=5) FormulaShareProcessSchedulable to recalculate all rules on a regular basis
@@ -101,6 +106,45 @@ Logs are removed based on a retention schedule, which by default is 8 days for R
 
 Known limitations are outlined in the guide: https://cloudsundial.com/formulashare-limits-and-limitations
 
+## Deploying to an org
+
+There are a few ways to deploy FormulaShare depending on how you're planning to use, adapt or contribute:
+
+### Install from the AppExchange
+_Best for_: Using the package as it's designed\
+_Steps to take_:
+ - Install to a sandbox or production from the [AppEchange listing](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1)
+ - Complete post-installation steps described in [Technical configuration](#technical-configuration)
+
+This is the simplest and most convenient way to introduce FormulaShare for your organisation. The package can be installed in a few clicks and is kept up to date through an automated release process. Since the app has been security reviewed, it's given its own set of limits and won't contribute to most limits in your org.
+
+### Deploy directly to a sandbox or production
+_Best for_: Getting source code into your own environment using traditional development methodologies.\
+_Steps to take_:
+ - Clone or fork the repo, and use VS Code, Salesforce DX command line or another tool to deploy the source files to your org
+ - Complete post-installation steps described in [Technical configuration](#technical-configuration)
+ - Optionally, call execute FSSampleAppDataGenerationService.run(_noTestDonations_) to generate a set of test data in the sample app
+
+This is the simplest way of getting source files into an org with your configuration and the ability to view and edit components. If you'd like to contribute enhancements or fixes, just fork the repo, deploy, retrieve your changes, create an issue in GitHub and submit a PR.
+
+### Deploy to a scratch org without using the namespace
+Best for: Working independently on contributions or custom versions using a scratch org workflow\
+ _Steps to take_:
+ - Clone or fork the repo
+ - Remove the attribute `"namespace": "sdfs"` from [sfdx-project.json](sfdx-project.json)
+ - Run the batch script [sfdx-project.json](buildScratchOrg.bat). This creates a scratch org, deploys everything, assigns permission sets to the default user, creates test data and schedules the batch
+
+This workflow enables development using scratch orgs and a version which doesn't reference the namespace of the FormulaShare managed package. FormulaShare is designed to work correctly whether the namespace is in place or not, and this approach is probably best if you're adapting FormulaShare for use in your own organisation or app and work with scratch orgs, or if you have ideas or enhancements to contribute to the project which don't impact dynamic metadata references.
+
+### Deploy to a scratch org configured to use the FormulaShare package namespace
+Best for: Working on complex changes to the core project which will become part of the managed package. Note that to support this workflow, temporary admin access to your dev hub will be required by the owner of the FormulaShare packaging org\
+_Steps to take_:
+ - Clone or fork the repo
+ - Create an issue with title "Namespace Access Request: Username" to request authorisation to work with the namespace (further instructions will be sent in response to the issue)
+ - Once authorisation and other configuration is complete, the batch/shell script can be used as described above
+
+This process enables development using a dev hub and scratch orgs which can simulate the package namespace, and gives the most accurate development representation of the packaging org. This is ideal when changes involve complex dynamic metadata references and should therefore be tested with the namespace in place to ensure they work correctly.
+
 ## Ethos
 
-FormulaShare is developed as a community project and is free to use and distribute. Contributions, collaborations, feedback and suggestions are welcome.
+FormulaShare is a community project and is free to use and distribute. Contributions, collaborations, feedback and suggestions are welcome. Feel free to raise issues for enhancements or fixes, and fork the repo and submit a pull request if you'd like to contribute your own work to the project.
