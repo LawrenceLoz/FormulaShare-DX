@@ -3,7 +3,6 @@
 #Before running this script, make it executable with the following command:
 #chmod +x ./buildScratchOrg.sh
 
-username=formulasharetestuser%orgName%@sfdx.org
 nameOfMonth=$(date +%b)
 day=$(date +%d)
 
