@@ -3,6 +3,7 @@ import { ShowToastEventName } from 'lightning/platformShowToastEvent';
 
 import FormulaShareRulesListView from 'c/formulaShareRulesListView';
 import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 
 // Mocking imperative Apex method call.
@@ -16,6 +17,8 @@ import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewCont
     { virtual: true }
 );*/
 
+// Register as Apex wire adapter. Some tests verify that provisioned values trigger desired behavior.
+const getTreeGridListAdapter = registerApexTestWireAdapter(getTreeGridData);
 
 // Import mock data to send through the wire adapter.
 const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
@@ -126,7 +129,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Emit error from @wire
-        getTreeGridDataWireAdapter.error();
+        getTreeGridListAdapter.error();
 
         // Mock handler for toast event
         const handler = jest.fn();

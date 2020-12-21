@@ -271,9 +271,6 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
         
-        // Mock return value for FormulaShareRulesListViewController.activateDeactivate.
-        //activateDeactivateWireAdapter.emit(mockExampleTreeGridData);
-        
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
         // ending the test and fail the test if the promise rejects.
@@ -299,6 +296,78 @@ describe('c-formula-share-rules-list-view', () => {
         })
         .then(() => {
             // Missing assertions. Don't know how to check if spinner appears.
+        });
+    });
+
+    it('Test deactivate rule (Positive).', () => {
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(() => {
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            // Extract parents.
+            const parents = treeGrid.data;
+            // Get first child of first parent.
+            const firstChild = parents[0]._children;
+            const firstRowOfFirstChild = firstChild[0];
+
+            const rowActionEvent = new CustomEvent(
+                "rowaction", {
+                    detail: {
+                        action: { name: "deactivate" },
+                        row: firstRowOfFirstChild
+                    }
+            });
+            
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        })
+        .then(() => {
+            // Missing assertions. Don't know how to check if spinner appears.
+        });
+    });
+
+    it('Test open schedule modal (Positive).', () => {
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(() => {
+            const rowActionEvent = new CustomEvent(
+                "rowaction", {
+                    detail: {
+                        action: { name: "scheduleWarning" },
+                    }
+            });
+            
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        })
+        .then(() => {
+            // Verify c-formula-share-schedule-job-description is present in DOM.
+            const formulaShareSchedulaJobDescription = element.shadowRoot.querySelector('c-formula-share-schedule-job-description');
+            expect(formulaShareSchedulaJobDescription).not.toBeNull();
         });
     });
 });
