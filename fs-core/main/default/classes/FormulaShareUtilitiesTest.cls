@@ -137,10 +137,10 @@ public with sharing class FormulaShareUtilitiesTest {
         for(String key : reasons.keySet()) {
             if(key.contains('FormulaShare_Log_Share__c')) {
                 foundReason = true;
-                System.assertEquals('FormulaShare Log Share', reasons.get(key), 'Label mismatch');
+                System.assertEquals('FormulaShare Batch Log Share', reasons.get(key), 'Label mismatch');
             }
         }
-        System.assert(foundReason, 'Didnt find FormulaShare Log Share sharing reason');
+        System.assert(foundReason, 'Didnt find FormulaShare Batch Log Share sharing reason');
     }
 
 }
