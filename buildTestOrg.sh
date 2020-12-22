@@ -1,3 +1,7 @@
+# This script creates a long-lived (30 days) scratch org with a relatively large amount of data (~700 donations).
+# This can be helpful when persistent data and large batches is useful for testing.
+
+
 #!/bin/bash
 
 #Before running this script, make it executable with the following command:

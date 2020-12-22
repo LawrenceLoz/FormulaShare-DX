@@ -131,8 +131,7 @@ This is the simplest way of getting source files into an org with your configura
 Best for: Working independently on contributions or custom versions using a scratch org workflow\
  _Steps to take_:
  - Clone or fork the repo
- - Remove the attribute `"namespace": "sdfs"` from [sfdx-project.json](sfdx-project.json)
- - Run the batch script [sfdx-project.json](buildScratchOrg.bat). This creates a scratch org, deploys everything, assigns permission sets to the default user, creates test data and schedules the batch
+ - Run the [shell script](buildScratchOrg.sh) (Mac) or [batch script](buildScratchOrg.bat) (Windows). This creates a scratch org, deploys everything, assigns permission sets to the default user, creates test data and schedules the batch
 
 This workflow enables development using scratch orgs and a version which doesn't reference the namespace of the FormulaShare managed package. FormulaShare is designed to work correctly whether the namespace is in place or not, and this approach is probably best if you're adapting FormulaShare for use in your own organisation or app and work with scratch orgs, or if you have ideas or enhancements to contribute to the project which don't impact dynamic metadata references.
 

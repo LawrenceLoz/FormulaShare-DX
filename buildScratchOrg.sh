@@ -1,3 +1,12 @@
+# This script creates and configures a scratch org for genenral development. The steps below will be carried out:
+# - A default scratch org valid for 7 days will be created with name "<Day><Mon>FS" (e.g. "21DecFS")
+# - The core app and sample app will be pushed
+# - Permission sets for the core and sample apps will be assigned to the default scratch org user
+# - Lightning debug will be enabled for the default user
+# - A few test records are created (donations, programmes, countries and themes)
+# - The FormulaShare batch job will be scheduled
+
+
 #!/bin/bash
 
 #Before running this script, make it executable with the following command:
