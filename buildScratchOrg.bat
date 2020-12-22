@@ -1,3 +1,11 @@
+:: This script creates and configures a scratch org for genenral development. The steps below will be carried out:
+:: - A default scratch org valid for 7 days will be created with name "<Day><Mon>FS" (e.g. "21DecFS")
+:: - The core app and sample app will be pushed
+:: - Permission sets for the core and sample apps will be assigned to the default scratch org user
+:: - Lightning debug will be enabled for the default user
+:: - A few test records are created (donations, programmes, countries and themes)
+:: - The FormulaShare batch job will be scheduled
+
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -24,5 +32,3 @@ call sfdx force:apex:execute -f config/setDebugModeForUser.apex
 echo Set up user for debug mode
 call sfdx force:apex:execute -f config/runApexOnInstallation.apex
 echo Created test data
-call sfdx force:user:create --setalias fstest --definitionfile config/user-def.json username=formulasharetestuser%orgName%@sfdx.org
-echo Created test user fstest

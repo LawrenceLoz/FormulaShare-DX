@@ -1,3 +1,6 @@
+:: This script creates a long-lived (30 days) scratch org with a relatively large amount of data (~700 donations).
+:: This can be helpful when persistent data and large batches is useful for testing.
+
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -15,5 +18,3 @@ call sfdx force:apex:execute -f config/setDebugModeForUser.apex -u %orgName%
 echo Set up user for debug mode
 call sfdx force:apex:execute -f config/runApexFullTestDataset.apex -u %orgName%
 echo Created test data
-call sfdx force:user:create --setalias fstest --definitionfile config/user-def.json username=formulasharetestuser%orgName%@sfdx.org -u %orgName%
-echo Created test user fstest
