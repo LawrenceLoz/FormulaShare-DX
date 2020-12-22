@@ -9,3 +9,6 @@ package.xml
 **/jsconfig.json
 
 **/.eslintrc.json
+
+# LWC Jest tests
+**/__tests__/**
