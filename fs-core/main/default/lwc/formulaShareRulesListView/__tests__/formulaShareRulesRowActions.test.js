@@ -2,13 +2,10 @@ import { createElement } from 'lwc';
 import FormulaShareRulesListView from 'c/formulaShareRulesListView';
 
 import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+
 import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import { activateDeactivate } from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
-
-// Use a mocked navigation plugin.
-// See fs-core/test/jest-mocks/lightning/navigation.js for the mock
-// and see jest.config.js for jest config to use the mock
-//import { getNavigateCalledWith } from 'lightning/navigation';
 
 // Use a mocked navigation plugin.
 // fs-core/test/jest-mocks/lightning/platformShowToastEvent.js for the mock
@@ -22,7 +19,9 @@ const batchIsProcessingFalse = require('./data/batchIsProcessingFalse.json');
 
 // Register a test wire adapter.
 const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
-//const activateDeactivateWireAdapter = registerLdsTestWireAdapter(activateDeactivate);
+
+// Register as Apex wire adapter. Some tests verify that provisioned values trigger desired behavior.
+const getActivateDeactivateAdapter = registerApexTestWireAdapter(activateDeactivate);
 
 describe('c-formula-share-rules-list-view', () => {
     afterEach(() => {
@@ -66,9 +65,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstParent = parents[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "recalculate" },
+                        action: { name: 'recalculate' },
                         row: firstParent
                     }
             });
@@ -107,9 +106,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstParent = parents[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "recalculate" },
+                        action: { name: 'recalculate' },
                         row: firstParent
                     }
             });
@@ -163,9 +162,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstParent = parents[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "recalculate" },
+                        action: { name: 'recalculate' },
                         row: firstParent
                     }
             });
@@ -205,9 +204,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstRowOfFirstChild = firstChild[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "viewlogs" },
+                        action: { name: 'viewlogs' },
                         row: firstRowOfFirstChild
                     }
             });
@@ -244,9 +243,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstRowOfFirstChild = firstChild[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "edit" },
+                        action: { name: 'edit' },
                         row: firstRowOfFirstChild
                     }
             });
@@ -284,9 +283,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstRowOfFirstChild = firstChild[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "activate" },
+                        action: { name: 'activate' },
                         row: firstRowOfFirstChild
                     }
             });
@@ -322,9 +321,9 @@ describe('c-formula-share-rules-list-view', () => {
             const firstRowOfFirstChild = firstChild[0];
 
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "deactivate" },
+                        action: { name: 'deactivate' },
                         row: firstRowOfFirstChild
                     }
             });
@@ -335,6 +334,57 @@ describe('c-formula-share-rules-list-view', () => {
         .then(() => {
             // Missing assertions. Don't know how to check if spinner appears.
         });
+    });
+
+    it('Test activate/deactivate rule (Negative).', () => {
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock handler for toast event.
+        const handler = jest.fn();
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(() => {
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            // Extract parents.
+            const parents = treeGrid.data;
+            // Get first child of first parent.
+            const firstChild = parents[0]._children;
+            const firstRowOfFirstChild = firstChild[0];
+
+            const rowActionEvent = new CustomEvent(
+                'rowaction', {
+                    detail: {
+                        action: { name: 'activate' },
+                        row: firstRowOfFirstChild
+                    }
+            });
+            
+            // Add event listener to catch toast event.
+            element.addEventListener(ShowToastEventName, handler);
+
+            // Emit error from @wire.
+            getActivateDeactivateAdapter.error();
+
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        })
+        .then(() => {
+            // Check if toast event has been fired.
+            expect(handler).toHaveBeenCalled();
+            /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+            expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
+            expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
+        })
     });
 
     it('Test open schedule modal (Positive).', () => {
@@ -352,9 +402,9 @@ describe('c-formula-share-rules-list-view', () => {
         // ending the test and fail the test if the promise rejects.
         return Promise.resolve().then(() => {
             const rowActionEvent = new CustomEvent(
-                "rowaction", {
+                'rowaction', {
                     detail: {
-                        action: { name: "scheduleWarning" },
+                        action: { name: 'scheduleWarning' },
                     }
             });
             
