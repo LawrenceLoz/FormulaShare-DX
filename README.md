@@ -111,16 +111,14 @@ Known limitations are outlined in the guide: https://cloudsundial.com/formulasha
 There are a few ways to deploy FormulaShare depending on how you're planning to use, adapt or contribute:
 
 ### Install from the AppExchange
-_Best for_: Using the package as it's designed\
-_Steps to take_:
+_Best for_: Using the package as it's designed
  - Install to a sandbox or production from the [AppEchange listing](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1)
  - Complete post-installation steps described in [Technical configuration](#technical-configuration)
 
 This is the simplest and most convenient way to introduce FormulaShare for your organisation. The package can be installed in a few clicks and is kept up to date through an automated release process. Since the app has been security reviewed, it's given its own set of limits and won't contribute to most limits in your org.
 
 ### Deploy directly to a sandbox or production
-_Best for_: Getting source code into your own environment using traditional development methodologies.\
-_Steps to take_:
+_Best for_: Getting source code into your own environment using traditional development methodologies
  - Clone or fork the repo, and use VS Code, Salesforce DX command line or another tool to deploy the source files to your org
  - Complete post-installation steps described in [Technical configuration](#technical-configuration)
  - Optionally, call execute FSSampleAppDataGenerationService.run(_noTestDonations_) to generate a set of test data in the sample app
@@ -128,16 +126,14 @@ _Steps to take_:
 This is the simplest way of getting source files into an org with your configuration and the ability to view and edit components. If you'd like to contribute enhancements or fixes, just fork the repo, deploy, retrieve your changes, create an issue in GitHub and submit a PR.
 
 ### Deploy to a scratch org without using the namespace
-Best for: Working independently on contributions or custom versions using a scratch org workflow\
- _Steps to take_:
+_Best for_: Working independently on contributions or custom versions using a scratch org workflow
  - Clone or fork the repo
  - Run the [shell script](buildScratchOrg.sh) (Mac) or [batch script](buildScratchOrg.bat) (Windows). This creates a scratch org, deploys everything, assigns permission sets to the default user, creates test data and schedules the batch
 
 This workflow enables development using scratch orgs and a version which doesn't reference the namespace of the FormulaShare managed package. FormulaShare is designed to work correctly whether the namespace is in place or not, and this approach is probably best if you're adapting FormulaShare for use in your own organisation or app and work with scratch orgs, or if you have ideas or enhancements to contribute to the project which don't impact dynamic metadata references.
 
 ### Deploy to a scratch org configured to use the FormulaShare package namespace
-Best for: Working on complex changes to the core project which will become part of the managed package. Note that to support this workflow, temporary admin access to your dev hub will be required by the owner of the FormulaShare packaging org\
-_Steps to take_:
+_Best for_: Working on complex changes to the core project which will become part of the managed package. Note that to support this workflow, temporary admin access to your dev hub will be required by the owner of the FormulaShare packaging org
  - Clone or fork the repo
  - Create an issue with title "Namespace Access Request: Username" to request authorisation to work with the namespace (further instructions will be sent in response to the issue)
  - Once authorisation and other configuration is complete, the batch/shell script can be used as described above
