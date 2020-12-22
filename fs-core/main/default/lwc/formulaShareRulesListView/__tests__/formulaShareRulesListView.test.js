@@ -28,12 +28,12 @@ const onlyParentRows = require('./data/onlyParentRows.json');
 const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
 
 // Sample error for imperative Apex call
-const APEX_FORMULA_SHARE_RULES_ERROR = {
+/*const APEX_FORMULA_SHARE_RULES_ERROR = {
     body: { message: 'An internal server error has occurred' },
     ok: false,
     status: 400,
     statusText: 'Bad Request'
-};
+};*/
 
 describe('c-formula-share-rules-list-view', () => {
     afterEach(() => {
@@ -114,12 +114,9 @@ describe('c-formula-share-rules-list-view', () => {
 
     it('Test row with example data + columns in lightning-tree-grid (Negative).', () => {
         // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/apexImperativeMethod/__tests__/apexImperativeMethod.test.js
-        
-        // Assign mock value for rejected Apex promise
-        //jest.fn().mockRejectedValue(APEX_FORMULA_SHARE_RULES_ERROR);
 
         const TOAST_TITLE = 'Error fetching data from Salesforce';
-        const TOAST_MESSAGE = APEX_FORMULA_SHARE_RULES_ERROR.body.message;
+        const TOAST_MESSAGE = 'Message from Salesforce: ';
         const TOAST_VARIANT = 'error';
 
         // Create initial lwc element and attach to virtual DOM.
@@ -128,13 +125,13 @@ describe('c-formula-share-rules-list-view', () => {
         });
         document.body.appendChild(element);
 
-        // Emit error from @wire
-        getTreeGridListAdapter.error();
-
         // Mock handler for toast event
         const handler = jest.fn();
         // Add event listener to catch toast event
         element.addEventListener(ShowToastEventName, handler);
+
+        // Emit error from @wire
+        getTreeGridListAdapter.error();
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -144,8 +141,8 @@ describe('c-formula-share-rules-list-view', () => {
             // Check if toast event has been fired
             expect(handler).toHaveBeenCalled();
             expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-            expect(handler.mock.calls[0][0].detail.message).toBe(TOAST_MESSAGE);
+            expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
             expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);
-        });
+        })
     });
 });
