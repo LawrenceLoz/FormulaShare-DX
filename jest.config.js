@@ -13,7 +13,9 @@ module.exports = {
         '^lightning/uiRecordApi$':
             '<rootDir>/fs-core/test/jest-mocks/lightning/uiRecordApi',
         '^lightning/messageService$':
-            '<rootDir>/fs-core/test/jest-mocks/lightning/messageService'
+            '<rootDir>/fs-core/test/jest-mocks/lightning/messageService',
+        "^lightning/empApi$":
+            "<rootDir>/fs-core/test/jest-mocks/lightning/empApi"
     },
     //setupFiles: ['jest-canvas-mock'],
     setupFilesAfterEnv,

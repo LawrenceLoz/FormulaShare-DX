@@ -7,6 +7,7 @@ import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewControlle
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
+import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
 
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
@@ -142,7 +143,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
 
         else if(error) {
-            //console.log('Error fetching data from Salesforce');
+            console.log('Error fetching data from Salesforce');
             this.showError(error, 'Error fetching data from Salesforce');
         }
     }
@@ -187,43 +188,70 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
     }
 
+    prefix;
+    @wire(getNamespacePrefix)
+    wiredNamespacePrefix({ error, data })
+    {
+        if (data) {
+            console.log('>>>data: ' + JSON.stringify(data, null, '\t'));
+
+            this.prefix = data;
+        } else if (error) {
+            console.error('>>>error: ' + error);
+            this.prefix = undefined;
+            console.log('Error getting namespace prefix');
+            this.showError(error, 'Error getting namespace prefix');
+        }        
+    }
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
     createOrUpdate = false;
     manageRefreshEvents() {
+        console.log('>>>manageRefreshEvents.');
 
         // Get namespace prefix
-        getNamespacePrefix()
-            .then((prefix) => {
-                //console.log('Got namespace: '+prefix);
+        /*getNamespacePrefix()
+            .then((prefix) => {*/
+                try {
+                    console.log('Got namespace: '+ JSON.stringify(this.prefix, null, '\t'));
 
                 // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
-                    //console.log('Received Refresh Event');
+                    console.log('Received Refresh Event');
                     this.refreshView();
                 };
-                subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
-                    //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                console.log('#1');
+                subscribe('/event/'+this.prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback)
+                .then(response => {
+                    console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+                })
+                .catch(error => {
+                    console.error('>>>error 2: ', JSON.stringify(error));
                 });
-
+                console.log('#2');
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
                     if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
-                        //console.log('Received FormulaShare_Rule_DML__e');
+                        console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
                     }
                 };
+                console.log('#3');
                 subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
-                    //console.log('List component subscribed to : ', JSON.stringify(response.channel));
+                    console.log('List component subscribed to : ', JSON.stringify(response.channel));
                 });
-
-            })
-            .catch(error => {
-                //console.log('Error getting namespace prefix');
+                console.log('#4');
+                } catch (error) {
+                    console.error('>>>error: ', JSON.stringify(error));
+                }
+                
+            }
+            /*.catch(error => {
+                console.log('Error getting namespace prefix');
                 this.showError(error, 'Error getting namespace prefix');
             });
-    }
+    }*/
 
 
     // Set available drop-down actions for each grid row
@@ -376,9 +404,14 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Action method to update a rule to active/inactive
     spinnerClasses;
     activateDeactivate(row, actionName) {
+        console.log('>>>activateDeactivate.');
+        console.log('>>>row: ' + JSON.stringify(row, null, '\t'));
+        console.log('>>>actionName: ' + JSON.stringify(actionName, null, '\t'));
+
         const rowDeveloperName = row['developerName'];
         activateDeactivate({ ruleName : rowDeveloperName, type : actionName })
             .then(() => {
+                console.log('then()');
                 this.processingLoad = true;
                 this.spinnerClasses = 'processingMessage';
 
@@ -386,9 +419,10 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 setTimeout(() => {
                     this.spinnerClasses = 'processingMessage afterProcessingMessage';
                 }, 5000);
+                console.log('#1')
             })
             .catch(error => {
-                //console.log('Error changing activation status');
+                console.log('Error changing activation status');
                 this.showError(error, 'Error changing activation status')
             });
     }
@@ -423,6 +457,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     // Called to trigger a toast message including a system error
     showError(error, toastTitle) {
+        console.log('>>>error: ' + JSON.stringify(error, null, '\t'));
+        console.log('>>>toastTitle: ' + JSON.stringify(toastTitle, null, '\t'));
+
         let errorMessage = 'Unknown error';
         if (Array.isArray(error.body)) {
             errorMessage = error.body.map(e => e.message).join(', ');
