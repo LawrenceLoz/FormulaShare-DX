@@ -63,7 +63,7 @@ public with sharing class FormulaShareRuleDetailController {
             System.debug('Checking object: '+ed.QualifiedApiName+' internal sharing: '+ed.InternalSharingModel+' external sharing '+ed.ExternalSharingModel);
             if((ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read'
                 || ed.ExternalSharingModel == 'Private' || ed.ExternalSharingModel == 'Read')
-                && FormulaShareUtilities.isSupportedObjectForCustomMetadata(ed.QualifiedApiName)) {
+                && !FormulaShareUtilities.excludedFromCustomMetadata.contains(ed.QualifiedApiName)) {
                 ShareableObject so = new ShareableObject();
                 so.objectApiName = ed.QualifiedApiName;
                 so.objectLabel = ed.Label;
@@ -133,6 +133,8 @@ public with sharing class FormulaShareRuleDetailController {
             sfoList.add(sfo);
         }
 
+        sfoList.sort();
+
         return sfoList;
     }
 
@@ -195,7 +197,9 @@ public with sharing class FormulaShareRuleDetailController {
         public Boolean isCustom {get;set;}
     }
 
-    public class ShareFieldOption {
+
+    public class ShareFieldOption implements Comparable {
+
         @AuraEnabled
         public String fieldApiName {get;set;}
         @AuraEnabled
@@ -206,6 +210,20 @@ public with sharing class FormulaShareRuleDetailController {
         public Boolean isIdType {get;set;}
         @AuraEnabled
         public String formula {get;set;}
+
+        // Comparable interface allows us to call sort on the list of fields
+        public Integer compareTo(Object compareTo) {
+            ShareFieldOption compareToSfo = (ShareFieldOption) compareTo;
+            if (fieldLabel == compareToSfo.fieldLabel) {
+                return 0;
+            }
+            else if (fieldLabel > compareToSfo.fieldLabel) {
+                return 1;
+            }
+            else {
+                return -1;        
+            }
+        }
     }
 
 }

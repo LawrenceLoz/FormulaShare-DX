@@ -99,20 +99,8 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
             if(Object.keys(data).length === 0) {
                 this.disableChild(this.objectLabel + ' does not have any child objects');
             }
-
             else {
-                let relatedObjList = [];
-                data.forEach((obj) => {
-                    const option = {
-                        label: obj.relatedObjectLabel + ' (related by ' + obj.relatedFieldApiName + ')',
-                        value: obj.relatedObjectApiName + '|' + obj.relatedFieldApiName
-                    };
-                    relatedObjList.push(option);
-    
-                    this.objectNameToLabelMap.set(obj.relatedObjectApiName, obj.relatedObjectLabel);
-                });
-    
-                this.childObjectOptions = relatedObjList;
+                this.childObjectOptions = this.buildRelatedObjList(data);
             }
         }
     }
@@ -122,20 +110,30 @@ export default class FormulaShareRelationshipButtons extends LightningElement {
     @wire(getParentRelationships, { childObjectAPIName : '$objectApiName'} )
     parentRelationships({ error, data }) {
         if(data) {
-            
-            let relatedObjList = [];
-            data.forEach((obj) => {
-                const option = {
-                    label: obj.relatedObjectLabel + ' (related by ' + obj.relatedFieldApiName + ')',
-                    value: obj.relatedObjectApiName + '|' + obj.relatedFieldApiName
-                };
-                relatedObjList.push(option);
-
-                this.objectNameToLabelMap.set(obj.relatedObjectApiName, obj.relatedObjectLabel);
-            });
-
-            this.parentObjectOptions = relatedObjList;
+            if(Object.keys(data).length === 0) {
+                this.disableParent(this.objectLabel + ' does not have any parent objects');
+            }
+            else {
+                this.parentObjectOptions = this.buildRelatedObjList(data);
+            }
         }
+    }
+
+    // Constructs array of options for parent / child picklists
+    buildRelatedObjList(data) {
+        let relatedObjList = [];
+
+        data.forEach((obj) => {
+            const option = {
+                label: obj.relatedObjectLabel + ' (related by ' + obj.relatedFieldApiName + ')',
+                value: obj.relatedObjectApiName + '|' + obj.relatedFieldApiName
+            };
+            relatedObjList.push(option);
+
+            this.objectNameToLabelMap.set(obj.relatedObjectApiName, obj.relatedObjectLabel);
+        });
+
+        return relatedObjList;
     }
 
     

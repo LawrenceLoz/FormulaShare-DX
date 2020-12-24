@@ -112,6 +112,12 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     @track sharingReasonsHelpBox = false;
     toggleSharingReasonsHelpBox() {
         this.sharingReasonsHelpBox ? this.sharingReasonsHelpBox = false : this.sharingReasonsHelpBox = true;
+
+        // Scroll down after help text appears
+        setTimeout(() => {
+            const sharingReasonsHelp = this.template.querySelector('div[id*="sharingReasonsHelp"]');
+            sharingReasonsHelp.scrollIntoView();
+        }, 50);
     }
 
     // Get custom Salesforce classic domain on component load
