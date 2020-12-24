@@ -59,7 +59,7 @@ public with sharing class FormulaShareUtilitiesTest {
 //
 //        String shareKey = FormulaShareUtilities.getShareRecordKey(share);
 //
-//        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
+//        String idString = FormulaShareIdUtilities.get15CharacterId(UserInfo.getUserId());
 //        String expectedKey = idString + idString + 'Read' + 'FormulaShare_Log_Share__c';
 //        system.assertEquals(expectedKey, shareKey);
 //    }
@@ -77,18 +77,10 @@ public with sharing class FormulaShareUtilitiesTest {
 
         String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(fsLogType, share);
 
-        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
+        String idString = FormulaShareIdUtilities.get15CharacterId(UserInfo.getUserId());
         String expectedKey = idString + idString + 'Read';
         system.assertEquals(expectedKey, shareKey);
     }   */
-
-
-    @IsTest 
-    public static void testPassNullIdToGet15CharacterId() {
-        FormulaShareUtilities fsUtil = FormulaShareUtilities.construct();   // Will run code to generate non-mock object
-        String idStringFromNull = fsUtil.get15CharacterIdInstance(null);    // Runs instance implementation without mocking
-        system.assertEquals(null, idStringFromNull);        // Checks that static implementation returns null if passed null
-    }
 
 
     @IsTest

@@ -302,8 +302,15 @@ public inherited sharing class FormulaShareRulesSelector {
         List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 
         for(FormulaShare_Rule__mdt mdRule : mdRules) {
-            FormulaShareRule rule = FormulaShareRule.getRule(mdRule);
-            rulesToReturn.add(rule);
+
+            // Attempt to construct rule from metadata (ignore if any exceptions - could be the case if structure corrupted or object not supported)
+            try {
+                FormulaShareRule rule = FormulaShareRule.getRule(mdRule);
+                rulesToReturn.add(rule);
+            }
+            catch(Exception e) {
+                System.debug('Issue constructing rule: '+mdRule.developerName+'. Message from Salesforce: '+e.getMessage());
+            }
         }
 
         return rulesToReturn;

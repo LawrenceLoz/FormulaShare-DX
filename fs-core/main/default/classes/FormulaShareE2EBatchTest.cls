@@ -13,8 +13,8 @@ public with sharing class FormulaShareE2EBatchTest {
         FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
         FormulaShareRulesSelector.mock = mockFSRulesSelector;
 
-        FormulaShareUtilities mockFSShareUtiities = (FormulaShareUtilities) FormulaShareMockUtil.createMock(FormulaShareUtilities.class);
-        FormulaShareUtilities.mock = mockFSShareUtiities;
+        FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
+        FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
 
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
@@ -118,7 +118,9 @@ public with sharing class FormulaShareE2EBatchTest {
         Test.stopTest();
 
         // Retrieve share records for the inserted record log
-        List<FormulaShare_Record_Log__Share> shares = [SELECT Id, ParentId, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Record_Log__Share WHERE Parent.FormulaShare_Batch_Log__c = :batchLog.Id];
+        List<FormulaShare_Record_Log__Share> shares = [SELECT Id, ParentId, UserOrGroupId, AccessLevel, RowCause 
+            FROM FormulaShare_Record_Log__Share 
+            WHERE Parent.FormulaShare_Batch_Log__c = :batchLog.Id];
         System.debug('|||Inserted '+shares.size()+' share records: '+shares);
 
         Integer relevantUserSharesForLog1 = 0;
@@ -137,7 +139,7 @@ public with sharing class FormulaShareE2EBatchTest {
         System.assertEquals(2, relevantUserSharesForLog2, 'Expected share records for both users in rule in batch records for second record log');
     }
 
-    
+ 
     @IsTest
     public static void testUpdateInlaw() {
         setMocks();
@@ -177,4 +179,5 @@ public with sharing class FormulaShareE2EBatchTest {
         System.assertEquals(1, updatedShares.size(), 'Only a single share is expected');
         System.assertEquals(publicGroupId, updatedShares[0].UserOrGroupId, 'Should share with public group set by rule');
     }
+
 }

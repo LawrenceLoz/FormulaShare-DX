@@ -3,8 +3,8 @@ public with sharing class FormulaShareRuleFactory {
 
     public static String userRuleName = 'User_rule';
     public static String groupRuleName = 'Group_rule';
-    public static String roleSubName = 'Rule_sub_rule';
-    public static String roleRuleName = 'Rule_rule';
+    public static String roleSubName = 'Role_sub_rule';
+    public static String roleRuleName = 'Role_rule';
     public static String childUserRuleName = 'Child_user_rule';
     public static String ancestorUserRuleName = 'Ancestor_user_rule';
     public static String siblingUserRuleName = 'Sibling_user_rule';
@@ -165,9 +165,10 @@ public with sharing class FormulaShareRuleFactory {
         rule.firstQueryStepApiName = prefix + 'FormulaShare_Batch_Log__c';
 
         // Populate lookup field lists
-        Schema.SObjectType sharedType = FormulaShareUtilities.getSObjectTypeFromName(rule.objectSharedAPIName);
-        Schema.SObjectField lookupToControlling = FormulaShareUtilities.getSObjectFieldFromName(rule.firstQueryStepApiName, sharedType);
-        rule.lookupFromSharedObjToControllingObjFieldList.add(lookupToControlling);
+        
+//        Schema.SObjectType sharedType = FormulaShareUtilities.getSObjectTypeFromName(rule.objectSharedAPIName);
+//        Schema.SObjectField lookupToControlling = FormulaShareUtilities.getSObjectFieldFromName(rule.firstQueryStepApiName, sharedType);
+        rule.lookupFromSharedObjToControllingObjFieldList.add(getSOBjectFieldFromObject(rule.objectSharedAPIName, rule.firstQueryStepApiName));
 
         rule.relationship = getRelationshipAncestorRule(rule);
 
@@ -215,6 +216,13 @@ public with sharing class FormulaShareRuleFactory {
         rule.pathFromSharedObjToTopObj = prefix + 'FormulaShare_Batch_Log__c';
         rule.pathFromControllingObjToTopObj = prefix + 'FormulaShare_Log__c';
         rule.pathToSharedToField = prefix + 'FormulaShare_Rule_Name__c';
+
+        rule.lookupFromSharedObjToTopObjFieldList = new List<Schema.SObjectField>{
+            getSOBjectFieldFromObject(prefix + 'FormulaShare_Record_Log__c', prefix + 'FormulaShare_Batch_Log__c')
+        };
+        rule.lookupFromSiblingObjToTopObjFieldList = new List<Schema.SObjectField>{
+            getSOBjectFieldFromObject(prefix + 'FormulaShare_Rule_in_Batch__c', prefix + 'FormulaShare_Log__c')
+        };
 
         rule.relationship = getRelationshipSiblingRule(rule);
 
@@ -274,9 +282,9 @@ public with sharing class FormulaShareRuleFactory {
         rule.pathToSharedToField = prefix + 'Exception_Type__c';
         rule.firstQueryStepApiName = rule.lookupFromBottomObjTowardsSharedObj;
 
-        Schema.SObjectType boType = FormulaShareUtilities.getSObjectTypeFromName(rule.bottomObjectApiName);
-        Schema.SObjectField lookupToShared = FormulaShareUtilities.getSObjectFieldFromName(rule.pathFromBottomObjToSharedObj, boType);
-        rule.lookupFromBottomObjToSharedObjFieldList.add(lookupToShared);
+//        Schema.SObjectType boType = FormulaShareUtilities.getSObjectTypeFromName(rule.bottomObjectApiName);
+//        Schema.SObjectField lookupToShared = FormulaShareUtilities.getSObjectFieldFromName(rule.pathFromBottomObjToSharedObj, boType);
+        rule.lookupFromBottomObjToSharedObjFieldList.add(getSOBjectFieldFromObject(rule.bottomObjectApiName, rule.pathFromBottomObjToSharedObj));
 
         return rule;
     }
@@ -328,12 +336,8 @@ public with sharing class FormulaShareRuleFactory {
         rule.pathToSharedToField = prefix + 'FormulaShare_Rule_in_Batch__r.' + prefix + 'FormulaShare_Rule_Name__c';
 
         // Populate lookup field lists
-        Schema.SObjectType boType = FormulaShareUtilities.getSObjectTypeFromName(rule.bottomObjectApiName);
-        Schema.SObjectField lookupToShared = FormulaShareUtilities.getSObjectFieldFromName(rule.pathFromBottomObjToSharedObj, boType);
-        rule.lookupFromBottomObjToSharedObjFieldList.add(lookupToShared);
-
-        Schema.SObjectField lookupToControlling = FormulaShareUtilities.getSObjectFieldFromName(rule.lookupFromBottomObjTowardsControllingObj, boType);
-        rule.lookupFromBottomObjToControllingObjFieldList.add(lookupToControlling);
+        rule.lookupFromBottomObjToSharedObjFieldList.add(getSOBjectFieldFromObject(rule.bottomObjectApiName, rule.pathFromBottomObjToSharedObj));
+        rule.lookupFromBottomObjToControllingObjFieldList.add(getSOBjectFieldFromObject(rule.bottomObjectApiName, rule.lookupFromBottomObjTowardsControllingObj));
     
         rule.relationship = getRelationshipInlawRule(rule);
 
@@ -456,5 +460,16 @@ public with sharing class FormulaShareRuleFactory {
         rule.Related_Object_9_Shared_To_Field__c = prefix + 'Exception_Type__c';
 
         return rule;
-    }    
+    }   
+    
+    
+    // Similar functionality exists in utilities but we use version here to ensure unit tests are independent
+    private static Schema.SObjectField getSOBjectFieldFromObject(String objectApiName, String fieldApiName) {
+        Schema.SObjectType type = Schema.getGlobalDescribe().get(objectApiName);
+        System.debug('sib Found object: ' + type.getDescribe().getNAme());
+        Schema.SObjectField theField = type.getDescribe().fields.getMap().get(fieldApiName);
+        System.debug('Found field: ' + theField.getDescribe().getNAme());
+        return theField;
+    }
+    
 }

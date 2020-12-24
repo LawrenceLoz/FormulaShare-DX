@@ -137,11 +137,15 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return objNames;
         }
 
-        // -------------------------- FormulaShareUtilities Mocks ----------------------------- //
+        // -------------------------- FormulaShareIdUtilities Mocks ----------------------------- //
 
         else if(stubbedMethodName == 'get15CharacterIdInstance') {
             String argument18 = (String) listOfArgs[0];
             return argument18.left(15);
+        }
+
+        else if(stubbedMethodName == 'isValidIdType') {
+            return true;
         }
 
         // -------------------------- FormulaShareService Mocks ----------------------------- //

@@ -242,7 +242,7 @@ public inherited sharing class FormulaShareService {
 
 				// Add User Id to map
 				if(rule.shareWith == 'Users') {
-					if(FormulaShareUtilities.isValidIdType(sharedToString, Schema.User.getSObjectType())) {
+					if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.User.getSObjectType())) {
 						userQueryIdSet.add((Id) sharedToString);
 						userRecordRules.add(recordRule);
 					}
@@ -255,7 +255,7 @@ public inherited sharing class FormulaShareService {
 				// Add Group Id to map
 				else if(rule.shareWith == 'Public Groups') {
 					if(rule.controllingObjectSharedToFieldType == 'Id') {
-						if(FormulaShareUtilities.isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
+						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
 							updateShareMaps(recordRule.recordToShare.Id, (Id) sharedToString, rule);
 						}
 						else {
@@ -272,7 +272,7 @@ public inherited sharing class FormulaShareService {
 				// Add Role Id to role group query set
 				else if(rule.shareWith == 'Roles' || rule.shareWith == 'Roles and Internal Subordinates' || rule.shareWith == 'Roles, Internal and Portal Subordinates') {
 					if(rule.controllingObjectSharedToFieldType == 'Id') {
-						if(FormulaShareUtilities.isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
+						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
 							roleQueryIdSet.add((Id) sharedToString);
 							roleRecordRules.add(recordRule);
 						}
@@ -467,7 +467,7 @@ public inherited sharing class FormulaShareService {
 			AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal' OR Type = 'RoleAndSubordinates')
 			]) {
 
-			String shortRelatedToId = FormulaShareUtilities.get15CharacterId(grp.RelatedId);
+			String shortRelatedToId = FormulaShareIdUtilities.get15CharacterId(grp.RelatedId);
 			String key = shortRelatedToId + grp.Type;
 			system.debug('Added roleGroupEntry key: '+key+' for group: '+grp.Id);
 			roleGroupIds.put(key, grp.Id);
@@ -501,7 +501,7 @@ public inherited sharing class FormulaShareService {
 					sharedToId = (Id) sharedTo;
 				}
 	
-				String shortSharedToId = FormulaShareUtilities.get15CharacterId(sharedToId);
+				String shortSharedToId = FormulaShareIdUtilities.get15CharacterId(sharedToId);
 	
 				// Get group for Roles sharing
 				if(recordRule.rule.shareWith == 'Roles') {
@@ -631,11 +631,11 @@ public inherited sharing class FormulaShareService {
 
 
 	private String getShareKey(Id recordId, Id sharedTo, FormulaShareRule rule) {
-		FormulaShareUtilities fsUtil = FormulaShareUtilities.construct();
+		FormulaShareIdUtilities idUtil = FormulaShareIdUtilities.construct();
 
 		// Instance method used to support mocking for standard objects
-		String shareKey = fsUtil.get15CharacterIdInstance(recordId)
-			+ fsUtil.get15CharacterIdInstance(sharedTo);
+		String shareKey = idUtil.get15CharacterIdInstance(recordId)
+			+ idUtil.get15CharacterIdInstance(sharedTo);
 		if(type.getDescribe().isCustom()) {
 			shareKey += rule.sharingReason;
 		}

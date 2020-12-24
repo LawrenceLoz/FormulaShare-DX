@@ -48,9 +48,9 @@ public inherited sharing class FormulaShareSObjectUtilities {
 		Id parentId = (Id) share.get(parentIdFieldName());
 		Id userOrGroupId = (Id) share.get('UserOrGroupId');
         System.debug('share parentId: '+parentId);
-		String parentId15 = FormulaShareUtilities.get15CharacterId(parentId);
+		String parentId15 = FormulaShareIdUtilities.get15CharacterId(parentId);
         System.debug('share parentId15: '+parentId15);
-		String userOrGroupId15 = FormulaShareUtilities.get15CharacterId(userOrGroupId);
+		String userOrGroupId15 = FormulaShareIdUtilities.get15CharacterId(userOrGroupId);
         String shareKeyBase = parentId15 + userOrGroupId15;
         return shareKeyBase;
     }
