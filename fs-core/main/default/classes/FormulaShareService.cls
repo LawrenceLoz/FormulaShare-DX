@@ -147,20 +147,59 @@ public inherited sharing class FormulaShareService {
 	// Core method called from trigger and batch context - returns a wrapper with all details needed to make updates
 	public void processFormulaShares() {
 
-		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(type);
-		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(sharedRecordIdsSet);
-		System.debug('parentIdsString: '+parentIdsString);
-		System.debug('type: ' +shareObjectType.getDescribe().getName());
-
-		// Retrieve current record shares if type in scope is a custom object
-		List<SObject> sharesQueryResult;
-
 		// Set map tracking number of shares for rules with zeros
 		for(FormulaShareRule rule : rules) {
 			noValidSharesForRules.put(rule.developerName, 0);
 		}
 
+		// If no records populated (e.g. if lookups aren't populated), then no need to process
+		if(sharedRecordIdsSet.isEmpty()) {
+			return;
+		}	
+
+		// For account sharing, determine whether contact sharing is controlled by account
+		if(type.getDescribe().getName() == 'Account') {
+			contactIsControlledByAccount = FormulaShareUtilities.isContactSharingControlledByAccount();
+		}
+
+		// Query for existing shares
+		List<SObject> sharesQueryResult = getExistingShares();
+
+		// Create map of all record shares with unique key
+		// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
+		for(SObject share : sharesQueryResult) {
+			FormulaShareSObjectUtilities objectUtils = new FormulaShareSObjectUtilities(type);
+			String shareKey = objectUtils.getShareKey(share);
+			ShareDetail sd = new ShareDetail();
+			sd.shareRecord = share;
+			sd.type = type;
+			mapToDelete.put(shareKey, sd);
+		}
+
+		// Clone so we can check existing sharing after removing shares from deletion map
+		existingShareKeys = mapToDelete.keySet().clone();
+
+		// Assess sharing to be created or kept (will update deletion and insertion maps)
+		assessRequiredShares();
+
+		// Clear deletion map if object is standard and removal of standard sharing is not permitted
+		if(!isShareRemovalAllowed()) {
+			mapToDelete.clear();
+		}
+	}
+
+
+	// Retrieve shares for all shared objects identified as being in scope
+	private List<SObject> getExistingShares() {
+		List<SObject> sharesQueryResult = new List<SObject>();
+
+		// Get object's share type, initialise selector and build string of parent Ids to query
+		SObjectType shareObjectType = FormulaShareUtilities.getShareObject(type);
 		FormulaShareSObjectSharesSelector sharesSelector = new FormulaShareSObjectSharesSelector(true, shareObjectType, type);
+		String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(sharedRecordIdsSet);
+		System.debug('parentIdsString: '+parentIdsString);
+
+		// If custom, select by parent Ids and sharing reasons
 		if(type.getDescribe().isCustom()) {
 			
 			// Get all relevant row causes (aka apex sharing reasons) used in rules
@@ -175,38 +214,14 @@ public inherited sharing class FormulaShareService {
 			sharesQueryResult = sharesSelector.selectByParentIdsAndRowCauses(parentIdsString, rowCausesString);
 		}
 
-		// Retrieve current record shares if type in scope is a standard object
+		// If standard, select by parent Ids only
 		else {
 			sharesQueryResult = sharesSelector.selectByParentIds(parentIdsString);
-
-			// For account sharing, check whether contact sharing is controlled by account
-			if(type.getDescribe().getName() == 'Account') {
-				contactIsControlledByAccount = FormulaShareUtilities.isContactSharingControlledByAccount();
-			}
 		}
 
 		system.debug('Share query result: '+sharesQueryResult);
 
-		// Create map of all record shares with unique key
-		// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
-		for(SObject share : sharesQueryResult) {
-			FormulaShareSObjectUtilities objectUtils = new FormulaShareSObjectUtilities(type);
-			String shareKey = objectUtils.getShareKey(share);
-			ShareDetail sd = new ShareDetail();
-			sd.shareRecord = share;
-			sd.type = type;
-			mapToDelete.put(shareKey, sd);
-		}
-
-		existingShareKeys = mapToDelete.keySet().clone();
-
-		// Assess sharing to be created or kept (will update deletion and insertion maps)
-		assessRequiredShares();
-
-		// Clear deletion map if object is standard and removal of standard sharing is not permitted
-		if(!isShareRemovalAllowed()) {
-			mapToDelete.clear();
-		}
+		return sharesQueryResult;
 	}
 
 

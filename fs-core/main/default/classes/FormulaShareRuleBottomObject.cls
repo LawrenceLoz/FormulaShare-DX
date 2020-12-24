@@ -36,7 +36,7 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
         // Iterate until we're on the bottom object and add the relationship name (__r) of each lookup
         while(rel.nextRelationship?.lookupToPrevObjectApiName != null) {
-            System.debug('this rel (going down to bottom): '+rel.nextRelationship);
+            System.debug('Bottom rel intermediate rel towards bottom obj. Object: '+rel.thisObjectApiName+'. Rel: '+rel.nextRelationship);
 
             rel = rel.nextRelationship;
 

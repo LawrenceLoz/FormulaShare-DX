@@ -274,17 +274,22 @@ public inherited sharing class FormulaShareHelperService {
 		// Get shared record id
 		SObject bottomRecord = fullQueriedRecords.get(recordRule.bottomObjectRecordId);
 		FormulaShareRuleBottomObject boRule = (FormulaShareRuleBottomObject) recordRule.rule;
-		Id sharedRecordId = (Id) bottomRecord.get(boRule.pathFromBottomObjToSharedObj);
+		Id sharedRecordId = boRule.getSharedObjectIdFromBottomRecord(bottomRecord);
 
-		// Get ownerId if rule shares with users (might not have been queried otherwise)
-		Id ownerId;
-		if(boRule.shareWith == 'Users') {
-			ownerId = boRule.getOwnerOfSharedObjectFromBottomObject(bottomRecord);
+		// If there's a shared record in scope (will be the case unless a lookup towards shared isn't populated)
+		if(sharedRecordId != null) {
+
+			// Get ownerId if rule shares with users (might not have been queried otherwise)
+			Id ownerId;
+			if(boRule.shareWith == 'Users') {
+				ownerId = boRule.getOwnerOfSharedObjectFromBottomObject(bottomRecord);
+			}
+	
+			// Establish the retrieved records with related details object for the shared object
+			FormulaShareServiceDetailsForType details = getDetailsForType(boRule.objectSharedAPIName);
+			details.setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, ownerId, boRule);
+			setDetailsForType(boRule.objectSharedAPIName, details);
 		}
-
-		FormulaShareServiceDetailsForType details = getDetailsForType(boRule.objectSharedAPIName);
-		details.setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, ownerId, boRule);
-		setDetailsForType(boRule.objectSharedAPIName, details);
 	}
 
 	private FormulaShareServiceDetailsForType getDetailsForType(String sharedObjectName) {
