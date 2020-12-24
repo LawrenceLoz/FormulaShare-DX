@@ -7,7 +7,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         return this._relationship;
     }
     set relationship(value) {
-        console.log('received rule: '+JSON.stringify(value));
+        //console.log('received rule: '+JSON.stringify(value));
         // Reset relationship only if shared object has changed
         if(!this._relationship || this._relationship.thisObjectApiName != value.thisObjectApiName) {
             this._relationship = value;
@@ -64,7 +64,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
 
     // Event handlers for button selection of rule type. Update type and fire event to parent
     handleSelectedThisObject() {
-        console.log('handleSelectedThisObject');
+        //console.log('handleSelectedThisObject');
         this._selectedLocation = 'thisObject';
 
         // Copy top level (shared object) relationship without subordinate relationships removed
@@ -77,7 +77,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         this.fireRelationshipChangeAndClearErrorMessage(controllingObject, relCopy);
     }
     handleSelectedRelatedObject() {
-        console.log('handleSelectedRelatedObject: '+JSON.stringify(this._relationship));
+        //console.log('handleSelectedRelatedObject: '+JSON.stringify(this._relationship));
         this._selectedLocation = 'relatedObject';
         
         const controllingObject = this._controllingObjectApiName;
@@ -86,7 +86,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
 
     // Detect and fire event for parent when change in relationship-object components
     handleRelationshipChange(event) {
-        console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
+        //console.log('Captured relationship change in child component: '+JSON.stringify(event.detail.relationship));
         this._relationship = event.detail.relationship;
         this._controllingObjectApiName = event.detail.controllingObjectApiName;
         this.fireRelationshipChangeAndClearErrorMessage(event.detail.controllingObjectApiName, this._relationship);
@@ -95,7 +95,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     // Notify parent so it's always up to date with which object controls the sharing
     fireRelationshipChangeAndClearErrorMessage(controllingObjectApiName, newRelationship) {
         this.errorMessage = null;
-        console.log('notifying parent detail component');
+        //console.log('notifying parent detail component');
         const relationshipDetails = {
             relationship: newRelationship,
             controllingObjectApiName: controllingObjectApiName,
@@ -115,7 +115,7 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
     errorMessage;
     @api
     checkValidity() {
-        console.log('checking validity location');
+        //console.log('checking validity location');
 
         if(this.fieldIsOnRelatedObject) {
             var relationshipComponent = this.template.querySelector('c-formula-share-relationship-object');

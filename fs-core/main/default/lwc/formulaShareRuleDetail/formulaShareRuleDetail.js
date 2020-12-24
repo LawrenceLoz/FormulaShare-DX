@@ -32,7 +32,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     set ruleId(value) {
         this._ruleId = value;
 
-        console.log('Set rule from id: '+value);
+        //console.log('Set rule from id: '+value);
         this.populateRule();
     }
     _ruleId;
@@ -42,7 +42,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     @api
     checkValidity() {
-        console.log('checking validity');
+        //console.log('checking validity');
         var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
         var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
         var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
@@ -61,7 +61,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         //console.log('_ruleId '+this._ruleid);
         getSpecificRule({ ruleId : this._ruleId })
         .then((data) => {
-            console.log('retrieved rule: '+JSON.stringify(data));
+            //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
             this.fireEventWithRule();
         });
@@ -110,7 +110,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     selectedLocation;
     handleSharedObjectChange(event) {
-       console.log('in handleSharedObjectChange');
+       //console.log('in handleSharedObjectChange');
         
         // On change of shared object, assume that rule will be standard
         // Default object with share field to be the selected object (ensures field list populates)
@@ -126,7 +126,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.rule.caseAccess = null;
         this.rule.opportunityAccess = null;
 
-        console.log('Cleared values after shared obj change. Current rule: '+JSON.stringify(this.rule));
+        //console.log('Cleared values after shared obj change. Current rule: '+JSON.stringify(this.rule));
 
         this.handleSetSharedObjectDetail(event);    // Capture object details
     }
@@ -153,7 +153,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
     // Replace with handlers for generic change of relationship
     handleRelationshipChange(event) {
 
-        console.log('Captured relationship change in top component: '+JSON.stringify(event.detail.relationship));
+        //console.log('Captured relationship change in top component: '+JSON.stringify(event.detail.relationship));
         this.rule.relationship = event.detail.relationship;
         this.rule.controllingObjectApiName = event.detail.controllingObjectApiName;
         this.selectedLocation = event.detail.selectedLocation;
@@ -169,7 +169,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         
         // Also set field in controlling object in relationship (this is referenced in rule DML)
         this.rule.relationship = this.getRelationshipWithNewControllingDetails(this.rule.relationship);
-        console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
+        //console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
         this.fireEventWithRule();
     }
     handleShareWithChange(event) {
