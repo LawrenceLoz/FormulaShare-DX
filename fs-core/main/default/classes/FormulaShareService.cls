@@ -152,10 +152,10 @@ public inherited sharing class FormulaShareService {
 			noValidSharesForRules.put(rule.developerName, 0);
 		}
 
-		// If no records populated (e.g. if lookups aren't populated), then no need to process
+		// If no records populated (e.g. lookups towards shared object are blank), no need to process
 		if(sharedRecordIdsSet.isEmpty()) {
 			return;
-		}	
+		}
 
 		// For account sharing, determine whether contact sharing is controlled by account
 		if(type.getDescribe().getName() == 'Account') {

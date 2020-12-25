@@ -11,7 +11,7 @@ public inherited sharing class FormulaShareHelperServiceInlaw extends FormulaSha
     }
 
 
-	public void processInsert(SObject newRecord) {
+	public override void processInsert(SObject newRecord) {
 		for(FormulaShareRuleInlaw rule : rules) {
 
 			if(newRecord.get(rule.lookupFromBottomObjTowardsSharedObj) != null 
@@ -22,7 +22,7 @@ public inherited sharing class FormulaShareHelperServiceInlaw extends FormulaSha
 	}
 
 
-	public void processUpdate(SObject newRecord, SObject oldRecord) {
+	public override void processUpdate(SObject newRecord, SObject oldRecord) {
 		for(FormulaShareRuleInlaw rule : rules) {
 
 			// Only progress if both lookups on bottom object are populated

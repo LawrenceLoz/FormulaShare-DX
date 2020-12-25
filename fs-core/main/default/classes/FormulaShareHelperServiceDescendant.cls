@@ -11,7 +11,7 @@ public inherited sharing class FormulaShareHelperServiceDescendant extends Formu
     }
 
 
-	public void processInsert(SObject newRecord) {
+	public override void processInsert(SObject newRecord) {
 		System.debug('Descendant process insert');
 		for(FormulaShareRuleDescendant rule : rules) {
 			System.debug('Checking record ' + newRecord.get('Id') + ' for processing for descendant rule: ' + rule.developerName + '. First query step(' + rule.controllingObjectSharedToFieldAPIName + '): '+newRecord.get(rule.controllingObjectSharedToFieldAPIName));
@@ -26,7 +26,7 @@ public inherited sharing class FormulaShareHelperServiceDescendant extends Formu
     }
     
 
-	public void processUpdate(SObject newRecord, SObject oldRecord) {
+	public override void processUpdate(SObject newRecord, SObject oldRecord) {
 		for(FormulaShareRuleDescendant rule : rules) {
 
 			// Only progress if lookup and shared to field are populated

@@ -35,18 +35,13 @@ public inherited sharing class FormulaShareTriggerHelper extends FormulaShareHel
 			if(Trigger.isInsert || Trigger.isUpdate || Trigger.isUndelete) {
 				List<sObject> recordsChanged = Trigger.new;
 				type = recordsChanged[0].getSObjectType();
-			}
-			// No processing for delete
-//			else if(Trigger.isDelete) {
-//				List<sObject> recordsDeleted = Trigger.old;
-//				type = recordsDeleted[0].getSObjectType();
-//			}
 
-			// Continue if we haven't already processed for this object (protects against calling in a loop)
-			if(!objectsRun.contains(type)) {
-				objectsRun.add(type);
+				// Continue if we haven't already processed for this object (protects against calling in a loop)
+				if(!objectsRun.contains(type)) {
+					objectsRun.add(type);
 
-				super.handleChanges(type, Trigger.oldMap, Trigger.newMap);
+					super.handleChanges(type, Trigger.oldMap, Trigger.newMap);
+				}
 			}
 		}
 	}

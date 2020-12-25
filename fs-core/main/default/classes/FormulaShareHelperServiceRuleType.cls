@@ -5,8 +5,8 @@ public abstract inherited sharing class FormulaShareHelperServiceRuleType {
 	public List<BottomObjectRecordRule> recordRules = new List<BottomObjectRecordRule>();
 
     // Methods must be implemented
-    abstract void processInsert(SObject newRecord);
-    abstract void processUpdate(SObject newRecord, SObject oldRecord);
+    public abstract void processInsert(SObject newRecord);
+    public abstract void processUpdate(SObject newRecord, SObject oldRecord);
 
 
     // Populates record id to be queried, and sets record rules to be matched after query

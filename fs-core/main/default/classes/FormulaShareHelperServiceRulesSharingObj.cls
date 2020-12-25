@@ -14,7 +14,7 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
     }
 
 
-    public void processInsert(SObject newRecord) {
+    public override void processInsert(SObject newRecord) {
         for(FormulaShareRule rule : rules) {
 			System.debug('processInsert for rule: ' + rule.developerName);
                     
@@ -30,7 +30,7 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
     }
 
 
-	public void processUpdate(SObject newRecord, SObject oldRecord) {
+	public override void processUpdate(SObject newRecord, SObject oldRecord) {
 
 		for(FormulaShareRule rule : rules) {
 

@@ -7,6 +7,7 @@ public inherited sharing class FormulaShareHelperService {
     FormulaShareHelperServiceDescendant descendantRulesService;
 
     Schema.SObjectType type;
+	OperationType opType;
 	String objectName;
 	Boolean removeSharesForSharedObject = true;
 
@@ -24,7 +25,6 @@ public inherited sharing class FormulaShareHelperService {
 		recordsToQuery.clear();
 
 		// Determine trigger operation (we don't use trigger context variable so method can be unit tested)
-		OperationType opType;
 		if(oldRecords == null) {
 			opType = OperationType.AFTER_INSERT_OR_UNDELETE;
 		}
@@ -38,52 +38,122 @@ public inherited sharing class FormulaShareHelperService {
 		System.debug('opType: '+opType);
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
-        setRuleServices();
+		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
+		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getStandardAndAncestorRulesSharingObject(objectName);
+        List<FormulaShareRule> rulesObjectControls = fsRulesSelector.getDescendantAndInlawRulesWithThisBottomObject(objectName);
 
-		// Split descendant and inlaw rules, and remove invalid or inactive ones
-		List<FormulaShareRuleDescendant> descendantRulesObjectControls = new List<FormulaShareRuleDescendant>();
-		List<FormulaShareRuleInlaw> inlawRulesObjectControls = new List<FormulaShareRuleInlaw>();
+		// Initialise service objects (variable setting only in constructors)
+		rulesSharingObjectService = new FormulaShareHelperServiceRulesSharingObj(rulesSharingObject);
+        descendantRulesService = new FormulaShareHelperServiceDescendant(rulesObjectControls);
+        inlawRulesService = new FormulaShareHelperServiceInlaw(rulesObjectControls);
+		
+		// Add records to be re-queried if rules could be affected by changes to this object
+		if(!rulesSharingObjectService.rules.isEmpty()) {
+			populateRecordsToQuery(rulesSharingObjectService, oldRecords, newRecords);
+
+			// Assess whether to remove rules
+			setRemoveSharesForSharedObject();
+
+			// Add all rules to map which splits by shared object
+			if(removeSharesForSharedObject) {
+				addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
+			}
+			else {
+				addToRulesForTypeMap(rulesSharingObjectService.fullRules);
+			}
+		}
+		if(!descendantRulesService.rules.isEmpty()) {
+			populateRecordsToQuery(descendantRulesService, oldRecords, newRecords);
+			addToRulesForTypeMap(descendantRulesService.relevantRules);
+		}
+		if(!inlawRulesService.rules.isEmpty()) {
+			populateRecordsToQuery(inlawRulesService, oldRecords, newRecords);
+			addToRulesForTypeMap(inlawRulesService.relevantRules);
+		}
+	}
+
+	
+//	// Check whether any impact for rules sharing this object
+//	private void processRulesSharingObject(Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
+//
+//		switch on opType {
+//
+//			// If insert, submit records where one or more share to field is populated
+//			when AFTER_INSERT_OR_UNDELETE {
+//				for(SObject newRecord : newRecords.values()) {
+//                    rulesSharingObjectService.processInsert(newRecord);
+//				}
+//			}
+//
+//			// If update, submit those where one or more share to field has changed
+//			when AFTER_UPDATE {
+//				for(SObject newRecord : newRecords.values()) {
+//					SObject oldRecord = oldRecords.get((Id) newRecord.get('Id'));
+//                    rulesSharingObjectService.processUpdate(newRecord, oldRecord);
+//				}
+//			}
+//		}
+//
+//        // Add records which need to be queried
+//		recordsToQuery.addAll(rulesSharingObjectService.recordsToQuery);
+//	}
+	
+
+	// Check whether possible sharing impact based on rules and values from trigger
+	private void populateRecordsToQuery(FormulaShareHelperServiceRuleType serviceRuleType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
 		switch on opType {
 
-			// If insert, submit records where one or more share to formula field is populated
+			// If insert, submit records where one or more share to field is populated
 			when AFTER_INSERT_OR_UNDELETE {
 				for(SObject newRecord : newRecords.values()) {
-                    rulesSharingObjectService.processInsert(newRecord);
-                    descendantRulesService.processInsert(newRecord);
-                    inlawRulesService.processInsert(newRecord);
+                    serviceRuleType.processInsert(newRecord);
 				}
 			}
 
-			// If update, submit those where one or more share to formula field has changed
+			// If update, submit those where one or more share to field has changed
 			when AFTER_UPDATE {
 				for(SObject newRecord : newRecords.values()) {
 					SObject oldRecord = oldRecords.get((Id) newRecord.get('Id'));
-                    rulesSharingObjectService.processUpdate(newRecord, oldRecord);
-                    descendantRulesService.processUpdate(newRecord, oldRecord);
-                    inlawRulesService.processUpdate(newRecord, oldRecord);
+                    serviceRuleType.processUpdate(newRecord, oldRecord);
 				}
 			}
 		}
 
-		setRemoveSharesForSharedObject();
-
-		// Add all rules to map which splits by shared object
-		if(removeSharesForSharedObject) {
-			addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
-		}
-		else {
-			addToRulesForTypeMap(rulesSharingObjectService.fullRules);
-		}
-		addToRulesForTypeMap(inlawRulesService.relevantRules);
-		addToRulesForTypeMap(descendantRulesService.relevantRules);
-
         // Add all records which need to be queried
-        recordsToQuery.addAll(rulesSharingObjectService.recordsToQuery);
-        recordsToQuery.addAll(inlawRulesService.recordsToQuery);
-        recordsToQuery.addAll(descendantRulesService.recordsToQuery);
+        recordsToQuery.addAll(serviceRuleType.recordsToQuery);
 	}
-	
+
+//	// Check whether any impact for inlaw and descendant rules where this object is the controlling object
+//	private void processRulesThisObjectControls(OperationType opType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
+//
+//		switch on opType {
+//
+//			// If insert, submit records where one or more share to field is populated
+//			when AFTER_INSERT_OR_UNDELETE {
+//				for(SObject newRecord : newRecords.values()) {
+//                    descendantRulesService.processInsert(newRecord);
+//                    inlawRulesService.processInsert(newRecord);
+//				}
+//			}
+//
+//			// If update, submit those where one or more share to field has changed
+//			when AFTER_UPDATE {
+//				for(SObject newRecord : newRecords.values()) {
+//					SObject oldRecord = oldRecords.get((Id) newRecord.get('Id'));
+//                    descendantRulesService.processUpdate(newRecord, oldRecord);
+//                    inlawRulesService.processUpdate(newRecord, oldRecord);
+//				}
+//			}
+//		}
+//
+//		addToRulesForTypeMap(inlawRulesService.relevantRules);
+//		addToRulesForTypeMap(descendantRulesService.relevantRules);
+//
+//        // Add all records which need to be queried
+//        recordsToQuery.addAll(inlawRulesService.recordsToQuery);
+//        recordsToQuery.addAll(descendantRulesService.recordsToQuery);
+//	}
 
 
     // Queries for records if necessary and returns map of objects and records with all sharing details required
@@ -125,30 +195,8 @@ public inherited sharing class FormulaShareHelperService {
 			System.debug('Setting record needed by std rule: '+record);
 			setSharedObjectRetrievedRecord(record);
 		}
-		
-		System.debug('no details objects: '+ detailsMap.values().size());
-		System.debug('No rules to be processed: '+ detailsMap.values()[0].rules.size());
-		System.debug('First rule to be processed: '+ detailsMap.values()[0].rules[0].developerName);
-		System.debug('Rules service rules rulesSharingObjectService: ' + rulesSharingObjectService.relevantRules.size());
-		System.debug('Rules service rules full standard: ' + rulesSharingObjectService.fullStandardRulesSet.size());
-		System.debug('Rules service rules full ancestor: ' + rulesSharingObjectService.fullAncestorRulesSet.size());
-		System.debug('Rules service rules inlawRulesService: ' + inlawRulesService.relevantRules.size());
-		System.debug('Rules service rules descendantRulesService: ' + descendantRulesService.relevantRules.size());
 
         return detailsMap.values();
-    }
-
-
-    private void setRuleServices() {
-        // Query for all rules which may need to be assessed
-		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
-		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getStandardAndAncestorRulesSharingObject(objectName);
-        List<FormulaShareRule> rulesObjectControls = fsRulesSelector.getDescendantAndInlawRulesWithThisBottomObject(objectName);
-        
-        // Establish service objects for these rules
-        rulesSharingObjectService = new FormulaShareHelperServiceRulesSharingObj(rulesSharingObject);
-        descendantRulesService = new FormulaShareHelperServiceDescendant(rulesObjectControls);
-        inlawRulesService = new FormulaShareHelperServiceInlaw(rulesObjectControls);
     }
 
 
