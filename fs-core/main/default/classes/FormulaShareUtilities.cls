@@ -23,7 +23,7 @@ public inherited sharing class FormulaShareUtilities {
 
     // Method returns the namespace of the package with underscores appended
     // Used to determine what to add to object and field names
-    static String classInPackage = 'FormulaShareService';
+    static String classInPackage = 'FormulaShareUnitOfWorkDML';
     static String namespacePrefix = '';
 	static Boolean namespaceSet = false;
 	
