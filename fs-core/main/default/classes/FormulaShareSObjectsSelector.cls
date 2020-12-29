@@ -1,3 +1,24 @@
+/**
+*Copyright 2020 Lawrence Newcombe
+*
+*Permission is hereby granted, free of charge, to any person obtaining a copy 
+*of this software and associated documentation files (the "Software"), to deal 
+*in the Software without restriction, including without limitation the rights 
+*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+*of the Software, and to permit persons to whom the Software is furnished to do 
+*so, subject to the following conditions:
+*
+*The above copyright notice and this permission notice shall be included in all 
+*copies or substantial portions of the Software.
+*
+*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
 public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjectSelector {
 
     public Schema.SObjectType type;
@@ -5,14 +26,8 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
     Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
     Set<String> fieldStrings = new Set<String>();
 
-    //    public static FormulaShareSObjectsSelector mock;
     public static FormulaShareSObjectsSelector construct(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
-//        if(Test.isRunningTest()) {
-//            return mock;
-//        }
-//        else {
         return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type);
-//        }
     }
     
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
@@ -37,25 +52,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         fieldStrings.add(fieldString);
     }
 
-
-////    public static FormulaShareSObjectsSelector mock;
-//    public static FormulaShareSObjectsSelector construct(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type, Set<Schema.SObjectField> fieldsSet) {
-////        if(Test.isRunningTest()) {
-////            return mock;
-////        }
-////        else {
-//            return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type, fieldsSet);
-////        }
-//    }
-//
-//    public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type, Set<Schema.SObjectField> fieldsSet) {
-//        super(false // Do not include FieldSet fields
-//            , enforceObjectAndFieldSecurity // Enforce field security if requested
-//            , enforceObjectAndFieldSecurity // Enforce object security if requested
-//            );
-//        this.type = type;
-//        this.fields.addAll(fieldsSet);
-//    }
 
     public Schema.SObjectType getSObjectType() {
         return type;
@@ -118,7 +114,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
 
 
     // Used to query for a set of records with specific ids
-    // ----- replace method below with this ------------
     public List<SObject> selectWithFields(Set<Id> recordIdSet) {
 
         // Set fields provided as tokens
@@ -148,59 +143,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
     }
 
 
-    // Called directly 
-//    public List<SObject> selectWithFieldsForObjectList(List<RelatedObjectDetails> rodList, Set<Id> sharedObjIdSet) {
-//        fields.addAll(fieldsSet);
-//
-//        fflib_QueryFactory sharedObjQueryFactory = newQueryFactory();
-//        system.debug('*SOQL before loop: '+sharedObjQueryFactory.toSOQL());
-//
-//        // If child object sharing is required, add relationship sub-selects for fields on related objects
-//        for(RelatedObjectDetails rod : rodList) {
-//            system.debug('rod.relationshipName '+rod.relationshipName);
-//
-//            try {
-//                FormulaShareSObjectsSelector relatedObjSelector = new FormulaShareSObjectsSelector(true, rod.type);
-//                relatedObjSelector.setFields(rod.fields);
-//                fflib_QueryFactory relatedObjQueryFactory = relatedObjSelector.addQueryFactorySubselect(sharedObjQueryFactory, rod.relationshipName);
-//            }
-//            catch(Exception e) {
-//                e.setMessage('Issue constructing related object subquery for rule sharing object '
-//                    + type.getDescribe().getName() + ' based on field in object '
-//                    + rod.type.getDescribe().getName() + '. This could be due to an invalid FormulaShare rule configuration '
-//                    + '(Exception: '+e.getMessage()+')');
-//                throw e;
-//            }
-//
-//            // Exclude records which don't have any shared to field populated - commented out as not possible to 
-//            // add conditions to subselects with current fflibs version
-////            String condition = '';
-////            for(Schema.SObjectField field : rod.fields) {
-////                String fieldName = field.getDescribe().getName();
-////                if(String.isBlank(condition)) {
-////                    condition = fieldName + ' != null';
-////                }
-////                else {
-////                    condition = condition + ' OR ' + fieldName + ' != null';
-////                }
-////            }
-////            relatedObjQueryFactory.setCondition(condition);
-//        }
-//
-//        // Add parent fields if included
-//        for(String fieldString : fieldStrings) {
-//            sharedObjQueryFactory.selectField(fieldString);
-//        }
-//
-//        // Restrict to specific shared records in scope
-//        String sharedObjIdsString = FormulaShareUtilities.buildStringFromSetQuotes(sharedObjIdSet);
-//        sharedObjQueryFactory.setCondition('Id IN (' + sharedObjIdsString + ')');
-//        system.debug('SOQL with condition: '+sharedObjQueryFactory.toSOQL());
-//
-//        return Database.query(sharedObjQueryFactory.toSOQL());
-//    }
-
-
     // Returns values for first few records with non-blank field values
     public List<String> selectSampleData(Integer queryLimit) {
         fields.addAll(fieldsSet);
@@ -224,14 +166,6 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         return returnList;
     }
 
-
-//    public Database.QueryLocator selectAllSharedObjectsLocator() {
-//        fields.addAll(fieldsSet);
-//        fflib_QueryFactory sharedObjQueryFactory = newQueryFactory();
-//        return Database.getQueryLocator(
-//            sharedObjQueryFactory.toSOQL()
-//        );
-//    }
 
     public class RelatedObjectDetails {
         public SObjectType type;
