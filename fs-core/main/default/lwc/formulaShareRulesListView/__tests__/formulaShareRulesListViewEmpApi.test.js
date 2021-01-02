@@ -12,7 +12,7 @@ const getPrefixWireAdapter = registerLdsTestWireAdapter(getNamespacePrefix);
 
 // Import mock data to send through the wire adapter.
 const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
-const mockPrefixData = require('./data/prefix.json');
+const PREFIX = 'sfds__';
 
 // eslint-disable-next-line no-undef
 const flushPromises = () => new Promise(setImmediate);
@@ -35,7 +35,7 @@ describe('c-formula-share-rules-list-view', () => {
         });
         document.body.appendChild(element);
 
-        getPrefixWireAdapter.emit(mockPrefixData);
+        getPrefixWireAdapter.emit(PREFIX);
         getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
 
         // Make sure async subscribe call in connectedCallback completes

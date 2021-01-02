@@ -191,13 +191,13 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     wiredNamespacePrefix({ error, data })
     {
         if (data) {
-            //console.log('>>>data: ' + data);
+            console.log('>>>data: ' + JSON.stringify(data, null, '\t'));
             this.prefix = data;
         } else if (error) {
-            //console.error('>>>error: ' + error);
+            console.error('>>>error: ' + error);
             this.prefix = undefined;
-            this.showError(error, 'Error getting namespace prefix');
-        }        
+            this.showError(error, 'Error getting namespace prefix.');
+        }
     }
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
@@ -208,7 +208,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
             // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
             const listUpdateCallback = (response) => {
-                console.log('Received Refresh Event');
+                //console.log('Received Refresh Event');
                 this.refreshView();
             };
 
@@ -217,7 +217,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                     //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
                 })
                 .catch(error => {
-                    console.error('>>>error 2: ', JSON.stringify(error));
+                    //console.error('>>>error: ', JSON.stringify(error));
                 });
 
             // Scubscribe to dml events (raised by on rule create/edit)
@@ -234,7 +234,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
         } catch (error) {
             //console.error('>>>error: ', JSON.stringify(error));
-            this.showError(error, 'Error getting namespace prefix');
+            this.showError(error, 'Error during manage refresh events.');
         }
     }
 
