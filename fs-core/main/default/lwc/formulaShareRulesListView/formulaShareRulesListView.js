@@ -204,7 +204,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     createOrUpdate = false;
     manageRefreshEvents() {
         try {
-            //console.log('>>>prefix: '+ JSON.stringify(this.prefix, null, '\t'));
+            //console.log('>>>this.prefix: '+ JSON.stringify(this.prefix, null, '\t'));
 
             // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
             const listUpdateCallback = (response) => {
@@ -228,7 +228,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 }
             };
 
-            subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
+            subscribe('/event/'+this.prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
                 //console.log('List component subscribed to : ', JSON.stringify(response.channel));
             });
 
