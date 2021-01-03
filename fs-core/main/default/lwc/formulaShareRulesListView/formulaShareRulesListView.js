@@ -186,16 +186,16 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
     }
 
-    prefix;
+    namespacePrefix;
     @wire(getNamespacePrefix)
     wiredNamespacePrefix({ error, data })
     {
         if (data) {
             console.log('>>>data: ' + JSON.stringify(data, null, '\t'));
-            this.prefix = data;
+            this.namespacePrefix = data;
         } else if (error) {
             console.error('>>>error: ' + error);
-            this.prefix = undefined;
+            this.namespacePrefix = undefined;
             this.showError(error, 'Error getting namespace prefix.');
         }
     }
@@ -204,7 +204,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     createOrUpdate = false;
     manageRefreshEvents() {
         try {
-            //console.log('>>>this.prefix: '+ JSON.stringify(this.prefix, null, '\t'));
+            //console.log('>>>this.namespacePrefix: '+ JSON.stringify(this.namespacePrefix, null, '\t'));
 
             // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
             const listUpdateCallback = (response) => {
@@ -212,7 +212,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.refreshView();
             };
 
-            subscribe('/event/'+this.prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback)
+            subscribe('/event/'+this.namespacePrefix+'FormulaShare_List_Update__e', -1, listUpdateCallback)
                 .then(response => {
                     //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
                 })
@@ -228,7 +228,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 }
             };
 
-            subscribe('/event/'+this.prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
+            subscribe('/event/'+this.namespacePrefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
                 //console.log('List component subscribed to : ', JSON.stringify(response.channel));
             });
 
