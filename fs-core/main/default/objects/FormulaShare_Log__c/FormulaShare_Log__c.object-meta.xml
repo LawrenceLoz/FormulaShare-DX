@@ -173,8 +173,10 @@
         <customTabListAdditionalFields>Processing_Finished__c</customTabListAdditionalFields>
         <searchResultsAdditionalFields>Type_In_Scope__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Query__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Batches_Processed__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Processing_Started__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Processing_Finished__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Status__c</searchResultsAdditionalFields>
     </searchLayouts>
     <sharingModel>Private</sharingModel>
     <visibility>Public</visibility>

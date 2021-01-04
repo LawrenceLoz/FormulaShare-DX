@@ -1,18 +1,20 @@
 <template>
     <fieldset class="slds-form-element">
-        <div class="slds-form-element__control">
-            <div class="slds-grid slds-gutters">
+        <div class="slds-p-around_small">
+            <div class="slds-form-element__control">
+            <div class="slds-grid slds-gutters"
+                id="buttonSet">
                 <div class="slds-col slds-size_1-of-2 slds-var-p-around_medium">
 
                     <div class="slds-visual-picker">
 
                         <input 
                             type="radio" 
-                            id="standard" 
-                            value="standard" 
-                            name="ruleType" 
-                            checked={isStandard} 
-                            onchange={handleSelectedStandard} />
+                            id="standard"
+                            value="standard"
+                            name="ruleType"
+                            checked={fieldIsOnThisObject} 
+                            onclick={handleSelectedThisObject} />
                         <label for="standard">
                             <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
@@ -21,8 +23,8 @@
                                         <lightning-icon icon-name="standard:contact_list" alternative-text="Standard" title="Standard" size="medium"></lightning-icon>
                                     </span>
                                     <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
-                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {sharedObject.objectLabel} Object</h2>
-                                        <p class="slds-m-top_small">{sharedObject.pluralLabel} will be shared to the user, role or group specified in a field on each record</p>
+                                        <h2 class="slds-truncate slds-text-heading_small" title="The Object">The {_relationship.thisObjectLabel} Object</h2>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectLabel} records will be shared to the user, role or group specified in a field on each record</p>
                                     </span>
                                 </div>
 
@@ -44,12 +46,12 @@
                     <div class="slds-visual-picker">
                         <input 
                             type="radio" 
-                            id="child" 
-                            value="child" 
+                            id="related" 
+                            value="related" 
                             name="ruleType" 
-                            checked={isChild} 
-                            onchange={handleSelectedChild} />
-                        <label for="child">
+                            checked={fieldIsOnRelatedObject} 
+                            onclick={handleSelectedRelatedObject} />
+                        <label for="related">
                             <span class="slds-visual-picker__figure slds-visual-picker__text slds-align_absolute-center">
 
                                 <div class="slds-media slds-media_center">
@@ -58,7 +60,7 @@
                                     </span>
                                     <span class="slds-media__body slds-border_left slds-p-around_small slds-text-align_left">
                                         <h2 class="slds-truncate slds-text-heading_small" title="A Related Object">A Related Object</h2>
-                                        <p class="slds-m-top_small">{sharedObject.pluralLabel} will be shared to the users, roles or groups specified in a field on related records</p>
+                                        <p class="slds-m-top_small">{_relationship.thisObjectLabel} records will be shared to the users, roles or groups specified in a field on related records</p>
                                     </span>
                                 </div>
 
@@ -74,19 +76,31 @@
                             </span>
                         </label>
                     </div>
-
-                    <template if:true={isChild}>
-                        <lightning-combobox
-                            name="relatedObject"
-                            placeholder="Select Object"
-                            options={relatedObjectOptions}
-                            value={relatedObjectSelected}
-                            onchange={handleRelatedObjectChange}>
-                        </lightning-combobox>
-                    </template>
-
                 </div>
             </div>
         </div>
+        </div>
     </fieldset>
+
+    <template if:true={fieldIsOnRelatedObject}>
+        <c-formula-share-relationship-object 
+            relationship={_relationship}
+            traverse={initialTraverse}
+            onrelationshipchange={handleRelationshipChange}
+            onaddrelationshipcancelled={handleAddRelationshipCancelled}>
+        </c-formula-share-relationship-object>
+    </template>
+
+    <template if:true={errorMessage}>
+        <div style="display: flex; align-items: baseline">
+            <div style="width: 1px; flex-grow: 1"></div>
+            <div class="slds-form-element__helper slds-has-error slds-p-bottom_medium">
+                <div class="slds-form-element__help">
+                    {errorMessage}
+                </div>
+            </div>
+            <div style="width: 1px; flex-grow: 1"></div>
+        </div>
+    </template>
+
 </template>

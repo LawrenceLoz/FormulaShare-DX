@@ -99,43 +99,56 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
    	public void execute(Database.BatchableContext context, List<SObject> scope) {
 		
 		FormulaShareService fsService = FormulaShareService.construct(typeInThisBatch, rulesForType);
-		String insertStatus;
-		String insertStatusReason;
-		String deleteStatus;
-		String deleteStatusReason;
-		Map<String,Integer> failedInsertsMap = new Map<String,Integer>();
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
 
 		system.debug('*** batch scope : '+ scope);
 
+		// Get set of records which we'll need for sharing assessment and populate into service class
 		try {
 			// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
 			Set<Id> sharedObjIdSet = new Set<Id>();
 			for(SObject obj : scope) {
 				sharedObjIdSet.add((Id) obj.get('Id'));
 			}
-			List<SObject> records = FormulaShareService.getSObjectsWithFields(typeInThisBatch, rulesForType, sharedObjIdSet);
+
+			FormulaShareSObjectsRetrievalService rs = new FormulaShareSObjectsRetrievalService(typeInThisBatch, rulesForType);
+			rs.setRecordIds(sharedObjIdSet);
+			List<FormulaShareRetrievedRecordDetails> recordDetails = rs.getDetailsForSharing();
 
 			// Populate records in batch scope into wrapper
-			fsService.addToRecordsMap(records);
+			fsService.setSharedRecordDetails(recordDetails);
 		}
 
+		// Fail batch if exceptions identifying or populating records
 		catch(Exception e) {
 			e.setMessage('Issue populating batch scope. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
 			atLeastOneBatchFailed = true;
+			return;
 		}
 
+		processSharingAssessmentAndLogs(fsService, fsLogs);
+	}
+
+	private void processSharingAssessmentAndLogs(FormulaShareService fsService, FormulaShareLogs fsLogs) {
+		String insertStatus;
+		String insertStatusReason;
+		String deleteStatus;
+		String deleteStatusReason;
+		Map<String,Integer> failedInsertsMap = new Map<String,Integer>();
+
+		// Assess sharing for this object
 		try {
-			// Assess sharing for this object
 			fsService.processFormulaShares();
 		}
 
+		// Fail this batch if any exceptions assessing sharing
 		catch(Exception e) {
 			e.setMessage('FormulaShareService processing error. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
 			atLeastOneBatchFailed = true;
+			return;
 		}
 		
 		// Get insert details and extract list of shares
@@ -157,7 +170,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				insertStatus = 'Error';
 				insertStatusReason = e.getMessage();
 
-				// Populate map of no failed inserts by rule for finish metrics
+				// Populate map of number of failed inserts by rule for finish metrics
 				for(FormulaShareService.ShareDetail sd : insertDetails.values()) {
 					Integer noFails = 0;
 					if(failedInsertsMap.containsKey(sd.rule.developerName)) {
@@ -317,21 +330,23 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		// If any exceptions updating logs, ensure batch is closed
 		catch(Exception e) {
 			metricsException = e;
+
+			try {
+				fsLogs.setFinalisedLogs();
+				updateLogAfterMetricsFail(fsLogs, metricsException);
+			}
+			catch(Exception exp) {
+				System.debug('Error updating batch log after metrics error: '+exp.getMessage());
+			}
 		}
 
-		// If there are more types to process, submit another batch
-		if(types.size() > 1) {
-			types.remove(0);
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
-			system.debug('Submitted next batch, Id = ' + batchJobId);
-		}
-
-		try {
-			fsLogs.setFinalisedLogs();
-			updateLogAfterMetricsFail(fsLogs, metricsException);
-		}
-		catch(Exception e) {
-			System.debug('Error updating batch log after metrics error');
+		finally {
+			// If there are more types to process, submit another batch
+			if(types.size() > 1) {
+				types.remove(0);
+				Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+				system.debug('Submitted next batch, Id = ' + batchJobId);
+			}
 		}
 
 	}

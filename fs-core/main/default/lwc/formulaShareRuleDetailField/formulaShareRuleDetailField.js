@@ -27,6 +27,8 @@ import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.get
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
+    @api disableShareField;
+
     @api
     get objectWithShareField() {
         return this._objectWithShareField;
