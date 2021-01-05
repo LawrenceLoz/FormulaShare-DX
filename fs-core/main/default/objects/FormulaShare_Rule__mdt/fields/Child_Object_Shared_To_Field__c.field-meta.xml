@@ -3,8 +3,8 @@
     <fullName>Child_Object_Shared_To_Field__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>If sharing is based on the contents of a field in a related child object, indicate the field on the child object which contains the user, role or group that the object should be shared with</inlineHelpText>
-    <label>Child Object Shared To Field</label>
+    <inlineHelpText>If sharing is based on the contents of a field in an object related directly to the shared object, indicates the field which contains the user, role or group that the shared object should be shared with</inlineHelpText>
+    <label>Related Object 1 Shared To Field</label>
     <metadataRelationshipControllingField>FormulaShare_Rule__mdt.Child_Object_with_Shared_To_Field__c</metadataRelationshipControllingField>
     <referenceTo>FieldDefinition</referenceTo>
     <relationshipLabel>FormulaShare_Rules1</relationshipLabel>

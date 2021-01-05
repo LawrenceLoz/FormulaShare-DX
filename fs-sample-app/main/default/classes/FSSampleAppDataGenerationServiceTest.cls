@@ -40,5 +40,12 @@ public with sharing class FSSampleAppDataGenerationServiceTest {
         System.assertEquals(firstNamesList.size() * surnamesList.size(), donations.size());
         System.assert(donations[0].Amount__c > 0);
         System.assert(donations[0].Programme_to_Support__c != null);
+
+        // Check right number of programme support officers created and lookups are populated
+        Integer noUsersExpected = FSSampleAppDataGenerationService.userProfiles.size();
+        List<Programme_Support_Officer__c> psoList = [SELECT Id, Programme__c, User__c FROM Programme_Support_Officer__c];
+        System.assertEquals(progs.size() * noUsersExpected, psoList.size());
+        System.assert(psoList[0].Programme__c != null);
+        System.assert(psoList[0].User__c != null);
     }
 }

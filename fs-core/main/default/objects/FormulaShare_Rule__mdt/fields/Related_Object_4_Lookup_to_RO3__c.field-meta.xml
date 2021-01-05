@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Related_Object_4_Lookup_to_RO3__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Related Object 4 Lookup to RO3</label>
+    <metadataRelationshipControllingField>FormulaShare_Rule__mdt.Related_Object_4__c</metadataRelationshipControllingField>
+    <referenceTo>FieldDefinition</referenceTo>
+    <relationshipLabel>FormulaShare_Rules11</relationshipLabel>
+    <relationshipName>FormulaShare_Rules11</relationshipName>
+    <required>false</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

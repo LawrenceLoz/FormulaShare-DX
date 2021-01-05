@@ -235,10 +235,16 @@ public with sharing class FormulaShareServiceBulkTest {
         // Carry out processing to share records (we won't use a batch as only one can be called per test)
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
-		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
-		for(FormulaShare_Log__c log : fsLogs) {
-            fsService.recordsMap.put(log.Id, log);
+        FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
+        
+        List<FormulaShareRetrievedRecordDetails> recordDetails = new List<FormulaShareRetrievedRecordDetails>();
+        for(FormulaShare_Log__c log : fsLogs) {
+            FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
+            details.sharedRecord = log;
+            recordDetails.add(details);
         }
+        fsService.setSharedRecordDetails(recordDetails);
+        
 		fsService.processFormulaShares();
 
         // Update to remove sharing from records shared with all

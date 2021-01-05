@@ -36,11 +36,11 @@
                                             placeholder="Select Field"
                                             options={fieldOptions}
                                             onchange={handleShareFieldChange}
+                                            disabled={disableShareField}
                                             required >
                                         </lightning-combobox>
 
                                         <div class="slds-m-left_x-small" onclick={refreshFields}>
-<!--                                            style="background-color:#04b295"   Previously inside the icon tag to colour green -->
                                             <lightning-icon 
                                                 icon-name="action:refresh" 
                                                 alternative-text="Refresh" 
@@ -69,6 +69,7 @@
                                     options={shareFieldTypeOptions}
                                     onchange={handleShareFieldTypeChange}
                                     read-only={fieldTypeIsReadOnly}
+                                    disabled={disableShareField}
                                     message-when-value-missing="Complete this field (depends on Share With option selected)"
                                     required >
                                 </lightning-combobox>

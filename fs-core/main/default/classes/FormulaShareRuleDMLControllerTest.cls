@@ -9,45 +9,39 @@ public with sharing class FormulaShareRuleDMLControllerTest {
         FormulaShareRulesSelector.mock = mockFSRulesSelector;
     }
 
-    static Id expectedId = UserInfo.getUserId();
+    static Id expectedId = FormulaShareMockProvider.expectedMockId;
 
-    private static FormulaShareRuleDMLController.ComponentRule getComponentRule() {
-        String prefix = FormulaShareTestUtils.getNamespacePrefix();
-        FormulaShareRuleDMLController.ComponentRule cr = new FormulaShareRuleDMLController.ComponentRule();
-        cr.ruleName = 'Test_FS_Rule';
-        cr.ruleLabel = 'Test FS Rule';
-        FormulaShareRuleDMLController.ComponentSharedObject cso = new FormulaShareRuleDMLController.ComponentSharedObject();
-        cso.objectApiName = prefix + 'FormulaShare_Log__c';
-        cr.sharedObject = cso;
-        cr.shareField = 'Failed_Batches__c';
-        cr.shareWith = 'Roles and Internal Subordinates';
-        cr.accessLevel = 'Read';
-        cr.ruleActive = true;
-        cr.shareFieldType = 'Name';
-        cr.sharingReason = prefix + 'FormulaShare_Log_Share__c';
-        cr.ruleDescription = 'This is a description';
-        cr.ruleType = 'standard';
-        return cr;
-    }
 
-    private static String getStringifiedComponentRule() {
-        return JSON.serialize(getComponentRule());
+    @IsTest
+    public static void testRuleStringToRule() {
+        FormulaShareRule rule = FormulaShareRuleFactory.getUserRule();
+        String ruleString = JSON.serialize(rule);
+
+        FormulaShare_Rule__mdt mdRule = FormulaShareRuleDMLController.ruleStringToRule(ruleString);
+
+        System.assertEquals(rule.developerName, mdRule.DeveloperName, 'Developer name not set as expected');
+        System.assertEquals(rule.objectSharedAPIName, mdRule.Object_Shared__c, 'Object shared not set as expected');
+        System.assertEquals(rule.controllingObjectSharedToFieldType, mdRule.Shared_To_Field_Type__c, 'No child object so should have set shared to field for standard rule');
     }
 
     @IsTest
     public static void testCreateSubmission() {
         setMocks();
-        String crString = getStringifiedComponentRule();
-        Id returnedId = FormulaShareRuleDMLController.submitForCreate(crString);
+        FormulaShareRule rule = FormulaShareRuleFactory.getUserRule();
+        String ruleString = JSON.serialize(rule);
+
+        Id returnedId = FormulaShareRuleDMLController.submitForCreate(ruleString);
         System.assertEquals(expectedId, returnedId, 'Id not returned as expected');
     }
 
     @IsTest
     public static void testEditSubmission() {
         setMocks();
-        String crString = getStringifiedComponentRule();
-        Id returnedId = FormulaShareRuleDMLController.submitForEdit(crString);
+        FormulaShareRule rule = FormulaShareRuleFactory.getUserRule();
+        String ruleString = JSON.serialize(rule);
+
+        Id returnedId = FormulaShareRuleDMLController.submitForEdit(ruleString);
         System.assertEquals(expectedId, returnedId, 'Id not returned as expected');
-    }    
+    }
 
 }
