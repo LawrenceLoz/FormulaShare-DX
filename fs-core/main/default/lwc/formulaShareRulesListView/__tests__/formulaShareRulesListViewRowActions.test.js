@@ -353,6 +353,13 @@ describe('c-formula-share-rules-list-view', () => {
         });
     });
 
+    // Helper function to wait until the microtask queue is empty. This is needed for promise
+    // timing when calling createRecord.
+    function flushPromises() {
+        // eslint-disable-next-line no-undef
+        return new Promise((resolve) => setImmediate(resolve));
+    }
+
     it('Test activate/deactivate rule (Negative).', () => {
         // Assign mock value for resolved Apex promise
         activateDeactivate.mockRejectedValue(ERROR_JSON);
@@ -402,15 +409,20 @@ describe('c-formula-share-rules-list-view', () => {
 
             // Trigger row action in lightning-tree-grid.
             treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Check if toast event has been fired.
-            expect(handler).toHaveBeenCalled();
-            /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-            expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
-            expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
-        })
-    });
+        
+            // Return an immediate flushed promise (after the LDS call) to then
+            // wait for any asynchronous DOM updates. Jest will automatically wait
+            // for the Promise chain to complete before ending the test and fail
+            // the test if the promise ends in the rejected state.
+            return flushPromises().then(() => {
+                // Check if toast event has been fired.
+                expect(handler).toHaveBeenCalled();
+                /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+                expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
+                expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
+            });
+        });
+    })
 
     it('Test open schedule modal (Positive).', () => {
         // Create initial lwc element and attach to virtual DOM.
