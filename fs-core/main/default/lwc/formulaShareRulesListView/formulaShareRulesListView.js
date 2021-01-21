@@ -385,18 +385,23 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Action method to update a rule to active/inactive
     spinnerClasses;
     activateDeactivate(row, actionName) {
+        console.log('>>>row: ' + JSON.stringify(row, null, '\t'));
         const rowDeveloperName = row['developerName'];
+        console.log('#1');
         activateDeactivate({ ruleName : rowDeveloperName, type : actionName })
             .then(() => {
+                console.log('#2');
+
                 this.processingLoad = true;
                 this.spinnerClasses = 'processingMessage';
 
                 // After submitting, wait 5 seconds and add class to display 
-                setTimeout(() => {
+                /*setTimeout(() => {
                     this.spinnerClasses = 'processingMessage afterProcessingMessage';
-                }, 5000);
+                }, 5000);*/
             })
             .catch(error => {
+                console.error('>>>error: ' +  JSON.stringify(error, null, '\t'));
                 this.showError(error, 'Error changing activation status')
             });
     }

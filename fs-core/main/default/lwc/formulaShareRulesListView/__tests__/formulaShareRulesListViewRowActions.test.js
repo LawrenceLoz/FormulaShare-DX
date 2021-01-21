@@ -7,6 +7,17 @@ import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import { activateDeactivate } from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 
+// Mocking imperative Apex method call
+jest.mock(
+    '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate',
+    () => {
+        return {
+            default: jest.fn()
+        };
+    },
+    { virtual: true }
+);
+
 // Use a mocked navigation plugin.
 // fs-core/test/jest-mocks/lightning/platformShowToastEvent.js for the mock
 // and see jest.config.js for jest config to use the mock
@@ -22,6 +33,12 @@ const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
 
 // Register as Apex wire adapter. Some tests verify that provisioned values trigger desired behavior.
 const getActivateDeactivateAdapter = registerApexTestWireAdapter(activateDeactivate);
+
+const ERROR_JSON = {
+    body: {
+        message: 'Error',
+    }
+}
 
 describe('c-formula-share-rules-list-view', () => {
     afterEach(() => {
@@ -337,6 +354,9 @@ describe('c-formula-share-rules-list-view', () => {
     });
 
     it('Test activate/deactivate rule (Negative).', () => {
+        // Assign mock value for resolved Apex promise
+        activateDeactivate.mockRejectedValue(ERROR_JSON);
+
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -345,6 +365,9 @@ describe('c-formula-share-rules-list-view', () => {
 
         // Mock handler for toast event.
         const handler = jest.fn();
+
+        // Add event listener to catch toast event
+        element.addEventListener(ShowToastEventName, handler);
 
         // Mock data.
         getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
@@ -370,10 +393,12 @@ describe('c-formula-share-rules-list-view', () => {
             });
             
             // Add event listener to catch toast event.
-            element.addEventListener(ShowToastEventName, handler);
+            //element.addEventListener(ShowToastEventName, handler);
 
             // Emit error from @wire.
-            getActivateDeactivateAdapter.error();
+            //getActivateDeactivateAdapter.error();
+
+            
 
             // Trigger row action in lightning-tree-grid.
             treeGrid.dispatchEvent(rowActionEvent);
