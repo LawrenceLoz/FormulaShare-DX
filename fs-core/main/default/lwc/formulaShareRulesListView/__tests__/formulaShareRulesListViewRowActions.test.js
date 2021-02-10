@@ -40,6 +40,12 @@ const ERROR_JSON = {
     }
 }
 
+const SUCCESS_JSON = {
+    body: {
+        message: 'Success',
+    }
+}
+
 describe('c-formula-share-rules-list-view', () => {
     afterEach(() => {
         // The jsdom instance is shared across test cases in a single file so reset the DOM
@@ -50,6 +56,78 @@ describe('c-formula-share-rules-list-view', () => {
         // Prevent data saved on mocks from leaking between tests.
         jest.clearAllMocks();
     });
+
+
+    // Helper function to wait until the microtask queue is empty. This is needed for promise
+    // timing when calling createRecord.
+    function flushPromises() {
+        // eslint-disable-next-line no-undef
+        return new Promise((resolve) => setImmediate(resolve));
+    }
+
+    it('Test activate/deactivate rule (Negative).', () => {
+        // Assign mock value for resolved Apex promise
+        activateDeactivate.mockRejectedValue(ERROR_JSON);
+
+        // Create initial lwc element and attach to virtual DOM.
+        const element = createElement('c-formula-share-rules-list-view', {
+            is: FormulaShareRulesListView
+        });
+        document.body.appendChild(element);
+
+        // Mock handler for toast event.
+        const handler = jest.fn();
+
+        // Add event listener to catch toast event
+        element.addEventListener(ShowToastEventName, handler);
+
+        // Mock data.
+        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        
+        // Return a promise to wait for any asynchronous DOM updates. Jest
+        // will automatically wait for the Promise chain to complete before
+        // ending the test and fail the test if the promise rejects.
+        return Promise.resolve().then(async () => {
+            // Select ligthning-tree-grid.
+            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            // Extract parents.
+            const parents = treeGrid.data;
+            // Get first child of first parent.
+            const firstChild = parents[0]._children;
+            const firstRowOfFirstChild = firstChild[0];
+
+            const rowActionEvent = new CustomEvent(
+                'rowaction', {
+                    detail: {
+                        action: { name: 'activate' },
+                        row: firstRowOfFirstChild
+                    }
+            });
+            
+            // Add event listener to catch toast event.
+            //element.addEventListener(ShowToastEventName, handler);
+
+            // Emit error from @wire.
+            //getActivateDeactivateAdapter.error();
+
+            
+
+            // Trigger row action in lightning-tree-grid.
+            treeGrid.dispatchEvent(rowActionEvent);
+        
+            // Return an immediate flushed promise (after the LDS call) to then
+            // wait for any asynchronous DOM updates. Jest will automatically wait
+            // for the Promise chain to complete before ending the test and fail
+            // the test if the promise ends in the rejected state.
+            await flushPromises().then(() => {
+                // Check if toast event has been fired.
+                expect(handler).toHaveBeenCalled();
+                /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+                expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
+                expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
+            });
+        });
+    })
 
     it('Test submit for recalculation (Toast) (Positive).', () => {
         // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
@@ -278,6 +356,9 @@ describe('c-formula-share-rules-list-view', () => {
     });
 
     it('Test activate rule (Positive).', () => {
+        // Assign mock value for resolved Apex promise
+        activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -316,6 +397,9 @@ describe('c-formula-share-rules-list-view', () => {
     });
 
     it('Test deactivate rule (Positive).', () => {
+        // Assign mock value for resolved Apex promise
+        activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -352,77 +436,6 @@ describe('c-formula-share-rules-list-view', () => {
             // Missing assertions. Don't know how to check if spinner appears.
         });
     });
-
-    // Helper function to wait until the microtask queue is empty. This is needed for promise
-    // timing when calling createRecord.
-    function flushPromises() {
-        // eslint-disable-next-line no-undef
-        return new Promise((resolve) => setImmediate(resolve));
-    }
-
-    it('Test activate/deactivate rule (Negative).', () => {
-        // Assign mock value for resolved Apex promise
-        activateDeactivate.mockRejectedValue(ERROR_JSON);
-
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
-
-        // Mock handler for toast event.
-        const handler = jest.fn();
-
-        // Add event listener to catch toast event
-        element.addEventListener(ShowToastEventName, handler);
-
-        // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
-        
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
-
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'activate' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Add event listener to catch toast event.
-            //element.addEventListener(ShowToastEventName, handler);
-
-            // Emit error from @wire.
-            //getActivateDeactivateAdapter.error();
-
-            
-
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        
-            // Return an immediate flushed promise (after the LDS call) to then
-            // wait for any asynchronous DOM updates. Jest will automatically wait
-            // for the Promise chain to complete before ending the test and fail
-            // the test if the promise ends in the rejected state.
-            return flushPromises().then(() => {
-                // Check if toast event has been fired.
-                expect(handler).toHaveBeenCalled();
-                /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-                expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
-                expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
-            });
-        });
-    })
 
     it('Test open schedule modal (Positive).', () => {
         // Create initial lwc element and attach to virtual DOM.
