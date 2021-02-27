@@ -7,8 +7,6 @@ import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewControlle
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
-import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
-
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
 
@@ -186,56 +184,41 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
     }
 
-    namespacePrefix;
-    @wire(getNamespacePrefix)
-    wiredNamespacePrefix({ error, data })
-    {
-        if (data) {
-            console.log('>>>data: ' + JSON.stringify(data, null, '\t'));
-            this.namespacePrefix = data;
-        } else if (error) {
-            console.error('>>>error: ' + error);
-            this.namespacePrefix = undefined;
-            this.showError(error, 'Error getting namespace prefix.');
-        }
-    }
-
     // Subcribes to list platform event, and refresh treegrid each time event is received
     createOrUpdate = false;
     manageRefreshEvents() {
-        try {
-            //console.log('>>>this.namespacePrefix: '+ JSON.stringify(this.namespacePrefix, null, '\t'));
 
-            // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
-            const listUpdateCallback = (response) => {
-                //console.log('Received Refresh Event');
-                this.refreshView();
-            };
+        // Get namespace prefix
+        getNamespacePrefix()
+            .then((prefix) => {
+                //console.log('Got namespace: '+prefix);
 
-            subscribe('/event/'+this.namespacePrefix+'FormulaShare_List_Update__e', -1, listUpdateCallback)
-                .then(response => {
+                // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
+                const listUpdateCallback = (response) => {
+                    //console.log('Received Refresh Event');
+                    this.refreshView();
+                };
+                subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
                     //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
-                })
-                .catch(error => {
-                    //console.error('>>>error: ', JSON.stringify(error));
                 });
 
-            // Scubscribe to dml events (raised by on rule create/edit)
-            const dmlUpdateCallback = (response) => {
-                if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
-                    this.createOrUpdate = true;
-                    this.refreshView();
-                }
-            };
+                // Scubscribe to dml events (raised by on rule create/edit)
+                const dmlUpdateCallback = (response) => {
+                    if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
+                        //console.log('Received FormulaShare_Rule_DML__e');
+                        this.createOrUpdate = true;
+                        this.refreshView();
+                    }
+                };
+                subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
+                    //console.log('List component subscribed to : ', JSON.stringify(response.channel));
+                });
 
-            subscribe('/event/'+this.namespacePrefix+'FormulaShare_Rule_DML__e', -1, dmlUpdateCallback).then(response => {
-                //console.log('List component subscribed to : ', JSON.stringify(response.channel));
+            })
+            .catch(error => {
+                //console.log('Error getting namespace prefix');
+                this.showError(error, 'Error getting namespace prefix');
             });
-
-        } catch (error) {
-            //console.error('>>>error: ', JSON.stringify(error));
-            this.showError(error, 'Error during manage refresh events.');
-        }
     }
 
     // Set available drop-down actions for each grid row
@@ -385,13 +368,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Action method to update a rule to active/inactive
     spinnerClasses;
     activateDeactivate(row, actionName) {
-        console.log('>>>row: ' + JSON.stringify(row, null, '\t'));
         const rowDeveloperName = row['developerName'];
-        console.log('#1');
         activateDeactivate({ ruleName : rowDeveloperName, type : actionName })
             .then(() => {
-                console.log('#2');
-
                 this.processingLoad = true;
                 this.spinnerClasses = 'processingMessage';
 
