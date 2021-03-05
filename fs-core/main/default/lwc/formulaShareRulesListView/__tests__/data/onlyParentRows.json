@@ -1,0 +1,18 @@
+[
+  {
+    "isParentRow": true,
+    "_children": [],
+    "key": "object|Programme__c",
+    "objectApiName": "Programme__c",
+    "sharedObjectClass": "slds-tree__item slds-text-title_caps",
+    "tableLabel": "Programme (2)"
+  },
+  {
+    "isParentRow": true,
+    "_children": [],
+    "key": "object|Donation__c",
+    "objectApiName": "Donation__c",
+    "sharedObjectClass": "slds-tree__item slds-text-title_caps",
+    "tableLabel": "Donation (4)"
+  }
+]
