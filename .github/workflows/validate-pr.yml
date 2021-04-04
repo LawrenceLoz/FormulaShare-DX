@@ -44,6 +44,7 @@ jobs:
     
     - name: Run all JEST tests
       run: |
+        sfdx force:lightning:lwc:test:setup
         sfdx force:lightning:lwc:test:run
     
     # jq adds the namespace element to the project-scratch-def.json
