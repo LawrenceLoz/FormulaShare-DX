@@ -1,13 +1,17 @@
-# Validates deployment of a 
+# Validates a feature branch is deployable prior to merging into master
+# Carries out the following in parallel:
+# 1. Run all Jest tests
+# 2. Create a scratch org WITHOUT package namespace, deploy and run all apex tests
+# 3. Create scratch orgs WITH package namespace, deploy and run all apex tests
 
-name: Validate Pull Request
+name: Validate Branch is Deployable
 
-# Run only on PRs to release branch
+# Run only on demand or on PRs to master
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - Release*
+      - master
 
 env:
   JWT_SIGNING_KEY:  ${{ secrets.JWT_SIGNING_KEY }}
@@ -15,8 +19,8 @@ env:
   DEV_HUB_USERNAME: ${{ secrets.ISV_DEV_HUB_USERNAME }}
 
 jobs:
-  deploy-and-test-without-namespace:
-    name: Deploy and Test using Scratch Org without Namespace
+  run-jest-tests:
+    name: Run Jest Tests
     runs-on: ubuntu-latest
     steps:
 
@@ -25,7 +29,8 @@ jobs:
       uses: actions/checkout@v2
     
     # Install currently supported node version
-    - uses: actions/setup-node@v2
+    - name: Install node 14
+      uses: actions/setup-node@v2
       with:
         node-version: '14.x'
 
@@ -37,14 +42,38 @@ jobs:
         consumer-key:     $CONSUMER_KEY
         dev-hub-username: $DEV_HUB_USERNAME
 
-    - name: Install JEST
+    - name: Install Jest
       run: |
         sfdx force:lightning:lwc:test:setup
 
-    - name: Run all JEST tests
+    - name: Run all Jest tests
       run: |
         sfdx force:lightning:lwc:test:run
+
+
+  deploy-and-test-without-namespace:
+    name: Deploy and Test No Namespace
+    runs-on: ubuntu-latest
+    steps:
+
+    # Checkout branch so we have source code in working directory
+    - name: 'Checkout source code'
+      uses: actions/checkout@v2
     
+    # Install currently supported node version
+    - name: Install node 14
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    # Call an action (from scripts subdirectory) to install DX and authenticate to the dev hub
+    - name: Install DX
+      uses: ./.github/workflows/scripts/install-and-authenticate-dx
+      with:
+        jwt-signing-key:  $JWT_SIGNING_KEY
+        consumer-key:     $CONSUMER_KEY
+        dev-hub-username: $DEV_HUB_USERNAME
+
     - name: Create scratch org
       run: |
         sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername -d 1
@@ -67,9 +96,9 @@ jobs:
       run: |
         tail -n100 ~/.sfdx/sfdx.log
 
-        
+
   deploy-and-test-with-namespace:
-    name: Deploy and Test using Scratch Org with Namespace
+    name: Deploy and Test with Namespace
     runs-on: ubuntu-latest
     steps:
 
@@ -94,14 +123,6 @@ jobs:
     - name: Install jq
       run: |
         sudo apt-get install jq
-    
-    - name: Install JEST
-      run: |
-        sfdx force:lightning:lwc:test:setup
-
-    - name: Run all JEST tests
-      run: |
-        sfdx force:lightning:lwc:test:run
     
     # jq adds the namespace element to the project-scratch-def.json
     # We're able to create scratch orgs in package namespace from ISV org because namespace is linked
