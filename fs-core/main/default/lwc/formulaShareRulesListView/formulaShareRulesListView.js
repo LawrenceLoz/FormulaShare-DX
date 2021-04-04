@@ -8,7 +8,6 @@ import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewContro
 import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 
-
 export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     @track data = [];
@@ -119,8 +118,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
-            //console.log('this.treeItems: '+JSON.stringify(this.treeItems));
-            //console.log('loading data');
 
             this.setColumns();
             this.countRows(tempjson);
@@ -187,7 +184,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
     }
 
-
     // Subcribes to list platform event, and refresh treegrid each time event is received
     createOrUpdate = false;
     manageRefreshEvents() {
@@ -225,11 +221,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             });
     }
 
-
     // Set available drop-down actions for each grid row
     getRowActions(row, doneCallback) {
-        const rowApiName = row['objectApiName'];
-
         // Check the retention days before populating (this is used in an action label)
         //console.log('loading actions');
 
@@ -372,7 +365,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         refreshApex(this.provisionedValue);
     }
 
-
     // Action method to update a rule to active/inactive
     spinnerClasses;
     activateDeactivate(row, actionName) {
@@ -383,19 +375,18 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.spinnerClasses = 'processingMessage';
 
                 // After submitting, wait 5 seconds and add class to display 
-                setTimeout(() => {
+                /*setTimeout(() => {
                     this.spinnerClasses = 'processingMessage afterProcessingMessage';
-                }, 5000);
+                }, 5000);*/
             })
             .catch(error => {
-                //console.log('Error changing activation status');
+                console.error('>>>error: ' +  JSON.stringify(error, null, '\t'));
                 this.showError(error, 'Error changing activation status')
             });
     }
 
 
     openLogsReport(row) {
-
         // Set filter parameter for report ("fv0" is the convention for the first filter)
         var params = {};
         params['fv0'] = encodeURI(row['developerName']);
@@ -441,7 +432,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     @track openModal
     @track rowRuleId
     editRule(row) {
-        //console.log('row: ' + JSON.stringify(row));
         this.rowRuleId = row['ruleId'];
         this.openModal = true;
     }

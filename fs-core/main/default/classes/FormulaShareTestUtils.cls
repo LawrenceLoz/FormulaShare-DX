@@ -26,4 +26,19 @@ public inherited sharing class FormulaShareTestUtils {
         return FormulaShareUtilities.getNamespacePrefix();
     }
 
+    public static String batchLogRowCause  = getNamespacePrefix() + 'FormulaShare_Log_Share__c';
+    public static String recordLogRowCause = getNamespacePrefix() + 'FormulaShare_Record_Log_Share__c';
+
+
+    public static String sharedGroupName = 'AllInternalUsers';
+
+    static Id groupId;
+    public static Id getSharedGroupId() {
+        if(groupId == null) {
+            Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = :sharedGroupName][0];
+            groupId = publicGroup.Id;
+        }
+        return groupId;
+    }
+
 }

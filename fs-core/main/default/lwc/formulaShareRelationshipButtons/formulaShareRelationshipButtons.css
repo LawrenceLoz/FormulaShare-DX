@@ -1,0 +1,63 @@
+:host {
+    --child-button-width: 150;
+    --parent-button-width: 150;
+}
+
+@keyframes slideDown {
+    from {opacity: 0; top: -30px;}
+    to {opacity: 1; top: 0px;}
+}
+.slideDownButton {
+    position: relative;
+    animation-name: slideDown;
+    animation-duration: 1.5s;
+}
+
+@keyframes slideFromLeft {
+    from {left: calc((var(--parent-button-width) / 2 + 20) * -1px);}
+    to {left: 0px;}
+}
+.slideFromLeftButton {
+    position: relative;
+    animation-name: slideFromLeft;
+    animation-duration: 1.5s;
+}
+
+@keyframes slideFromRight {
+    from {left: calc((var(--child-button-width) / 2 + 20) * 1px);}
+    to {left: 0px;}
+}
+.slideFromRightButton {
+    position: relative;
+    animation-name: slideFromRight;
+    animation-duration: 1.5s;
+}
+
+
+.childButtonMessage {
+    position: absolute;
+    top: 0;
+    min-width: 230px;
+    left: calc(var(--child-button-width) * 1px + 10px);
+    text-align: left;
+    font-style: italic;
+}
+.parentButtonMessage {
+    position: absolute;
+    top: 0;
+    min-width: 230px;
+    right: calc(var(--parent-button-width) * 1px + 10px);
+    text-align: right;
+    font-style: italic;
+}
+
+.centreCombobox {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    z-index: 2;    
+    width: 50%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

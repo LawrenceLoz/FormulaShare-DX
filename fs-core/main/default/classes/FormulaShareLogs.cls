@@ -42,6 +42,7 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
             log.Number_Of_Rules__c = rulesForType.size();
             log.Query__c = query;
             log.Batches_Processed__c = 0;
+            log.Batches_Failed__c = 0;
             log.Failed_Batches__c = '';
 
             log.Processing_Started__c = DateTime.now();
@@ -58,6 +59,7 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
             log.Exception_Line_Number__c = e.getLineNumber();
             log.Exception_Stack_Trace__c = e.getStackTraceString();
             log.Exception_Type__c = e.getTypeName();
+            log.Batches_Failed__c++;
             if(log.Failed_Batches__c == null || log.Failed_Batches__c.length() < 248) {
                 log.Failed_Batches__c += String.valueOf(log.Batches_Processed__c) + ', ';
             }

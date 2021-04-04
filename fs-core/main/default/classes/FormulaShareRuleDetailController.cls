@@ -63,7 +63,7 @@ public with sharing class FormulaShareRuleDetailController {
             System.debug('Checking object: '+ed.QualifiedApiName+' internal sharing: '+ed.InternalSharingModel+' external sharing '+ed.ExternalSharingModel);
             if((ed.InternalSharingModel == 'Private' || ed.InternalSharingModel == 'Read'
                 || ed.ExternalSharingModel == 'Private' || ed.ExternalSharingModel == 'Read')
-                && FormulaShareUtilities.isSupportedObjectForCustomMetadata(ed.QualifiedApiName)) {
+                && !FormulaShareUtilities.excludedFromCustomMetadata.contains(ed.QualifiedApiName)) {
                 ShareableObject so = new ShareableObject();
                 so.objectApiName = ed.QualifiedApiName;
                 so.objectLabel = ed.Label;
@@ -91,9 +91,15 @@ public with sharing class FormulaShareRuleDetailController {
 
 
     @AuraEnabled(cacheable=true)
-    public static List<FormulaShareUtilities.ChildRelationshipDetails> getChildRelationships(String parentObjectAPIName) {
+    public static List<FormulaShareUtilities.RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
         return FormulaShareUtilities.getChildRelationships(parentObjectAPIName);
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<FormulaShareUtilities.RelationshipDetails> getParentRelationships(String childObjectAPIName) {
+        return FormulaShareUtilities.getParentRelationships(childObjectAPIName);
+    }
+
 
     @AuraEnabled(cacheable=true)
     public static List<ShareFieldOption> getShareFieldOptions(String objectApiName){
@@ -127,6 +133,8 @@ public with sharing class FormulaShareRuleDetailController {
             sfoList.add(sfo);
         }
 
+        sfoList.sort();
+
         return sfoList;
     }
 
@@ -143,7 +151,8 @@ public with sharing class FormulaShareRuleDetailController {
         Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};
 
         // Call selector method to retrieve sample data, and concatenate to a single string
-        FormulaShareSObjectsSelector soSelector = FormulaShareSObjectsSelector.construct(true, type, fieldSet);
+        FormulaShareSObjectsSelector soSelector = FormulaShareSObjectsSelector.construct(true, type);
+        soSelector.setFields(fieldSet);
         List<String> sampleList;
         try {
             sampleList = soSelector.selectSampleData(100);
@@ -188,7 +197,9 @@ public with sharing class FormulaShareRuleDetailController {
         public Boolean isCustom {get;set;}
     }
 
-    public class ShareFieldOption {
+
+    public class ShareFieldOption implements Comparable {
+
         @AuraEnabled
         public String fieldApiName {get;set;}
         @AuraEnabled
@@ -199,6 +210,20 @@ public with sharing class FormulaShareRuleDetailController {
         public Boolean isIdType {get;set;}
         @AuraEnabled
         public String formula {get;set;}
+
+        // Comparable interface allows us to call sort on the list of fields
+        public Integer compareTo(Object compareTo) {
+            ShareFieldOption compareToSfo = (ShareFieldOption) compareTo;
+            if (fieldLabel == compareToSfo.fieldLabel) {
+                return 0;
+            }
+            else if (fieldLabel > compareToSfo.fieldLabel) {
+                return 1;
+            }
+            else {
+                return -1;        
+            }
+        }
     }
 
 }

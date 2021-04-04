@@ -20,7 +20,13 @@
 **/
 
 public with sharing class FSSampleAppDataGenerationService {
-    
+
+    @TestVisible
+    private static List<String> userProfiles = new List<String>{
+        'Analytics Cloud Integration User',
+        'Analytics Cloud Security User'
+    };
+
     public static void run(Integer noDonations) {
         List<Country__c> countries = new List<Country__c>();
         Map<String,Id> countriesMap = new Map<String,Id>();
@@ -28,6 +34,9 @@ public with sharing class FSSampleAppDataGenerationService {
         Map<String,Id> themesMap = new Map<String,Id>();
         List<Programme__c> progs = new List<Programme__c>();
         List<Donation__c> donations = new List<Donation__c>();
+        List<Programme_Support_Officer__c> progSuppOfficers = new List<Programme_Support_Officer__c>();
+
+        List<User> users = [SELECT Id, Username FROM User WHERE Profile.Name IN :userProfiles];
 
         // insert countries
         for(FS_Sample_App_Country__mdt countryMeta : [SELECT DeveloperName, Finance_Manager_Role__c FROM FS_Sample_App_Country__mdt]) {
@@ -59,6 +68,7 @@ public with sharing class FSSampleAppDataGenerationService {
             p.Description__c = progMeta.DeveloperName;
             p.Country__c = countriesMap.get(progMeta.Country__r.DeveloperName);
             p.Theme__c = themesMap.get(progMeta.Theme__r.DeveloperName);
+            p.Major_Donor_Relationship_Manager__c = users[0].Id;
             progs.add(p);
         }
         insert progs;
@@ -90,5 +100,15 @@ public with sharing class FSSampleAppDataGenerationService {
         }
         insert donations;
 
+        // Insert two programme support officers for each programme
+        for(Programme__c prog : progs) {
+            for(User u : users) {
+                Programme_Support_Officer__c pso = new Programme_Support_Officer__c();
+                pso.Programme__c = prog.Id;
+                pso.User__c = u.Id;
+                progSuppOfficers.add(pso);
+            }
+        }
+        insert progSuppOfficers;        
     }
 }

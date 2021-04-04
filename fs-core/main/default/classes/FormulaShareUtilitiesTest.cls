@@ -59,7 +59,7 @@ public with sharing class FormulaShareUtilitiesTest {
 //
 //        String shareKey = FormulaShareUtilities.getShareRecordKey(share);
 //
-//        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
+//        String idString = FormulaShareIdUtilities.get15CharacterId(UserInfo.getUserId());
 //        String expectedKey = idString + idString + 'Read' + 'FormulaShare_Log_Share__c';
 //        system.assertEquals(expectedKey, shareKey);
 //    }
@@ -77,28 +77,20 @@ public with sharing class FormulaShareUtilitiesTest {
 
         String shareKey = FormulaShareUtilities.getShareRecordKeyStandard(fsLogType, share);
 
-        String idString = FormulaShareUtilities.get15CharacterId(UserInfo.getUserId());
+        String idString = FormulaShareIdUtilities.get15CharacterId(UserInfo.getUserId());
         String expectedKey = idString + idString + 'Read';
         system.assertEquals(expectedKey, shareKey);
     }   */
 
 
-    @IsTest 
-    public static void testPassNullIdToGet15CharacterId() {
-        FormulaShareUtilities fsUtil = FormulaShareUtilities.construct();   // Will run code to generate non-mock object
-        String idStringFromNull = fsUtil.get15CharacterIdInstance(null);    // Runs instance implementation without mocking
-        system.assertEquals(null, idStringFromNull);        // Checks that static implementation returns null if passed null
-    }
-
-
     @IsTest
     public static void checkChildRelationships() {
         String prefix = FormulaShareTestUtils.getNamespacePrefix();
-        List<FormulaShareUtilities.ChildRelationshipDetails> crds = FormulaShareUtilities.getChildRelationships(prefix + 'FormulaShare_Log__c');
+        List<FormulaShareUtilities.RelationshipDetails> crds = FormulaShareUtilities.getChildRelationships(prefix + 'FormulaShare_Log__c');
         Boolean foundRibRelationship = false;
-        for(FormulaShareUtilities.ChildRelationshipDetails crd : crds) {
-            if(crd.childObjectApiName.contains('FormulaShare_Rule_in_Batch__c')) {
-                System.assert(crd.childFieldApiName.contains('FormulaShare_Log__c'), 'Relationship name is different to the one expected');
+        for(FormulaShareUtilities.RelationshipDetails crd : crds) {
+            if(crd.relatedObjectApiName.contains('FormulaShare_Rule_in_Batch__c')) {
+                System.assert(crd.relatedFieldApiName.contains('FormulaShare_Log__c'), 'Relationship name is different to the one expected');
                 foundRibRelationship = true;
             }
         }
@@ -137,10 +129,10 @@ public with sharing class FormulaShareUtilitiesTest {
         for(String key : reasons.keySet()) {
             if(key.contains('FormulaShare_Log_Share__c')) {
                 foundReason = true;
-                System.assertEquals('FormulaShare Log Share', reasons.get(key), 'Label mismatch');
+                System.assertEquals('FormulaShare Batch Log Share', reasons.get(key), 'Label mismatch');
             }
         }
-        System.assert(foundReason, 'Didnt find FormulaShare Log Share sharing reason');
+        System.assert(foundReason, 'Didnt find FormulaShare Batch Log Share sharing reason');
     }
 
 }

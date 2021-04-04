@@ -1,7 +1,84 @@
+/* Modal width for rule create and edit */
 .wideModal {
     max-width: 70rem;
     width: 70%;
 }
+
+/* Icon style for relationship components */
+.baselineIconStyle {
+    display: inline-block;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 60px;
+    padding: 0.5em 0.5em;
+}
+
+
+/* Animations for label, object frame and button fades */
+.fadeIn {
+    -webkit-animation: fadein 2.0s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation:    fadein 2.0s; /* Firefox < 16 */
+     -ms-animation:    fadein 2.0s; /* Internet Explorer */
+      -o-animation:    fadein 2.0s; /* Opera < 12.1 */
+         animation:    fadein 2.0s;
+}
+
+@keyframes fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+
+.fadeOut {
+    -webkit-animation: fadeout 0.7s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation:    fadeout 0.7s; /* Firefox < 16 */
+     -ms-animation:    fadeout 0.7s; /* Internet Explorer */
+      -o-animation:    fadeout 0.7s; /* Opera < 12.1 */
+         animation:    fadeout 0.7s;
+}
+
+@keyframes fadeout {
+from { opacity: 1; }
+to   { opacity: 0; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadeout {
+from { opacity: 1; }
+to   { opacity: 0; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadeout {
+from { opacity: 1; }
+to   { opacity: 0; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadeout {
+from { opacity: 1; }
+to   { opacity: 0; }
+}
+
+
+/* Labels and animation for rule deployment spinners - message shown after 1 second in case long deployment */
 
 .processingMessage::before {
     position: absolute;
@@ -18,32 +95,10 @@
     text-align: center;
     top: calc(50% + 4em);
 
+    /* Re-use fadeIn classes above */
     -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
        -moz-animation: fadein 1s; /* Firefox < 16 */
         -ms-animation: fadein 1s; /* Internet Explorer */
          -o-animation: fadein 1s; /* Opera < 12.1 */
             animation: fadein 1s;
-}
-
-@keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Firefox < 16 */
-@-moz-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Safari, Chrome and Opera > 12.1 */
-@-webkit-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Internet Explorer */
-@-ms-keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
 }

@@ -1,14 +1,13 @@
 <template>
-<!--    <template if:true={sharedObjectApiName}>    -->
         <lightning-combobox
-        name="objectShared"
-        value={sharedObjectApiName}
-        placeholder="Select Object"
-        options={shareableObjectOptions}
-        onopen={handleSharedObjectOpen}
-        onblur={handleClickedOut}
-        onchange={handleSharedObjectChange}></lightning-combobox>
-<!--    </template> -->
+            name="objectShared"
+            value={sharedObjectApiName}
+            placeholder="Select Object"
+            options={shareableObjectOptions}
+            onopen={handleSharedObjectOpen}
+            onblur={handleClickedOut}
+            onchange={handleSharedObjectChange}>
+        </lightning-combobox>
 
     <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleOwdHelpText}>
         Object not listed?
