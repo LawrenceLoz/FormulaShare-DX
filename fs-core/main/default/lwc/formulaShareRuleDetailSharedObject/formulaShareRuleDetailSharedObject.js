@@ -182,6 +182,7 @@ export default class FormulaShareRuleDetailSharedObject extends LightningElement
             detail: obj
         });
         this.dispatchEvent(selection);
+        //console.log('selection: '+JSON.stringify(selection));
     }
 
 }

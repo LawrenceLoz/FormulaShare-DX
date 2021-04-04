@@ -17,8 +17,9 @@ export default class FormulaShareRuleCreate extends LightningElement {
     connectedCallback() {
         const messageCallback = (response) => {
             this.processing = false;
+
+            // Pop toast to confirm successful deployment
             if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
-                //console.log('Create Successful');
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'FormulaShare Rule created',
@@ -28,8 +29,8 @@ export default class FormulaShareRuleCreate extends LightningElement {
                 this.closeModal();
             }
 
+            // Show error toast if response indicates errors
             else {
-                //console.log('Create Failed');
                 var errorMessage;
                 if(response.data.payload.sdfs__Error__c) {
                     errorMessage = response.data.payload.sdfs__Error__c
@@ -56,7 +57,6 @@ export default class FormulaShareRuleCreate extends LightningElement {
                 });
             })
             .catch(error => {
-                //console.log('Error getting namespace prefix');
                 this.showError(error, 'Error getting namespace prefix');
             });
     }
@@ -72,9 +72,9 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
     spinnerClasses;
     saveMethod() {
-        var allValid = this.template.querySelector('c-formula-share-rule-detail').checkValidity();
 
-        //console.log('allValid '+ allValid);
+        // Check all components report positive validity
+        var allValid = this.template.querySelector('c-formula-share-rule-detail').checkValidity();
 
         if(allValid) {
             //console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
@@ -82,7 +82,6 @@ export default class FormulaShareRuleCreate extends LightningElement {
             this.spinnerClasses = 'processingMessage';
             submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
                 .then(() => {
-                    //console.log('submitted fsRuleString');
 
                     // After submitting, wait 5 seconds and add class to display 
                     setTimeout(() => {
@@ -91,7 +90,6 @@ export default class FormulaShareRuleCreate extends LightningElement {
                 })
                 .catch(error => {
                     this.processing = false;
-                    //console.log('Error saving rule: '+error);
                     this.dispatchEvent(
                         new ShowToastEvent({
                             title: 'Error saving rule',

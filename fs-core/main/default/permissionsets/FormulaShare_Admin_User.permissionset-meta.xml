@@ -21,6 +21,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareE2EBatchTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareEntityDefinitionSelector</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -30,6 +34,30 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FormulaShareHelper</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperBase</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperServiceDescendant</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperServiceInlaw</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperServiceRuleType</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareHelperServiceRulesSharingObj</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -93,6 +121,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareRecordUtilities</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareRemoveBatchLogsBatch</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -117,7 +149,23 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareRetrievedRecordDetails</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareRule</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleAncestor</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleBottomObject</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleChild</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -129,6 +177,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareRuleDescendant</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareRuleDetailController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -137,7 +189,27 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareRuleFactory</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareRuleInBatchSelector</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleInlaw</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleRelatedObject</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleSibling</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareRuleStandard</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -165,6 +237,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareSObjectRelationship</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareSObjectRelationshipTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareSObjectShares</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -185,6 +265,22 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FormulaShareSObjectsRetrievalBottomObj</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareSObjectsRetrievalService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareSObjectsRetrievalShared</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareSObjectsRetrievalSibling</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FormulaShareSObjectsSelector</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -198,6 +294,14 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FormulaShareServiceBulkTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareServiceDetailsForType</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FormulaShareServiceSObjectRule</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -496,6 +600,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>FormulaShare_Log__c.Batches_Failed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>FormulaShare_Log__c.Batches_Processed__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -582,6 +691,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>FormulaShare_Log__c.Related_Log_Required_for_Test_Class__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>FormulaShare_Log__c.Status__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -707,6 +821,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>FormulaShare_Record_Log__c.FormulaShare_Batch_Log__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.FormulaShare_Rule_in_Batch__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

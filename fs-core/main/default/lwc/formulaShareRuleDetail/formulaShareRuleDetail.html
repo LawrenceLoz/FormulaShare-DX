@@ -2,10 +2,10 @@
 
     <h3 class="slds-section-title--divider ">Rule name</h3>
     <c-formula-share-rule-detail-name-label
-        rule-name={ruleName}
-        rule-label={ruleLabel}
-        rule-description={ruleDescription}
-        rule-active={ruleActive}
+        rule-name={rule.developerName}
+        rule-label={rule.label}
+        rule-description={rule.description}
+        rule-active={rule.active}
         is-edit={isEdit}
         onlabelchange={handleLabelChange}
         onnamechange={handleNameChange}
@@ -14,58 +14,62 @@
     </c-formula-share-rule-detail-name-label>
 
     <h3 class="slds-section-title--divider ">Object to share</h3>
+
     <c-formula-share-rule-detail-shared-object 
-        shared-object-api-name={sharedObjectApiName}
+        shared-object-api-name={rule.objectSharedAPIName}
         onsetsharedobjectdetail={handleSetSharedObjectDetail}
         onsharedobjectchange={handleSharedObjectChange}
-        onaccountrelatedowd={handleSetAccountRelatedOwd}
-        >
+        onaccountrelatedowd={handleSetAccountRelatedOwd}>
     </c-formula-share-rule-detail-shared-object>
 
-    <template if:true={sharedObject}>
-        <div class="slds-p-top_medium">
+    <template if:true={rule.relationship}>
+        <div class="slds-p-top_medium stackOrderTop">
             <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
+            
             <c-formula-share-rule-detail-location 
-                rule-type={ruleType} 
-                shared-object={sharedObject}
-                shared-object-api-name={sharedObjectApiName}
-                related-object-selected={relatedObjectSelected}
+                relationship={rule.relationship}
+                controlling-object-api-name={rule.controllingObjectApiName}
+                selected-location={selectedLocation}
                 onruletypechange={handleRuleTypeChange}
-                onrelatedobjectchange={handleRelatedObjectChange}>
+                onrelationshipchange={handleRelationshipChange}>
             </c-formula-share-rule-detail-location>
         </div>
+
+<!-- Line below can be added to monitor full JSON        
+    Relationship detail: {ruleDetail}       -->
     </template>
 
-    <template if:true={sharedObject}>
+    <template if:true={sharedObjectDetail}>
         <h3 class="slds-section-title--divider">Share with</h3>
         <c-formula-share-rule-detail-field 
-            object-with-share-field={objectWithShareField}
-            share-with={shareWith}
-            internal-sharing-model={sharedObject.internalSharingModel}
-            external-sharing-model={sharedObject.externalSharingModel}
-            share-field={shareField}
-            share-field-type={shareFieldType}
+            disable-share-field={disableShareField}
+            object-with-share-field={rule.controllingObjectApiName}
+            share-with={rule.shareWith}
+            internal-sharing-model={sharedObjectDetail.internalSharingModel}
+            external-sharing-model={sharedObjectDetail.externalSharingModel}
+            share-field={rule.controllingObjectSharedToFieldAPIName}
+            share-field-type={rule.controllingObjectSharedToFieldType}
             onsharewithchange={handleShareWithChange}
             onsharefieldchange={handleShareFieldChange}
             onsharefieldtypechange={handleShareFieldTypeChange}>
         </c-formula-share-rule-detail-field>
     </template>
 
-    <template if:true={sharedObject}>
+    <template if:true={sharedObjectDetail}>
         <h3 class="slds-section-title--divider">Sharing provided</h3>
         <c-formula-share-rule-detail-access 
-            internal-sharing-model={sharedObject.internalSharingModel}
-            external-sharing-model={sharedObject.externalSharingModel}
+            internal-sharing-model={sharedObjectDetail.internalSharingModel}
+            external-sharing-model={sharedObjectDetail.externalSharingModel}
             account-related-owd={accountRelatedOwd}
-            is-custom={sharedObject.isCustom}
-            shared-object-id={sharedObject.objectId}
-            shared-object-label={sharedObject.objectLabel}
-            shared-object-api-name={sharedObjectApiName}
-            access-level={accessLevel}
-            contact-access={contactAccess}
-            case-access={caseAccess}
-            opportunity-access={opportunityAccess}
-            sharing-reason={sharingReason}
+            is-custom={sharedObjectDetail.isCustom}
+            shared-object-id={sharedObjectDetail.objectId}
+            shared-object-label={sharedObjectDetail.objectLabel}
+            shared-object-api-name={rule.objectSharedAPIName}
+            access-level={rule.accessLevel}
+            contact-access={rule.contactAccess}
+            case-access={rule.caseAccess}
+            opportunity-access={rule.opportunityAccess}
+            sharing-reason={rule.sharingReason}
             onaccesslevelchange={handleAccessLevelChange}
             onsharingreasonchange={handleSharingReasonChange}
             oncontactaccesschange={handleContactAccessChange}

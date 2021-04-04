@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Failed_Batches__c</fullName>
     <externalId>false</externalId>
-    <label>Failed Batches</label>
+    <label>Failed Batch Numbers</label>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

@@ -19,23 +19,14 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareUtilities {
-
-    public static FormulaShareUtilities mock;
-    public static FormulaShareUtilities construct() {
-        if(Test.isRunningTest() && mock != null ) {
-            return mock;
-        }
-        else {
-            return new FormulaShareUtilities();
-        }
-    }
+public inherited sharing class FormulaShareUtilities {
 
     // Method returns the namespace of the package with underscores appended
     // Used to determine what to add to object and field names
-    static String classInPackage = 'FormulaShareService';
+    static String classInPackage = 'FormulaShareUnitOfWorkDML';
     static String namespacePrefix = '';
 	static Boolean namespaceSet = false;
+	
 	@AuraEnabled(cacheable=true)
     public static String getNamespacePrefix() {
         if(!namespaceSet) {
@@ -65,6 +56,7 @@ public with sharing class FormulaShareUtilities {
 	// Get describe result and maintain cache
 	public static Schema.DescribeSObjectResult describe(String objectAPIName) {
 		if(cachedDescribes.containsKey(objectAPIName)) {
+			System.debug('Describe: Returning from cache: '+cachedDescribes.get(objectAPIName));
 			return cachedDescribes.get(objectAPIName);
 		}
 		else {
@@ -72,9 +64,11 @@ public with sharing class FormulaShareUtilities {
 				Schema.SObjectType objType = globalDescribe.get(objectAPIName);
 				Schema.DescribeSObjectResult describe = objType.getDescribe();
 				cachedDescribes.put(objectAPIName, describe);
+				System.debug('Describe: Returning from global: '+describe);
 				return describe;
 			}
 			else {
+				System.debug('Describe: Couldnt find');
 				return null;
 			}
 		}
@@ -83,6 +77,8 @@ public with sharing class FormulaShareUtilities {
 
 	// Return SObjectType token from API name
 	public static Schema.SObjectType getSObjectTypeFromName(String objectAPIName) {
+		System.debug('Checking describe for object: '+objectAPIName);
+		System.debug('Describe: '+describe(objectAPIName));
 		Schema.SObjectType type = describe(objectAPIName).getSobjectType();
 		return type;
 	}
@@ -107,8 +103,16 @@ public with sharing class FormulaShareUtilities {
 
 
 	public static Schema.sObjectField getSObjectFieldFromName(String fieldNameString, Schema.SOBjectType type) {
-		Map<String, Schema.SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
-		Schema.SObjectField sObjField = fieldsMapByName.get(fieldNameString.toLowerCase());
+//		Schema.SObjectField sObjField;
+//		try {
+			Map<String, Schema.SObjectField> fieldsMapByName = type.getDescribe().fields.getMap();
+			Schema.SObjectField sObjField = fieldsMapByName.get(fieldNameString.toLowerCase());
+//		}
+//		catch(Exception e) {
+//			System.debug('exception type: '+type);
+//			System.debug('exception fieldNameString: '+fieldNameString);
+//			System.debug('exception field map: '+ type.getDescribe().fields.getMap());
+//		}
 		return sObjField;
 	}
 
@@ -146,22 +150,79 @@ public with sharing class FormulaShareUtilities {
 	}
 
 
-	public static List<ChildRelationshipDetails> getChildRelationships(String parentObjectAPIName) {
-		List<ChildRelationshipDetails> crdList = new List<ChildRelationshipDetails>();
+	// Some standard objects can't be used in any custom metadata relationship fields
+	public static Set<String> excludedFromCustomMetadata = new Set<String>{
+		'User',						// Can't be used in entity relationship field on metadata
+		'Event',					// Can't be used in entity relationship field on metadata
+		'Task',						// Can't be used in entity relationship field on metadata
+		'RecordAction'				// Can't be used in entity relationship field on metadata
+	};
+
+	// Some objects are not supported by the features or processes used in FormulaShare
+	static Set<String> excludedFromRelatedObjects = new Set<String> {
+		'DuplicateRecordItem',		// Fails as a child in cross-object query
+		'ContactRequest',			// Generic WhatId field not permitted in queries
+		'ProcessException'			// Access not permitted in query
+	};
+
+
+	// Returns details of all objects associated through a lookup
+	public static List<RelationshipDetails> getParentRelationships(String childObjectAPIName) {
+		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
+
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(childObjectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+
+			// If it's a lookup field, check whether the lookup object is user (only lookup type which could control sharing)
+			if(fieldType == Schema.DisplayType.REFERENCE) {
+				List<Schema.SObjectType> parentObjTypes = fieldDesc.getReferenceTo();
+
+				// Only consider fields which can reference a single object
+				if(parentObjTypes.size() == 1) {
+					Schema.DescribeSObjectResult parentObjDesc = parentObjTypes[0].getDescribe();
+					String parentObjApiName = parentObjDesc.getName();
+
+					// Continue if object is supported on custom metadata records
+					if(!excludedFromCustomMetadata.contains(parentObjApiName)) {
+						RelationshipDetails rd = new RelationshipDetails();
+						rd.relatedObjDesc = parentObjDesc;
+						rd.relatedObjectApiName = parentObjApiName;
+						rd.relatedObjectLabel = parentObjDesc.getLabel();
+						rd.relatedFieldApiName = fieldDesc.getName();
+						crdList.add(rd);
+					}
+				}
+			}
+		}
+
+		crdList.sort();
+		return crdList;
+	}
+
+
+	public static List<RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
+		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
 
 		List<Schema.ChildRelationship> allChildRelationships = parentObjDesc.getChildRelationships();
 
 		// build CRD objects
-		List<ChildRelationshipDetails> allCrds = new List<ChildRelationshipDetails>();
+		List<RelationshipDetails> allCrds = new List<RelationshipDetails>();
 		List<String> childObjApiNames = new List<String>();
 		for(Schema.ChildRelationship cr : allChildRelationships) {
 
 			// Exclude child relationships with a null relationship name (these can't be processed by FormulaShareService)
 			if(cr.getRelationshipName() != null) {
-				ChildRelationshipDetails crd = convertToChildRelationshipDetails(cr);
-				allCrds.add(crd);
-				childObjApiNames.add(crd.childObjectApiName);
+				RelationshipDetails crd = convertToRelationshipDetails(cr);
+
+				// Exclude any which aren't supported for metadata lists, cross-object queries or other complications
+				if(!excludedFromCustomMetadata.contains(crd.relatedObjectApiName) 
+					&& !excludedFromRelatedObjects.contains(crd.relatedObjectApiName)) {
+					allCrds.add(crd);
+					childObjApiNames.add(crd.relatedObjectApiName);
+				}
 			}
 		}
 
@@ -175,53 +236,53 @@ public with sharing class FormulaShareUtilities {
 		// Build list of crds which are valid for use as child objects
 		// Objects aren't included unless they're triggerable and customisable 
 		// (these don't seem to be acceptable entity definitions for custom metadata)
-		List<ChildRelationshipDetails> eligibleCrds = new List<ChildRelationshipDetails>();
-		for(ChildRelationshipDetails crd : allCrds) {
-			if(edMap.containsKey(crd.childObjectApiName)) {
-				EntityDefinition ed = edMap.get(crd.childObjectApiName);
+		List<RelationshipDetails> eligibleCrds = new List<RelationshipDetails>();
+		for(RelationshipDetails crd : allCrds) {
+			if(edMap.containsKey(crd.relatedObjectApiName)) {
+				EntityDefinition ed = edMap.get(crd.relatedObjectApiName);
 				if(ed.IsApexTriggerable && ed.IsCustomizable) {
 					eligibleCrds.add(crd);
 				}
 			}
 		}
 
-		List<ChildRelationshipDetails> customChildRelationships = new List<ChildRelationshipDetails>();
-		List<ChildRelationshipDetails> standardChildRelationships = new List<ChildRelationshipDetails>();
+		List<RelationshipDetails> customChildRelationships = new List<RelationshipDetails>();
+		List<RelationshipDetails> standardChildRelationships = new List<RelationshipDetails>();
 
 		// Build lists of custom and standard child relationship details
-		for(ChildRelationshipDetails crd : eligibleCrds) {
-//			if(cr.getRelationshipName() != null) {
-			if(crd.childObjDesc.isCustom()) {
+		for(RelationshipDetails crd : eligibleCrds) {
+			if(crd.relatedObjDesc.isCustom()) {
 				customChildRelationships.add(crd);
 			}
-			else if(crd.childObjDesc.isQueryable()) {
+			else if(crd.relatedObjDesc.isQueryable()) {
 				standardChildRelationships.add(crd);
 			}
 		}
 
 		// Add all child relationships for custom objects
-		for(ChildRelationshipDetails crd : customChildRelationships) {
+		for(RelationshipDetails crd : customChildRelationships) {
 			crdList.add(crd);
 		}
 
 		// Then add all child relationships for queryable standard objects (ensures shows custom then standard)
-		for(ChildRelationshipDetails crd : standardChildRelationships) {
+		for(RelationshipDetails crd : standardChildRelationships) {
 			crdList.add(crd);
 		}
 
+		crdList.sort();
 		return crdList;
 	}
 
 	
-	private static ChildRelationshipDetails convertToChildRelationshipDetails(Schema.ChildRelationship cr) {
+	private static RelationshipDetails convertToRelationshipDetails(Schema.ChildRelationship cr) {
 
-		ChildRelationshipDetails crd = new ChildRelationshipDetails();
-		crd.childObjFieldDesc = cr.getField().getDescribe();
-		crd.childObjDesc = cr.getChildSObject().getDescribe();
-		crd.childObjectLabel = crd.childObjFieldDesc.getLabel();
-		crd.childFieldApiName = crd.childObjFieldDesc.getName();
-		crd.childObjectApiName = crd.childObjDesc.getName();
-		crd.childObjectLabel = crd.childObjDesc.getLabel();
+		RelationshipDetails crd = new RelationshipDetails();
+		crd.relatedObjFieldDesc = cr.getField().getDescribe();
+		crd.relatedObjDesc = cr.getChildSObject().getDescribe();
+		crd.relatedObjectLabel = crd.relatedObjFieldDesc.getLabel();
+		crd.relatedFieldApiName = crd.relatedObjFieldDesc.getName();
+		crd.relatedObjectApiName = crd.relatedObjDesc.getName();
+		crd.relatedObjectLabel = crd.relatedObjDesc.getLabel();
 
 		return crd;
 	}
@@ -306,17 +367,6 @@ public with sharing class FormulaShareUtilities {
 	}
 
 
-	// Some standard objects can't be used in custom metadata relationship fields
-	public static Boolean isSupportedObjectForCustomMetadata(String objectApiName) {
-		switch on objectApiName {
-			when 'Event', 'Task', 'User' {
-				return false;
-			}
-		}
-		return true;
-	}
-
-
 	public static Schema.SObjectType getShareObject(Schema.SObjectType type) {
 		Schema.SObjectType shareObject;
 		String typeName = type.getDescribe().getName();
@@ -330,64 +380,6 @@ public with sharing class FormulaShareUtilities {
 		shareObject = Schema.getGlobalDescribe().get(typeName+'Share');
 		
 		return shareObject;
-	}
-
-
-	public static String get15CharacterId(Id longId) {
-		if(longId != null) {
-			String shortId = ((String) longId).left(15);
-			return shortId;
-		}
-		else {
-			return null;
-		}
-	}
-	
-	// Instance implementation for mocking
-	public String get15CharacterIdInstance(Id longId) {
-		return get15CharacterId(longId);
-	}
-
-
-	public static Boolean isValidIdType(String candidateId, Schema.SObjectType shareWithType) {
-		
-		// Accetable if null
-		if(candidateId == null) {
-			return true;
-		}
-
-		else {
-			
-			// Check Id is valid
-			Id idValueToCheck;
-			if(isValidIdType(candidateId)) {
-				idValueToCheck = (Id) candidateId;
-			}
-			else {
-				return false;
-			}
-
-			// Check that Id is the expected type
-			if(idValueToCheck.getSObjectType() == shareWithType) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-
-	public static Boolean isValidIdType(String candidateId) {
-		
-		// Check we can cast to an Id
-		Id idValueToCheck;
-		try {
-			idValueToCheck = (Id) candidateId;
-		}
-		catch(Exception e) {
-			return false;
-		}
-		return true;
 	}
 
 
@@ -427,7 +419,7 @@ public with sharing class FormulaShareUtilities {
     public static String buildStringFromSetQuotes(Set<Id> idSet) {
         String queryString = '';
         for (Id value : idSet) {
-            queryString += '\'' + get15CharacterId(value) + '\',';
+            queryString += '\'' + FormulaShareIdUtilities.get15CharacterId(value) + '\',';
         }
         queryString = queryString.substringBeforeLast(',');
         return queryString;
@@ -495,21 +487,42 @@ public with sharing class FormulaShareUtilities {
 	}
 
 
-    public class ChildRelationshipDetails {
-		private Schema.DescribeFieldResult childObjFieldDesc;
-		private Schema.DescribeSObjectResult childObjDesc;
+    public class RelationshipDetails implements Comparable {
+		
+		private Schema.DescribeFieldResult relatedObjFieldDesc;
+		private Schema.DescribeSObjectResult relatedObjDesc;
         @AuraEnabled
-        public String childObjectLabel {get;set;}
+        public String relatedObjectLabel {get;set;}
         @AuraEnabled
-        public String childObjectApiName {get;set;}
+        public String relatedObjectApiName {get;set;}
         @AuraEnabled
-        public String childObjectId {get;set;}
-        @AuraEnabled
-        public String childFieldLabel {get;set;}
-        @AuraEnabled
-        public String childFieldApiName {get;set;}
-        @AuraEnabled
-		public String childFieldId {get;set;}
+        public String relatedFieldApiName {get;set;}
+		
+		// Comparable interface allows us to call sort on the list of relationships
+        public Integer compareTo(Object compareTo) {
+			RelationshipDetails compareToRel = (RelationshipDetails) compareTo;
+			
+			// Sort on related object labels if they're different
+            if (relatedObjectLabel < compareToRel.relatedObjectLabel) {
+                return -1;
+            }
+            else if (relatedObjectLabel > compareToRel.relatedObjectLabel) {
+                return 1;
+			}
+			
+			// Otherwise, sort on related fields
+            else {
+				if(relatedFieldApiName < compareToRel.relatedFieldApiName) {
+					return -1;
+				}
+				else if(relatedFieldApiName > compareToRel.relatedFieldApiName) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+            }
+        }
     }
 
 }
