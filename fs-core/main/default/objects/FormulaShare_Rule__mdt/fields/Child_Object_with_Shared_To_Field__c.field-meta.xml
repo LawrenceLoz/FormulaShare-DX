@@ -4,7 +4,7 @@
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>If sharing is based on the contents of a field in a related child object, indicate the child object here</inlineHelpText>
-    <label>Child Object with Shared To Field</label>
+    <label>Related Object 1</label>
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>FormulaShare_Rules1</relationshipLabel>
     <relationshipName>FormulaShare_Rules1</relationshipName>

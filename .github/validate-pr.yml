@@ -1,0 +1,76 @@
+# Validates deployment of a 
+
+name: Validate Pull Request
+
+# Run only on PRs to release branch
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - Release*
+
+env:
+  JWT_SIGNING_KEY:  ${{ secrets.JWT_SIGNING_KEY }}
+  CONSUMER_KEY:     ${{ secrets.ISV_DEV_HUB_CONSUMER_KEY }}
+  DEV_HUB_USERNAME: ${{ secrets.ISV_DEV_HUB_USERNAME }}
+
+jobs:
+  deploy-to-scratch-org-and-run-tests:
+    name: Deploy to a Scratch Org and Run Tests
+    runs-on: ubuntu-latest
+    steps:
+
+    # Checkout branch so we have source code in working directory
+    - name: 'Checkout source code'
+      uses: actions/checkout@v2
+    
+    # Install currently supported node version
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    # Call an action (from scripts subdirectory) to install DX and authenticate to the dev hub
+    - name: Install DX
+      uses: ./.github/workflows/scripts/install-and-authenticate-dx
+      with:
+        jwt-signing-key:  $JWT_SIGNING_KEY
+        consumer-key:     $CONSUMER_KEY
+        dev-hub-username: $DEV_HUB_USERNAME
+
+    # JQ is used to update project-scratch-def.json
+    - name: Install jq
+      run: |
+        sudo apt-get install jq
+    
+    - name: Run all JEST tests
+      run: |
+        sfdx force:lightning:lwc:test:run
+    
+    # jq adds the namespace element to the project-scratch-def.json
+    # We're able to create scratch orgs in package namespace from ISV org because namespace is linked
+    - name: Add package namespace to project-scratch-def.json
+      run: |
+        jq '. + {"namespace": "sdfs"}' config/project-scratch-def.json > temp.json
+        mv temp.json config/project-scratch-def.json
+
+    - name: Create scratch org
+      run: |
+        sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername -d 1
+
+    - name: Push source
+      run: |
+        sfdx force:source:push
+
+    - name: Run all apex tests
+      run: |
+        force:apex:test:run
+
+    - name: Delete scratch org
+      run: |
+        sfdx force:org:delete -p
+
+    # Output information related to processing
+    - name: Output sfdx logs
+      if: ${{ always() }}
+      run: |
+        tail -n100 ~/.sfdx/sfdx.log

@@ -74,7 +74,6 @@ public with sharing class FormulaShareRulesListViewController {
             rulesMap.put(rule.developerName, rule);
             
             List<RuleWrapper> rwList;
-            system.debug('Shared_To__c: '+rule.sharedToFieldToken);
 
             String objectName = rule.objectSharedAPIName;
 
@@ -92,7 +91,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.tableLabel = rule.label;
             rw.label = rule.label;
             rw.objectLabel = rule.objectSharedLabel;
-            rw.controllingObject = rule.controllingObjectLabelForRuleType;
+            rw.controllingObject = rule.controllingObjectLabel;
             rw.shareWith = rule.shareWith;
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
@@ -102,19 +101,20 @@ public with sharing class FormulaShareRulesListViewController {
             rw.setMetricsDetails(objectName, metricsMap);
 
             // Set URL for shared to field if populated
-            if(!String.isBlank(rule.sharedToTokenForRuleType) && rule.sharedToTokenForRuleType.contains('.')) {
+            System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
+            if(!String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
                 
                 // Build URL to field from token (includes object and field id, separated by full stop)
-                Integer sharedToPoint = rule.sharedToTokenForRuleType.indexOf('.');
-                String objectId = rule.sharedToTokenForRuleType.left(sharedToPoint);
-                String fieldId = rule.sharedToTokenForRuleType.mid(sharedToPoint + 1, 15);
+                Integer sharedToPoint = rule.controllingObjectSharedToFieldToken.indexOf('.');
+                String objectId = rule.controllingObjectSharedToFieldToken.left(sharedToPoint);
+                String fieldId = rule.controllingObjectSharedToFieldToken.mid(sharedToPoint + 1, 15);
                 rw.sharedToLink = FormulaShareUtilities.getLightningDomain() 
                     + '/lightning/setup/ObjectManager/' 
                     + objectId
                     + '/FieldsAndRelationships/' 
                     + fieldId 
                     + '/view';
-                rw.sharedToLinkLabel = rule.sharedToLabelRuleType;
+                rw.sharedToLinkLabel = rule.controllingObjectSharedToFieldLabel;
             }
 
             // Set calculation status depending on most recent logs
@@ -146,28 +146,30 @@ public with sharing class FormulaShareRulesListViewController {
             }
         }
 
+        // Construct list of object wrappers with rules to return
         List<ObjectRulesWrapper> orwList = new List<ObjectRulesWrapper>();
         for(String objectName : objectsWithRulesMap.keySet()) {
             ObjectRulesWrapper orw = new ObjectRulesWrapper();
             List<RuleWrapper> rwList = objectsWithRulesMap.get(objectName);
+            rwList.sort();
             for(RuleWrapper rw : rwList) {
                 if(rw.lastCalcStatus == 'In Progress') {
                     orw.batchIsProcessing = true;
                     break;
                 }
             }
+
             String objectLabel = objectNameToLabelMap.get(objectName);
             orw.tableLabel = objectLabel + ' (' + rwList.size() + ')';
-//            orw.key = objectLabel;
             orw.key = 'object|'+objectName;
             orw.items = rwList;
             system.debug('rwList'+ rwList);
             orw.objectApiName = objectName;
-//            orw.isParentRow = true;
             orw.sharedObjectClass = 'slds-tree__item slds-text-title_caps';
             orwList.add(orw);
         }
 
+        orwList.sort();
         return orwList;
     }
 
@@ -217,7 +219,7 @@ public with sharing class FormulaShareRulesListViewController {
     }
 
     
-    public class ObjectRulesWrapper {
+    public class ObjectRulesWrapper implements Comparable {
         @AuraEnabled
         public String key {get;set;}
         @AuraEnabled
@@ -232,9 +234,22 @@ public with sharing class FormulaShareRulesListViewController {
         public List<RuleWrapper> items {get;set;}
         @AuraEnabled
         public String sharedObjectClass {get;set;}
+
+		// Comparable interface allows us to call sort
+        public Integer compareTo(Object compareTo) {
+			ObjectRulesWrapper compareToWrapper = (ObjectRulesWrapper) compareTo;
+			
+			// Sort on table labels (object labels)
+            if (tableLabel < compareToWrapper.tableLabel) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        }
     }
 
-    public class RuleWrapper {
+    public class RuleWrapper implements Comparable {
         @AuraEnabled
         public String key {get;set;}
         @AuraEnabled
@@ -275,8 +290,6 @@ public with sharing class FormulaShareRulesListViewController {
         public Decimal noSharesApplied {get;set;}
         @AuraEnabled
         public String warningIcon {get;set;}
-//        @AuraEnabled
-//        public String warningText {get;set;}
         @AuraEnabled
         public String warningUrl {get;set;}
         @AuraEnabled
@@ -292,13 +305,23 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public Long batchFinishEpoch {get;set;}
 
-
-//        private final String successIcon = 'standard:task2';
-//        private final String pendingIcon = 'standard:today';   // custom:custom25
-//        private final String noSharesIcon = 'utility:success';
-
         private final String warningTriangle = 'utility:warning';
         
+		// Comparable interface allows us to call sort
+        public Integer compareTo(Object compareTo) {
+			RuleWrapper compareToWrapper = (RuleWrapper) compareTo;
+			
+			// Sort on table labels (rule labels)
+            if (tableLabel < compareToWrapper.tableLabel) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        }
+
+
+        // Assess what to show in this line's records shared numbers and any warnings based on latest metrics
         private void setMetricsDetails(String objectApiName, Map<String,FormulaShare_Metrics__c> metricsMap) {
             FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 

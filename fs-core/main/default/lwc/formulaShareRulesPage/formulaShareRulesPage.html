@@ -28,16 +28,17 @@
           <div class="slds-page-header__control">
             <ul class="slds-button-group">
 
-              <lightning-button 
-                class="slds-button" 
+              <lightning-button
+                data-name="helpAndAbout"
                 variant="base" 
                 label="Help & About" 
                 onclick={handleAbout}>
               </lightning-button>
 
               <template if:false={rulesNotSetUp}>
-                <lightning-button 
-                  class="slds-button slds-p-left_x-small" 
+                <lightning-button
+                  data-name="newRule"
+                  class="slds-p-left_x-small" 
                   variant="neutral" 
                   label="New Rule"
                   onclick={handleNewRule}>

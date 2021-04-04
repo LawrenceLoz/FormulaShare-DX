@@ -21,6 +21,8 @@
 
 public with sharing class FormulaShareRuleDMLController {
 
+
+    // Called by relevant LWC components to trigger DML
     @AuraEnabled
     public static Id submitForCreate(String fsRuleString){
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
@@ -44,67 +46,15 @@ public with sharing class FormulaShareRuleDMLController {
         return jobId;
     }
 
+
+    // Deserialise JSON from create/edit and map to rule metadata object
+    @TestVisible
     private static FormulaShare_Rule__mdt ruleStringToRule(String fsRuleString) {
 
-        ComponentRule cr = (ComponentRule) JSON.deserialize(fsRuleString, ComponentRule.class);
+        FormulaShareRule rule = (FormulaShareRule) JSON.deserialize(fsRuleString, FormulaShareRule.class);
 
-        FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
-        rule.DeveloperName = cr.ruleName;
-        rule.MasterLabel = cr.ruleLabel;
-        rule.Description__c = cr.ruleDescription;
-        rule.Share_With__c = cr.shareWith;
-        rule.Access_Level__c = cr.accessLevel;
-        rule.Contact_Access__c = cr.contactAccess;
-        rule.Case_Access__c = cr.caseAccess;
-        rule.Opportunity_Access__c = cr.opportunityAccess;
-        rule.Sharing_Reason__c = cr.sharingReason;
-        rule.Object_Shared__c = cr.sharedObject.objectApiName;
-
-        if(cr.ruleType == 'standard') {
-            rule.Shared_To__c = cr.shareField;
-            rule.Shared_To_Field_Type__c = cr.shareFieldType;
-        }
-
-        if(cr.ruleType == 'child') {
-            system.debug('cr.relatedObjectSelected : '+cr.relatedObjectSelected);
-            rule.Child_Object_with_Shared_To_Field__c = cr.relatedObjectSelected.substringBefore('|');
-            rule.Child_Object_Lookup_Field__c = cr.relatedObjectSelected.substringAfter('|');
-            rule.Child_Object_Shared_To_Field__c = cr.shareField;
-            rule.Child_Object_Shared_To_Field_Type__c = cr.shareFieldType;
-        }
-
-        return rule;
+        FormulaShare_Rule__mdt mdRule = rule.transformRuleToMetadataRule();
+        return mdRule;
     }
 
-    @TestVisible
-    private class ComponentRule {
-        @TestVisible String ruleLabel;
-        @TestVisible String ruleName;
-        @TestVisible String ruleDescription;
-        @TestVisible Boolean ruleActive;
-        @TestVisible String sharedObjectApiName;
-        @TestVisible ComponentSharedObject sharedObject;
-        @TestVisible String ruleType;
-        @TestVisible String relatedObjectSelected;
-        @TestVisible String shareField;
-        @TestVisible String shareWith;
-        @TestVisible String shareFieldType;
-        @TestVisible String accessLevel;
-        @TestVisible String contactAccess;
-        @TestVisible String caseAccess;
-        @TestVisible String opportunityAccess;
-        @TestVisible String sharingReason;
-    }
-
-    @TestVisible
-    private class ComponentSharedObject {
-        @TestVisible String detailUrl;
-        @TestVisible String externalSharingModel;
-        @TestVisible String internalSharingModel;
-        @TestVisible Boolean isCustom;
-        @TestVisible String objectApiName;
-        @TestVisible String objectId;
-        @TestVisible String objectLabel;
-        @TestVisible String pluralLabel;
-    }
 }

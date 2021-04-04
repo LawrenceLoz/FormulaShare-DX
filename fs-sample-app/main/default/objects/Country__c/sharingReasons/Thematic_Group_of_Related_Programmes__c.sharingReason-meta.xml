@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SharingReason xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Thematic_Group_of_Related_Programmes__c</fullName>
+    <label>Thematic Group of Related Programmes</label>
+</SharingReason>

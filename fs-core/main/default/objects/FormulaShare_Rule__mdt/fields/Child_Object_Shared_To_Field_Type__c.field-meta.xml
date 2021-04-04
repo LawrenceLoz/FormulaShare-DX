@@ -3,8 +3,8 @@
     <fullName>Child_Object_Shared_To_Field_Type__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>If sharing is based on the contents of a field in a related child object, indicate whether the Child Object Shared To field contains the record id or name of the entity to share with</inlineHelpText>
-    <label>Child Object Shared To Field Type</label>
+    <inlineHelpText>If sharing is based on the contents of a field in a related object, indicates the type of data in the shared to field (id or name) on the related object controlling this sharing</inlineHelpText>
+    <label>Controlling Object Shared To Field Type</label>
     <required>false</required>
     <type>Picklist</type>
     <valueSet>

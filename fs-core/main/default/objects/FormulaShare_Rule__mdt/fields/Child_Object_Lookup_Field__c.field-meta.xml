@@ -3,8 +3,8 @@
     <fullName>Child_Object_Lookup_Field__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>If sharing is based on the contents of a field in a related child object, provide the field on the child object which is a lookup to the object to be shared</inlineHelpText>
-    <label>Child Object Lookup Field</label>
+    <inlineHelpText>If sharing is based on a child object (or an object related to this child object), indicates the field on the child object which is a lookup to the object to be shared</inlineHelpText>
+    <label>Related Object 1 Lookup to Shared Object</label>
     <metadataRelationshipControllingField>FormulaShare_Rule__mdt.Child_Object_with_Shared_To_Field__c</metadataRelationshipControllingField>
     <referenceTo>FieldDefinition</referenceTo>
     <relationshipLabel>FormulaShare_Rules2</relationshipLabel>

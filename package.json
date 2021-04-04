@@ -1,0 +1,27 @@
+{
+  "name": "formulashare-dx",
+  "version": "1.0.0",
+  "description": "**Note**: FormulaShare is published as a free managed package on the AppExchange https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. As of November 2020, the package is installed and active in 49 Enterprise, Unlimited and Professional production orgs (excludes sandboxes and developer edition orgs).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "sfdx-lwc-jest",
+    "test:unit:debug": "sfdx-lwc-jest --debug",
+    "test:unit:watch": "sfdx-lwc-jest --watch",
+    "test:unit:coverage": "sfdx-lwc-jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LawrenceLoz/FormulaShare-DX.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LawrenceLoz/FormulaShare-DX/issues"
+  },
+  "homepage": "https://github.com/LawrenceLoz/FormulaShare-DX#readme",
+  "devDependencies": {
+    "@salesforce/sfdx-lwc-jest": "^0.10.2",
+    "jest-canvas-mock": "^2.3.0"
+  }
+}
