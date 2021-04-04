@@ -42,9 +42,12 @@ jobs:
       run: |
         sudo apt-get install jq
     
-    - name: Run all JEST tests
+    - name: Install JEST
       run: |
         sfdx force:lightning:lwc:test:setup
+
+    - name: Run all JEST tests
+      run: |
         sfdx force:lightning:lwc:test:run
     
     # jq adds the namespace element to the project-scratch-def.json
@@ -64,7 +67,7 @@ jobs:
 
     - name: Run all apex tests
       run: |
-        force:apex:test:run
+        sfdx force:apex:test:run
 
     - name: Delete scratch org
       run: |
