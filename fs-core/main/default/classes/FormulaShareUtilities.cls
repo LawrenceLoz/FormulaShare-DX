@@ -377,7 +377,7 @@ public inherited sharing class FormulaShareUtilities {
 		}
 
 		// Append "Share" to get the right object share name
-		shareObject = Schema.getGlobalDescribe().get(typeName+'Share');
+		shareObject = globalDescribe.get(typeName+'Share');
 		
 		return shareObject;
 	}
