@@ -30,23 +30,25 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
     accessLevelLabel;
     showAccountRelatedAccess;
+
+    @api sharedObjectLabel;
     @api
-    get sharedObjectLabel() {}
-    set sharedObjectLabel(value) {
+    get sharedObjectApiName() {}
+    set sharedObjectApiName(value) {
 
         // Clear fields if shared object is updated
-        if(this._sharedObjectLabel && this._sharedObjectLabel != value) {
+        if(this._sharedObjectApiName && this._sharedObjectApiName != value) {
             this.updateAccessLevel(null);
             this.updateSharingReason(null);
         }
-        this._sharedObjectLabel = value;
+        this._sharedObjectApiName = value;
 
         // Set access level options
         this.updateAccessLevelOptions();
 
         // Set label and visibility of depending on whether account or not
         // Also set field attributes for related objects
-        if(this._sharedObjectLabel === 'Account') {
+        if(this._sharedObjectApiName === 'Account') {
             this.accessLevelLabel = 'Account and Contract Access';
             this.assessAccountRelatedAccess();
         }
@@ -55,7 +57,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
             this.showAccountRelatedAccess = false;
         }
     }
-    _sharedObjectLabel;
+    _sharedObjectApiName;
 
     @api
     get sharedObjectId() {}
@@ -78,7 +80,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
         // Proceed only if all required attributes are set and shared object is Account
         if(this._accountRelatedOwd
-            && this._sharedObjectLabel === 'Account') {
+            && this.sharedObjectLabel === 'Account') {
 
             // Set options for case and opportunity
             this.updateAccessLevelOption('case', this._accountRelatedOwd.caseAccess);
@@ -90,7 +92,6 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         }
     }
 
-    @api sharedObjectApiName;
     @api isCustom;
     @api accessLevel;
     @api contactAccess;
@@ -145,23 +146,21 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     @track accessLevelHelpText;
     updateAccessLevelOptions() {
         
-        if(this._internalSharingModel && this._externalSharingModel && this._sharedObjectLabel) {
+        if(this._internalSharingModel && this._externalSharingModel && this.sharedObjectLabel) {
             var options = [];
 
             // Set help text
-            this.accessLevelHelpText = 'Organisation-wide default sharing for '+this._sharedObjectLabel+': '+this._internalSharingModel+' (intenal), ' +this._externalSharingModel+' (external)';
+            this.accessLevelHelpText = 'Organisation-wide default sharing for '+this.sharedObjectLabel+': '+this._internalSharingModel+' (intenal), ' +this._externalSharingModel+' (external)';
     
             // Include Read Only option if either internal or external OWD is private
             if(this._internalSharingModel === 'Private' || this._externalSharingModel === 'Private') {
                 options.push( { label: 'Read Only', value: 'Read' } );
-//                this.accessLevelHelpText = null;
                 this.accessLevelIsReadOnly = false;
             }
     
-            // Otherwise disable field, default to only option and add help text
+            // Otherwise disable field and default to only option
             else {
                 this.accessLevelIsReadOnly = true;
-//                this.accessLevelHelpText = 'Access level must be more permissive than the organisation-wide default, which is set to Public Read Only for ' + this._sharedObjectLabel;
                 this.updateAccessLevel('Edit');
             }
 
