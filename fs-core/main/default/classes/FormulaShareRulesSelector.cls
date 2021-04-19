@@ -205,8 +205,7 @@ public inherited sharing class FormulaShareRulesSelector {
         }
 
         else {
-            String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\''
-                + ' WITH SECURITY_ENFORCED';
+            String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\'';
             String query = getQueryWithCondition(condition);
             rules = Database.query(query);
         }
@@ -224,8 +223,7 @@ public inherited sharing class FormulaShareRulesSelector {
         String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\''
             + ' AND Child_Object_Lookup_Field__c = NULL'
             + ' AND Related_Object_2_Lookup_to_RO1__c = NULL'
-            + ' AND Related_Object_3_Lookup_to_RO2__c = NULL'
-            + ' WITH SECURITY_ENFORCED';
+            + ' AND Related_Object_3_Lookup_to_RO2__c = NULL';
         String query = getQueryWithCondition(condition);
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
@@ -241,8 +239,7 @@ public inherited sharing class FormulaShareRulesSelector {
 
         // Filter to just records with a related object which is below the shared object
         // Since OR conditions aren't allowed for metadata queries, further filtering is done in apex
-        String condition = 'Child_Object_with_Shared_To_Field__c != NULL AND Child_Object_Lookup_Field__c != NULL'
-            + ' WITH SECURITY_ENFORCED';
+        String condition = 'Child_Object_with_Shared_To_Field__c != NULL AND Child_Object_Lookup_Field__c != NULL';
         String query = getQueryWithCondition(condition);
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
@@ -287,7 +284,7 @@ public inherited sharing class FormulaShareRulesSelector {
     // Used by FormulaShareRuleDetail LWC
     @AuraEnabled(cacheable=false)
     public static FormulaShareRule getSpecificRule(Id ruleId) {
-        String condition = 'Id = \'' + ruleId + '\' WITH SECURITY_ENFORCED LIMIT 1';
+        String condition = 'Id = \'' + ruleId + '\' LIMIT 1';
         String query = getQueryWithCondition(condition);
         System.debug('specific rule query: '+ query);
         FormulaShare_Rule__mdt rule = Database.query(query);
