@@ -82,6 +82,11 @@ jobs:
       run: |
         sfdx force:source:push
 
+    - name: Assign permission sets
+      run: |
+        sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
+        sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
+
     - name: Run all apex tests
       run: |
         sfdx force:apex:test:run --synchronous
@@ -138,6 +143,11 @@ jobs:
     - name: Push source
       run: |
         sfdx force:source:push
+
+    - name: Assign permission sets
+      run: |
+        sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
+        sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
 
     - name: Run all apex tests
       run: |
