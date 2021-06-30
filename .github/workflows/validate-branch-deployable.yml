@@ -84,7 +84,7 @@ jobs:
 
     - name: Run all apex tests
       run: |
-        sfdx force:apex:test:run
+        sfdx force:apex:test:run --synchronous
 
     - name: Delete scratch org
       run: |
@@ -141,7 +141,7 @@ jobs:
 
     - name: Run all apex tests
       run: |
-        sfdx force:apex:test:run
+        sfdx force:apex:test:run --synchronous
 
     - name: Delete scratch org
       run: |
