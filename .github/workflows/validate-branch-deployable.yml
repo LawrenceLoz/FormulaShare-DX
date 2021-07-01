@@ -136,6 +136,10 @@ jobs:
         jq '. + {"namespace": "sdfs"}' config/project-scratch-def.json > temp.json
         mv temp.json config/project-scratch-def.json
 
+    - name: Append namespace to metadata
+      run: 
+        node scripts\appendNamespaceToSampleMD.js
+
     - name: Create scratch org
       run: |
         sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername -d 1

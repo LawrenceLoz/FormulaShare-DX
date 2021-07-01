@@ -23,5 +23,8 @@
   "devDependencies": {
     "@salesforce/sfdx-lwc-jest": "^0.10.2",
     "jest-canvas-mock": "^2.3.0"
+  },
+  "dependencies": {
+    "xml2js": "^0.4.23"
   }
 }

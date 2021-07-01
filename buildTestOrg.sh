@@ -12,6 +12,8 @@ echo Username for org: ${orgName}
 
 call sfdx force:org:create -f config/project-scratch-def.json -a ${orgName} --durationdays 30
 echo Created org with username ${orgName}
+node scripts/appendNamespaceToSampleMD.js
+echo Checked for namespace and appended to custom metadata if required
 call sfdx force:source:push -u ${orgName}
 echo Pushed source
 call sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User -u ${orgName}
