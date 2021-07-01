@@ -23,6 +23,8 @@ echo Username for default org: %orgName%
 
 call sfdx force:org:create -f config/project-scratch-def.json -a %orgName% --setdefaultusername
 echo Created org with default username %orgName%
+call node scripts/appendNamespaceToSampleMD.js
+echo Checked for namespace and appended to custom metadata if required
 call sfdx force:source:push
 echo Pushed source
 call sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User

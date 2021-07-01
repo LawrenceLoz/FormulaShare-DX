@@ -82,9 +82,14 @@ jobs:
       run: |
         sfdx force:source:push
 
+    - name: Assign permission sets
+      run: |
+        sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
+        sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
+
     - name: Run all apex tests
       run: |
-        sfdx force:apex:test:run
+        sfdx force:apex:test:run --synchronous
 
     - name: Delete scratch org
       run: |
@@ -124,12 +129,21 @@ jobs:
       run: |
         sudo apt-get install jq
     
+    # xml2js used in node script to append namespace to custom metadata
+    - name: Install xml2js
+      run: |
+        npm install xml2js
+    
     # jq adds the namespace element to the project-scratch-def.json
     # We're able to create scratch orgs in package namespace from ISV org because namespace is linked
     - name: Add package namespace to project-scratch-def.json
       run: |
         jq '. + {"namespace": "sdfs"}' config/project-scratch-def.json > temp.json
         mv temp.json config/project-scratch-def.json
+
+    - name: Append namespace to metadata
+      run: 
+        node scripts/appendNamespaceToSampleMD.js
 
     - name: Create scratch org
       run: |
@@ -139,9 +153,14 @@ jobs:
       run: |
         sfdx force:source:push
 
+    - name: Assign permission sets
+      run: |
+        sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
+        sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
+
     - name: Run all apex tests
       run: |
-        sfdx force:apex:test:run
+        sfdx force:apex:test:run --synchronous
 
     - name: Delete scratch org
       run: |
