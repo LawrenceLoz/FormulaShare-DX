@@ -6,7 +6,7 @@
 const fs = require('fs');
 
 const scratchDefFile = 'config/project-scratch-def.json';
-const sampleMetaDir = 'fs-sample-app\\main\\default\\customMetadata';   // Convert metadata in sample app namespace
+const sampleMetaDir = 'fs-sample-app/main/default/customMetadata';   // Convert metadata in sample app namespace
 
 const scratchDef = fs.readFileSync(scratchDefFile);
 const scratchDefJson = JSON.parse(scratchDef);
@@ -27,7 +27,7 @@ if(namespace) {
             if(file.startsWith("FormulaShare_Rule")) {
 
                 // Get file contents
-                const fileLocation = sampleMetaDir + '\\' + file;
+                const fileLocation = sampleMetaDir + '/' + file;
                 const ruleMeta = fs.readFileSync(fileLocation);
 
                 // Convert XML to JSON
