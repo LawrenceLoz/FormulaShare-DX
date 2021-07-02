@@ -51,7 +51,8 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
             FormulaShare_Settings__mdt.Record_Logs_Since_Last_Batch_Report_Name__c,
             FormulaShare_Settings__mdt.All_Record_Errors_Report_Name__c,
             FormulaShare_Settings__mdt.Rec_Errors_Since_Last_Batch_Report_Name__c,
-            FormulaShare_Settings__mdt.Batch_Errors_Report_Name__c
+            FormulaShare_Settings__mdt.Batch_Errors_Report_Name__c,
+            FormulaShare_Settings__mdt.Allow_Recursive_Reassessment__c
         };
     }
 
