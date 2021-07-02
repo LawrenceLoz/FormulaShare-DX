@@ -124,6 +124,11 @@ jobs:
         consumer-key:     $CONSUMER_KEY
         dev-hub-username: $DEV_HUB_USERNAME
 
+    # xml2js used in node script to append namespace to custom metadata
+    - name: Install xml2js
+      run: |
+        npm install xml2js
+
     # We're able to create scratch orgs in package namespace from ISV org because namespace is linked
     - name: Add package namespace to project-scratch-def.json
       run: |
