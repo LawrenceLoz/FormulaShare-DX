@@ -124,22 +124,15 @@ jobs:
         consumer-key:     $CONSUMER_KEY
         dev-hub-username: $DEV_HUB_USERNAME
 
-    # JQ is used to update project-scratch-def.json
-    - name: Install jq
-      run: |
-        sudo apt-get install jq
-    
     # xml2js used in node script to append namespace to custom metadata
     - name: Install xml2js
       run: |
         npm install xml2js
-    
-    # jq adds the namespace element to the project-scratch-def.json
+
     # We're able to create scratch orgs in package namespace from ISV org because namespace is linked
     - name: Add package namespace to project-scratch-def.json
       run: |
-        jq '. + {"namespace": "sdfs"}' config/project-scratch-def.json > temp.json
-        mv temp.json config/project-scratch-def.json
+        node scripts/setNamespace.js sdfs
 
     - name: Append namespace to metadata
       run: 
