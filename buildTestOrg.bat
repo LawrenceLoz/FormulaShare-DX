@@ -7,6 +7,16 @@ setlocal EnableDelayedExpansion
 set orgName=TestData
 echo Username for org: %orgName%
 
+:: If namespace was provided as an argument, set this in the project-scratch-def.json
+:: and update rules metadata to include the prefix in the sharing reason
+set namespace=%1
+if not "%namespace%" == "" (
+    call node scripts/setNamespace.js %namespace%
+    echo Set namespace in project-scratch-def.json
+    call node scripts/appendNamespaceToSampleMD.js
+    echo Appended namespace to custom metadata if required
+)
+
 call sfdx force:org:create -f config/project-scratch-def.json -a %orgName% --durationdays 30
 echo Created org with username %orgName%
 call node scripts/appendNamespaceToSampleMD.js
