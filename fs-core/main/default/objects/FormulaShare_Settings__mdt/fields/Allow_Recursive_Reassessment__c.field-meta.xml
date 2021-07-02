@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Allow_Recursive_Reassessment__c</fullName>
+    <defaultValue>false</defaultValue>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Allows sharing to be assessed for the same record more than once in a transaction. This may be required for real time reassessment in complex scenarios with cascading updates, but could contribute to performance issues so should be disabled unless it&apos;s needed</inlineHelpText>
+    <label>Allow Recursive Reassessment</label>
+    <type>Checkbox</type>
+</CustomField>

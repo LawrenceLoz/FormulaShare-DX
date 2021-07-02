@@ -23,17 +23,68 @@
 // Implements methods acting on a list of FormulaShareService classes (populated within extending classes)
 public abstract inherited sharing class FormulaShareHelperBase {
 
-    @TestVisible 
-	protected List<FormulaShareService> populatedFsServiceList = new List<FormulaShareService>();
+	// Used to prevent recursion
+	@TestVisible private static Set<Id> processedIds = new Set<Id>();
+
+    @TestVisible protected List<FormulaShareService> populatedFsServiceList = new List<FormulaShareService>();
 	
     @TestVisible
     protected void handleChanges(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
-		setServiceObjectsWithRecords(type, oldRecords, newRecords);
+
+		// Check whether settings allow recursion
+		FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
+		Map<Id,SObject> oldRecordsToProcess;
+		Map<Id,SObject> newRecordsToProcess;
+
+		// Process all records if permitted
+		if(settings.Allow_Recursive_Reassessment__c) {
+			oldRecordsToProcess = oldRecords;
+			newRecordsToProcess = newRecords;
+		}
+
+		// Otherwise remove any records processed this transaction
+		else {
+			oldRecordsToProcess = stripProcessed(oldRecords);
+			newRecordsToProcess = stripProcessed(newRecords);
+		}
+		processedIds.addAll(newRecords.keySet());
+
+		// Retrieve relevant info and establish FormulaShareService list
+		setServiceObjectsWithRecords(type, oldRecordsToProcess, newRecordsToProcess);
 
 		for(FormulaShareService fsService : populatedFsServiceList) {
 			fsService.processFormulaShares();
 		}
 	}
+
+
+	// Returns a map with records processed this transaction removed
+	@TestVisible
+	private Map<Id,SObject> stripProcessed(Map<Id,SObject> recordsMap) {
+		if(recordsMap == null) {
+			return null;
+		}
+
+		Map<Id,SObject> unprocessedMap;
+
+		// First time only save a loop by returning map as is
+		if(processedIds.isEmpty()) {
+			unprocessedMap = recordsMap;
+		}
+
+		// Otherwise, create a new map with records not yet processed
+		else {
+			unprocessedMap = new Map<Id,SObject>();
+			for(Id thisId : recordsMap.keySet()) {
+				if(!processedIds.contains(thisId)) {
+					unprocessedMap.put(thisId, recordsMap.get(thisId));
+				}
+			}
+		}
+
+		return unprocessedMap;
+	}
+
 
 	@TestVisible
 	private void setServiceObjectsWithRecords(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
