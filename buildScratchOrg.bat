@@ -21,10 +21,18 @@ set monthName=!monthList:~%monthPos%,3!
 set orgName=%day%%monthName%FS
 echo Username for default org: %orgName%
 
+:: If namespace was provided as an argument, set this in the project-scratch-def.json
+:: and update rules metadata to include the prefix in the sharing reason
+set namespace=%1
+if not "%namespace%" == "" (
+    call node scripts/setNamespace.js %namespace%
+    echo Set namespace in project-scratch-def.json
+    call node scripts/appendNamespaceToSampleMD.js
+    echo Appended namespace to custom metadata if required
+)
+
 call sfdx force:org:create -f config/project-scratch-def.json -a %orgName% --setdefaultusername
 echo Created org with default username %orgName%
-call node scripts/appendNamespaceToSampleMD.js
-echo Checked for namespace and appended to custom metadata if required
 call sfdx force:source:push
 echo Pushed source
 call sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
