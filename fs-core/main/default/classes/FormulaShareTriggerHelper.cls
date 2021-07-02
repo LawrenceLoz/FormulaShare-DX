@@ -21,8 +21,6 @@
 
 public inherited sharing class FormulaShareTriggerHelper extends FormulaShareHelperBase implements FormulaShareIHelper {
 
-	private static List<sObjectType> objectsRun = new List<sObjectType>();
-
 	// Constructor to assess sharing
 	public FormulaShareTriggerHelper() {
 
@@ -36,12 +34,8 @@ public inherited sharing class FormulaShareTriggerHelper extends FormulaShareHel
 				List<sObject> recordsChanged = Trigger.new;
 				type = recordsChanged[0].getSObjectType();
 
-				// Continue if we haven't already processed for this object (protects against calling in a loop)
-				if(!objectsRun.contains(type)) {
-					objectsRun.add(type);
-
-					super.handleChanges(type, Trigger.oldMap, Trigger.newMap);
-				}
+				// Call base method with old and new maps
+				super.handleChanges(type, Trigger.oldMap, Trigger.newMap);
 			}
 		}
 	}
