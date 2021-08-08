@@ -44,4 +44,9 @@ jobs:
     # RunLocalTests is the default for production but included here just in case
     - name: Deploy Core Folder Metadata and Run Tests
       run: |
-        sfdx force:source:deploy -u packagingOrg -p fs-core -l RunLocalTests
+        sfdx force:source:deploy -u packagingOrg -p fs-core/main/default -l RunLocalTests
+    # Issue with deploying fflibs labels due to known issue
+    # https://salesforce.stackexchange.com/questions/324328/sf-dx-cannot-deploy-package-xml-with-custom-labels
+    # https://trailblazer.salesforce.com/issues_view?id=a1p4V000000scTpQAI
+    # Command below should be used instead when this is resolved:
+    # sfdx force:source:deploy -u packagingOrg -p fs-core -l RunLocalTests
