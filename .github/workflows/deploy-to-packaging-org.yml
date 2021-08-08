@@ -34,7 +34,7 @@ jobs:
       uses: ./.github/workflows/scripts/install-and-authenticate-dx
       with:
         jwt-signing-key:  $JWT_SIGNING_KEY
-        consumer-key:     $CONSUMER_KEY
+        consumer-key:     $DEV_HUB_CONSUMER_KEY
         dev-hub-username: $DEV_HUB_USERNAME
 
     - name: Authenticate to Packaging Org
