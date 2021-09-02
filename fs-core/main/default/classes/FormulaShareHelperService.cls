@@ -392,6 +392,7 @@ public inherited sharing class FormulaShareHelperService {
 		return key;
 	}
 
+	// Only remove sharing if object being assessed is the shared object (i.e. standard rule or specific record assessment e.g. for batch)
 	private Boolean removeSharesForThisType(String sharedObjectName) {
 		return sharedObjectName == objectName && removeSharesForSharedObject;
 	}
