@@ -285,13 +285,11 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     @track sharingReasonOptions = [];
     @track loadingReasons = true;
     reasons;
-    @wire(getSharingReasons, { objectApiName : '$sharedObjectApiName'} )
+    @wire(getSharingReasons, { objectApiName : '$_sharedObjectApiName'} )
     wiredSharingReasons(value) {
         this.reasons = value;
         const { data, error } = value;
         if(data) {
-            //console.log('retrieved options: '+JSON.stringify(data));
-
             this.sharingReasonOptions = [];
             this.oneOrMoreReasons = false;
 
