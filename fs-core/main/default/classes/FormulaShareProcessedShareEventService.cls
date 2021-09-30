@@ -102,7 +102,8 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     
         // Get processed record objects and register for insert if allowed
         List<FormulaShare_Record_Log__c> recordLogs = processedRecords.values();
-        if(settings.Log_Processing_Events__c == 'All') {
+        
+        if(createRecordLogs()) {
             uow.registerNew(recordLogs);
 
             // If processing batch, register a relationship with the batch log
@@ -305,8 +306,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
             prs.Share_With__c = pse.Share_With__c;
         }
 
-        // Register records for insert if settings allow
-        if(settings.Log_Processing_Events__c == 'All') {
+        if(createRecordLogs()) {
             // Set master detail relationship
             FormulaShare_Record_Log__c recordLog = recordLogsMap.get(pse.Record_Id__c);
             uow.registerNew(prs, FormulaShare_Processed_Record_Share__c.Processed_Record__c, recordLog);
@@ -453,6 +453,13 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         }
 
         List<Database.SaveResult> results = EventBus.publish(eventsList);
+    }
+
+
+    // Create record logs only if setting allows
+    // And only if job is scheduled (to prevent data volumes growing without cleanup job running)    
+    private static Boolean createRecordLogs() {
+        return settings.Log_Processing_Events__c == 'All' && FormulaShareAsyncApexJobSelector.isScheduled();
     }
 
 

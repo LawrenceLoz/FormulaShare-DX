@@ -205,20 +205,6 @@ public with sharing class FormulaShareRulesListViewController {
     }
 
     
-    // Query and cache whether the job is scheduled
-    @TestVisible static Boolean jobScheduled;
-    private static Boolean jobScheduled() {
-        if(jobScheduled == null) {
-            List<AsyncApexJob> jobs = [SELECT Id FROM AsyncApexJob 
-            WHERE Status != 'Aborted' AND Status != 'Completed' AND Status != 'Failed'
-            AND ApexClass.Name = 'FormulaShareProcessSchedulable'];
-            jobScheduled = !jobs.isEmpty();
-        }
-
-        return jobScheduled;
-    }
-
-    
     public class ObjectRulesWrapper implements Comparable {
         @AuraEnabled
         public String key {get;set;}
@@ -405,7 +391,7 @@ public with sharing class FormulaShareRulesListViewController {
 
             // If job isn't scheduled, set icon and link
             warningUrlLabel = '';
-            if(!jobScheduled()) {
+            if(!FormulaShareAsyncApexJobSelector.isScheduled()) {
                 warningIcon = warningTriangle;
                 warningUrlLabel = 'Schedule batch job';
                 warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';
