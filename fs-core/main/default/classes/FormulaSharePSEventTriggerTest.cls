@@ -4,6 +4,9 @@ public with sharing class FormulaSharePSEventTriggerTest {
     @IsTest
     public static void testLogAfterSuccessfulInsert() {
 
+        // Simulate a batch being scheduled
+        FormulaShareAsyncApexJobSelector.isScheduled = true;
+
         // Simulate share being inserted by rule
         FormulaShare_Log__c log = FormulaShareTestDataFactory.getBatchLog();
         insert log;
@@ -63,6 +66,9 @@ public with sharing class FormulaSharePSEventTriggerTest {
     @IsTest
     public static void testLogAfterFailedInsert() {
         String ruleName = 'Test_rule';
+
+        // Simulate a batch being scheduled
+        FormulaShareAsyncApexJobSelector.isScheduled = true;
 
         // Insert existing trigger log so we can check this is updated
         FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(ruleName, null);

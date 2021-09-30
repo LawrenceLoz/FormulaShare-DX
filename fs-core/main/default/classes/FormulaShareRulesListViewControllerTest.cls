@@ -176,7 +176,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 
     @IsTest
     public static void testBatchFinishMetricsPopulate() {
-        FormulaShareRulesListViewController.jobScheduled = true;
+        FormulaShareAsyncApexJobSelector.isScheduled = true;
         setMocks();
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
 
@@ -213,7 +213,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 
     @IsTest
     public static void testBatchFinishFailPlusOtherMetrics() {
-        FormulaShareRulesListViewController.jobScheduled = true;
+        FormulaShareAsyncApexJobSelector.isScheduled = true;
         setMocks();
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
 
@@ -252,7 +252,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 
     @IsTest
     public static void testBatchAndTriggerOnly() {
-        FormulaShareRulesListViewController.jobScheduled = true;
+        FormulaShareAsyncApexJobSelector.isScheduled = true;
         setMocks();
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
 
@@ -286,7 +286,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 
     @IsTest
     public static void testNoJobScheduled() {
-        FormulaShareRulesListViewController.jobScheduled = false;   // Should trigger error message relating to scheduled job
+        FormulaShareAsyncApexJobSelector.isScheduled = false;   // Should trigger error message relating to scheduled job
         setMocks();
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
 
