@@ -64,8 +64,8 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
 					addToFullSets(rule);
 				}
 
-				// If owner of shared standard object has changed we might need to check if this owner still requires sharing
-				else if(oldRecord.get('OwnerId') != newRecord.get('OwnerId') && !rule.sharedObjectIsCustom) {
+				// If owner has changed we might need to check if the old owner still requires sharing
+				else if(oldRecord.get('OwnerId') != newRecord.get('OwnerId')) {
 					System.debug('Adding record ' + newRecord.get('Id') + ' for processing for standard or ancestor rule: ' + rule.developerName + '. OwnerId: '+newRecord.get('OwnerId'));
 					addToSets(newRecord, rule);
 					addToFullSets(rule);
