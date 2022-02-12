@@ -257,7 +257,7 @@ public virtual inherited sharing class FormulaShareRule {
             }
         }
 
-        return getShareRecordAtAccessLevels(type, recordId, sharedTo, objectAccessLevels);
+        return getShareRecordAtAccessLevels(objectUtils, recordId, sharedTo, objectAccessLevels);
     }
 
 
@@ -352,27 +352,23 @@ public virtual inherited sharing class FormulaShareRule {
             }
         }
 
-        return getShareRecordAtAccessLevels(type, recordId, sharedTo, objectAccessLevels);
+        return getShareRecordAtAccessLevels(objectUtils, recordId, sharedTo, objectAccessLevels);
     }
 
     
     // Return a populated share record with access levels supplied and appropriate values for the record and shared to entity
-    private SObject getShareRecordAtAccessLevels(Schema.SObjectType type, Id recordId, Id sharedTo, Map<String,String> objectAccessLevels) {
+    private SObject getShareRecordAtAccessLevels(FormulaShareSObjectUtilities objectUtils, Id recordId, Id sharedTo, Map<String,String> objectAccessLevels) {
 
-		SObject newShare = getShareAccessOnly(type, objectAccessLevels);
+        // Get a share record with access level (or levels) set
+		SObject newShare = getShareAccessOnly(objectUtils.type, objectAccessLevels);
 
-        // Populate values if object is custom
-        if(type.getDescribe().isCustom()) {
-            newShare.put('ParentId', recordId);
-            newShare.put('UserOrGroupId', sharedTo);
+        // Populate lookup to parent (either ParentId or ObjectNameId) and entity to get access
+        newShare.put(objectUtils.parentIdFieldName(), recordId);
+        newShare.put('UserOrGroupId', sharedTo);
+
+        // Populate row cause if object is custom (manual is set by default for standard objects)
+        if(objectUtils.type.getDescribe().isCustom()) {
             newShare.put('RowCause', sharingReason);
-        }
-
-        // Populate values if object is standard (format of share records is a bit different)
-        else {
-            newShare.put(type + 'Id', recordId);
-            newShare.put('UserOrGroupId', sharedTo);
-    //		newShare.put('RowCause','Manual');		// Only reason supported for standard objects is manual (set by default)
         }
 
 		return newShare;
