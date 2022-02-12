@@ -35,25 +35,58 @@ public inherited sharing class FormulaShareSObjectUtilities {
     }
 
 	public String accessLevelFieldName() {
+
+        // Custom objects will always include AccessLevel
         if(isCustom) {
             return 'AccessLevel';
         }
-        else {
+
+        // Most standard objects have a field called "ObjectNameAccessLevel"
+        else if(shareObjectHasField(objectName + 'AccessLevel')) {
             return objectName + 'AccessLevel';
+        }
+
+        // But for some (e.g. Work Order) this is just called "AccessLevel"
+        else if(shareObjectHasField('AccessLevel')) {
+            return 'AccessLevel';
+        }
+
+        else {
+            throw new FormulaShareRule.FormulaShareException('Share object for '+objectName+' does not include field with expected format ('+objectName+'AccessLevel or AccessLevel)');
         }
     }
 
 	public String parentIdFieldName() {
+
+        // Custom objects will always include ParentId
         if(isCustom) {
             return 'ParentId';
         }
-        else {
+
+        // Most standard objects have a field called "ObjectNameAccessLevel"
+        else if(shareObjectHasField(objectName + 'Id')) {
             return objectName + 'Id';
         }
+
+        // But for some (e.g. Work Order) this is just called "ParentId"
+        else if(shareObjectHasField('ParentId')) {
+            return 'ParentId';
+        }
+
+        else {
+            throw new FormulaShareRule.FormulaShareException('Share object for '+objectName+' does not include access level rule with expected format ('+objectName+'Id or ParentId)');
+        }
+    }
+
+    private Boolean shareObjectHasField(String fieldName) {
+        Schema.SObjectType shareObj = FormulaShareUtilities.getShareObject(type);
+        return FormulaShareUtilities.getSObjectFieldFromName(fieldName, shareObj) != null;
     }
 
 	public String getShareKey(SObject share) {
         String shareKeyBase = getShareKeyBase(share);
+
+        // Only custom objects allow for a custom RowCause (apex sharing reason)
         if(isCustom) {
             String rowCause = (String) share.get('RowCause');
             String shareKey = shareKeyBase + rowCause;
