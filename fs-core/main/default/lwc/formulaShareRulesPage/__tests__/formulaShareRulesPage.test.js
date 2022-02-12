@@ -137,7 +137,7 @@ describe('c-formula-share-rules-page', () => {
             rulesList.dispatchEvent(onRuleLoadEvent);
         })
         .then(() => {
-            const pageHeader = element.shadowRoot.querySelector('p.slds-page-header__meta-text.slds-text-body--small.slds-m-top_xxx-small');
+            const pageHeader = element.shadowRoot.querySelector('p.slds-page-header__meta-text.slds-text-body_small.slds-m-top_xxx-small');
             expect(pageHeader).not.toBeNull();
             const innerHTML = pageHeader.innerHTML;
             expect(innerHTML).toBe(numberOfRows + ' items');
