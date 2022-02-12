@@ -1,38 +1,69 @@
 <template>
 
-    <h3 class="slds-section-title--divider ">Rule name</h3>
-    <c-formula-share-rule-detail-name-label
-        rule-name={rule.developerName}
-        rule-label={rule.label}
-        rule-description={rule.description}
-        rule-active={rule.active}
-        is-edit={isEdit}
-        onlabelchange={handleLabelChange}
-        onnamechange={handleNameChange}
-        ondescriptionchange={handleDescriptionChange}
-        onactivechange={handleActiveChange}>
-    </c-formula-share-rule-detail-name-label>
+    <div class="slds-section slds-is-open">
+        <h3 class="slds-section__title slds-theme_shade">
+            <span 
+                class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                title="Rule Name">
+                Rule Name
+            </span>
+        </h3>
+        <div aria-hidden="false" class="slds-section__content">
+            <c-formula-share-rule-detail-name-label
+                rule-name={rule.developerName}
+                rule-label={rule.label}
+                rule-description={rule.description}
+                rule-active={rule.active}
+                is-edit={isEdit}
+                onlabelchange={handleLabelChange}
+                onnamechange={handleNameChange}
+                ondescriptionchange={handleDescriptionChange}
+                onactivechange={handleActiveChange}>
+            </c-formula-share-rule-detail-name-label>
+        </div>
+    </div>
 
-    <h3 class="slds-section-title--divider ">Object to share</h3>
+    <div class="slds-section slds-is-open">
+        <h3 class="slds-section__title slds-theme_shade">
+            <span 
+                class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                title="Object to share">
+                Object to share
+            </span>
+        </h3>
+        <div aria-hidden="false">
+            <c-formula-share-rule-detail-shared-object 
+                shared-object-api-name={rule.objectSharedAPIName}
+                onsetsharedobjectdetail={handleSetSharedObjectDetail}
+                onsharedobjectchange={handleSharedObjectChange}
+                onaccountrelatedowd={handleSetAccountRelatedOwd}>
+            </c-formula-share-rule-detail-shared-object>
+        </div>
+    </div>
 
-    <c-formula-share-rule-detail-shared-object 
-        shared-object-api-name={rule.objectSharedAPIName}
-        onsetsharedobjectdetail={handleSetSharedObjectDetail}
-        onsharedobjectchange={handleSharedObjectChange}
-        onaccountrelatedowd={handleSetAccountRelatedOwd}>
-    </c-formula-share-rule-detail-shared-object>
 
     <template if:true={rule.relationship}>
-        <div class="slds-p-top_medium stackOrderTop">
-            <h3 class="slds-section-title--divider">Location of field with user, role or group</h3>
-            
-            <c-formula-share-rule-detail-location 
-                relationship={rule.relationship}
-                controlling-object-api-name={rule.controllingObjectApiName}
-                selected-location={selectedLocation}
-                onruletypechange={handleRuleTypeChange}
-                onrelationshipchange={handleRelationshipChange}>
-            </c-formula-share-rule-detail-location>
+        <div class="slds-p-top_xx-small stackOrderTop">
+
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title slds-theme_shade">
+                    <span 
+                        class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                        title="Location of field with user, role or group">
+                        Location of field with user, role or group
+                    </span>
+                </h3>
+                <div aria-hidden="false" class="slds-section__content">
+                    <c-formula-share-rule-detail-location 
+                        relationship={rule.relationship}
+                        controlling-object-api-name={rule.controllingObjectApiName}
+                        selected-location={selectedLocation}
+                        onruletypechange={handleRuleTypeChange}
+                        onrelationshipchange={handleRelationshipChange}>
+                    </c-formula-share-rule-detail-location>
+                </div>
+            </div>
+
         </div>
 
 <!-- Line below can be added to monitor full JSON        
@@ -40,43 +71,67 @@
     </template>
 
     <template if:true={sharedObjectDetail}>
-        <h3 class="slds-section-title--divider">Share with</h3>
-        <c-formula-share-rule-detail-field 
-            disable-share-field={disableShareField}
-            object-with-share-field={rule.controllingObjectApiName}
-            share-with={rule.shareWith}
-            internal-sharing-model={sharedObjectDetail.internalSharingModel}
-            external-sharing-model={sharedObjectDetail.externalSharingModel}
-            share-field={rule.controllingObjectSharedToFieldAPIName}
-            share-field-type={rule.controllingObjectSharedToFieldType}
-            onsharewithchange={handleShareWithChange}
-            onsharefieldchange={handleShareFieldChange}
-            onsharefieldtypechange={handleShareFieldTypeChange}>
-        </c-formula-share-rule-detail-field>
+
+        <div class="slds-section slds-is-open">
+            <h3 class="slds-section__title slds-theme_shade">
+                <span 
+                    class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                    title="Share with">
+                    Share with
+                </span>
+            </h3>
+            <div aria-hidden="false" class="slds-section__content">
+                <c-formula-share-rule-detail-field 
+                    disable-share-field={disableShareField}
+                    object-with-share-field={rule.controllingObjectApiName}
+                    share-with={rule.shareWith}
+                    internal-sharing-model={sharedObjectDetail.internalSharingModel}
+                    external-sharing-model={sharedObjectDetail.externalSharingModel}
+                    share-field={rule.controllingObjectSharedToFieldAPIName}
+                    share-field-type={rule.controllingObjectSharedToFieldType}
+                    onsharewithchange={handleShareWithChange}
+                    onsharefieldchange={handleShareFieldChange}
+                    onsharefieldtypechange={handleShareFieldTypeChange}>
+                </c-formula-share-rule-detail-field>
+            </div>
+        </div>
+    
     </template>
 
     <template if:true={sharedObjectDetail}>
-        <h3 class="slds-section-title--divider">Sharing provided</h3>
-        <c-formula-share-rule-detail-access 
-            internal-sharing-model={sharedObjectDetail.internalSharingModel}
-            external-sharing-model={sharedObjectDetail.externalSharingModel}
-            account-related-owd={accountRelatedOwd}
-            is-custom={sharedObjectDetail.isCustom}
-            shared-object-id={sharedObjectDetail.objectId}
-            shared-object-label={sharedObjectDetail.objectLabel}
-            shared-object-api-name={rule.objectSharedAPIName}
-            access-level={rule.accessLevel}
-            contact-access={rule.contactAccess}
-            case-access={rule.caseAccess}
-            opportunity-access={rule.opportunityAccess}
-            sharing-reason={rule.sharingReason}
-            onaccesslevelchange={handleAccessLevelChange}
-            onsharingreasonchange={handleSharingReasonChange}
-            oncontactaccesschange={handleContactAccessChange}
-            oncaseaccesschange={handleCaseAccessChange}
-            onopportunityaccesschange={handleOpportunityAccessChange}
-            >
-        </c-formula-share-rule-detail-access>            
+
+        <div class="slds-section slds-is-open">
+            <h3 class="slds-section__title slds-theme_shade">
+                <span 
+                    class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                    title="Sharing provided">
+                    Sharing provided
+                </span>
+            </h3>
+            <div aria-hidden="false" class="slds-section__content">
+                <c-formula-share-rule-detail-access 
+                    internal-sharing-model={sharedObjectDetail.internalSharingModel}
+                    external-sharing-model={sharedObjectDetail.externalSharingModel}
+                    account-related-owd={accountRelatedOwd}
+                    is-custom={sharedObjectDetail.isCustom}
+                    shared-object-id={sharedObjectDetail.objectId}
+                    shared-object-label={sharedObjectDetail.objectLabel}
+                    shared-object-api-name={rule.objectSharedAPIName}
+                    access-level={rule.accessLevel}
+                    contact-access={rule.contactAccess}
+                    case-access={rule.caseAccess}
+                    opportunity-access={rule.opportunityAccess}
+                    sharing-reason={rule.sharingReason}
+                    onaccesslevelchange={handleAccessLevelChange}
+                    onsharingreasonchange={handleSharingReasonChange}
+                    oncontactaccesschange={handleContactAccessChange}
+                    oncaseaccesschange={handleCaseAccessChange}
+                    onopportunityaccesschange={handleOpportunityAccessChange}
+                    >
+                </c-formula-share-rule-detail-access>
+            </div>
+        </div>        
+
     </template>
 
 </template>
