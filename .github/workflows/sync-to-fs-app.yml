@@ -1,0 +1,24 @@
+# Calls Sync Dependencies workflow from FormulaShare-App repo to update the 
+# master branch with latest version of dependencies
+
+name: Sync to FS-App repo
+
+# Run for all commits to master
+on:
+  push:
+    branches:
+      - master
+
+env:
+  PAT_FOR_REPO_INTEGRATION:  ${{ secrets.PAT_FOR_REPO_INTEGRATION }}
+
+jobs:
+  call-sync:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: 'Call sync workflow'
+      run: |
+        curl -XPOST -H "Authorization: Bearer $PAT_FOR_REPO_INTEGRATION" -H "Content-Type:application/json" \
+        https://api.github.com/repos/LawrenceLoz/FormulaShare-App/dispatches \
+        --data "{\"event_type\": \"sync_master\"}"
