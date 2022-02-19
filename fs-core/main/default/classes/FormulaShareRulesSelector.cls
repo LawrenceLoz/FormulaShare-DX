@@ -280,6 +280,26 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
+    @AuraEnabled(cacheable=false)
+    public static Integer getNoActiveStandardRules() {
+        Integer activeStandardRules = [
+            SELECT COUNT() FROM FormulaShare_Rule__mdt 
+            WHERE Child_Object_with_Shared_To_Field__c = null
+            AND Active__c = true];
+		return activeStandardRules;
+    }
+
+
+    @AuraEnabled(cacheable=false)
+    public static Integer getNoActiveCrossObjectRules() {
+        Integer activeCrossObjectRules = [
+            SELECT COUNT() FROM FormulaShare_Rule__mdt 
+            WHERE Child_Object_with_Shared_To_Field__c != null
+            AND Active__c = true];
+		return activeCrossObjectRules;
+    }
+
+
     // Returns details of a single rule matching a supplied id
     // Used by FormulaShareRuleDetail LWC
     @AuraEnabled(cacheable=false)
