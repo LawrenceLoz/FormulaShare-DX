@@ -60,6 +60,12 @@ export default class FormulaShareRuleDetailLocation extends LightningElement {
         return this._selectedLocation === 'relatedObject';
     }
 
+    // Relationship objects can be hidden to use visual pickers for illustration in setup
+    @api hideRelationshipObjects = false;
+    get showRelationshipObjects() {
+        return this._selectedLocation === 'relatedObject' && !this.hideRelationshipObjects;
+    }
+
     initialTraverse = {sequence: 0, depth: 0};  // relationship-object component operates on this
 
     // Event handlers for button selection of rule type. Update type and fire event to parent

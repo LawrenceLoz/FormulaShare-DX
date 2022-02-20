@@ -82,7 +82,7 @@
         </div>
     </fieldset>
 
-    <template if:true={fieldIsOnRelatedObject}>
+    <template if:true={showRelationshipObjects}>
         <c-formula-share-relationship-object 
             relationship={_relationship}
             traverse={initialTraverse}
