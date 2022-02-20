@@ -280,7 +280,7 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    @AuraEnabled(cacheable=false)
+    @AuraEnabled(cacheable=true)
     public static Integer getNoActiveStandardRules() {
         Integer activeStandardRules = [
             SELECT COUNT() FROM FormulaShare_Rule__mdt 
@@ -290,7 +290,7 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    @AuraEnabled(cacheable=false)
+    @AuraEnabled(cacheable=true)
     public static Integer getNoActiveCrossObjectRules() {
         Integer activeCrossObjectRules = [
             SELECT COUNT() FROM FormulaShare_Rule__mdt 
