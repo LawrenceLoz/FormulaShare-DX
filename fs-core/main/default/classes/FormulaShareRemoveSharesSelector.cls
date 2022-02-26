@@ -35,8 +35,16 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
 		List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLinesToReturn = 
             [SELECT Id
 			FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-			WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName];
+			WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName
+            AND Inactive__c = false];
 
         return removalLinesToReturn;
+    }
+
+    public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getAllRemovalLines() {
+        return [
+            SELECT Id, Standard_Object_to_Remove_Sharing__r.QualifiedApiName, Inactive__c
+            FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+        ];
     }
 }
