@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Retain_Sharing_After_Record_Changes__c</fullName>
+    <defaultValue>false</defaultValue>
+    <externalId>false</externalId>
+    <description>If ticked, sharing on this object won't be removed if it's not within the current scope of any rules. For standard objects, this will any include manual/apex sharing not applied by FormulaShare</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Retain Sharing After Record Changes</label>
+    <type>Checkbox</type>
+</CustomField>

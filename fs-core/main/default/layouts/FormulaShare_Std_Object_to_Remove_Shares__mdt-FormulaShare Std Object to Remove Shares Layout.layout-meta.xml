@@ -22,7 +22,7 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Inactive__c</field>
+                <field>Retain_Sharing_After_Record_Changes__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

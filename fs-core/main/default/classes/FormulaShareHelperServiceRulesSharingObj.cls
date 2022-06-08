@@ -28,6 +28,10 @@ public inherited sharing class FormulaShareHelperServiceRulesSharingObj extends 
 	public Set<FormulaShareRuleAncestor> relevantAncestorRulesSet = new Set<FormulaShareRuleAncestor>();
 	public Set<FormulaShareRuleStandard> fullStandardRulesSet = new Set<FormulaShareRuleStandard>();
 	public Set<FormulaShareRuleAncestor> fullAncestorRulesSet = new Set<FormulaShareRuleAncestor>();
+
+	// relevantRules, defined in base class, includes all rules which might need to be reapplied
+	// (because record is inserted or they share based on a field which changed)
+	// fullRules includes all standard rules on this object
 	public Set<FormulaShareRule> fullRules = new Set<FormulaShareRule>();
 
     public FormulaShareHelperServiceRulesSharingObj(List<FormulaShareRule> rules) {

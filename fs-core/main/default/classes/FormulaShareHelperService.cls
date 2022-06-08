@@ -28,9 +28,11 @@ public inherited sharing class FormulaShareHelperService {
     FormulaShareHelperServiceDescendant descendantRulesService;
 
     Schema.SObjectType type;
+	Schema.DescribeSObjectResult typeDescribe;
 	OperationType opType;
 	String objectName;
 	Boolean removeSharesForSharedObject = true;
+	Boolean assessAllRules = false;
 
 	Set<Id> recordsToQuery = new Set<Id>();
 
@@ -40,7 +42,8 @@ public inherited sharing class FormulaShareHelperService {
 	public FormulaShareHelperService(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
         this.type = type;
-		objectName = type.getDescribe().getName();
+		this.typeDescribe = type.getDescribe();
+		objectName = typeDescribe.getName();
 
 		// Clear map in case populated from previous object in same transaction
 		recordsToQuery.clear();
@@ -75,12 +78,14 @@ public inherited sharing class FormulaShareHelperService {
 			// Assess whether to remove rules
 			setRemoveSharesForSharedObject();
 
-			// Add all rules to map which splits by shared object
-			if(removeSharesForSharedObject) {
-				addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
-			}
-			else {
+			// Add all rules to be assessed
+			// For standard objects where removal is permitted, we need to check all rules to check we don't remove other valid sharing
+			if(assessAllRules) {
 				addToRulesForTypeMap(rulesSharingObjectService.fullRules);
+			}
+			// If we're not removing sharing, or for custom objects which split by sharing reason, we only care about affected rules
+			else {
+				addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
 			}
 		}
 		if(!descendantRulesService.rules.isEmpty()) {
@@ -221,24 +226,46 @@ public inherited sharing class FormulaShareHelperService {
     }
 
 
-	// removeSharesForSharedObject is true by default. For standard objects check whether we should set to false
+	// removeSharesForSharedObject is true by default. Check object settings to determine whether we should set to false
 	// If we do need to check for removal, we need to query for all standard/ancestor fields and check all rules sharing object
 	private void setRemoveSharesForSharedObject() {
 
 		// Check whether removal of sharing is permitted at all
-		if(!rulesSharingObjectService.relevantRules.isEmpty() && !type.getDescribe().isCustom()) {
+		if(!rulesSharingObjectService.relevantRules.isEmpty()) {
 			FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(type);
-			removeSharesForSharedObject = objUtils.removeSharesForObject();
 
-			// If standard object and we're permitted to remove sharing, check whether any rules other than standard and ancestor
-			// If so, we shouldn't instruct to remove sharing because there might be legitimate shares in place from these rules
-			if(removeSharesForSharedObject) {
+			Boolean isCustom = typeDescribe.isCustom();
+			Boolean removalAllowed = objUtils.removeSharesForObject();
+
+			// For custom objects, remove sharing only if object settings allow this
+			// No need to assess sharing for other rules, as sharing will be separated effectively by sharing rules 
+			if(isCustom) {
+				removeSharesForSharedObject = objUtils.removeSharesForObject();
+				assessAllRules = false;
+			}
+
+			// For standard objects where removal is not allowed, do not remove sharing
+			else if(!isCustom && !removalAllowed) {
+				removeSharesForSharedObject = false;
+				assessAllRules = false;
+			}
+
+			// For standard objects where removal is allowed...
+			else if(!isCustom && removalAllowed) {
 				FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
 				List<FormulaShareRule> allRules = fsRulesSelector.getRulesSharingObject(type);
 
 				// Check whether the number of rules sharing object is the same as the number of standard & ancestor rules
+				// If so we know all sharing on the object will be from rules we're assessing
 				if(allRules.size() != rulesSharingObjectService.rules.size()) {
 					removeSharesForSharedObject = false;
+					assessAllRules = false;
+				}
+
+				// Otherwise, don't remove because there might be valid shares in place from other rules
+				else {
+					removeSharesForSharedObject = true;
+					assessAllRules = true;
 				}
 			}
 		}
@@ -275,10 +302,15 @@ public inherited sharing class FormulaShareHelperService {
 			// For ancestor and standard, if we're planning to remove sharing then we need to query for anything relevant
 			Set<FormulaShareRuleStandard> standardRules;
 			Set<FormulaShareRuleAncestor> ancestorRules;
-			if(removeSharesForSharedObject && !type.getDescribe().isCustom()) {
+
+			// For standard objects, if we plan to remove sharing we'll need to check what's shared by any rules on the object
+			// This is so we don't remove sharing for any other rule
+			if(assessAllRules) {
 				standardRules = rulesSharingObjectService.fullStandardRulesSet;
 				ancestorRules = rulesSharingObjectService.fullAncestorRulesSet;
 			}
+			// For custom objects, we only need to check sharing for rules which might be impacted
+			// Other FormulaShare sharing will be associated with different sharing reasons, so isn't at risk of being removed
 			else {
 				standardRules = rulesSharingObjectService.relevantStandardRulesSet;
 				ancestorRules = rulesSharingObjectService.relevantAncestorRulesSet;
