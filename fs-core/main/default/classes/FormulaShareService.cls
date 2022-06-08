@@ -182,7 +182,7 @@ public inherited sharing class FormulaShareService {
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares();
 
-		// Clear deletion map if object is standard and removal of standard sharing is not permitted
+		// Clear deletion map if removal of standard sharing is not permitted
 		if(!isShareRemovalAllowed()) {
 			mapToDelete.clear();
 		}

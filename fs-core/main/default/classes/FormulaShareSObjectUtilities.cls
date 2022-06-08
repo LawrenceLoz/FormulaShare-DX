@@ -112,16 +112,19 @@ public inherited sharing class FormulaShareSObjectUtilities {
     public Boolean removeSharesForObject() {
         if(removeSharesForObject == null) {
 
-            // Always remove for custom objects as we distinguish by row cause
-            removeSharesForObject = true;
+            FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
+            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> objSettings = selector.getSettingsForType(type);
 
-            // Otherwise check custom metadata setting for this object
-            if(!isCustom) {
-                FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
-                List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLines = selector.getRemovalLinesForType(type);
-                if(removalLines.isEmpty()) {
-                    removeSharesForObject = false;
-                }
+            // If explicit settings, default to:
+            //  - Remove for custom objects, as we distinguish FS sharing by row cause
+            //  - Do not remove for standard objects, as we can't distinguish FS sharing from other apex/manual sharing
+            if(objSettings.isEmpty()) {
+                removeSharesForObject = isCustom;
+            }
+
+            // If settings exist, determing whether to remove based on the retain setting (we assume only a single settings record per object)
+            else {
+                removeSharesForObject = !objSettings[0].Retain_Sharing_After_Record_Changes__c;
             }
         }
         return removeSharesForObject;
