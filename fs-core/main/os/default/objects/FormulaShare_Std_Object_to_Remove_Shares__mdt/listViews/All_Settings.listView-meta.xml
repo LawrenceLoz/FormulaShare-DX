@@ -4,7 +4,7 @@
     <columns>MasterLabel</columns>
     <columns>DeveloperName</columns>
     <columns>Standard_Object_to_Remove_Sharing__c</columns>
-    <columns>Inactive__c</columns>
+    <columns>Retain_Sharing_After_Record_Changes__c</columns>
     <columns>NamespacePrefix</columns>
     <filterScope>Everything</filterScope>
     <label>All Settings</label>

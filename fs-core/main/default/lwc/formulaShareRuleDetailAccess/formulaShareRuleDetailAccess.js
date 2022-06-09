@@ -208,7 +208,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         const evt = new CustomEvent(type + 'accesschange', {
             detail: value
         });
-        this.dispatchEvent(evt);        
+        this.dispatchEvent(evt);
     }
 
     @track contactAccessOptions;
