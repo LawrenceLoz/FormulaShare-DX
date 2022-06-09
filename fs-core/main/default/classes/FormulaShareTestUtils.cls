@@ -29,7 +29,6 @@ public inherited sharing class FormulaShareTestUtils {
     public static String batchLogRowCause  = getNamespacePrefix() + 'FormulaShare_Log_Share__c';
     public static String recordLogRowCause = getNamespacePrefix() + 'FormulaShare_Record_Log_Share__c';
 
-
     public static String sharedGroupName = 'AllInternalUsers';
 
     static Id groupId;
@@ -39,6 +38,43 @@ public inherited sharing class FormulaShareTestUtils {
             groupId = publicGroup.Id;
         }
         return groupId;
+    }
+
+    public static String namespacePrefix = FormulaShareUtilities.getNamespacePrefix();
+    public static String mdNamePrefix = 'FormulaShare_Rule.';
+
+
+    //--------------------  Methods below assist simulating Metadata DML operations --------------- //
+
+    public static Map<String,SObject> cmdtToCmdtMap(FormulaShare_Rule__mdt rule) {
+        Map<String,SObject> mdMap = new Map<String,SObject>();
+        mdMap.put(rule.DeveloperName, rule);
+        return mdMap;
+    }
+
+    public static List<Metadata.Metadata> cmdtToMetadataList(FormulaShare_Rule__mdt rule) {
+        // Get list of metadata type populated with object for the original rule for the mock
+        Metadata.CustomMetadata md = cmdtToMetadata(rule, FormulaShare_Rule__mdt.SObjectType);
+        List<Metadata.Metadata> mdList = new List<Metadata.Metadata>{ md };
+        return mdList;
+    }
+
+    private static Metadata.CustomMetadata cmdtToMetadata(SObject cmdtRecord, Schema.SObjectType type) {
+
+        Map<String, Schema.SObjectField> fieldsMap = type.getDescribe().fields.getMap();
+
+        Metadata.CustomMetadata cmdt = new Metadata.CustomMetadata();
+        cmdt.fullName = namespacePrefix + mdNamePrefix + cmdtRecord.get('DeveloperName');
+        cmdt.label = (String) cmdtRecord.get('MasterLabel');
+        
+        for(String fieldName : fieldsMap.keySet()) {
+            Metadata.CustomMetadataValue customField = new Metadata.CustomMetadataValue();
+            customField.field = fieldName;
+            customField.value = cmdtRecord.get(fieldName);
+            cmdt.values.add(customField);
+        }
+
+        return cmdt;
     }
 
 }

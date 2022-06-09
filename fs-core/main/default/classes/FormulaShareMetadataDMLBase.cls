@@ -1,19 +1,18 @@
 public abstract inherited sharing class FormulaShareMetadataDMLBase {
 
     protected String mdNamePrefix;              // Set to the name of the metadata type
-    protected List<String> fieldsToSet;                             // Custom fields to be set if included, otherwise unchanged
-    protected List<String> fieldsToSetOrClear = new List<String>(); // Custom fields to be set if included, otherwise cleared
+    protected Set<String> fieldsToSet;                             // Custom fields to be set if included, otherwise unchanged
+    protected Set<String> fieldsToSetOrClear = new Set<String>(); // Custom fields to be set if included, otherwise cleared
 
     protected String namespacePrefix = FormulaShareUtilities.getNamespacePrefix();
 
-    private FormulaShareCMDTRetriever retriever;
+    private FormulaShareMetadataBroker broker;
     
     public FormulaShareMetadataDMLBase() {
-        this.retriever = new FormulaShareCMDTRetriever();
+        this.broker = new FormulaShareMetadataBroker();
     }
-    @TestVisible
-    private FormulaShareMetadataDMLBase(FormulaShareCMDTRetriever retriever) {
-        this.retriever = retriever;
+    protected FormulaShareMetadataDMLBase(FormulaShareMetadataBroker broker) {
+        this.broker = broker;
     }
 
     // Subclasses can handle deployment success and errors by implementing methods below
@@ -27,18 +26,19 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
     }
 
     public Id submitEdit(Map<String,SObject> mdMap) {
-        Metadata.DeployContainer container = makeCmdtContainerUpdate(mdMap);
+        Metadata.DeployContainer container = makeCmdtContainerEdit(mdMap);
         return deployContainer(container);
     }
 
     private Id deployContainer(Metadata.DeployContainer container) {
         DeployCallback callback = new DeployCallback(this);
-        Id asyncResultId = Metadata.Operations.enqueueDeployment(container, callback);
+        Id asyncResultId = broker.enqueueDeployment(container, callback);
         return asyncResultId;
     }
     
 
     // Method is kept separate from update - otherwise we'd need to compoare and merge lists of cmdt value lists
+    @TestVisible
     private Metadata.DeployContainer makeCmdtContainerCreate(Map<String,SObject> mdMapNew) {
 
         // Create a metadata container for deployment
@@ -73,7 +73,8 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
     }
 
 
-    private Metadata.DeployContainer makeCmdtContainerUpdate(Map<String,SObject> mdMapNew) {
+    @TestVisible
+    private Metadata.DeployContainer makeCmdtContainerEdit(Map<String,SObject> mdMapNew) {
         
         // Build metadata API format full names and retrieve metadata
         List<String> mdRecordNames = new List<String>();
@@ -82,13 +83,7 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
         }
         
         List<Metadata.Metadata> retrievedRecords;
-        retrievedRecords = retriever.retrieve(mdRecordNames);
-//        if(!Test.isRunningTest()) {
-//            retrievedRecords = Metadata.Operations.retrieve(Metadata.MetadataType.CustomMetadata, mdRecordNames);
-//        }
-//        else {
-//            retrievedRecords = testRecords;
-//        }
+        retrievedRecords = broker.retrieve(mdRecordNames);
 
         // Create a metadata container for deployment
         Metadata.DeployContainer container = new Metadata.DeployContainer();
@@ -106,7 +101,7 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
                 cmdt.label = (String) mdNew.get('MasterLabel');
             }
 
-            setFieldsOnUpdate(cmdt, mdNew);
+            setFieldsOn(cmdt, mdNew);
 
             container.addMetadata(cmdt);
         }
@@ -116,22 +111,25 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
 
 
     // Sets all supplied fields, and clears fields which weren't supplied if they're in the fieldsToSetOrClear list
-    private Metadata.CustomMetadata setFieldsOnUpdate(Metadata.CustomMetadata cmdt, SObject mdNew) {
+    private Metadata.CustomMetadata setFieldsOn(Metadata.CustomMetadata cmdt, SObject mdNew) {
 
         // Loop through field values
+        System.debug('Set or clear: '+fieldsToSetOrClear);
         for (Metadata.CustomMetadataValue cmdtFieldValue : cmdt.values) {
 
             String fieldName = getFieldWithNamespace(cmdtFieldValue);
 
+            system.debug('checking '+fieldName);
+
             // If a value for this field was supplied, set this
             if(mdNew.get(fieldName) != null) {
-                system.debug('adding '+fieldName+' setting to : '+mdNew.get(fieldName));
+                system.debug('adding '+fieldName+'. Currently set to: '+cmdtFieldValue.value+', updating to : '+mdNew.get(fieldName));
                 cmdtFieldValue.value = mdNew.get(fieldName);
             }
 
             // Otherwise if field is one to be cleared and isn't supplied, set to null
             else if(fieldsToSetOrClear.contains(fieldName)) {
-                system.debug('clearing '+fieldName);
+                system.debug('clearing '+fieldName+'. Currently set to: '+cmdtFieldValue.value);
                 cmdtFieldValue.value = null;
             }
         }
@@ -153,11 +151,14 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
         return cmdtFieldValue;
     }
 
-
+    
     // Manage post-callback logic and call methods (overridable in subclasses) on success and failure
-    private class DeployCallback implements Metadata.DeployCallback {
+    public List<FormulaShare_Rule_DML__e> eventsDmlList = new List<FormulaShare_Rule_DML__e>();
+    public class DeployCallback implements Metadata.DeployCallback {
 
         private FormulaShareMetadataDMLBase instance;
+        @TestVisible
+
         public DeployCallback(FormulaShareMetadataDMLBase instance) {
             this.instance = instance;
         }

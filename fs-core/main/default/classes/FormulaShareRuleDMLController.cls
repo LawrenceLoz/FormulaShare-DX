@@ -25,33 +25,33 @@ public with sharing class FormulaShareRuleDMLController {
     @AuraEnabled
     public static Id submitForCreate(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
-        FormulaShareMetadataDMLRules DMLService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
-        Id jobId = createRule(rule, DMLService);
+        FormulaShareMetadataDMLRules dmlService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
+        Id jobId = createRule(rule, dmlService);
         return jobId;
     }
     @AuraEnabled
     public static Id submitForEdit(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
-        FormulaShareMetadataDMLRules DMLService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
-        Id jobId = editRule(rule, DMLService);
+        FormulaShareMetadataDMLRules dmlService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
+        Id jobId = editRule(rule, dmlService);
         return jobId;
     }
 
     // Separated to allow injecting a mock
     @TestVisible
-    private static Id createRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules DMLService) {
+    private static Id createRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules dmlService) {
         rule.Active__c = true;      // Create all new rules as active
         Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
         ruleMap.put(rule.DeveloperName, rule);
-        Id jobId = DMLService.submitCreate(ruleMap);
+        Id jobId = dmlService.submitCreate(ruleMap);
         return jobId;
     }
 
     @TestVisible
-    private static Id editRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules DMLService) {
+    private static Id editRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules dmlService) {
         Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
         ruleMap.put(rule.DeveloperName, rule);
-        Id jobId = DMLService.submitEdit(ruleMap);
+        Id jobId = dmlService.submitEdit(ruleMap);
         return jobId;
     }
 
