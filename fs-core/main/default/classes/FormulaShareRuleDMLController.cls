@@ -21,31 +21,39 @@
 
 public with sharing class FormulaShareRuleDMLController {
 
-
     // Called by relevant LWC components to trigger DML
     @AuraEnabled
-    public static Id submitForCreate(String fsRuleString){
+    public static Id submitForCreate(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
-        rule.Active__c = true;      // Create all new rules as active
-
-        Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
-        ruleMap.put(rule.DeveloperName, rule);
-
-        Id jobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(ruleMap, 'create');
+        FormulaShareMetadataDMLRules DMLService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
+        Id jobId = createRule(rule, DMLService);
         return jobId;
     }
-
     @AuraEnabled
     public static Id submitForEdit(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
-
-        Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
-        ruleMap.put(rule.DeveloperName, rule);
-
-        Id jobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(ruleMap, 'edit');
+        FormulaShareMetadataDMLRules DMLService = rule.Object_Shared__c == 'Account' ? new FormulaShareMetadataDMLRules() : new FormulaShareMetadataDMLRulesAccount();
+        Id jobId = editRule(rule, DMLService);
         return jobId;
     }
 
+    // Separated to allow injecting a mock
+    @TestVisible
+    private static Id createRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules DMLService) {
+        rule.Active__c = true;      // Create all new rules as active
+        Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
+        ruleMap.put(rule.DeveloperName, rule);
+        Id jobId = DMLService.submitCreate(ruleMap);
+        return jobId;
+    }
+
+    @TestVisible
+    private static Id editRule(FormulaShare_Rule__mdt rule, FormulaShareMetadataDMLRules DMLService) {
+        Map<String,FormulaShare_Rule__mdt> ruleMap = new Map<String,FormulaShare_Rule__mdt>();
+        ruleMap.put(rule.DeveloperName, rule);
+        Id jobId = DMLService.submitEdit(ruleMap);
+        return jobId;
+    }
 
     // Deserialise JSON from create/edit and map to rule metadata object
     @TestVisible
