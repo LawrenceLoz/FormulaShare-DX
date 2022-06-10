@@ -7,7 +7,7 @@ public with sharing class FormulaShareMetadataDMLRulesActivateTest {
     @isTest
     static void testConstructor() {
         FormulaShareMetadataDMLRulesActivate dmlService = new FormulaShareMetadataDMLRulesActivate();
-        System.assert(dmlService.fieldsToSetOrClear.contains('active__c'), 'Active__c should have been converted to a lower case string and added to set');
+        System.assert(dmlService.fieldsToSetOrClear.contains('Active__c'), 'Active__c should be included in set');
     }
 
     @IsTest
