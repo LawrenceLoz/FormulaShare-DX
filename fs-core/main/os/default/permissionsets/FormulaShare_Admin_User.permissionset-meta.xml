@@ -169,14 +169,6 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>FormulaShareRuleDMLController</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>FormulaShareRuleDMLControllerTest</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>FormulaShareRuleDescendant</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -218,14 +210,6 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FormulaShareRulesListViewControllerTest</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>FormulaShareRulesMetadataDMLService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>FormulaShareRulesMetadataDMLServiceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

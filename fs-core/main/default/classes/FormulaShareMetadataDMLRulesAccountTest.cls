@@ -15,7 +15,7 @@ public with sharing class FormulaShareMetadataDMLRulesAccountTest {
 
         // Change the rule to accounts in RO and modify related object access
         FormulaShare_Rule__mdt ruleWithUpdate = FormulaShareRuleFactory.getAccountRuleUpdated().transformRuleToMetadataRule();
-        Map<String,SObject> mdMapNew = FormulaShareTestUtils.cmdtToCmdtMap(ruleWithUpdate);
+        Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(ruleWithUpdate);
 
         Test.startTest();
         Metadata.DeployContainer container = dmlRules.makeCmdtContainerEdit(mdMapNew);

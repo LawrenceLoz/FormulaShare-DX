@@ -46,12 +46,6 @@ public inherited sharing class FormulaShareTestUtils {
 
     //--------------------  Methods below assist simulating Metadata DML operations --------------- //
 
-    public static Map<String,SObject> cmdtToCmdtMap(FormulaShare_Rule__mdt rule) {
-        Map<String,SObject> mdMap = new Map<String,SObject>();
-        mdMap.put(rule.DeveloperName, rule);
-        return mdMap;
-    }
-
     public static List<Metadata.Metadata> cmdtToMetadataList(FormulaShare_Rule__mdt rule) {
         // Get list of metadata type populated with object for the original rule for the mock
         Metadata.CustomMetadata md = cmdtToMetadata(rule, FormulaShare_Rule__mdt.SObjectType);
@@ -62,12 +56,14 @@ public inherited sharing class FormulaShareTestUtils {
     private static Metadata.CustomMetadata cmdtToMetadata(SObject cmdtRecord, Schema.SObjectType type) {
 
         Map<String, Schema.SObjectField> fieldsMap = type.getDescribe().fields.getMap();
+        system.debug('fieldsMap contents: '+fieldsMap);
 
         Metadata.CustomMetadata cmdt = new Metadata.CustomMetadata();
         cmdt.fullName = namespacePrefix + mdNamePrefix + cmdtRecord.get('DeveloperName');
         cmdt.label = (String) cmdtRecord.get('MasterLabel');
         
-        for(String fieldName : fieldsMap.keySet()) {
+        for(Schema.SObjectField field : fieldsMap.values()) {
+            String fieldName = field.getDescribe().getName();
             Metadata.CustomMetadataValue customField = new Metadata.CustomMetadataValue();
             customField.field = fieldName;
             customField.value = cmdtRecord.get(fieldName);

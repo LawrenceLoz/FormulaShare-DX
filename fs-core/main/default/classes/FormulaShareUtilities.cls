@@ -486,6 +486,12 @@ public inherited sharing class FormulaShareUtilities {
 		return false;
 	}
 
+	public static Map<String,SObject> cmdtToCmdtMap(FormulaShare_Rule__mdt rule) {
+        Map<String,SObject> mdMap = new Map<String,SObject>();
+        mdMap.put(rule.DeveloperName, rule);
+        return mdMap;
+    }
+
 
     public class RelationshipDetails implements Comparable {
 		

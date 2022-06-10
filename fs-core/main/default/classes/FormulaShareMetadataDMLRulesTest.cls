@@ -41,7 +41,7 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
         
         FormulaShare_Rule__mdt rule = FormulaShareRuleFactory.getUserRule().transformRuleToMetadataRule();
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules(getMockBroker());
-        Map<String,SObject> mdMap = FormulaShareTestUtils.cmdtToCmdtMap(rule);
+        Map<String,SObject> mdMap = FormulaShareUtilities.cmdtToCmdtMap(rule);
 
         Test.startTest();
         Id returnedId = dmlRules.submitCreate(mdMap);
@@ -61,7 +61,7 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
         // Make a map with updated rule
         FormulaShare_Rule__mdt ruleWithUpdate = rule.clone();
         ruleWithUpdate.Access_Level__c = 'Read';  // Update access from Edit to Read
-        Map<String,SObject> mdMap = FormulaShareTestUtils.cmdtToCmdtMap(ruleWithUpdate);
+        Map<String,SObject> mdMap = FormulaShareUtilities.cmdtToCmdtMap(ruleWithUpdate);
 
         Test.startTest();
         Id returnedId = dmlRules.submitEdit(mdMap);
@@ -73,7 +73,7 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
     @IsTest
     static void testMakeCmdtContainerCreate() {
         FormulaShare_Rule__mdt rule = FormulaShareRuleFactory.getUserRule().transformRuleToMetadataRule();
-        Map<String,SObject> mdMapNew = FormulaShareTestUtils.cmdtToCmdtMap(rule);
+        Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(rule);
         
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules();
 
@@ -102,7 +102,7 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
 
         // Change the rule to share contacts in RO instead
         FormulaShare_Rule__mdt ruleWithUpdate = FormulaShareRuleFactory.getAccountRuleModifiedToContactRule().transformRuleToMetadataRule();
-        Map<String,SObject> mdMapNew = FormulaShareTestUtils.cmdtToCmdtMap(ruleWithUpdate);
+        Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(ruleWithUpdate);
 
         Test.startTest();
         Metadata.DeployContainer container = dmlRules.makeCmdtContainerEdit(mdMapNew);
