@@ -1,5 +1,5 @@
 // Note that most generic functionality from FormulaShareMetadataDMLBase is tested 
-// in FormulaShareMetadataDMLRulesTest - this class looks at account specific things only
+// in FormulaShareMetadataDMLRulesTest - this class looks at activation specific things only
 
 @IsTest
 public with sharing class FormulaShareMetadataDMLRulesActivateTest {
@@ -7,7 +7,8 @@ public with sharing class FormulaShareMetadataDMLRulesActivateTest {
     @isTest
     static void testConstructor() {
         FormulaShareMetadataDMLRulesActivate dmlService = new FormulaShareMetadataDMLRulesActivate();
-        System.assert(dmlService.fieldsToSetOrClear.contains('Active__c'), 'Active__c should be included in set');
+        String namespacePrefix = FormulaShareUtilities.getNamespacePrefix();
+        System.assert(dmlService.fieldsToSetOrClear.contains(namespacePrefix + 'Active__c'), 'Active__c should be included in set');
     }
 
     @IsTest

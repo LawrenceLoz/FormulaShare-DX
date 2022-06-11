@@ -112,29 +112,33 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
         Metadata.CustomMetadata md = (Metadata.CustomMetadata) mdListForDeployment[0];
         List<Metadata.CustomMetadataValue> customFields = md.values;
 
+        String namespace = FormulaShareTestUtils.namespacePrefix;
+
         System.assertEquals(1, mdList.size(), 'Expected a single MD object');
-        System.assertEquals(md.fullName, FormulaShareTestUtils.namespacePrefix + FormulaShareTestUtils.mdNamePrefix + currentRule.DeveloperName, 'Rule name should be consistent with namespace, object and rule');
+        System.assertEquals(md.fullName, namespace + FormulaShareTestUtils.mdNamePrefix + currentRule.DeveloperName, 'Rule name should be consistent with namespace, object and rule');
 
         Integer noChecks = 0;
 
         for(Metadata.CustomMetadataValue customField : customFields) {
-            if(customField.field == 'Contact_Access__c' || customField.field == 'Case_Access__c' || customField.field == 'Opportunity_Access__c') {
+            if(customField.field == namespace + 'Contact_Access__c' 
+                || customField.field == namespace + 'Case_Access__c' 
+                || customField.field == namespace + 'Opportunity_Access__c') {
                 System.assertEquals(null, customField.value, 'Account related access should be cleared as rule is converted to a Contact sharing rule');
                 noChecks++;
             }
-            if(customField.field == 'Object_Shared__c') {
+            else if(customField.field == namespace + 'Object_Shared__c') {
                 System.assertEquals('Contact', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }
-            if(customField.field == 'Shared_To__c') {
+            else if(customField.field == namespace + 'Shared_To__c') {
                 System.assertEquals('FirstName', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }
-            if(customField.field == 'Access_Level__c') {
+            else if(customField.field == namespace + 'Access_Level__c') {
                 System.assertEquals('Read', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }
-            if(customField.field == 'Share_With__c') {
+            else if(customField.field == namespace + 'Share_With__c') {
                 System.assertEquals(currentRule.get(customField.field), customField.value, 'Field wasnt changed so should match original rule');
                 noChecks++;
             }

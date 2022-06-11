@@ -25,25 +25,27 @@ public with sharing class FormulaShareMetadataDMLRulesAccountTest {
         Metadata.CustomMetadata md = (Metadata.CustomMetadata) mdListForDeployment[0];
         List<Metadata.CustomMetadataValue> customFields = md.values;
 
+        String namespace = FormulaShareTestUtils.namespacePrefix;
+
         System.assertEquals(1, mdList.size(), 'Expected a single MD object');
-        System.assertEquals(md.fullName, FormulaShareTestUtils.namespacePrefix + FormulaShareTestUtils.mdNamePrefix + currentRule.DeveloperName, 'Rule name should be consistent with namespace, object and rule');
+        System.assertEquals(md.fullName, namespace + FormulaShareTestUtils.mdNamePrefix + currentRule.DeveloperName, 'Rule name should be consistent with namespace, object and rule');
 
         Integer noChecks = 0;
 
         for(Metadata.CustomMetadataValue customField : customFields) {
-            if(customField.field == 'Opportunity_Access__c') {
+            if(customField.field == namespace + 'Opportunity_Access__c') {
                 System.assertEquals(currentRule.get(customField.field), customField.value, 'Opps related access (not specified) should NOT be cleared and should be as per original rule');
                 noChecks++;
             }
-            if(customField.field == 'Contact_Access__c') {
+            else if(customField.field == namespace + 'Contact_Access__c') {
                 System.assertEquals('ControlledByParent', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }
-            if(customField.field == 'Case_Access__c') {
+            else if(customField.field == namespace + 'Case_Access__c') {
                 System.assertEquals('ControlledByParent', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }
-            if(customField.field == 'Access_Level__c') {
+            else if(customField.field == namespace + 'Access_Level__c') {
                 System.assertEquals('Read', customField.value, 'Should have been updated to reflect change');
                 noChecks++;
             }

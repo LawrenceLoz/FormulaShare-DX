@@ -162,8 +162,15 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
 
     // Namespaces included in package but not in namespaced scratch orgs. Strip out if present and append to be sure it's there
     private String getFieldWithNamespace(Metadata.CustomMetadataValue cmdtFieldValue) {
-        String fieldWithoutNamespace = cmdtFieldValue.field.remove(namespacePrefix);
-        return namespacePrefix + fieldWithoutNamespace;
+
+        // Custom fields include namespace, standard ones don't
+        if(cmdtFieldValue.field.endsWith('__c')) {
+            String fieldWithoutNamespace = cmdtFieldValue.field.remove(namespacePrefix);
+            return namespacePrefix + fieldWithoutNamespace;
+        }
+        else {
+            return cmdtFieldValue.field;
+        }
     }
 
     private Metadata.CustomMetadataValue getMetadataValue(SObject md, String fieldName) {
