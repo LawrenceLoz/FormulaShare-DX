@@ -3,7 +3,7 @@
 #
 
 # GLOBAL IGNORE
-**profiles
+**/profiles/**
 AppSwitcher.appMenu
 package.xml
 **/jsconfig.json

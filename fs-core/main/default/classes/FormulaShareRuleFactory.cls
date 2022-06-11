@@ -5,6 +5,7 @@ public with sharing class FormulaShareRuleFactory {
     public static String groupRuleName = 'Group_rule';
     public static String roleSubName = 'Role_sub_rule';
     public static String roleRuleName = 'Role_rule';
+    public static String accountRuleName = 'Account_rule';
     public static String childUserRuleName = 'Child_user_rule';
     public static String ancestorUserRuleName = 'Ancestor_user_rule';
     public static String siblingUserRuleName = 'Sibling_user_rule';
@@ -110,6 +111,85 @@ public with sharing class FormulaShareRuleFactory {
 
         rule.type = 'standard';
         rule.accessLevel = 'Edit';
+        rule.shareWith = 'Roles';
+        rule.controllingObjectSharedToFieldType = 'Id';
+        rule.relationship = getRelationshipStandardRule(rule);
+
+        return rule;
+    }
+
+    public static FormulaShareRuleStandard getAccountRule() {
+
+        FormulaShareRuleStandard rule = new FormulaShareRuleStandard();
+        rule.objectSharedAPIName = 'Account';
+        rule.controllingObjectApiName = rule.objectSharedAPIName;
+        rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        rule.controllingObjectSharedToFieldAPIName = 'Name';
+        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
+        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.active = true;
+
+        rule.contactAccess = 'None';
+        rule.caseAccess = 'ReadWrite';
+        rule.opportunityAccess = 'ControlledByParent';
+
+        rule.developerName = accountRuleName;
+
+        rule.type = 'standard';
+        rule.accessLevel = 'Edit';
+        rule.shareWith = 'Roles';
+        rule.controllingObjectSharedToFieldType = 'Id';
+        rule.relationship = getRelationshipStandardRule(rule);
+
+        return rule;
+    }
+
+    public static FormulaShareRuleStandard getAccountRuleUpdated() {
+
+        FormulaShareRuleStandard rule = new FormulaShareRuleStandard();
+        rule.objectSharedAPIName = 'Account';
+        rule.controllingObjectApiName = rule.objectSharedAPIName;
+        rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        rule.controllingObjectSharedToFieldAPIName = 'Name';
+        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
+        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.active = true;
+
+        rule.contactAccess = 'ControlledByParent';  // Updated
+        rule.caseAccess = 'ControlledByParent';  // Updated
+//        rule.opportunityAccess = 'ControlledByParent';    // Not specified
+
+        rule.developerName = accountRuleName;
+
+        rule.type = 'standard';
+        rule.accessLevel = 'Read';  // Updated
+        rule.shareWith = 'Roles';
+        rule.controllingObjectSharedToFieldType = 'Id';
+        rule.relationship = getRelationshipStandardRule(rule);
+
+        return rule;
+    }
+
+    public static FormulaShareRuleStandard getAccountRuleModifiedToContactRule() {
+
+        FormulaShareRuleStandard rule = new FormulaShareRuleStandard();
+        rule.objectSharedAPIName = 'Contact';      // Updated
+        rule.controllingObjectApiName = rule.objectSharedAPIName;
+        rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
+        rule.controllingObjectSharedToFieldAPIName = 'FirstName';      // Updated
+        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
+        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.active = true;
+
+        // Omit the account access levels
+//        rule.contactAccess = 'None';
+//        rule.caseAccess = 'ReadWrite';
+//        rule.opportunityAccess = 'ControlledByParent';
+
+        rule.developerName = accountRuleName;
+
+        rule.type = 'standard';
+        rule.accessLevel = 'Read';      // Updated
         rule.shareWith = 'Roles';
         rule.controllingObjectSharedToFieldType = 'Id';
         rule.relationship = getRelationshipStandardRule(rule);

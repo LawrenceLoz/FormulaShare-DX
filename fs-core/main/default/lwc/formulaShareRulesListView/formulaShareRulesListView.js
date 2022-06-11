@@ -5,7 +5,7 @@ import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lig
 import { NavigationMixin } from 'lightning/navigation';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
-import activateDeactivate from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
+import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
