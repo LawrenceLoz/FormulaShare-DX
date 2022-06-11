@@ -3,7 +3,7 @@
 
 name: Deploy to Packaging Org
 
-# Run on demand (typically expect to run from master)
+# Run on demand (typically expect to run from main)
 on:
   workflow_dispatch:
 

@@ -1,13 +1,13 @@
 # Calls Sync Dependencies workflow from FormulaShare-App repo to update the 
-# master branch with latest version of dependencies
+# main branch with latest version of dependencies
 
 name: Sync to FS-App repo
 
-# Run for all commits to master
+# Run for all commits to main
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   PAT_FOR_REPO_INTEGRATION:  ${{ secrets.PAT_FOR_REPO_INTEGRATION }}

@@ -1,4 +1,4 @@
-# Validates a feature branch is deployable prior to merging into master
+# Validates a feature branch is deployable prior to merging into main
 # Carries out the following in parallel:
 # 1. Run all Jest tests
 # 2. Create a scratch org WITHOUT package namespace, deploy and run all apex tests
@@ -6,12 +6,12 @@
 
 name: Validate Branch is Deployable
 
-# Run only on demand or on PRs to master
+# Run only on demand or on PRs to main
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - main
 
 env:
   JWT_SIGNING_KEY:  ${{ secrets.JWT_SIGNING_KEY }}
