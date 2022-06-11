@@ -4,12 +4,12 @@ import FormulaShareRulesListView from 'c/formulaShareRulesListView';
 import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 
-import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
-import { activateDeactivate } from '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate';
+import { getTreeGridData } from '@salesforce/apex/FormulaShareMetadataControllerRules.getTreeGridData';
+import { activateDeactivate } from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 
 // Mocking imperative Apex method call
 jest.mock(
-    '@salesforce/apex/FormulaShareRulesListViewController.activateDeactivate',
+    '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate',
     () => {
         return {
             default: jest.fn()

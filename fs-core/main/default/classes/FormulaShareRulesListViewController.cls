@@ -190,20 +190,6 @@ public with sharing class FormulaShareRulesListViewController {
         Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(typesList, batchSize), batchSize);
     }
 
-
-    @AuraEnabled
-    public static void activateDeactivate(String ruleName, String type) {
-
-        Map<String,FormulaShare_Rule__mdt> fsRulesMap = new Map<String,FormulaShare_Rule__mdt>();
-        
-        FormulaShare_Rule__mdt rule = new FormulaShare_Rule__mdt();
-        rule.Active__c = type == 'activate' ? true : false;
-        fsRulesMap.put(ruleName, rule);
-
-        Id asyncJobId = FormulaShareRulesMetadataDMLService.construct().submitForDml(fsRulesMap, type);
-        system.debug('Metadata deployment job ID : '+asyncJobId);
-    }
-
     
     public class ObjectRulesWrapper implements Comparable {
         @AuraEnabled

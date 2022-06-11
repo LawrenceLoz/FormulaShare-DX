@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
-import submitForCreate from '@salesforce/apex/FormulaShareRuleDMLController.submitForCreate';
+import submitForCreate from '@salesforce/apex/FormulaShareMetadataControllerRules.submitForCreate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 
 
