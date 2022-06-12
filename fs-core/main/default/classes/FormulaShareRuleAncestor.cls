@@ -40,6 +40,7 @@ public virtual inherited sharing class FormulaShareRuleAncestor extends FormulaS
 
         // Field to check in queries (lookup from shared obj to next obj) is indicated in the second element of the relationship list
         firstQueryStepApiName = relationship.nextRelationship.lookupFromPrevObjectApiName;
+        pathToOwnerIdOnShared = 'OwnerId';
 
         String prevObjApiName = objectSharedAPIName;
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;

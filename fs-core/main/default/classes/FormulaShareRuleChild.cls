@@ -27,10 +27,10 @@ public inherited sharing class FormulaShareRuleChild extends FormulaShareRuleRel
         setVars();
     }
 
-    public String pathFromBottomObjToSharedObj;
+    public String pathToSharedObject;
 
     private void setVars() {
-        pathFromBottomObjToSharedObj = relationship.nextRelationship.lookupToPrevObjectApiName;
+        pathToSharedObject = relationship.nextRelationship.lookupToPrevObjectApiName;
     }
 
 }

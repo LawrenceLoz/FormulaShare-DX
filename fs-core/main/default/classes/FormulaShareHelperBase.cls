@@ -90,8 +90,9 @@ public abstract inherited sharing class FormulaShareHelperBase {
 	private void setServiceObjectsWithRecords(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
         // Check records for possible sharing impact, query for extra lookups if needed, and get rules and record details
-		FormulaShareHelperService helperService = new FormulaShareHelperService(type, oldRecords, newRecords);
-		List<FormulaShareServiceDetailsForType> detailsForTypes = helperService.getDetailsForTypes();
+		FormulaShareHelperService helperService = new FormulaShareHelperService();
+		helperService.checkImpact(type, oldRecords, newRecords);
+		List<FormulaShareServiceDetailsForType> detailsForTypes = helperService.getDetailsForTypeList();
 
         // Iterate through objects which may need sharing changes and assess what these should be
 		for(FormulaShareServiceDetailsForType details : detailsForTypes) {

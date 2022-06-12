@@ -1,5 +1,5 @@
 /**
-*Copyright 2020 Lawrence Newcombe
+*Copyright 2022 Lawrence Newcombe
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy 
 *of this software and associated documentation files (the "Software"), to deal 
@@ -19,23 +19,11 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRuleStandard extends FormulaShareRule {
+public inherited sharing class FormulaShareInjectionService {
 
-    // Allow direct construction from test context only
-    @TestVisible
-    private FormulaShareRuleStandard() {}
-
-    public FormulaShareRuleStandard(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
-        super(mdRule, rel, tacf);
-        type = 'standard';
-
-        // Shared to type is in the field relating to a standard rule
-        controllingObjectSharedToFieldType = mdRule.Shared_To_Field_Type__c;
-
-        // Share field will be queried from controlling/shared object, so add without relationship
-        firstQueryStepApiName = controllingObjectSharedToFieldAPIName;
-        pathToOwnerIdOnShared = 'OwnerId';
-        pathToSharedToField = controllingObjectSharedToFieldAPIName;
+    public List<FormulaShareHelperServiceRuleType> getRuleTypeServices() {
+        return new List<FormulaShareHelperServiceRuleType>{
+            FormulaShareHelperServiceStandard
+        };
     }
-
 }

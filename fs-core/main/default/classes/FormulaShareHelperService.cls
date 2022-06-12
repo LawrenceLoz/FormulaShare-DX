@@ -23,9 +23,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	enum OperationType {AFTER_INSERT_OR_UNDELETE, AFTER_UPDATE, AFTER_DELETE}
 
-    FormulaShareHelperServiceRulesSharingObj rulesSharingObjectService;
-    FormulaShareHelperServiceInlaw inlawRulesService;
-    FormulaShareHelperServiceDescendant descendantRulesService;
+	List<FormulaShareHelperServiceRuleType> ruleTypeServices;
 
     Schema.SObjectType type;
 	Schema.DescribeSObjectResult typeDescribe;
@@ -36,17 +34,15 @@ public inherited sharing class FormulaShareHelperService {
 
 	Set<Id> recordsToQuery = new Set<Id>();
 
-	//	Map<String,List<FormulaShareRule>> rulesForTypeMap= new Map<String,List<FormulaShareRule>>();
-	Map<String,FormulaShareServiceDetailsForType> detailsMap = new Map<String,FormulaShareServiceDetailsForType>();
 
-	public FormulaShareHelperService(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
+	public FormulaShareHelperService() {
+		this.ruleTypeServices = new FormulaShareInjectionService().getRuleTypeServices();
+	}
 
+	public void checkImpact(Schema.SObjectType type, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
         this.type = type;
 		this.typeDescribe = type.getDescribe();
 		objectName = typeDescribe.getName();
-
-		// Clear map in case populated from previous object in same transaction
-		recordsToQuery.clear();
 
 		// Determine trigger operation (we don't use trigger context variable so method can be unit tested)
 		if(oldRecords == null) {
@@ -59,72 +55,42 @@ public inherited sharing class FormulaShareHelperService {
 		else {
 			opType = OperationType.AFTER_UPDATE;
 		}
-		System.debug('opType: '+opType);
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
 		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
-		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getStandardAndAncestorRulesSharingObject(objectName);
-        List<FormulaShareRule> rulesObjectControls = fsRulesSelector.getDescendantAndInlawRulesWithThisBottomObject(objectName);
+		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getRulesSharingObject(objectName);
+        List<FormulaShareRule> rulesObjectInfluences = fsRulesSelector.getInfluencedRulesOnOtherObjects(objectName);
 
-		// Initialise service objects (variable setting only in constructors)
-		rulesSharingObjectService = new FormulaShareHelperServiceRulesSharingObj(rulesSharingObject);
-        descendantRulesService = new FormulaShareHelperServiceDescendant(rulesObjectControls);
-        inlawRulesService = new FormulaShareHelperServiceInlaw(rulesObjectControls);
-		
-		// Add records to be re-queried if rules could be affected by changes to this object
-		if(!rulesSharingObjectService.rules.isEmpty()) {
-			populateRecordsToQuery(rulesSharingObjectService, oldRecords, newRecords);
+		// Use services to identify which rules could need to be assessed for these records
+		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
+			service.setRules(sharedObjectName, rulesSharingObject, rulesObjectInfluences);
 
-			// Assess whether to remove rules
-			setRemoveSharesForSharedObject();
+			if(!service.rules.isEmpty()) {
+				populateRecordsToQuery(service, oldRecords, newRecords);
 
-			// Add all rules to be assessed
-			// For standard objects where removal is permitted, we need to check all rules to check we don't remove other valid sharing
-			if(assessAllRules) {
-				addToRulesForTypeMap(rulesSharingObjectService.fullRules);
-			}
-			// If we're not removing sharing, or for custom objects which split by sharing reason, we only care about affected rules
-			else {
-				addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
+				// If the service shares the updated records, we might need to consider all rules on these
+				// This is because this is (currently) the only situation where sharing could be removed
+				if(service.sharesProcessedObject()) {
+					setRemoveSharesForSharedObject();
+				}
 			}
 		}
-		if(!descendantRulesService.rules.isEmpty()) {
-			populateRecordsToQuery(descendantRulesService, oldRecords, newRecords);
-			addToRulesForTypeMap(descendantRulesService.relevantRules);
-		}
-		if(!inlawRulesService.rules.isEmpty()) {
-			populateRecordsToQuery(inlawRulesService, oldRecords, newRecords);
-			addToRulesForTypeMap(inlawRulesService.relevantRules);
+
+		// Knowing whether full set of rules will need to be assessed, iterate again and add rules to map
+		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
+			if(!service.rules.isEmpty()) {
+				if(service.sharesProcessedObject() && assessAllRules) {
+					addToRulesForTypeMap(rulesSharingObjectService.fullRules);
+				}
+				else {
+					addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
+				}
+			}
 		}
 	}
 
-	
-//	// Check whether any impact for rules sharing this object
-//	private void processRulesSharingObject(Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
-//
-//		switch on opType {
-//
-//			// If insert, submit records where one or more share to field is populated
-//			when AFTER_INSERT_OR_UNDELETE {
-//				for(SObject newRecord : newRecords.values()) {
-//                    rulesSharingObjectService.processInsert(newRecord);
-//				}
-//			}
-//
-//			// If update, submit those where one or more share to field has changed
-//			when AFTER_UPDATE {
-//				for(SObject newRecord : newRecords.values()) {
-//					SObject oldRecord = oldRecords.get((Id) newRecord.get('Id'));
-//                    rulesSharingObjectService.processUpdate(newRecord, oldRecord);
-//				}
-//			}
-//		}
-//
-//        // Add records which need to be queried
-//		recordsToQuery.addAll(rulesSharingObjectService.recordsToQuery);
-//	}
-	
 
+	
 	// Check whether possible sharing impact based on rules and values from trigger
 	private void populateRecordsToQuery(FormulaShareHelperServiceRuleType serviceRuleType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
@@ -150,88 +116,14 @@ public inherited sharing class FormulaShareHelperService {
         recordsToQuery.addAll(serviceRuleType.recordsToQuery);
 	}
 
-//	// Check whether any impact for inlaw and descendant rules where this object is the controlling object
-//	private void processRulesThisObjectControls(OperationType opType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
-//
-//		switch on opType {
-//
-//			// If insert, submit records where one or more share to field is populated
-//			when AFTER_INSERT_OR_UNDELETE {
-//				for(SObject newRecord : newRecords.values()) {
-//                    descendantRulesService.processInsert(newRecord);
-//                    inlawRulesService.processInsert(newRecord);
-//				}
-//			}
-//
-//			// If update, submit those where one or more share to field has changed
-//			when AFTER_UPDATE {
-//				for(SObject newRecord : newRecords.values()) {
-//					SObject oldRecord = oldRecords.get((Id) newRecord.get('Id'));
-//                    descendantRulesService.processUpdate(newRecord, oldRecord);
-//                    inlawRulesService.processUpdate(newRecord, oldRecord);
-//				}
-//			}
-//		}
-//
-//		addToRulesForTypeMap(inlawRulesService.relevantRules);
-//		addToRulesForTypeMap(descendantRulesService.relevantRules);
-//
-//        // Add all records which need to be queried
-//        recordsToQuery.addAll(inlawRulesService.recordsToQuery);
-//        recordsToQuery.addAll(descendantRulesService.recordsToQuery);
-//	}
-
-
-    // Queries for records if necessary and returns map of objects and records with all sharing details required
-    public List<FormulaShareServiceDetailsForType> getDetailsForTypes() {
-        
-		// Query for records to populate lookups if required, and set retrieved record details for each
-		Map<Id,SObject> fullQueriedRecords;
-		if(!recordsToQuery.isEmpty()) {
-
-			fullQueriedRecords = getFullQueriedRecords(type);
-
-			for(Id recordId : rulesSharingObjectService.recordIdsSharedByAncestorRules) {
-				SObject record = fullQueriedRecords.get(recordId);
-				System.debug('Setting record needed by ancestor rule: '+record);
-				setSharedObjectRetrievedRecord(record);
-			}
-
-			// Add details for descendant records
-			for(FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule : descendantRulesService.recordRules) {
-				getRelatedRecordDetailsAndSetInMap(fullQueriedRecords, recordRule);
-			}
-
-			// And details for inlaw rules
-			for(FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule : inlawRulesService.recordRules) {
-				getRelatedRecordDetailsAndSetInMap(fullQueriedRecords, recordRule);
-			}
-		}
-
-		// Add records shared by standard rules
-		System.debug('rulesSharingObjectService: '+rulesSharingObjectService);
-		System.debug('rulesSharingObjectService.recordsSharedByStandardRules: '+rulesSharingObjectService.recordsSharedByStandardRules);
-		for(SObject record : rulesSharingObjectService.recordsSharedByStandardRules) {
-
-			// If we'd queried this record for another type of rule, use the queried version with populated instead
-			if(fullQueriedRecords != null && fullQueriedRecords.containsKey(record.Id)) {
-				record = fullQueriedRecords.get(record.Id);
-			}
-			
-			System.debug('Setting record needed by std rule: '+record);
-			setSharedObjectRetrievedRecord(record);
-		}
-
-        return detailsMap.values();
-    }
-
 
 	// removeSharesForSharedObject is true by default. Check object settings to determine whether we should set to false
 	// If we do need to check for removal, we need to query for all standard/ancestor fields and check all rules sharing object
-	private void setRemoveSharesForSharedObject() {
+	private void setRemoveSharesForSharedObject(FormulaShareHelperServiceRuleType service) {
 
-		// Check whether removal of sharing is permitted at all
-		if(!rulesSharingObjectService.relevantRules.isEmpty()) {
+		// Proceed if there are any rules to check for this type 
+		// and we haven't already identified a need to assess everything
+		if(!service.relevantRules.isEmpty() && !assessAllRules) {
 			FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(type);
 
 			Boolean isCustom = typeDescribe.isCustom();
@@ -255,9 +147,9 @@ public inherited sharing class FormulaShareHelperService {
 				FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
 				List<FormulaShareRule> allRules = fsRulesSelector.getRulesSharingObject(type);
 
-				// Check whether the number of rules sharing object is the same as the number of standard & ancestor rules
-				// If so we know all sharing on the object will be from rules we're assessing
-				if(allRules.size() != rulesSharingObjectService.rules.size()) {
+				// Check whether the number of rules sharing object is the same as the number of rules considered by service
+				// If so we know all sharing on the object will be from rules we're assessing so no need to check others
+				if(allRules.size() != service.rules.size()) {
 					removeSharesForSharedObject = false;
 					assessAllRules = false;
 				}
@@ -266,87 +158,6 @@ public inherited sharing class FormulaShareHelperService {
 				else {
 					removeSharesForSharedObject = true;
 					assessAllRules = true;
-				}
-			}
-		}
-	}
-
-
-
-	// Queries for all records including lookups referenced in sharing and sets these in list
-	private Map<Id,SObject> getFullQueriedRecords(Schema.SObjectType type) {
-
-		if(!recordsToQuery.isEmpty()) {
-
-			// Create selector
-			FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
-
-			// Add field paths from all relevant rules
-			for(FormulaShareRule rule : descendantRulesService.relevantRules) {
-                FormulaShareRuleDescendant descRule = (FormulaShareRuleDescendant) rule;
-				System.debug('Adding descRule.pathFromBottomObjToSharedObj: ' + descRule.pathFromBottomObjToSharedObj);
-				System.debug('Adding descRule.controllingObjectSharedToFieldAPIName: ' + descRule.controllingObjectSharedToFieldAPIName);
-				selector.addFieldString(descRule.pathFromBottomObjToSharedObj);
-				selector.addFieldString(descRule.controllingObjectSharedToFieldAPIName);
-				selectOwnerIdIfNeeded(selector, rule);
-			}
-			for(FormulaShareRule rule : inlawRulesService.relevantRules) {
-				FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) rule;
-				System.debug('Adding inlawRule.pathFromBottomObjToSharedObj: ' + inlawRule.pathFromBottomObjToSharedObj);
-				System.debug('Adding inlawRule.pathToSharedToField: ' + inlawRule.pathToSharedToField);
-				selector.addFieldString(inlawRule.pathFromBottomObjToSharedObj);
-				selector.addFieldString(inlawRule.pathToSharedToField);
-				selectOwnerIdIfNeeded(selector, rule);
-			}
-
-			// For ancestor and standard, if we're planning to remove sharing then we need to query for anything relevant
-			Set<FormulaShareRuleStandard> standardRules;
-			Set<FormulaShareRuleAncestor> ancestorRules;
-
-			// For standard objects, if we plan to remove sharing we'll need to check what's shared by any rules on the object
-			// This is so we don't remove sharing for any other rule
-			if(assessAllRules) {
-				standardRules = rulesSharingObjectService.fullStandardRulesSet;
-				ancestorRules = rulesSharingObjectService.fullAncestorRulesSet;
-			}
-			// For custom objects, we only need to check sharing for rules which might be impacted
-			// Other FormulaShare sharing will be associated with different sharing reasons, so isn't at risk of being removed
-			else {
-				standardRules = rulesSharingObjectService.relevantStandardRulesSet;
-				ancestorRules = rulesSharingObjectService.relevantAncestorRulesSet;
-			}
-
-			for(FormulaShareRuleStandard rule : standardRules) {
-				System.debug('Adding standard rule controllingObjectSharedToFieldAPIName: ' + rule.controllingObjectSharedToFieldAPIName);
-				selector.addFieldString(rule.controllingObjectSharedToFieldAPIName);
-				selectOwnerIdIfNeeded(selector, rule);
-			}
-			for(FormulaShareRuleAncestor rule : ancestorRules) {
-				System.debug('Adding ancestor rule pathToSharedToField: ' + rule.pathToSharedToField);
-				selector.addFieldString(rule.pathToSharedToField);
-				selectOwnerIdIfNeeded(selector, rule);
-			}
-
-			List<SObject> queriedList = selector.selectWithFields(recordsToQuery);
-            Map<Id,SObject> fullQueriedRecords = new Map<Id,SObject>((List<SObject>) queriedList);
-            
-            return fullQueriedRecords;
-        }
-        
-        return new Map<Id,SObject>();
-	}
-
-
-	// If rule shares with users, adds the owner id from the shared object
-	private void selectOwnerIdIfNeeded(FormulaShareSObjectsSelector selector, FormulaShareRule rule) {
-		if(rule.shareWith == 'Users') {
-			switch on rule.type {
-				when 'standard', 'ancestor' {
-					selector.addFieldString('OwnerId');
-				}
-				when 'descendant', 'inlaw' {
-					FormulaShareRuleBottomObject boRule = (FormulaShareRuleBottomObject) rule;
-					selector.addFieldString(boRule.pathFromBottomObjToOwnerIdOnSharedObj);
 				}
 			}
 		}
@@ -363,51 +174,21 @@ public inherited sharing class FormulaShareHelperService {
 	}
 
 
-	private void setSharedObjectRetrievedRecord(SObject record) {
-		FormulaShareServiceDetailsForType details = getDetailsForType(objectName);
-		details.setSharedObjectRetrievedRecord(objectName, record);
-		setDetailsForType(objectName, details);
-	}
-
-	
-	private void getRelatedRecordDetailsAndSetInMap(Map<Id,SObject> fullQueriedRecords, FormulaShareHelperServiceRuleType.BottomObjectRecordRule recordRule) {
-
-		// Get shared record id
-		SObject bottomRecord = fullQueriedRecords.get(recordRule.bottomObjectRecordId);
-		FormulaShareRuleBottomObject boRule = (FormulaShareRuleBottomObject) recordRule.rule;
-		Id sharedRecordId = boRule.getSharedObjectIdFromBottomRecord(bottomRecord);
-
-		// If there's a shared record in scope (will be the case unless a lookup towards shared isn't populated)
-		if(sharedRecordId != null) {
-
-			// Get ownerId if rule shares with users (might not have been queried otherwise)
-			Id ownerId;
-			if(boRule.shareWith == 'Users') {
-				ownerId = boRule.getOwnerOfSharedObjectFromBottomObject(bottomRecord);
-			}
-	
-			// Establish the retrieved records with related details object for the shared object
-			FormulaShareServiceDetailsForType details = getDetailsForType(boRule.objectSharedAPIName);
-			details.setRetrievedRecordWithRelatedDetails(bottomRecord, sharedRecordId, ownerId, boRule);
-			setDetailsForType(boRule.objectSharedAPIName, details);
-		}
-	}
-
 	private FormulaShareServiceDetailsForType getDetailsForType(String sharedObjectName) {
 		String key = getDetailsMapKey(sharedObjectName);
 
-		FormulaShareServiceDetailsForType details;
+		// If we've already started populating a DetailsForType object for this SObject, return this
 		if(detailsMap.containsKey(key)) {
-			details = detailsMap.get(key);
+			return detailsMap.get(key);
 		}
+
+		// Otherwise determine if we should be removing shares, and construct and return a new DetailsForType
 		else {
 			Boolean removeForThisType = removeSharesForThisType(sharedObjectName);
 			System.debug('Removal settings for: '+sharedObjectName+' = ' + removeForThisType);
 			Schema.SObjectType sharedObjectType = FormulaShareUtilities.getSObjectTypeFromName(sharedObjectName);
-			details = new FormulaShareServiceDetailsForType(sharedObjectType, removeForThisType);
+			return new FormulaShareServiceDetailsForType(sharedObjectType, removeForThisType);
 		}
-
-		return details;
 	}
 
 	private void setDetailsForType(String sharedObjectName, FormulaShareServiceDetailsForType details) {
@@ -427,6 +208,69 @@ public inherited sharing class FormulaShareHelperService {
 	// Only remove sharing if object being assessed is the shared object (i.e. standard rule or specific record assessment e.g. for batch)
 	private Boolean removeSharesForThisType(String sharedObjectName) {
 		return sharedObjectName == objectName && removeSharesForSharedObject;
+	}
+
+	
+
+    // Queries for records if necessary and returns map of objects and records with all sharing details required
+    public List<FormulaShareServiceDetailsForType> getDetailsForTypeList() {
+
+		// Query for records to populate lookups if required, and set retrieved record details for each
+		Map<Id,SObject> fullQueriedRecords;
+		if(!recordsToQuery.isEmpty()) {
+
+			fullQueriedRecords = getFullQueriedRecords(type);
+
+			Map<String,FormulaShareServiceDetailsForType> detailsMap = new Map<String,FormulaShareServiceDetailsForType>();
+
+			// For each rule type service, add relevant records into the details service for the object
+			// that the rules in the type service share. Logic definied in each implementation of type service
+			for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
+				updatedDetailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords);
+			}
+		}
+
+        return detailsMap.values();
+    }
+
+
+	// Queries for all records including lookups referenced in sharing and sets these in list
+	private Map<Id,SObject> getFullQueriedRecords(Schema.SObjectType type) {
+
+		// Create selector
+		FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
+
+		// Add required field paths, including those to parent objects
+		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
+
+			List<FormulaShareRule> rules;
+
+			// We'll need paths from all rules if there's a chance we'll remove 
+			// sharing for a standard object and service shares this object
+			if(service.sharesProcessedObject() && assessAllRules) {
+				rules = service.fullRules;
+			}
+
+			// Otherwise we can be confident to proceed without checking rules where sharing shouldn't change
+			else {
+				rules = service.relevantRules;
+			}
+
+			// Add paths to all fields we might need to reference to assess rules
+			for(FormulaShareRule rule : rules) {
+				selector.addFieldString(pathToSharedToField);
+				selector.addFieldString(pathToSharedObject);
+
+				if(rule.shareWith == 'Users') {
+					selector.addFieldString(pathToOwnerIdOnShared);
+				}
+			}
+		}
+
+		List<SObject> queriedList = selector.selectWithFields(recordsToQuery);
+		Map<Id,SObject> fullQueriedRecords = new Map<Id,SObject>((List<SObject>) queriedList);
+		
+		return fullQueriedRecords;
 	}
 
 }

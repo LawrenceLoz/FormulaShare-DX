@@ -58,6 +58,8 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String controllingObjectSharedToFieldToken;
     @AuraEnabled public String controllingObjectSharedToFieldType;
 
+    // **************** Variables to support trigger assessment ************** //
+
     // Populates with the field which might be relevant to a sharing change for a trigger
     // Set to:
     // - Shared to field for standard rule
@@ -65,12 +67,24 @@ public virtual inherited sharing class FormulaShareRule {
     // - Path from bottom object to first object towards shared object for descendant / inlaw
     public String firstQueryStepApiName;
 
-    // pathToSharedToField populates with the full relationship from the queried object to shared to field
-    // This is set in sub-classes to:
+    // The full relationship from the queried object to shared to field
     // - Shared to field on controlling object for standard, sibling and descendant
-    // - Path from shared object to shared to field on top object for ancestor rule
-    // - Path from bottom object to shared to field on top object for inlaw rule
+    // - Path from shared object to shared to field on top object for ancestor
+    // - Path from bottom object to shared to field on top object for inlaw
     public String pathToSharedToField;
+    
+    // Full relationship from the queried object to shared object
+    // - null for standard, sibling and ancestor
+    // - Path from bottom object to shared object for descendant and inlaw
+    public String pathToSharedObject;
+
+    // Full relationship from the queried object to owner on shared object
+    // - OwnerId for standard and ancestor
+    // - Path from bottom object to OwnerId on shared object for descendant and inlaw
+    public String pathToOwnerIdOnShared;
+
+    // *********************************************************************** //
+
 
     // Allow direct construction from test context only
     @TestVisible

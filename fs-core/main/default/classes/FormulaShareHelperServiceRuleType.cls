@@ -21,28 +21,16 @@
 
 public abstract inherited sharing class FormulaShareHelperServiceRuleType {
 
-	public Set<FormulaShareRule> relevantRules = new Set<FormulaShareRule>();
-	public Set<Id> recordsToQuery = new Set<Id>();
-	public List<BottomObjectRecordRule> recordRules = new List<BottomObjectRecordRule>();
+	protected String sharedObjectName;
+	public Set<FormulaShareRule> relevantRules = new Set<FormulaShareRule>();	// Rules which might be directly affected by field changes
+	public Set<FormulaShareRule> fullRules 	   = new Set<FormulaShareRule>();	// All rules of this type on the object
+	public Set<SObject> recordsShared = new Set<SObject>();		// New/updated records which could be affected by relevant rules
 
     // Methods must be implemented
+	public abstract void setRules(List<FormulaShareRule> rulesSharingObject, List<FormulaShareRule> rulesObjectInfluences);
     public abstract void processInsert(SObject newRecord);
     public abstract void processUpdate(SObject newRecord, SObject oldRecord);
+	public abstract Boolean sharesProcessedObject();	// Returns true when service may need to check all rules, not just those where sharing could change
+	public abstract Map<String,FormulaShareServiceDetailsForType> makeUpdatedDetailsMap(Map<String,FormulaShareServiceDetailsForType> detailsMap, Map<Id,SObject> fullQueriedRecords);
 
-
-    // Populates record id to be queried, and sets record rules to be matched after query
-    protected virtual void addToSets(SObject record, FormulaShareRule rule) {
-		relevantRules.add(rule);
-		recordsToQuery.add(record.Id);
-
-		BottomObjectRecordRule details = new BottomObjectRecordRule();
-		details.bottomObjectRecordId = record.Id;
-		details.rule = rule;
-		recordRules.add(details);
-    }
-
-	public class BottomObjectRecordRule {
-		public Id bottomObjectRecordId;
-		public FormulaShareRule rule;
-	}
 }

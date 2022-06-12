@@ -219,11 +219,8 @@ public inherited sharing class FormulaShareRulesSelector {
 
     // Returns rules where the shared object and shared to field are the object in scope
     // Used by trigger helper to get rules which might be affected by object DML
-    public List<FormulaShareRule> getStandardAndAncestorRulesSharingObject(String objectName) {
-        String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\''
-            + ' AND Child_Object_Lookup_Field__c = NULL'
-            + ' AND Related_Object_2_Lookup_to_RO1__c = NULL'
-            + ' AND Related_Object_3_Lookup_to_RO2__c = NULL';
+    public List<FormulaShareRule> getRulesSharingObject(String objectName) {
+        String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\'';
         String query = getQueryWithCondition(condition);
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
@@ -232,39 +229,10 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    // Returns rules where the supplied object name matches the bottom object of a inlaw or descendant rule
-    // Since OR conditions aren't allowed for metadata queries, further filtering is done in apex
-    // Used by trigger helper to get rules which might be affected by object DML
-    public List<FormulaShareRule> getDescendantAndInlawRulesWithThisBottomObject(String objectName) {
-
-        // Filter to just records with a related object which is below the shared object
-        // Since OR conditions aren't allowed for metadata queries, further filtering is done in apex
-        String condition = 'Child_Object_with_Shared_To_Field__c != NULL AND Child_Object_Lookup_Field__c != NULL';
-        String query = getQueryWithCondition(condition);
-        List<FormulaShare_Rule__mdt> rules = Database.query(query);
-
-        List<FormulaShareRule> rulesFromQuery = mapMetadataRulesToWrapper(rules);
-        List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
-
-        // Check for any rules where this object is the bottom object
-        for(FormulaShareRule rule : rulesFromQuery) {
-            switch on rule.type {
-                when 'descendant' {
-                    if(rule.controllingObjectApiName == objectName) {
-                        rulesToReturn.add(rule);
-                    }
-                }
-                when 'inlaw' {
-                    FormulaShareRuleInlaw inlawRule = (FormulaShareRuleInlaw) rule;
-                    if(inlawRule.bottomObjectApiName == objectName) {
-                        rulesToReturn.add(rule);
-                    }
-                }
-            }
-        }
-
-		return rulesToReturn;
-    }    
+    // Method used for to identify related rules on other objects
+    public List<FormulaShareRule> getInfluencedRulesOnOtherObjects(String objectName) {
+		return new List<FormulaShareRule>();
+    }
 
 
     // Returns rules where type in scope is the child object in a child object rule

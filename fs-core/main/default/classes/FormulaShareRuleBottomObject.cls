@@ -28,13 +28,10 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
     public FormulaShareRuleBottomObject(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
         super(mdRule, rel, tacf);
         setVarsBottom();
-        firstQueryStepApiName = lookupFromBottomObjTowardsSharedObj;
+        firstQueryStepApiName = firstQueryStepApiName;
     }
 
     public String bottomObjectApiName;
-    public String pathFromBottomObjToSharedObj;
-    public String pathFromBottomObjToOwnerIdOnSharedObj; // Ends with the relationship of the
-    public String lookupFromBottomObjTowardsSharedObj;
     protected FormulaShareSObjectRelationship bottomObjectRelationship;
 
     // Sequence of lookup fields needed to get from shared object to top object
@@ -46,7 +43,7 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
         // Start from the first related object and field
         FormulaShareSObjectRelationship rel = relationship.nextRelationship;
-        pathFromBottomObjToSharedObj = rel.lookupToPrevObjectApiName;
+        pathToSharedObject = rel.lookupToPrevObjectApiName;
         List<Schema.SobjectField> lookupFieldListReverse = new List<Schema.SobjectField>();
 
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(rel.thisObjectApiName);
@@ -68,15 +65,15 @@ public virtual inherited sharing class FormulaShareRuleBottomObject extends Form
 
             // Add to path to shared object
             String relationshipName = field.getDescribe().getRelationshipName();
-            pathFromBottomObjToSharedObj             = relationshipName + '.' + pathFromBottomObjToSharedObj;
+            pathToSharedObject             = relationshipName + '.' + pathToSharedObject;
             relationshipPathFromBottomObjToSharedObj = relationshipName + '.' + relationshipPathFromBottomObjToSharedObj;
         }
 
         // Populate object name and lookup field from final relationship, and set full path to ownerId
         bottomObjectRelationship = rel;
         bottomObjectApiName = rel.thisObjectApiName;
-        lookupFromBottomObjTowardsSharedObj = rel.lookupToPrevObjectApiName;
-        pathFromBottomObjToOwnerIdOnSharedObj = relationshipPathFromBottomObjToSharedObj + '.OwnerId';
+        firstQueryStepApiName = rel.lookupToPrevObjectApiName;
+        pathToOwnerIdOnShared = relationshipPathFromBottomObjToSharedObj + '.OwnerId';
 
         // Reverse lookup field list to be in correct order
         for(Integer i=0; i<lookupFieldListReverse.size(); i++) {

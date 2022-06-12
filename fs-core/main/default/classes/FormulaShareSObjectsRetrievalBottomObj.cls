@@ -38,7 +38,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
 
             // Key includes queried object, the path from shared object to the 
             // top object, and path from the controlling object to the top object
-            String key = rule.bottomObjectApiName + rule.pathFromBottomObjToSharedObj;
+            String key = rule.bottomObjectApiName + rule.pathToSharedObject;
 
             // Add field name for this rule to bottom object map (and create bod if needed)
             BottomObjectDetails bod;
@@ -51,8 +51,8 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
             }
 
             // Add path to shared field
-            System.debug('Processing rule: '+bod.rule.DeveloperName+' | Adding field: '+rule.pathFromBottomObjToSharedObj);
-            bod.fieldsToQuery.add(rule.pathFromBottomObjToSharedObj);
+            System.debug('Processing rule: '+bod.rule.DeveloperName+' | Adding field: '+rule.pathToSharedObject);
+            bod.fieldsToQuery.add(rule.pathToSharedObject);
 
             // Add controlling field from bottom object or inlaw object (TODO - add this to inlaw check)
             System.debug('Processing rule: '+bod.rule.DeveloperName+' | Adding field: '+rule.pathToSharedToField);
@@ -95,11 +95,11 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
         }
 
         // Add owner id from shared object
-        System.debug('Owner id path: '+bod.rule.pathFromBottomObjToOwnerIdOnSharedObj);
-        selector.addFieldString(bod.rule.pathFromBottomObjToOwnerIdOnSharedObj);
+        System.debug('Owner id path: '+bod.rule.pathToOwnerIdOnShared);
+        selector.addFieldString(bod.rule.pathToOwnerIdOnShared);
 
         // Select filters on top object ids
-        List<SObject> bottomRecords = selector.selectPopulatedRecordsBasedOnParentPath(bod.rule.pathFromBottomObjToSharedObj, sharedObjIds);
+        List<SObject> bottomRecords = selector.selectPopulatedRecordsBasedOnParentPath(bod.rule.pathToSharedObject, sharedObjIds);
         return bottomRecords;
     }
 
@@ -117,10 +117,10 @@ public inherited sharing class FormulaShareSObjectsRetrievalBottomObj {
 
             for(FormulaShareRuleBottomObject rule : bottomObjectRules) {
 
-                //(Id) record.get(rule.pathFromBottomObjToSharedObj);
+                //(Id) record.get(rule.pathToSharedObject);
         
                 // Get records map for relevant bottom object relationship
-                String key = rule.bottomObjectApiName + rule.pathFromBottomObjToSharedObj;
+                String key = rule.bottomObjectApiName + rule.pathToSharedObject;
                 Map<Id,List<SObject>> bottomRecordsForSharedObjMap = recordsForSharedObjForBottomsMap.get(key);
 
                 // Get records for this top object and add to inner list to return
