@@ -5,9 +5,11 @@ name: Sync to FS-App repo
 
 # Run for all commits to main
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main
+       - "#84_Deprecate_Related_Object_Rules"
+#      - main
 
 env:
   PAT_FOR_REPO_INTEGRATION:  ${{ secrets.PAT_FOR_REPO_INTEGRATION }}
@@ -21,4 +23,4 @@ jobs:
       run: |
         curl -XPOST -H "Authorization: Bearer $PAT_FOR_REPO_INTEGRATION" -H "Content-Type:application/json" \
         https://api.github.com/repos/LawrenceLoz/FormulaShare-App/dispatches \
-        --data "{\"event_type\": \"sync_master\"}"
+        --data "{\"event_type\": \"sync_main\"}"

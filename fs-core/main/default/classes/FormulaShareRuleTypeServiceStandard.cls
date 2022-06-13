@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareHelperServiceStandard extends FormulaShareHelperServiceRuleType {
+public inherited sharing class FormulaShareRuleTypeServiceStandard extends FormulaShareRuleTypeServiceBase {
 
 	public override Boolean sharesProcessedObject() {
 		return true;
@@ -27,12 +27,11 @@ public inherited sharing class FormulaShareHelperServiceStandard extends Formula
 
     public override void setRules(String sharedObjectName, List<FormulaShareRule> rulesSharingObject, List<FormulaShareRule> rulesObjectInfluences) {
 		this.sharedObjectName = sharedObjectName;
-        this.fullRules = rulesSharingObject;
+        this.allRules = rulesSharingObject;
     }	
 
-
     public override void processInsert(SObject newRecord) {
-        for(FormulaShareRule rule : rules) {
+        for(FormulaShareRule rule : allRules) {
 			System.debug('processInsert for rule: ' + rule.developerName);
             
             // If path to top field (the shared to field for a standard rule or lookup for ancestor)
@@ -52,7 +51,7 @@ public inherited sharing class FormulaShareHelperServiceStandard extends Formula
 
 	public override void processUpdate(SObject newRecord, SObject oldRecord) {
 
-		for(FormulaShareRule rule : rules) {
+		for(FormulaShareRule rule : allRules) {
 
 			if(rule.isValid() && rule.active) {
 
@@ -92,17 +91,20 @@ public inherited sharing class FormulaShareHelperServiceStandard extends Formula
 	}
 
 
-	public override Map<String,FormulaShareServiceDetailsForType> makeUpdatedDetailsMap(Map<String,FormulaShareServiceDetailsForType> detailsMap, Map<Id,SObject> fullQueriedRecords) {
-		for(SObject record : records) {
+	public override Map<String,FormulaShareServiceDetailsForType> makeUpdatedDetailsMap(Map<String,FormulaShareServiceDetailsForType> detailsMap, Map<Id,SObject> fullQueriedRecords, String processedObjectKey) {
+		for(SObject record : recordsShared) {
 
 			// If we'd re-queried this record, use the queried version with extra fields instead
 			if(fullQueriedRecords != null && fullQueriedRecords.containsKey(record.Id)) {
 				record = fullQueriedRecords.get(record.Id);
 			}
 
-			FormulaShareServiceDetailsForType details = detailsMap.get(sharedObjectName);
+			// Because rules share the object being processed by trigger, use the key from the helper service 
+			// which includes indication of whether sharing is removed
+			FormulaShareServiceDetailsForType details = detailsMap.get(processedObjectKey);
+
 			details.setSharedObjectRetrievedRecord(sharedObjectName, record);
-			detailsMap.put(sharedObjectName, details);
+			detailsMap.put(processedObjectKey, details);
 		}
 
 		return detailsMap;

@@ -45,19 +45,11 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>FormulaShareHelperServiceDescendant</apexClass>
+        <apexClass>FormulaShareRuleTypeServiceBase</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>FormulaShareHelperServiceInlaw</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>FormulaShareHelperServiceRuleType</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>FormulaShareHelperServiceRulesSharingObj</apexClass>
+        <apexClass>FormulaShareRuleTypeServiceStandard</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

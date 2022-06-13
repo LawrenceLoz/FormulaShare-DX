@@ -21,9 +21,9 @@
 
 public inherited sharing class FormulaShareInjectionService {
 
-    public List<FormulaShareHelperServiceRuleType> getRuleTypeServices() {
-        return new List<FormulaShareHelperServiceRuleType>{
-            FormulaShareHelperServiceStandard
+    public List<FormulaShareRuleTypeServiceBase> getRuleTypeServices() {
+        return new List<FormulaShareRuleTypeServiceBase>{
+            new FormulaShareRuleTypeServiceStandard()
         };
     }
 }

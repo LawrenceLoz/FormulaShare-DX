@@ -23,7 +23,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	enum OperationType {AFTER_INSERT_OR_UNDELETE, AFTER_UPDATE, AFTER_DELETE}
 
-	List<FormulaShareHelperServiceRuleType> ruleTypeServices;
+	List<FormulaShareRuleTypeServiceBase> ruleTypeServices;
 
     Schema.SObjectType type;
 	Schema.DescribeSObjectResult typeDescribe;
@@ -34,6 +34,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	Set<Id> recordsToQuery = new Set<Id>();
 
+	Map<String,FormulaShareServiceDetailsForType> detailsMap = new Map<String,FormulaShareServiceDetailsForType>();
 
 	public FormulaShareHelperService() {
 		this.ruleTypeServices = new FormulaShareInjectionService().getRuleTypeServices();
@@ -62,28 +63,30 @@ public inherited sharing class FormulaShareHelperService {
         List<FormulaShareRule> rulesObjectInfluences = fsRulesSelector.getInfluencedRulesOnOtherObjects(objectName);
 
 		// Use services to identify which rules could need to be assessed for these records
-		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
-			service.setRules(sharedObjectName, rulesSharingObject, rulesObjectInfluences);
+		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
+			service.setRules(objectName, rulesSharingObject, rulesObjectInfluences);
 
-			if(!service.rules.isEmpty()) {
+			if(!service.allRules.isEmpty()) {
 				populateRecordsToQuery(service, oldRecords, newRecords);
 
 				// If the service shares the updated records, we might need to consider all rules on these
 				// This is because this is (currently) the only situation where sharing could be removed
 				if(service.sharesProcessedObject()) {
-					setRemoveSharesForSharedObject();
+					setRemoveSharesForSharedObject(service);
 				}
 			}
 		}
 
 		// Knowing whether full set of rules will need to be assessed, iterate again and add rules to map
-		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
-			if(!service.rules.isEmpty()) {
+		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
+			if(!service.fullRules.isEmpty()) {
 				if(service.sharesProcessedObject() && assessAllRules) {
-					addToRulesForTypeMap(rulesSharingObjectService.fullRules);
+					addToRulesForTypeMap(service.fullRules);
 				}
 				else {
-					addToRulesForTypeMap(rulesSharingObjectService.relevantRules);
+					if(!service.relevantRules.isEmpty()) {
+						addToRulesForTypeMap(service.relevantRules);
+					}
 				}
 			}
 		}
@@ -92,7 +95,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	
 	// Check whether possible sharing impact based on rules and values from trigger
-	private void populateRecordsToQuery(FormulaShareHelperServiceRuleType serviceRuleType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
+	private void populateRecordsToQuery(FormulaShareRuleTypeServiceBase serviceRuleType, Map<Id,SObject> oldRecords, Map<Id,SObject> newRecords) {
 
 		switch on opType {
 
@@ -119,7 +122,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	// removeSharesForSharedObject is true by default. Check object settings to determine whether we should set to false
 	// If we do need to check for removal, we need to query for all standard/ancestor fields and check all rules sharing object
-	private void setRemoveSharesForSharedObject(FormulaShareHelperServiceRuleType service) {
+	private void setRemoveSharesForSharedObject(FormulaShareRuleTypeServiceBase service) {
 
 		// Proceed if there are any rules to check for this type 
 		// and we haven't already identified a need to assess everything
@@ -149,7 +152,7 @@ public inherited sharing class FormulaShareHelperService {
 
 				// Check whether the number of rules sharing object is the same as the number of rules considered by service
 				// If so we know all sharing on the object will be from rules we're assessing so no need to check others
-				if(allRules.size() != service.rules.size()) {
+				if(allRules.size() != service.allRules.size()) {
 					removeSharesForSharedObject = false;
 					assessAllRules = false;
 				}
@@ -196,6 +199,8 @@ public inherited sharing class FormulaShareHelperService {
 		detailsMap.put(key, details);
 	}
 
+	// If we're removing records for the shared object, key includes this format so it's processed in the
+	// separately from any related object sharing which references the same object
 	private String getDetailsMapKey(String sharedObjectName) {
 		String key = sharedObjectName;
 		Boolean removeForThisType = removeSharesForThisType(sharedObjectName);
@@ -217,18 +222,32 @@ public inherited sharing class FormulaShareHelperService {
 
 		// Query for records to populate lookups if required, and set retrieved record details for each
 		Map<Id,SObject> fullQueriedRecords;
+
+		// We may have extra information to requery from the records (values of relationship parents for example)
 		if(!recordsToQuery.isEmpty()) {
-
 			fullQueriedRecords = getFullQueriedRecords(type);
+		}
 
-			Map<String,FormulaShareServiceDetailsForType> detailsMap = new Map<String,FormulaShareServiceDetailsForType>();
+		// ... but if not we can just use the versions from the trigger as the full queried records
+		else {
+			fullQueriedRecords = new Map<Id,SObject>();
 
-			// For each rule type service, add relevant records into the details service for the object
-			// that the rules in the type service share. Logic definied in each implementation of type service
-			for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
-				updatedDetailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords);
+			for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
+				for(SObject record : service.recordsShared) {
+					Id recordId = (Id) record.get('Id');
+					fullQueriedRecords.put(recordId, record);
+				}
 			}
 		}
+
+		// For each rule type service, add relevant records into the details service for the object
+		// that the rules in the type service share. Logic definied in each implementation of type service
+		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
+			String processedObjectKey = getDetailsMapKey(objectName);
+			detailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords, processedObjectKey);
+		}
+
+		System.debug('Details service values map: '+detailsMap.values());
 
         return detailsMap.values();
     }
@@ -241,9 +260,9 @@ public inherited sharing class FormulaShareHelperService {
 		FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
 
 		// Add required field paths, including those to parent objects
-		for(FormulaShareHelperServiceRuleType service : ruleTypeServices) {
+		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
 
-			List<FormulaShareRule> rules;
+			Set<FormulaShareRule> rules;
 
 			// We'll need paths from all rules if there's a chance we'll remove 
 			// sharing for a standard object and service shares this object
@@ -258,11 +277,11 @@ public inherited sharing class FormulaShareHelperService {
 
 			// Add paths to all fields we might need to reference to assess rules
 			for(FormulaShareRule rule : rules) {
-				selector.addFieldString(pathToSharedToField);
-				selector.addFieldString(pathToSharedObject);
+				selector.addFieldString(rule.pathToSharedToField);
+				selector.addFieldString(rule.pathToSharedObject);
 
 				if(rule.shareWith == 'Users') {
-					selector.addFieldString(pathToOwnerIdOnShared);
+					selector.addFieldString(rule.pathToOwnerIdOnShared);
 				}
 			}
 		}
