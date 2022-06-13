@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-       - "#84_Deprecate_Related_Object_Rules"
+       - refactor-84_Deprecate_Related_Object_Rules
 #      - main
 
 env:
