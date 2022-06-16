@@ -37,8 +37,8 @@ public with sharing class FormulaShareRulesSelectorTest {
         FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
         selector.isUnitTest = true;
 
-        List<String> objectsWithRules = selector.selectObjectsWithRules();
-        System.assertEquals('Test object', objectsWithRules[0]);
+        Set<String> objectsWithRules = selector.selectObjectsWithRules();
+        System.assert(objectsWithRules.contains('Test object'));
     }
 
 }

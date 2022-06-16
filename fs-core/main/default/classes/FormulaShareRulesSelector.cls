@@ -22,7 +22,7 @@
 // Note that fflib selector pattern isn't used because it fails for metadata relationship fields.
 // FLS and sharing checks aren't needed since custom metadata does not support either.
 
-public inherited sharing class FormulaShareRulesSelector {
+public virtual inherited sharing class FormulaShareRulesSelector {
 
     public static FormulaShareRulesSelector mock;
     public static FormulaShareRulesSelector construct() {
@@ -36,153 +36,45 @@ public inherited sharing class FormulaShareRulesSelector {
     }
     @TestVisible Boolean isUnitTest = false;
 
-
-    static String allFieldsForSelect;
-    private static String getAllFieldsForSelect() {
+    String allFieldsForSelect;
+    private String getAllFieldsForSelect() {
 
         // If selected fields string hasn't been prepared already, set this now
         if(allFieldsForSelect == null) {
-            List<String> fieldNames = new List<String>{
-                'Id',
-                'MasterLabel',
-                'DeveloperName',
-
-                'Active__c',
-                'Description__c',
-
-                'Access_Level__c',
-                'Case_Access__c',
-                'Contact_Access__c',
-                'Opportunity_Access__c',
-                'Share_With__c',
-                'Sharing_Reason__c',
-                'Child_Object_Shared_To_Field_Type__c',
-                'Shared_To_Field_Type__c',
-
-                'Object_Shared__c',
-                'Object_Shared__r.QualifiedApiName',
-                'Object_Shared__r.MasterLabel',
-                'Shared_To__c',
-                'Shared_To__r.QualifiedApiName',
-                'Shared_To__r.MasterLabel',
-
-                'Child_Object_with_Shared_To_Field__c',
-                'Child_Object_with_Shared_To_Field__r.QualifiedApiName',
-                'Child_Object_with_Shared_To_Field__r.MasterLabel',
-                'Child_Object_Lookup_Field__c',
-                'Child_Object_Lookup_Field__r.QualifiedApiName',
-                'Related_Object_1_Lookup_from_Shared_Obj__c',
-                'Related_Object_1_Lookup_from_Shared_Obj__r.QualifiedApiName',
-                'Child_Object_Shared_To_Field__c',
-                'Child_Object_Shared_To_Field__r.QualifiedApiName',
-                'Child_Object_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_2__c',
-                'Related_Object_2__r.QualifiedApiName',
-                'Related_Object_2__r.MasterLabel',
-                'Related_Object_2_Lookup_from_RO1__c',
-                'Related_Object_2_Lookup_from_RO1__r.QualifiedApiName',
-                'Related_Object_2_Lookup_to_RO1__c',
-                'Related_Object_2_Lookup_to_RO1__r.QualifiedApiName',
-                'Related_Object_2_Shared_To_Field__c',
-                'Related_Object_2_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_2_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_3__c',
-                'Related_Object_3__r.QualifiedApiName',
-                'Related_Object_3__r.MasterLabel',
-                'Related_Object_3_Lookup_from_RO2__c',
-                'Related_Object_3_Lookup_from_RO2__r.QualifiedApiName',
-                'Related_Object_3_Lookup_to_RO2__c',
-                'Related_Object_3_Lookup_to_RO2__r.QualifiedApiName',
-                'Related_Object_3_Shared_To_Field__c',
-                'Related_Object_3_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_3_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_4__c',
-                'Related_Object_4__r.QualifiedApiName',
-                'Related_Object_4__r.MasterLabel',
-                'Related_Object_4_Lookup_from_RO3__c',
-                'Related_Object_4_Lookup_from_RO3__r.QualifiedApiName',
-                'Related_Object_4_Lookup_to_RO3__c',
-                'Related_Object_4_Lookup_to_RO3__r.QualifiedApiName',
-                'Related_Object_4_Shared_To_Field__c',
-                'Related_Object_4_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_4_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_5__c',
-                'Related_Object_5__r.QualifiedApiName',
-                'Related_Object_5__r.MasterLabel',
-                'Related_Object_5_Lookup_from_RO4__c',
-                'Related_Object_5_Lookup_from_RO4__r.QualifiedApiName',
-                'Related_Object_5_Lookup_to_RO4__c',
-                'Related_Object_5_Lookup_to_RO4__r.QualifiedApiName',
-                'Related_Object_5_Shared_To_Field__c',
-                'Related_Object_5_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_5_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_6__c',
-                'Related_Object_6__r.QualifiedApiName',
-                'Related_Object_6__r.MasterLabel',
-                'Related_Object_6_Lookup_from_RO5__c',
-                'Related_Object_6_Lookup_from_RO5__r.QualifiedApiName',
-                'Related_Object_6_Lookup_to_RO5__c',
-                'Related_Object_6_Lookup_to_RO5__r.QualifiedApiName',
-                'Related_Object_6_Shared_To_Field__c',
-                'Related_Object_6_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_6_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_7__c',
-                'Related_Object_7__r.QualifiedApiName',
-                'Related_Object_7__r.MasterLabel',
-                'Related_Object_7_Lookup_from_RO6__c',
-                'Related_Object_7_Lookup_from_RO6__r.QualifiedApiName',
-                'Related_Object_7_Lookup_to_RO6__c',
-                'Related_Object_7_Lookup_to_RO6__r.QualifiedApiName',
-                'Related_Object_7_Shared_To_Field__c',
-                'Related_Object_7_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_7_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_8__c',
-                'Related_Object_8__r.QualifiedApiName',
-                'Related_Object_8__r.MasterLabel',
-                'Related_Object_8_Lookup_from_RO7__c',
-                'Related_Object_8_Lookup_from_RO7__r.QualifiedApiName',
-                'Related_Object_8_Lookup_to_RO7__c',
-                'Related_Object_8_Lookup_to_RO7__r.QualifiedApiName',
-                'Related_Object_8_Shared_To_Field__c',
-                'Related_Object_8_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_8_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_9__c',
-                'Related_Object_9__r.QualifiedApiName',
-                'Related_Object_9__r.MasterLabel',
-                'Related_Object_9_Lookup_from_RO8__c',
-                'Related_Object_9_Lookup_from_RO8__r.QualifiedApiName',
-                'Related_Object_9_Lookup_to_RO8__c',
-                'Related_Object_9_Lookup_to_RO8__r.QualifiedApiName',
-                'Related_Object_9_Shared_To_Field__c',
-                'Related_Object_9_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_9_Shared_To_Field__r.MasterLabel',
-
-                'Related_Object_10__c',
-                'Related_Object_10__r.QualifiedApiName',
-                'Related_Object_10__r.MasterLabel',
-                'Related_Object_10_Lookup_from_RO9__c',
-                'Related_Object_10_Lookup_from_RO9__r.QualifiedApiName',
-                'Related_Object_10_Lookup_to_RO9__c',
-                'Related_Object_10_Lookup_to_RO9__r.QualifiedApiName',
-                'Related_Object_10_Shared_To_Field__c',
-                'Related_Object_10_Shared_To_Field__r.QualifiedApiName',
-                'Related_Object_10_Shared_To_Field__r.MasterLabel'
-            };
-
+            List<String> fieldNames = getFieldNames();      // overridden in extending classes
             allFieldsForSelect = String.join(fieldNames, ',');
         }
         return allFieldsForSelect;
     }
 
-    private static String getQueryWithCondition(String condition) {
+    private virtual List<String> getFieldNames() {
+        List<String> fieldNames = new List<String>{
+            'Id',
+            'MasterLabel',
+            'DeveloperName',
+
+            'Active__c',
+            'Description__c',
+
+            'Access_Level__c',
+            'Case_Access__c',
+            'Contact_Access__c',
+            'Opportunity_Access__c',
+            'Share_With__c',
+            'Sharing_Reason__c',
+            'Shared_To_Field_Type__c',
+
+            'Object_Shared__c',
+            'Object_Shared__r.QualifiedApiName',
+            'Object_Shared__r.MasterLabel',
+            'Shared_To__c',
+            'Shared_To__r.QualifiedApiName',
+            'Shared_To__r.MasterLabel'
+        };
+        return fieldNames;
+    }
+
+    private String getQueryWithCondition(String condition) {
         String query = 'SELECT ' + getAllFieldsForSelect() 
             + ' FROM FormulaShare_Rule__mdt WHERE ' 
             + condition;
@@ -229,9 +121,9 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    // Method used for to identify related rules on other objects
-    public List<FormulaShareRule> getInfluencedRulesOnOtherObjects(String objectName) {
-		return new List<FormulaShareRule>();
+    // Implementation is simple in the base class and overriden for related object sharing
+    public virtual List<FormulaShareRule> getStandardAndAncestorRulesSharingObject(String objectName) {
+        return getRulesSharingObject(objectName);
     }
 
 
@@ -248,30 +140,26 @@ public inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    @AuraEnabled(cacheable=true)
-    public static Integer getNoActiveStandardRules() {
-        Integer activeStandardRules = [
-            SELECT COUNT() FROM FormulaShare_Rule__mdt 
-            WHERE Child_Object_with_Shared_To_Field__c = null
-            AND Active__c = true];
-		return activeStandardRules;
+    public Set<String> selectObjectsWithRules() {
+        Set<String> objNames = new Set<String>();
+
+        // If test, populate Set with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
+        if(isUnitTest) {
+            objNames.add('Test object');
+        }
+        
+        else {
+            Map<String, FormulaShare_Rule__mdt> fsRulesMap = FormulaShare_Rule__mdt.getAll();
+            for(FormulaShare_Rule__mdt rule : fsRulesMap.values()) {
+                objNames.add(rule.Object_Shared__r.QualifiedApiName);
+            }
+        }
+
+        return objNames;
     }
 
 
-    @AuraEnabled(cacheable=true)
-    public static Integer getNoActiveCrossObjectRules() {
-        Integer activeCrossObjectRules = [
-            SELECT COUNT() FROM FormulaShare_Rule__mdt 
-            WHERE Child_Object_with_Shared_To_Field__c != null
-            AND Active__c = true];
-		return activeCrossObjectRules;
-    }
-
-
-    // Returns details of a single rule matching a supplied id
-    // Used by FormulaShareRuleDetail LWC
-    @AuraEnabled(cacheable=false)
-    public static FormulaShareRule getSpecificRule(Id ruleId) {
+    public FormulaShareRule getSpecificRule(Id ruleId) {
         String condition = 'Id = \'' + ruleId + '\' LIMIT 1';
         String query = getQueryWithCondition(condition);
         System.debug('specific rule query: '+ query);
@@ -299,24 +187,6 @@ public inherited sharing class FormulaShareRulesSelector {
         }
 
         return rulesToReturn;
-    }
-
-
-    public List<String> selectObjectsWithRules() {
-        List<String> objNames = new List<String>();
-
-        // If test, populate list with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
-        if(isUnitTest) {
-            objNames.add('Test object');
-        }
-        
-        else {
-            for(FormulaShare_Rule__mdt rule : [SELECT Object_Shared__r.QualifiedApiName FROM FormulaShare_Rule__mdt LIMIT 50000]) {
-                objNames.add(rule.Object_Shared__r.QualifiedApiName);
-            }
-        }
-
-        return objNames;
     }
 
 }

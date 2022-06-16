@@ -21,7 +21,7 @@
 
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getSpecificRule from '@salesforce/apex/FormulaShareRulesSelector.getSpecificRule';
+import getSpecificRule from '@salesforce/apex/FormulaShareRulesQueriesController.getSpecificRule';
 
 export default class FormulaShareRuleDetail extends LightningElement {
 

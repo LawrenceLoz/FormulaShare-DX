@@ -25,40 +25,43 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
 		return true;
 	}
 
-    public override void setRules(String sharedObjectName, List<FormulaShareRule> rulesSharingObject, List<FormulaShareRule> rulesObjectInfluences) {
+    public override void setRules(String sharedObjectName) {
 		this.sharedObjectName = sharedObjectName;
-        this.allRules = rulesSharingObject;
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+		List<FormulaShareRule> allRules = rulesSelector.getStandardAndAncestorRulesSharingObject(sharedObjectName);
     }	
 
     public override void processInsert(SObject newRecord) {
-        for(FormulaShareRule rule : allRules) {
-			System.debug('processInsert for rule: ' + rule.developerName);
-            
-            // If path to top field (the shared to field for a standard rule or lookup for ancestor)
-            // is populated, we might need to check
-            if(rule.isValid() && rule.active 
-                && newRecord.get(rule.firstQueryStepApiName) != null) {
-				System.debug('Adding record ' + newRecord.get('Id') 
-					+ ' for processing for rule: ' + rule.developerName 
-					+ '. First query step(' + rule.firstQueryStepApiName 
-					+ '): '+newRecord.get(rule.firstQueryStepApiName));
-				
-				addToSets(newRecord, rule);
-            }
+
+		for(FormulaShareRule baseRule : allRules) {
+			if(baseRule.isValid() && baseRule.active && baseRule.type == 'standard') {
+				FormulaShareRuleStandard rule = (FormulaShareRuleStandard) baseRule;
+			
+				// If path to top field (the shared to field for a standard rule or lookup for ancestor)
+				// is populated, we might need to check
+				if(newRecord.get(rule.firstQueryStepApiName) != null) {
+					System.debug('Adding record ' + newRecord.get('Id') 
+						+ ' for processing for rule: ' + rule.developerName 
+						+ '. First query step(' + rule.firstQueryStepApiName 
+						+ '): '+newRecord.get(rule.firstQueryStepApiName));
+					
+					addToSets(newRecord, rule);
+				}
+			}
         }
     }
 
 
 	public override void processUpdate(SObject newRecord, SObject oldRecord) {
 
-		for(FormulaShareRule rule : allRules) {
-
-			if(rule.isValid() && rule.active) {
+		for(FormulaShareRule baseRule : allRules) {
+			if(baseRule.isValid() && baseRule.active && baseRule.type == 'standard') {
+				FormulaShareRuleStandard rule = (FormulaShareRuleStandard) baseRule;
 
 				// If sharing field specified on a standard rule has changed, we might need to assess sharing for this record
 				if(oldRecord.get(rule.firstQueryStepApiName) != newRecord.get(rule.firstQueryStepApiName)) {
 					System.debug('Adding record ' + newRecord.get('Id') 
-						+ ' for processing for standard or ancestor rule: ' + rule.developerName 
+						+ ' for processing for standard rule: ' + rule.developerName 
 						+ '. firstQueryStepApiName(' + rule.firstQueryStepApiName 
 						+ '): '+newRecord.get(rule.firstQueryStepApiName));
 					
@@ -68,7 +71,7 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
 				// If owner has changed we might need to check if the old owner still requires sharing
 				else if(oldRecord.get('OwnerId') != newRecord.get('OwnerId')) {
 					System.debug('Adding record ' + newRecord.get('Id') 
-						+ ' for processing for standard or ancestor rule: ' + rule.developerName 
+						+ ' for processing for standard rule: ' + rule.developerName 
 						+ '. OwnerId: '+newRecord.get('OwnerId'));
 					
 					addToSets(newRecord, rule);

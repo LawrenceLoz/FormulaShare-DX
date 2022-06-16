@@ -29,7 +29,7 @@ public abstract inherited sharing class FormulaShareRuleTypeServiceBase {
 	public Set<Id> recordsToQuery = new Set<Id>();				// Any additional records which may need to be queried
 
     // Methods must be implemented
-	public abstract void setRules(String sharedObjectName, List<FormulaShareRule> rulesSharingObject, List<FormulaShareRule> rulesObjectInfluences);
+	public abstract void setRules(String sharedObjectName);
     public abstract void processInsert(SObject newRecord);
     public abstract void processUpdate(SObject newRecord, SObject oldRecord);
 	public abstract Boolean sharesProcessedObject();	// Returns true when service may need to check all rules, not just those where sharing could change

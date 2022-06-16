@@ -131,7 +131,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         else if(stubbedMethodName == 'selectObjectsWithRules') {
-            List<String> objNames = new List<String>();
+            Set<String> objNames = new Set<String>();
             objNames.add(prefix + 'FormulaShare_Log__c');
             objNames.add(prefix + 'FormulaShare_Record_Log__c');
             return objNames;

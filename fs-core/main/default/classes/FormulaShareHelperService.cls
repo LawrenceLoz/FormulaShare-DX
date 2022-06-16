@@ -59,8 +59,8 @@ public inherited sharing class FormulaShareHelperService {
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
 		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
-		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getRulesSharingObject(objectName);
-        List<FormulaShareRule> rulesObjectInfluences = fsRulesSelector.getInfluencedRulesOnOtherObjects(objectName);
+		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getStandardAndAncestorRulesSharingObject(objectName);
+        List<FormulaShareRule> rulesObjectInfluences = fsRulesSelector.getDescendantAndInlawRulesWithThisBottomObject(objectName);
 
 		// Use services to identify which rules could need to be assessed for these records
 		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
@@ -169,6 +169,7 @@ public inherited sharing class FormulaShareHelperService {
 
 	// Establishes all types to be processed in map
 	private void addToRulesForTypeMap(Set<FormulaShareRule> rulesSet) {
+		System.debug('rulesSet: '+rulesSet);
 		for(FormulaShareRule rule : rulesSet) {
 			FormulaShareServiceDetailsForType details = getDetailsForType(rule.objectSharedAPIName);
 			details.rules.add(rule);
