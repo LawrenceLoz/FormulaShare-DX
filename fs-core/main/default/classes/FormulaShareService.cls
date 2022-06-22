@@ -125,7 +125,7 @@ public inherited sharing class FormulaShareService {
 		// Configure to disable object and field security for tests (can't guarantee permissions of running user)
 		Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
 
-		FormulaShareSObjectsSelector selector = FormulaShareSObjectsSelector.construct(enforceObjectAndFieldSecurity, type);
+		FormulaShareSObjectsSelector selector = new FormulaShareInjectionService().getSObjectsSelector(enforceObjectAndFieldSecurity, type);
 		selector.setFields(fieldsSet);
 		Database.QueryLocator ql = selector.selectAllLocator();
 		
@@ -230,9 +230,9 @@ public inherited sharing class FormulaShareService {
 		Set<Id> userQueryIdSet = new Set<Id>();
 		Set<Id> roleQueryIdSet = new Set<Id>();
 
-		Set<FormulaShareServiceSObjectRule> userRecordRules = new Set<FormulaShareServiceSObjectRule>();
-		Set<FormulaShareServiceSObjectRule> roleRecordRules = new Set<FormulaShareServiceSObjectRule>();
-		Set<FormulaShareServiceSObjectRule> groupRecordRules = new Set<FormulaShareServiceSObjectRule>();
+		Set<RecordRule> userRecordRules = new Set<RecordRule>();
+		Set<RecordRule> roleRecordRules = new Set<RecordRule>();
+		Set<RecordRule> groupRecordRules = new Set<RecordRule>();
 
 		Set<String> sharedToNamesGroups = new Set<String>();
 		Set<String> sharedToNamesRoles = new Set<String>();
@@ -240,15 +240,15 @@ public inherited sharing class FormulaShareService {
 		system.debug('Records to be assessed: '+recordDetails);
 		system.debug('Rules to be assessed: '+rules);
 
-		List<FormulaShareServiceSObjectRule> allRecordRules = buildRecordRules();
+		List<RecordRule> allRecordRules = buildRecordRules();
 
-		for(FormulaShareServiceSObjectRule recordRule : allRecordRules) {
+		for(RecordRule recRule : allRecordRules) {
 
-			FormulaShareRule rule = recordRule.rule;
-			String sharedToString = recordRule.sharedToString;
+			FormulaShareRule rule = recRule.rule;
+			String sharedToString = recRule.sharedToString;
 
 			system.debug('this rule: '+rule);
-			system.debug('*** the record: '+recordRule.recordWithSharedToDetails);
+			system.debug('*** the record: '+recRule.recordWithSharedToDetails);
 			system.debug('*** sharedToAPIName: '+rule.pathToSharedToField);
 			system.debug('shared to string: ' + sharedToString);
 			
@@ -259,11 +259,11 @@ public inherited sharing class FormulaShareService {
 				if(rule.shareWith == 'Users') {
 					if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.User.getSObjectType())) {
 						userQueryIdSet.add((Id) sharedToString);
-						userRecordRules.add(recordRule);
+						userRecordRules.add(recRule);
 					}
 					else {
 						String logMessage = 'Expected field to contain valid user id. Instead found: ' + sharedToString;
-						captureEntityNotFound(recordRule, logMessage);
+						captureEntityNotFound(recRule, logMessage);
 					}
 				}
 
@@ -271,16 +271,16 @@ public inherited sharing class FormulaShareService {
 				else if(rule.shareWith == 'Public Groups') {
 					if(rule.controllingObjectSharedToFieldType == 'Id') {
 						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
-							updateShareMaps(recordRule.recordToShare.Id, (Id) sharedToString, rule);
+							updateShareMaps(recRule.recordToShare.Id, (Id) sharedToString, rule);
 						}
 						else {
 							String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
-							captureEntityNotFound(recordRule, logMessage);
+							captureEntityNotFound(recRule, logMessage);
 						}
 					}
 					else if(rule.controllingObjectSharedToFieldType == 'Name') {
 						sharedToNamesGroups.add(sharedToString);
-						groupRecordRules.add(recordRule);
+						groupRecordRules.add(recRule);
 					}
 				}
 
@@ -289,17 +289,17 @@ public inherited sharing class FormulaShareService {
 					if(rule.controllingObjectSharedToFieldType == 'Id') {
 						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
 							roleQueryIdSet.add((Id) sharedToString);
-							roleRecordRules.add(recordRule);
+							roleRecordRules.add(recRule);
 						}
 						else {
 							String logMessage = 'Expected field to contain valid role id. Instead found: ' + sharedToString;
-							captureEntityNotFound(recordRule, logMessage);
+							captureEntityNotFound(recRule, logMessage);
 						}
 					}
 					else if(rule.controllingObjectSharedToFieldType == 'Name') {
 						System.debug('Adding share for role rule with name');
 						sharedToNamesRoles.add(sharedToString);
-						roleRecordRules.add(recordRule);
+						roleRecordRules.add(recRule);
 					}
 				}
 
@@ -308,7 +308,7 @@ public inherited sharing class FormulaShareService {
 
 			else if(!rule.isValid()) {
 				String logMessage = 'Invalid rule metadata, check configuration for rule: '+rule.developerName;
-				captureEntityNotFound(recordRule, logMessage);
+				captureEntityNotFound(recRule, logMessage);
 			}
 		}
 
@@ -339,8 +339,8 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private void captureEntityNotFound(FormulaShareServiceSObjectRule recordRule, String logMessage) {
-		captureEntityNotFound(recordRule.recordToShare.Id, recordRule.rule, logMessage);
+	private void captureEntityNotFound(RecordRule recRule, String logMessage) {
+		captureEntityNotFound(recRule.recordToShare.Id, recRule.rule, logMessage);
 	}
 
 	private void captureEntityNotFound(Id recordId, FormulaShareRule rule, String logMessage) {
@@ -355,34 +355,33 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private List<FormulaShareServiceSObjectRule> buildRecordRules() {
-		List<FormulaShareServiceSObjectRule> allRecordRules = new List<FormulaShareServiceSObjectRule>();
+	private List<RecordRule> buildRecordRules() {
+		List<RecordRule> allRecordRules = new List<RecordRule>();
 
 		for(FormulaShareRule rule : rules) {
 			for(FormulaShareRetrievedRecordDetails details : recordDetails) {
-				SObject record = details.sharedRecord;
-				
-				// If shared to details are on the shared object, then this object in the record rule
-				if(rule.type == 'standard' || rule.type == 'ancestor') {
-					FormulaShareServiceSObjectRule recordRule = new FormulaShareServiceSObjectRule(details.sharedRecord, rule);
-					allRecordRules.add(recordRule);
-					system.debug('*** processing standard '+ details.sharedRecord);
+
+				List<SObject> controllingObjectsForRule = new List<SObject>();
+
+				// If no controlling records set (e.g. standard rules), assume that the shared record is the controlling record
+				if(!details.controllingRecordsForRulesMap.containsKey(rule.developerName) || 
+					details.controllingRecordsForRulesMap.get(rule.developerName).isEmpty()) {
+					controllingObjectsForRule.add(details.sharedRecord);
 				}
 
-				// Otherwise, create record rules for the relevant records from the related object
+				// Otherwise get controlling records set in map
 				else {
-					System.debug('rule: '+ rule);
-					System.debug('details: '+details);
-					System.debug('details.controllingRecordsForRulesMap: '+details.controllingRecordsForRulesMap);
+					controllingObjectsForRule = details.controllingRecordsForRulesMap.get(rule.developerName);
+				}
 
-					if(details.controllingRecordsForRulesMap.containsKey(rule.developerName)) {
-						List<SObject> controllingObjectsForRule = details.controllingRecordsForRulesMap.get(rule.developerName);
-
-						for(SOBject relatedObj : controllingObjectsForRule) {
-							FormulaShareServiceSObjectRule recordRule = new FormulaShareServiceSObjectRule(details.sharedRecord, relatedObj, rule);
-							allRecordRules.add(recordRule);
-						}
-					}
+				for(SOBject controllingObj : controllingObjectsForRule) {
+					RecordRule recRule = new RecordRule();
+					recRule.recordToShare 			  = details.sharedRecord;
+					recRule.recordWithSharedToDetails = controllingObj;
+					recRule.sharedToString 			  = rule.getSharedToValueFromRecord(controllingObj);
+					recRule.rule 					  = rule;
+					
+					allRecordRules.add(recRule);
 				}
 			}
 		}
@@ -391,37 +390,37 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private void assessUserSharingFromIds(Set<Id> userQueryIdSet, Set<FormulaShareServiceSObjectRule> userRecordRules) {
+	private void assessUserSharingFromIds(Set<Id> userQueryIdSet, Set<RecordRule> userRecordRules) {
 		
 		Set<Id> activeUsersIdSet = getActiveUsers(userQueryIdSet);
 
 		system.debug('user record rules: ' + userRecordRules);
 
-		for(FormulaShareServiceSObjectRule recordRule : userRecordRules) {
-			system.debug('Looking for this shared to: ' + recordRule.sharedToString);
-			system.debug('in this object: ' + recordRule.recordWithSharedToDetails);
+		for(RecordRule recRule : userRecordRules) {
+			system.debug('Looking for this shared to: ' + recRule.sharedToString);
+			system.debug('in this object: ' + recRule.recordWithSharedToDetails);
 
-			system.debug('rec to share: ' + recordRule.recordToShare);
-			system.debug('share to field: ' + recordRule.sharedToString);
+			system.debug('rec to share: ' + recRule.recordToShare);
+			system.debug('share to field: ' + recRule.sharedToString);
 
 			// If user is set on record
-			if(recordRule.sharedToString != null) {
+			if(recRule.sharedToString != null) {
 	
-				Id userId = (Id) recordRule.sharedToString;
+				Id userId = (Id) recRule.sharedToString;
 				system.debug('Found this id: ' + userId);
-				system.debug('objects owner: ' + recordRule.recordToShare.get('OwnerId'));
+				system.debug('objects owner: ' + recRule.recordToShare.get('OwnerId'));
 				system.debug('activeUsersIdSet: ' + activeUsersIdSet);
 	
 				// If user is active and not already the record owner then create sharing record
-				if(activeUsersIdSet.contains(userId) && userId != recordRule.recordToShare.get('OwnerId')) {
+				if(activeUsersIdSet.contains(userId) && userId != recRule.recordToShare.get('OwnerId')) {
 					system.debug('adding to map for insert');
-					updateShareMaps(recordRule.recordToShare.Id, userId, recordRule.rule);
+					updateShareMaps(recRule.recordToShare.Id, userId, recRule.rule);
 				}
 	
 				// If user not found log this as error
 				else if(!activeUsersIdSet.contains(userId)) {
 					String logMessage = 'No active user found with id ' + userId;
-					captureEntityNotFound(recordRule, logMessage);
+					captureEntityNotFound(recRule, logMessage);
 				}
 			}
 		}
@@ -434,24 +433,24 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private void assessGroupSharingFromNames(Set<String> groupNames, Set<FormulaShareServiceSObjectRule> groupRecordRules) {
+	private void assessGroupSharingFromNames(Set<String> groupNames, Set<RecordRule> groupRecordRules) {
 
 		Map<String,Id> groupsMap = getGroupsFromNames(groupNames);
 
-		for(FormulaShareServiceSObjectRule recordRule : groupRecordRules) {
+		for(RecordRule recRule : groupRecordRules) {
 
 			// Update share maps or log only if group is set on record
-			if(recordRule.sharedToString != null) {
-				String sharedToName = (String) recordRule.sharedToString;
+			if(recRule.sharedToString != null) {
+				String sharedToName = (String) recRule.sharedToString;
 				Id groupId = groupsMap.get(sharedToName);
 	
 				if(groupId != null) {
-					updateShareMaps(recordRule.recordToShare.Id, groupId, recordRule.rule);
+					updateShareMaps(recRule.recordToShare.Id, groupId, recRule.rule);
 				}
 	
 				else {
 					String logMessage = 'Field value \''+sharedToName+'\' should correspond to an active public group, but no group was found with this name';
-					captureEntityNotFound(recordRule, logMessage);
+					captureEntityNotFound(recRule, logMessage);
 				}
 			}
 		}
@@ -471,7 +470,7 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	private void assessRoleSharing(Set<Id> roleQueryIdSet, Set<FormulaShareServiceSObjectRule> roleRecordRules, Map<String,Id> roleNamesToIdsMap) {
+	private void assessRoleSharing(Set<Id> roleQueryIdSet, Set<RecordRule> roleRecordRules, Map<String,Id> roleNamesToIdsMap) {
 
 		// Build map of required group Ids for role groups
 		Map<String,Id> roleGroupIds = new Map<String,Id>();
@@ -491,40 +490,40 @@ public inherited sharing class FormulaShareService {
 
 		// Update sharing maps to create or keep role shares
 		system.debug('*** Delete map before assessment: ' + mapToDelete.keySet() );
-		for(FormulaShareServiceSObjectRule recordRule : roleRecordRules) {
-			System.debug('recordRule.sharedToString: '+recordRule.sharedToString);
-			System.debug('recordRule.sharedToString: '+recordRule.sharedToString);
+		for(RecordRule recRule : roleRecordRules) {
+			System.debug('recRule.sharedToString: '+recRule.sharedToString);
+			System.debug('recRule.sharedToString: '+recRule.sharedToString);
 
 			// If role field is not blank on record
-			if(recordRule.sharedToString != null) {
-				String sharedTo = (String) recordRule.sharedToString;
+			if(recRule.sharedToString != null) {
+				String sharedTo = (String) recRule.sharedToString;
 				Id sharedToId = null;
 				Id roleGroupId = null;
 	
-				if(recordRule.rule.controllingObjectSharedToFieldType == 'Name') {
+				if(recRule.rule.controllingObjectSharedToFieldType == 'Name') {
 					if(roleNamesToIdsMap.containsKey(sharedTo)) {
 						sharedToId = roleNamesToIdsMap.get(sharedTo);
 					}
 					else {
 						String logMessage = 'Field value \''+sharedTo+'\' should correspond to an active role, but no role was found with this name';
-						captureEntityNotFound(recordRule, logMessage);
-						continue;	// No need to process remaining recordRule logic
+						captureEntityNotFound(recRule, logMessage);
+						continue;	// No need to process remaining recRule logic
 					}
 				}
 	
-				else if(recordRule.rule.controllingObjectSharedToFieldType == 'Id') {
+				else if(recRule.rule.controllingObjectSharedToFieldType == 'Id') {
 					sharedToId = (Id) sharedTo;
 				}
 	
 				String shortSharedToId = FormulaShareIdUtilities.get15CharacterId(sharedToId);
 	
 				// Get group for Roles sharing
-				if(recordRule.rule.shareWith == 'Roles') {
+				if(recRule.rule.shareWith == 'Roles') {
 					roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
 				}
 	
 				// Get group for Roles and Internal Subordinates sharing
-				else if(recordRule.rule.shareWith == 'Roles and Internal Subordinates') {
+				else if(recRule.rule.shareWith == 'Roles and Internal Subordinates') {
 	
 					// If role and subordinates internal group exists, use this
 					if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
@@ -539,17 +538,17 @@ public inherited sharing class FormulaShareService {
 				}
 	
 				// Get group for Roles, Internal and Portal Subordinates sharing
-				else if(recordRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
+				else if(recRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
 					roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
 				}
 	
 				if(roleGroupId != null) {
-					updateShareMaps(recordRule.recordToShare.Id, roleGroupId, recordRule.rule);
+					updateShareMaps(recRule.recordToShare.Id, roleGroupId, recRule.rule);
 				}
 	
 				else {
-					String logMessage = 'Role \''+recordRule.sharedToString+'\' specified on record is not valid for sharing';
-					captureEntityNotFound(recordRule, logMessage);
+					String logMessage = 'Role \''+recRule.sharedToString+'\' specified on record is not valid for sharing';
+					captureEntityNotFound(recRule, logMessage);
 				}
 			}
 		}
@@ -721,19 +720,6 @@ public inherited sharing class FormulaShareService {
 			typesList.add(type);
 		}
 
-
-
-//		if(!Test.isRunningTest()) {
-//			for(SObjectType type : typesSet) {
-//				typesList.add(type);
-//			}
-//		}
-//
-//		// If running test return list with FormulaShareRule to enable execution of other code
-//		else {
-//			typesList.add(FormulaShare_Log__c.SObjectType);
-//		}
-
 		return typesList;
 	}
 
@@ -752,6 +738,14 @@ public inherited sharing class FormulaShareService {
 	public class ShareDetail {
 		public SObject shareRecord;
 		public Schema.SObjectType type;
+		public FormulaShareRule rule;
+	}
+
+	// Holds details of a record and a rule sharing this record
+	private class RecordRule {
+		public SObject recordToShare;
+		public SObject recordWithSharedToDetails;
+		public String sharedToString;
 		public FormulaShareRule rule;
 	}
 

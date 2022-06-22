@@ -19,17 +19,13 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjectSelector {
+public virtual inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjectSelector {
 
     public Schema.SObjectType type;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
     Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
     Set<String> fieldStrings = new Set<String>();
 
-    public static FormulaShareSObjectsSelector construct(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
-        return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type);
-    }
-    
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
         super(false // Do not include FieldSet fields
             , enforceObjectAndFieldSecurity // Enforce field security if requested
@@ -69,51 +65,7 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         return Database.getQueryLocator(
             newQueryFactory().toSOQL()
         );
-    }
-
-
-    public List<SObject> selectPopulatedRecordsBasedOnParentPath(String parentFieldPath, Set<Id> parentIdSet) {
-        fields.addAll(fieldsSet);
-        
-        fflib_QueryFactory controllingObjQueryFactory = newQueryFactory();
-
-        // Add parent path to select
-        System.debug('Adding field: '+parentFieldPath+' to selector for type: '+type.getDescribe().getName());
-        controllingObjQueryFactory.selectField(parentFieldPath);
-
-        // Restrict to specific shared records in scope 
-        String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(parentIdSet);
-        String queryCondition = parentFieldPath + ' IN (' + parentIdsString + ')';
-
-        // If fields are supplied, we'll select these and restrict to records with one or more populated
-        if(!fieldStrings.isEmpty()) {
-            queryCondition += ' AND (';
-
-            // Add fields provided as strings (this would be all fields controlling sharing)
-            Boolean firstField = true;
-            for(String fieldString : fieldStrings) {
-                System.debug('|SOQL Adding query field: '+fieldString);
-
-                controllingObjQueryFactory.selectField(fieldString);
-                if(firstField) {
-                    firstField = false;
-                }
-                else {
-                    queryCondition += ' OR ';
-                }
-                // Restrict to only records with a share field popualted
-                queryCondition += fieldString + ' != NULL';
-            }
-
-            queryCondition += ')';
-        }
-
-        System.debug('Full query condition: '+queryCondition);
-        controllingObjQueryFactory.setCondition(queryCondition);
-
-        system.debug('SOQL with condition: '+controllingObjQueryFactory.toSOQL());
-        return Database.query(controllingObjQueryFactory.toSOQL());
-    }
+    }   
 
 
     // Used to query for a set of records with specific ids
@@ -169,11 +121,5 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         return returnList;
     }
 
-
-    public class RelatedObjectDetails {
-        public SObjectType type;
-        public Set<Schema.SObjectField> fields;
-        public String relationshipName;
-    }
 
 }

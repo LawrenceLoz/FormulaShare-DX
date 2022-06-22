@@ -30,4 +30,25 @@ public inherited sharing class FormulaShareInjectionService {
             new FormulaShareRuleTypeServiceStandard()
         };
     }
+
+    public FormulaShareRuleConverterBase getRuleConverter() {
+        return new FormulaShareRuleConverterStandard();
+    }
+
+    public System.StubProvider getMockProviderRulesSelector() {
+        return new FormulaShareMockProvRulesSelector();
+    }
+
+    public FormulaShareSObjectsRetrievalServiceBase getSObjectsRetrievalService() {
+        return new FormulaShareSObjectsRetrievalServiceStd();
+    }
+    
+    public FormulaShareSObjectsSelector getSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
+        return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type);
+    }
+
+    public Set<String> getExtraRelationshipFields() {
+        return new Set<String>();
+    }
+
 }

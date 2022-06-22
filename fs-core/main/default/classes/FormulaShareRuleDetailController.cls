@@ -151,7 +151,7 @@ public with sharing class FormulaShareRuleDetailController {
         Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};
 
         // Call selector method to retrieve sample data, and concatenate to a single string
-        FormulaShareSObjectsSelector soSelector = FormulaShareSObjectsSelector.construct(true, type);
+		FormulaShareSObjectsSelector soSelector = new FormulaShareInjectionService().getSObjectsSelector(true, type);
         soSelector.setFields(fieldSet);
         List<String> sampleList;
         try {

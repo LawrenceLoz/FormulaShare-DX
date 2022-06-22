@@ -164,7 +164,8 @@ public virtual inherited sharing class FormulaShareRulesSelector {
         String query = getQueryWithCondition(condition);
         System.debug('specific rule query: '+ query);
         FormulaShare_Rule__mdt rule = Database.query(query);
-        FormulaShareRule ruleToReturn = FormulaShareRule.getRule(rule);
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShareRule ruleToReturn = ruleConverter.getRule(rule);
         System.debug('ruleToReturn: '+ ruleToReturn);
 
 		return ruleToReturn;
@@ -176,9 +177,10 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
         for(FormulaShare_Rule__mdt mdRule : mdRules) {
 
-            // Attempt to construct rule from metadata (ignore if any exceptions - could be the case if structure corrupted or object not supported)
+            // Construct rule from metadata, and add only if no exceptions - could occur if structure corrupted or object not supported
             try {
-                FormulaShareRule rule = FormulaShareRule.getRule(mdRule);
+                FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+                FormulaShareRule rule = ruleConverter.getRule(mdRule);
                 rulesToReturn.add(rule);
             }
             catch(Exception e) {

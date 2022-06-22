@@ -5,11 +5,10 @@ public inherited sharing class FormulaShareTestDataFactory {
     static String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
     static String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
 
-    static String userRuleName = FormulaShareMockProvider.userRuleName;
-    static String groupRuleName = FormulaShareMockProvider.groupRuleName;
-    static String roleSubName = FormulaShareMockProvider.roleSubName;
-    static String roleRuleName = FormulaShareMockProvider.roleRuleName;
-    static String childUserRuleName = FormulaShareMockProvider.childUserRuleName;
+    static String userRuleName = FormulaShareRuleFactory.userRuleName;
+    static String groupRuleName = FormulaShareRuleFactory.groupRuleName;
+    static String roleSubName = FormulaShareRuleFactory.roleSubName;
+    static String roleRuleName = FormulaShareRuleFactory.roleRuleName;
 
     static String prefix = FormulaShareTestUtils.getNamespacePrefix();
 

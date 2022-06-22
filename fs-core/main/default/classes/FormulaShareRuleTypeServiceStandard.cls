@@ -28,7 +28,7 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
     public override void setRules(String sharedObjectName) {
 		this.sharedObjectName = sharedObjectName;
         FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
-		List<FormulaShareRule> allRules = rulesSelector.getStandardAndAncestorRulesSharingObject(sharedObjectName);
+		this.allRules = rulesSelector.getStandardAndAncestorRulesSharingObject(sharedObjectName);
     }	
 
     public override void processInsert(SObject newRecord) {

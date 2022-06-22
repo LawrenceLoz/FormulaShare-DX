@@ -6,7 +6,10 @@ public with sharing class FormulaShareMetadataControllerRulesTest {
     
         FormulaShareRule rule = FormulaShareRuleFactory.getUserRule();
         String ruleString = JSON.serialize(rule);
-        FormulaShare_Rule__mdt mdRule = rule.transformRuleToMetadataRule();
+
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt mdRule = ruleConverter.getMetadataRule(rule);
+
         Map<String,SObject> mdRuleMap = FormulaShareUtilities.cmdtToCmdtMap(mdRule);
 
         // Set mock
@@ -33,7 +36,10 @@ public with sharing class FormulaShareMetadataControllerRulesTest {
     static void testEdit() {
         FormulaShareRule rule = FormulaShareRuleFactory.getUserRule();
         String ruleString = JSON.serialize(rule);
-        FormulaShare_Rule__mdt mdRule = rule.transformRuleToMetadataRule();
+
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt mdRule = ruleConverter.getMetadataRule(rule);
+
         Map<String,SObject> mdRuleMap = FormulaShareUtilities.cmdtToCmdtMap(mdRule);
 
         // Set mock

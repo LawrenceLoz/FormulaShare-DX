@@ -117,6 +117,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Deprecate?
 	public static Schema.sObjectField getSObjectFieldFromRelatedName(String fieldRelatedNameString, SOBjectType type) {
 		// Get a map of all fields for the current object, and loop through each to find the next object to lookup
 		Map<String, Schema.SObjectField> fieldsForObject = type.getDescribe().fields.getMap();
@@ -131,6 +132,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Deprecate?
 	public static String getRelationshipName(String parentObjectAPIName, String childObjectAPIName, String lookupFieldAPIName) {
 		String relationshipName;
 
@@ -167,6 +169,7 @@ public inherited sharing class FormulaShareUtilities {
 
 
 	// Returns details of all objects associated through a lookup
+	// Used by LWC formulaShareRelationshipButtons component
 	public static List<RelationshipDetails> getParentRelationships(String childObjectAPIName) {
 		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 
@@ -202,6 +205,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Used by LWC formulaShareRelationshipButtons component
 	public static List<RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
 		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);

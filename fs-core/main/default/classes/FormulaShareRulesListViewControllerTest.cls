@@ -185,7 +185,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         insert batchLog;
 
         // Create sample metrics for user rule
-        FormulaShare_Metrics__c batchFinishMetrics = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, batchLog.Id);
+        FormulaShare_Metrics__c batchFinishMetrics = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatch(FormulaShareRuleFactory.userRuleName, batchLog.Id);
         insert batchFinishMetrics;
 
         // Run core method
@@ -197,7 +197,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                 for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
 
                     // Check user rule
-                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                    if(rw.developerName == FormulaShareRuleFactory.userRuleName) {
                         System.assertEquals(101, rw.noSharesApplied);
                         System.assertEquals(batchLog.Id, rw.lastBatchId);
                         System.assertEquals(UserInfo.getUserId(), rw.recordLogsReportId, 'Expected the mocked ID as the report ID');
@@ -222,8 +222,8 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         insert batchLog;
 
         // Create sample metrics for user rule
-        FormulaShare_Metrics__c batchFinishMetricsFailed = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatchFail(FormulaShareMockProvider.userRuleName, batchLog.Id);
-        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, batchLog.Id);
+        FormulaShare_Metrics__c batchFinishMetricsFailed = FormulaShareTestDataFactory.getBatchFinishMetricsForRuleAndBatchFail(FormulaShareRuleFactory.userRuleName, batchLog.Id);
+        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareRuleFactory.userRuleName, batchLog.Id);
         insert batchFinishMetricsFailed;
         insert triggerMetrics;
 
@@ -236,7 +236,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                 for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
 
                     // Check user rule
-                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                    if(rw.developerName == FormulaShareRuleFactory.userRuleName) {
                         foundUserRule = true;
                         System.assertEquals(203, rw.noSharesApplied);
                         System.assertEquals(batchLog.Id, rw.lastBatchId);
@@ -257,8 +257,8 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
 
         // Create sample metrics for user rule
-        FormulaShare_Metrics__c batchMetrics = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, null);
-        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareMockProvider.userRuleName, null);
+        FormulaShare_Metrics__c batchMetrics = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(FormulaShareRuleFactory.userRuleName, null);
+        FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(FormulaShareRuleFactory.userRuleName, null);
         insert batchMetrics;
         insert triggerMetrics;
 
@@ -271,7 +271,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                 for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
 
                     // Check user rule
-                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                    if(rw.developerName == FormulaShareRuleFactory.userRuleName) {
                         foundUserRule = true;
                         System.assertEquals(205, rw.noSharesApplied);
                         System.assertEquals(UserInfo.getUserId(), rw.recordLogsReportId, 'Expected the mocked ID to be set for records report');
@@ -299,7 +299,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                 for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
 
                     // Check user rule
-                    if(rw.developerName == FormulaShareMockProvider.userRuleName) {
+                    if(rw.developerName == FormulaShareRuleFactory.userRuleName) {
                         foundUserRule = true;
                         System.assertEquals('Schedule batch job', rw.warningUrlLabel, 'Expected batch job scheduled warning');
                     }

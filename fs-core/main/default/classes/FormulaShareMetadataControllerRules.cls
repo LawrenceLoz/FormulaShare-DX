@@ -85,8 +85,9 @@ public with sharing class FormulaShareMetadataControllerRules {
     private static FormulaShare_Rule__mdt ruleStringToRule(String fsRuleString) {
 
         FormulaShareRule rule = (FormulaShareRule) JSON.deserialize(fsRuleString, FormulaShareRule.class);
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt mdRule = ruleConverter.getMetadataRule(rule);
 
-        FormulaShare_Rule__mdt mdRule = rule.transformRuleToMetadataRule();
         return mdRule;
     }
 

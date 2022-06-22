@@ -21,53 +21,22 @@
 
 public inherited sharing class FormulaShareSObjectsRetrievalShared {
 
-    Schema.SObjectType type;
-    List<FormulaShareRule> rules;
-    Set<Id> sharedObjIdSet;
+    
+    public List<SObject> retrieveSharedObjects(Schema.SObjectType type, List<FormulaShareRule> rules, Set<Id> sharedObjIdSet) {
 
-    public FormulaShareSObjectsRetrievalShared(Schema.SObjectType type, List<FormulaShareRule> rules, Set<Id> sharedObjIdSet) {
-        this.type = type;
-        this.rules = rules;
-        this.sharedObjIdSet = sharedObjIdSet;
-    }
-
-    Map<String,FormulaShareSObjectsSelector.RelatedObjectDetails> rodMap = new Map<String,FormulaShareSObjectsSelector.RelatedObjectDetails>();
-
-    public List<SObject> retrieveSharedObjects() {
         Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(type);
-
-        Set<String> parentFieldSet = new Set<String>();
 
 		// Configure to disable object and field security for tests (can't guarantee permissions of running user)
 		Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
-        FormulaShareSObjectsSelector sharedObjectSelector = FormulaShareSObjectsSelector.construct(enforceObjectAndFieldSecurity,type);
+		FormulaShareSObjectsSelector sharedObjectSelector = new FormulaShareInjectionService().getSObjectsSelector(enforceObjectAndFieldSecurity, type);
 
         // Populate all details for query of shared object
         for(FormulaShareRule rule : rules) {
 
-            switch on rule.type {
-
-                // If rule references a field on the shared object, populate details
-                when 'standard' {
-                    Schema.SObjectField sharedToField = fieldMap.get(rule.controllingObjectSharedToFieldAPIName);
-                    System.debug('Adding field: '+sharedToField.getDescribe().getName());
-                    sharedObjectSelector.addField(sharedToField);
-                }
-
-                // For sharing based on parent values, populate top object lookups
-                when 'ancestor'{
-                    FormulaShareRuleAncestor ancestorRule = (FormulaShareRuleAncestor) rule;
-                    String fieldPath = ancestorRule.pathToSharedToField;
-                    System.debug('Adding ancestor field: '+fieldPath);
-                    sharedObjectSelector.addFieldString(fieldPath);
-                }
-                when 'sibling' {
-                    FormulaShareRuleSibling siblingRule = (FormulaShareRuleSibling) rule;
-                    String fieldPath = siblingRule.pathFromSharedObjToTopObj;
-                    System.debug('Adding sibling field: '+fieldPath);
-                    sharedObjectSelector.addFieldString(fieldPath);
-                }
-            }
+            // Add relevant field from shared object for each rule
+            Schema.SObjectField fieldToQuery = fieldMap.get(rule.pathFromSharedObject);
+            System.debug('Adding field: '+fieldToQuery.getDescribe().getName());
+            sharedObjectSelector.addField(fieldToQuery);
             
             // Also add the OwnerId field if rule shares to users (required for later comparisons)
             if(rule.shareWith == 'Users') {
@@ -80,8 +49,6 @@ public inherited sharing class FormulaShareSObjectsRetrievalShared {
         System.debug('sharedObjIdSet: '+sharedObjIdSet);
 
 		List<SObject> sharedRecords = sharedObjectSelector.selectWithFields(sharedObjIdSet);
-        return sharedRecords;
+        return sharedRecords;        
     }
-
-
 }

@@ -59,12 +59,13 @@ public inherited sharing class FormulaShareHelperService {
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
 		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
-		List<FormulaShareRule> rulesSharingObject = fsRulesSelector.getStandardAndAncestorRulesSharingObject(objectName);
-        List<FormulaShareRule> rulesObjectInfluences = fsRulesSelector.getDescendantAndInlawRulesWithThisBottomObject(objectName);
 
 		// Use services to identify which rules could need to be assessed for these records
 		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
-			service.setRules(objectName, rulesSharingObject, rulesObjectInfluences);
+			service.setRules(objectName);
+			System.debug('service: '+service);
+			System.debug('ruleTypeServices: '+ruleTypeServices);
+
 
 			if(!service.allRules.isEmpty()) {
 				populateRecordsToQuery(service, oldRecords, newRecords);
@@ -258,7 +259,7 @@ public inherited sharing class FormulaShareHelperService {
 	private Map<Id,SObject> getFullQueriedRecords(Schema.SObjectType type) {
 
 		// Create selector
-		FormulaShareSObjectsSelector selector = new FormulaShareSObjectsSelector(true, type);
+		FormulaShareSObjectsSelector selector = new FormulaShareInjectionService().getSObjectsSelector(true, type);
 
 		// Add required field paths, including those to parent objects
 		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {

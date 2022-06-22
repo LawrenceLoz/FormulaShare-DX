@@ -165,51 +165,7 @@ public class FormulaShareServiceTest {
         System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
     }
 
-    @IsTest
-    public static void testRelatedCreateUserSharingNewRecord() {
-        setMocks();
-
-        // Get the inserted user to share record to
-        User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
-
-        // Create parent log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c parentLog = new FormulaShare_Log__c();
-        parentLog.OwnerId = UserInfo.getUserId();     // Make sure owner is different to the user we want to share with
-        insert parentLog;
-
-        FormulaShare_Log__c childLog = new FormulaShare_Log__c();
-        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
-        childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
-        insert childLog;
-
-        FormulaShare_Log__c childLog2 = new FormulaShare_Log__c();
-        childLog2.Exception_Type__c = u.Id;  // Share with user (Id)
-        childLog2.Related_Log_Required_for_Test_Class__c = parentLog.Id;
-        insert childLog2;
-
-        List<FormulaShare_Log__c> sharedList = new List<FormulaShare_Log__c>{
-            parentLog};
-        List<FormulaShare_Log__c> relatedList = new List<FormulaShare_Log__c>{
-            childLog, childLog2};
-        Map<String,List<FormulaShare_Log__c>> relatedRecordsForRules = new Map<String,List<FormulaShare_Log__c>>{
-            FormulaShareMockProvider.childUserRuleName => relatedList};
-        Map<Id,Map<String,List<FormulaShare_Log__c>>> relatedRecordsMap = new Map<Id,Map<String,List<FormulaShare_Log__c>>>{
-            parentLog.Id => relatedRecordsForRules};
-
-        FormulaShareService fsService = callProcessForLogRecordWithRelated(sharedList, relatedRecordsMap);
-
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(parentLog.Id), 'Record differs from one expected');
-
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
-        System.assertEquals(parentLog.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
-    }
-
+    
     @IsTest
     public static void testCreateUserSharingNewRecord() {
         setMocks();

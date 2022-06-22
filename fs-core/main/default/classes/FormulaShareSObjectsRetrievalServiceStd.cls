@@ -19,18 +19,15 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRuleDescendant extends FormulaShareRuleBottomObject {
+public inherited sharing class FormulaShareSObjectsRetrievalServiceStd extends FormulaShareSObjectsRetrievalServiceBase {
+    
+    public override List<FormulaShareRetrievedRecordDetails> getDetailsForSharing() {
 
-    // Allow direct construction from test context only
-    @TestVisible
-    private FormulaShareRuleDescendant() {}
-
-    public FormulaShareRuleDescendant(FormulaShare_Rule__mdt mdRule, FormulaShareSObjectRelationship rel, TypeAndControllingFields tacf) {
-        super(mdRule, rel, tacf);
-        type = 'descendant';
-
-        // Share field will be queried from controlling object, so add without relationship
-        pathToSharedToField = controllingObjectSharedToFieldAPIName;
+        this.requeryIfNeeded();
+        this.setRecordsAndControllingDetailsMap(sharedRecords);
+        
+        System.debug('All shared record detais: ' + sharedRecordWithControllingDetails);
+        return sharedRecordWithControllingDetails;
     }
 
 }

@@ -26,11 +26,7 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     public static String groupRuleName        = FormulaShareRuleFactory.groupRuleName;
     public static String roleSubName          = FormulaShareRuleFactory.roleSubName;
     public static String roleRuleName         = FormulaShareRuleFactory.roleRuleName;
-    public static String childUserRuleName    = FormulaShareRuleFactory.childUserRuleName;
-    public static String ancestorUserRuleName = FormulaShareRuleFactory.ancestorUserRuleName;
-    public static String siblingUserRuleName  = FormulaShareRuleFactory.siblingUserRuleName;
-    public static String inlawGroupRuleName   = FormulaShareRuleFactory.inlawGroupRuleName;
-    private String prefix;
+    private String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
     // Example ID used in mock returns
     public static String expectedMockId = UserInfo.getUserId();
@@ -38,8 +34,6 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
     public Object handleMethodCall(Object stubbedObject, String stubbedMethodName, 
         Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames, 
         List<Object> listOfArgs) {
-
-        prefix = FormulaShareTestUtils.getNamespacePrefix();
 
         // You can use the method name and return type to determine which method was called.
         System.debug('Name of stubbed method: ' + stubbedMethodName);
@@ -77,64 +71,12 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
 
         // -------------------------- FormulaShareRulesSelector Mocks ----------------------------- //
 
-        else if(stubbedMethodName == 'getRulesSharingObject') {
-            Schema.SObjectType sharedType = (Schema.SObjectType) listOfArgs[0];
-
-            if(sharedType == FormulaShare_Log__c.SObjectType) {
-                return FormulaShareRuleFactory.getRulesSharingBatchLogs();
-            }
-            else if(sharedType == FormulaShare_Record_Log__c.SObjectType) {
-                return FormulaShareRuleFactory.getRulesSharingRecordLogs();
-            }
-            else {
-                return new List<FormulaShareRule>();
-            }
-        }
-
-        else if(stubbedMethodName == 'getAllRules') {
-            List<FormulaShareRule> rules = new List<FormulaShareRule>();
-            rules.addAll(FormulaShareRuleFactory.getRulesSharingBatchLogs());
-            rules.addAll(FormulaShareRuleFactory.getRulesSharingRecordLogs());
-            return rules;
-        }
-
-        else if(stubbedMethodName == 'getStandardAndAncestorRulesSharingObject') {
-            system.debug('getStandardAndAncestorRulesSharingObject stub');
-
-            String sharedObjectName = (String) listOfArgs[0];
-            List<FormulaShareRule> rules = new List<FormulaShareRule>();
-
-            if(sharedObjectName.contains('FormulaShare_Log__c')) {
-                rules = FormulaShareRuleFactory.getStandardRulesSharingBatchLogs();
-            }
-            else if(sharedObjectName.contains('FormulaShare_Record_Log__c')) {
-                rules.add(FormulaShareRuleFactory.getAncestorUserRule());
-            }
-
-            return rules;
-        }
-
-        else if(stubbedMethodName == 'getDescendantAndInlawRulesWithThisBottomObject') {
-            system.debug('getDescendantAndInlawRulesWithThisBottomObject stub');
-
-            String sharedObjectName = (String) listOfArgs[0];
-            List<FormulaShareRule> rules = new List<FormulaShareRule>();
-
-            if(sharedObjectName.contains('FormulaShare_Log__c')) {
-                rules.add(FormulaShareRuleFactory.getChildUserRule());
-            }
-            else if(sharedObjectName.contains('FormulaShare_Record_Log__c')) {
-                rules.add(FormulaShareRuleFactory.getInlawGroupRule());
-            }
-
-            return rules;
-        }
-
-        else if(stubbedMethodName == 'selectObjectsWithRules') {
-            Set<String> objNames = new Set<String>();
-            objNames.add(prefix + 'FormulaShare_Log__c');
-            objNames.add(prefix + 'FormulaShare_Record_Log__c');
-            return objNames;
+        // Dynamically instantiate appropriate selector
+        else if(stubbedObject instanceof FormulaShareRulesSelector) {
+            
+            System.StubProvider mockProv = new FormulaShareInjectionService().getMockProviderRulesSelector();
+            return mockProv.handleMethodCall(stubbedObject, stubbedMethodName, 
+                returnType, listOfParamTypes, listOfParamNames, listOfArgs);
         }
 
         // -------------------------- FormulaShareIdUtilities Mocks ----------------------------- //

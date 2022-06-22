@@ -38,8 +38,10 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
 
     @IsTest
     static void testSubmitCreate() {
-        
-        FormulaShare_Rule__mdt rule = FormulaShareRuleFactory.getUserRule().transformRuleToMetadataRule();
+
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt rule = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getUserRule());
+
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules(getMockBroker());
         Map<String,SObject> mdMap = FormulaShareUtilities.cmdtToCmdtMap(rule);
 
@@ -54,7 +56,9 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
     static void testUpdate() {
 
         // Get mocked dmlRules
-        FormulaShare_Rule__mdt rule = FormulaShareRuleFactory.getUserRule().transformRuleToMetadataRule();
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt rule = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getUserRule());
+
         List<Metadata.Metadata> mdList = FormulaShareTestUtils.cmdtToMetadataList(rule);
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules(getMockBroker(mdList));
 
@@ -72,7 +76,9 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
 
     @IsTest
     static void testMakeCmdtContainerCreate() {
-        FormulaShare_Rule__mdt rule = FormulaShareRuleFactory.getUserRule().transformRuleToMetadataRule();
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt rule = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getUserRule());
+
         Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(rule);
         
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules();
@@ -96,12 +102,15 @@ public with sharing class FormulaShareMetadataDMLRulesTest {
     @IsTest
     static void testMakeCmdtContainerEditFields() {
 
-        FormulaShare_Rule__mdt currentRule = FormulaShareRuleFactory.getAccountRule().transformRuleToMetadataRule();
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt currentRule = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getAccountRule());
+
         List<Metadata.Metadata> mdList = FormulaShareTestUtils.cmdtToMetadataList(currentRule);
         FormulaShareMetadataDMLRules dmlRules = new FormulaShareMetadataDMLRules(getMockBroker(mdList));
 
         // Change the rule to share contacts in RO instead
-        FormulaShare_Rule__mdt ruleWithUpdate = FormulaShareRuleFactory.getAccountRuleModifiedToContactRule().transformRuleToMetadataRule();
+        FormulaShare_Rule__mdt ruleWithUpdate = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getAccountRuleModifiedToContactRule());
+
         Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(ruleWithUpdate);
 
         Test.startTest();

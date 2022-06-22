@@ -9,12 +9,15 @@ public with sharing class FormulaShareMetadataDMLRulesAccountTest {
     @IsTest
     static void testMakeCmdtContainerEditFields() {
 
-        FormulaShare_Rule__mdt currentRule = FormulaShareRuleFactory.getAccountRule().transformRuleToMetadataRule();
+        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+        FormulaShare_Rule__mdt currentRule = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getAccountRule());
+        
         List<Metadata.Metadata> mdList = FormulaShareTestUtils.cmdtToMetadataList(currentRule);
         FormulaShareMetadataDMLRulesAccount dmlRules = new FormulaShareMetadataDMLRulesAccount(FormulaShareMetadataDMLRulesTest.getMockBroker(mdList));
 
         // Change the rule to accounts in RO and modify related object access
-        FormulaShare_Rule__mdt ruleWithUpdate = FormulaShareRuleFactory.getAccountRuleUpdated().transformRuleToMetadataRule();
+        FormulaShare_Rule__mdt ruleWithUpdate = ruleConverter.getMetadataRule(FormulaShareRuleFactory.getAccountRuleUpdated());
+
         Map<String,SObject> mdMapNew = FormulaShareUtilities.cmdtToCmdtMap(ruleWithUpdate);
 
         Test.startTest();

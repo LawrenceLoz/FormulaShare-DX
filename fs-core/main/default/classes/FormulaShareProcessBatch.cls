@@ -106,14 +106,9 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 		// Get set of records which we'll need for sharing assessment and populate into service class
 		try {
-			// Build id set, and re-query batch scope for fields and child objects (avoids issues with sub-selects in query locator)
-			Set<Id> sharedObjIdSet = new Set<Id>();
-			for(SObject obj : scope) {
-				sharedObjIdSet.add((Id) obj.get('Id'));
-			}
-
-			FormulaShareSObjectsRetrievalService rs = new FormulaShareSObjectsRetrievalService(typeInThisBatch, rulesForType);
-			rs.setRecordIds(sharedObjIdSet);
+			FormulaShareSObjectsRetrievalServiceBase rs = new FormulaShareInjectionService().getSObjectsRetrievalService();
+			rs.setRequery();	// Batch selector only selects ids, so requery for relevant fields
+			rs.setDetails(typeInThisBatch, rulesForType, scope);
 			List<FormulaShareRetrievedRecordDetails> recordDetails = rs.getDetailsForSharing();
 
 			// Populate records in batch scope into wrapper
