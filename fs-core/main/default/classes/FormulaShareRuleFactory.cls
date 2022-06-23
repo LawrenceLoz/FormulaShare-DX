@@ -35,6 +35,8 @@ public with sharing class FormulaShareRuleFactory {
         FormulaShareRuleStandard rule = getBasicRule(prefix + 'Exception_Type__c');
         rule.developerName = userRuleName;
 
+        // Add pathFromSharedObject to ALL RULES
+
         rule.type = 'standard';
         rule.accessLevel = 'Edit';
         rule.shareWith = 'Users';
@@ -89,8 +91,7 @@ public with sharing class FormulaShareRuleFactory {
         rule.controllingObjectApiName = rule.objectSharedAPIName;
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.controllingObjectSharedToFieldAPIName = 'Name';
-        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
-        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.setVars();
         rule.active = true;
 
         rule.contactAccess = 'None';
@@ -114,8 +115,7 @@ public with sharing class FormulaShareRuleFactory {
         rule.controllingObjectApiName = rule.objectSharedAPIName;
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.controllingObjectSharedToFieldAPIName = 'Name';
-        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
-        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.setVars();
         rule.active = true;
 
         rule.contactAccess = 'ControlledByParent';  // Updated
@@ -139,8 +139,7 @@ public with sharing class FormulaShareRuleFactory {
         rule.controllingObjectApiName = rule.objectSharedAPIName;
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.controllingObjectSharedToFieldAPIName = 'FirstName';      // Updated
-        rule.pathToSharedToField = rule.controllingObjectSharedToFieldAPIName;
-        rule.firstQueryStepApiName = rule.controllingObjectSharedToFieldAPIName;
+        rule.setVars();
         rule.active = true;
 
         // Omit the account access levels
@@ -167,8 +166,9 @@ public with sharing class FormulaShareRuleFactory {
         rule.controllingObjectSharedToFieldToken = 'objecttoken1234.fieldtoken12345';
         rule.sharingReason = prefix + 'FormulaShare_Log_Share__c';
         rule.controllingObjectSharedToFieldAPIName = sharedToFieldApiName;
-        rule.pathToSharedToField = sharedToFieldApiName;
-        rule.firstQueryStepApiName = sharedToFieldApiName;
+        rule.setVars();
+//        rule.pathToSharedToField = sharedToFieldApiName;
+//        rule.firstQueryStepApiName = sharedToFieldApiName;
         rule.active = true;
         return rule;
     }
