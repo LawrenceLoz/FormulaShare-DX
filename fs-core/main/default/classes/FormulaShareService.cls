@@ -363,13 +363,13 @@ public inherited sharing class FormulaShareService {
 
 				List<SObject> controllingObjectsForRule = new List<SObject>();
 
-				// If no controlling records set (e.g. standard rules), assume that the shared record is the controlling record
-				if(!details.controllingRecordsForRulesMap.containsKey(rule.developerName) || 
-					details.controllingRecordsForRulesMap.get(rule.developerName).isEmpty()) {
+				// If controlling records map doesn't include this rule (e.g. standard rule)
+				// then controlling records are the shared records
+				if(!details.controllingRecordsForRulesMap.containsKey(rule.developerName)) {
 					controllingObjectsForRule.add(details.sharedRecord);
 				}
 
-				// Otherwise get controlling records set in map
+				// Otherwise, controlling records should be set in map
 				else {
 					controllingObjectsForRule = details.controllingRecordsForRulesMap.get(rule.developerName);
 				}

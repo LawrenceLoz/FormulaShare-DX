@@ -29,8 +29,9 @@ public with sharing class FormulaShareProcessBatchTest {
         FormulaShareSObjectShares mockFSSObjectShares = (FormulaShareSObjectShares) FormulaShareMockUtil.createMock(FormulaShareSObjectShares.class);
         FormulaShareSObjectShares.mock = mockFSSObjectShares;
 
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
     }
 
     @IsTest

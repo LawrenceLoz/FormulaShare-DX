@@ -30,12 +30,11 @@ public with sharing class FormulaShareTriggerHelperTest {
         insert usersList;
     }
 
-    static void setMocks() {
-//        FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-//        FormulaShareService.mock = mockFSService;
 
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+    static void setMocks() {
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
     }
 
 

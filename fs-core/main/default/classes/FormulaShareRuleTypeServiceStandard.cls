@@ -25,8 +25,10 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
 		return true;
 	}
 
-    public override void setRules(String sharedObjectName) {
-		this.sharedObjectName = sharedObjectName;
+	private String sharedObjectName;
+
+    public override void setRules(String processedObjectName) {
+		this.sharedObjectName = processedObjectName;
         FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
 		this.allRules = rulesSelector.getStandardAndAncestorRulesSharingObject(sharedObjectName);
     }	
@@ -94,7 +96,7 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
 	}
 
 
-	public override Map<String,FormulaShareServiceDetailsForType> makeUpdatedDetailsMap(Map<String,FormulaShareServiceDetailsForType> detailsMap, Map<Id,SObject> fullQueriedRecords, String processedObjectKey) {
+	public override Map<String,FormulaShareServiceDetailsForType> makeUpdatedDetailsMap(Map<String,FormulaShareServiceDetailsForType> detailsMap, Map<Id,SObject> fullQueriedRecords, FormulaShareHelperService helperService) {
 		for(SObject record : recordsShared) {
 
 			// If we'd re-queried this record, use the queried version with extra fields instead
@@ -104,6 +106,7 @@ public inherited sharing class FormulaShareRuleTypeServiceStandard extends Formu
 
 			// Because rules share the object being processed by trigger, use the key from the helper service 
 			// which includes indication of whether sharing is removed
+			String processedObjectKey = helperService.getDetailsMapKey(sharedObjectName);
 			FormulaShareServiceDetailsForType details = detailsMap.get(processedObjectKey);
 
 			details.setSharedObjectRetrievedRecord(sharedObjectName, record);

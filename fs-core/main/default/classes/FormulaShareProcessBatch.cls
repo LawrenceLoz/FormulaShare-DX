@@ -41,15 +41,17 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		this.types = types;
 		this.batchSize = batchSize;
 		this.typeInThisBatch = types[0];
-		this.rulesForType = FormulaShareRulesSelector.construct().getRulesSharingObject(typeInThisBatch);
+		FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+		this.rulesForType = rulesSelector.getRulesSharingObject(typeInThisBatch);
 	}
 	
 
 	public Database.QueryLocator start(Database.BatchableContext context) {
 		system.debug('FormulaShare batch job started. Type in scope: '+typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
-
+		
 		if(!rulesForType.isEmpty()) {
+
 			Database.QueryLocator ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
 			system.debug('query locator: ' + ql);
 

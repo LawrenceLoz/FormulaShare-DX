@@ -24,11 +24,11 @@
 
 public virtual inherited sharing class FormulaShareRulesSelector {
 
-    public static FormulaShareRulesSelector mock;
+    public static Object mock;
     public static FormulaShareRulesSelector construct() {
         if(Test.isRunningTest() && mock != null ) {
             system.debug('Mock requested: '+mock);
-            return mock;
+            return (FormulaShareRulesSelector) mock;
         }
         else {
             return new FormulaShareRulesSelector();
@@ -47,7 +47,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
         return allFieldsForSelect;
     }
 
-    private virtual List<String> getFieldNames() {
+    protected virtual List<String> getFieldNames() {
         List<String> fieldNames = new List<String>{
             'Id',
             'MasterLabel',
@@ -74,7 +74,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
         return fieldNames;
     }
 
-    private String getQueryWithCondition(String condition) {
+    protected String getQueryWithCondition(String condition) {
         String query = 'SELECT ' + getAllFieldsForSelect() 
             + ' FROM FormulaShare_Rule__mdt WHERE ' 
             + condition;
@@ -172,7 +172,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    private List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> mdRules) {
+    protected List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> mdRules) {
         List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();
 
         for(FormulaShare_Rule__mdt mdRule : mdRules) {

@@ -34,8 +34,7 @@ public class FormulaShareServiceTest {
 
     //--------------------------------- Test utility methods ------------------------------------------------
 
-    // Called directly when related rules being tested
-    public static FormulaShareService callProcessForLogRecordWithRelated(List<FormulaShare_Log__c> fsLogs, Map<Id,Map<String,List<FormulaShare_Log__c>>> relatedRecordsMap) {
+    public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
@@ -44,19 +43,21 @@ public class FormulaShareServiceTest {
         for(FormulaShare_Log__c log : fsLogs) {
             FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
             details.sharedRecord = log;
-            if(relatedRecordsMap != null && relatedRecordsMap.containsKey(log.Id)) {
-                details.controllingRecordsForRulesMap = relatedRecordsMap.get(log.Id);
+
+            // For any non-standard rule, add a details object with empty list to controllingRecordsForRulesMap
+            // This indicates no relevant related records to process
+            for(FormulaShareRule rule : fsRules) {
+                if(!(rule instanceof FormulaShareRuleStandard)) {
+                    details.controllingRecordsForRulesMap.put(rule.developerName, new List<SObject>());
+                }
             }
             recordDetails.add(details);
         }
+
         fsService.setSharedRecordDetails(recordDetails);
 
 		fsService.processFormulaShares();
         return fsService;
-    }
-
-    public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
-        return callProcessForLogRecordWithRelated(fsLogs, null);
     }
 
     public static FormulaShareService callProcessForLogRecord(FormulaShare_Log__c log) {
@@ -66,8 +67,13 @@ public class FormulaShareServiceTest {
     }
 
     public static void setMocks() {
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+
+        // Mock standard rules selector
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
+//        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMockProvRulesSelectorMock(FormulaShareRulesSelector.class);
+//        FormulaShareRulesSelector.mock = mockFSRulesSelector;
 
         FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
         FormulaShareIdUtilities.mock = mockFSShareIdUtilities;

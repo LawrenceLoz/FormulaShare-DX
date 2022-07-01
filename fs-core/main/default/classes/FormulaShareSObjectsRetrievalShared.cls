@@ -24,8 +24,6 @@ public inherited sharing class FormulaShareSObjectsRetrievalShared {
     
     public List<SObject> retrieveSharedObjects(Schema.SObjectType type, List<FormulaShareRule> rules, Set<Id> sharedObjIdSet) {
 
-        Map<String, SObjectField> fieldMap = FormulaShareUtilities.getFieldMap(type);
-
 		// Configure to disable object and field security for tests (can't guarantee permissions of running user)
 		Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
 		FormulaShareSObjectsSelector sharedObjectSelector = new FormulaShareInjectionService().getSObjectsSelector(enforceObjectAndFieldSecurity, type);
@@ -34,14 +32,14 @@ public inherited sharing class FormulaShareSObjectsRetrievalShared {
         for(FormulaShareRule rule : rules) {
 
             // Add relevant field from shared object for each rule
-            Schema.SObjectField fieldToQuery = fieldMap.get(rule.pathFromSharedObject);
-            System.debug('Adding field: '+fieldToQuery.getDescribe().getName());
-            sharedObjectSelector.addField(fieldToQuery);
+            // Inlaw and descendant rules aren't based on fields from shared object, so pathFromSharedObject will be null
+            if(rule.pathFromSharedObject != null) {
+                sharedObjectSelector.addFieldString(rule.pathFromSharedObject);
+            }
             
             // Also add the OwnerId field if rule shares to users (required for later comparisons)
             if(rule.shareWith == 'Users') {
-                Schema.SObjectField ownerIdField = fieldMap.get('OwnerId');
-                sharedObjectSelector.addField(ownerIdField);
+                sharedObjectSelector.addFieldString('OwnerId');
             }
 
         }

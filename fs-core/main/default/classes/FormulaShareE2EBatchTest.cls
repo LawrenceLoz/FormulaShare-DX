@@ -1,6 +1,7 @@
 @IsTest
 public with sharing class FormulaShareE2EBatchTest {
 
+    
     @TestSetup
     public static void setup() {
         List<UserRole> roles = FormulaShareTestDataFactory.getRoles(2);
@@ -10,8 +11,9 @@ public with sharing class FormulaShareE2EBatchTest {
     }
 
     private static void setMocks() {
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
 
         FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
         FormulaShareIdUtilities.mock = mockFSShareIdUtilities;

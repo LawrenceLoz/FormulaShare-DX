@@ -35,8 +35,6 @@ public with sharing class FormulaShareRuleFactory {
         FormulaShareRuleStandard rule = getBasicRule(prefix + 'Exception_Type__c');
         rule.developerName = userRuleName;
 
-        // Add pathFromSharedObject to ALL RULES
-
         rule.type = 'standard';
         rule.accessLevel = 'Edit';
         rule.shareWith = 'Users';

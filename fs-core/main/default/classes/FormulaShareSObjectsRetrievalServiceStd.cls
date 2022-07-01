@@ -23,7 +23,7 @@ public inherited sharing class FormulaShareSObjectsRetrievalServiceStd extends F
     
     public override List<FormulaShareRetrievedRecordDetails> getDetailsForSharing() {
 
-        this.requeryIfNeeded();
+        List<SObject> sharedRecords = this.getSharedRecords();
         this.setRecordsAndControllingDetailsMap(sharedRecords);
         
         System.debug('All shared record detais: ' + sharedRecordWithControllingDetails);

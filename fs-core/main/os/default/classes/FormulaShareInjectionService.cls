@@ -25,6 +25,10 @@ public inherited sharing class FormulaShareInjectionService {
         return FormulaShareRulesSelector.construct();
     }
 
+    public Type getRulesSelectorType() {
+        return FormulaShareRulesSelector.class;
+    }
+
     public List<FormulaShareRuleTypeServiceBase> getRuleTypeServices() {
         return new List<FormulaShareRuleTypeServiceBase>{
             new FormulaShareRuleTypeServiceStandard()

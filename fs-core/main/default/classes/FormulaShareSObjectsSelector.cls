@@ -23,8 +23,8 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
 
     public Schema.SObjectType type;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
-    Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
-    Set<String> fieldStrings = new Set<String>();
+    protected Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
+    protected Set<String> fieldStrings = new Set<String>();
 
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
         super(false // Do not include FieldSet fields
@@ -36,10 +36,6 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
 
     public void setFields(Set<Schema.SObjectField> suppliedFieldsSet) {
         fieldsSet = suppliedFieldsSet;
-    }
-
-    public void addField(Schema.SObjectField field) {
-        fieldsSet.add(field);
     }
 
     // Can be used to populate based on field API name, or a lookup path to a parent object

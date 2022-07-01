@@ -58,7 +58,7 @@ public inherited sharing class FormulaShareHelperService {
 		}
 
         // Query for rules which may need to be reassessed for the records in scope, and initialise relevant service classes
-		FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
+		FormulaShareRulesSelector fsRulesSelector = new FormulaShareInjectionService().getRulesSelector();
 
 		// Use services to identify which rules could need to be assessed for these records
 		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
@@ -148,7 +148,7 @@ public inherited sharing class FormulaShareHelperService {
 
 			// For standard objects where removal is allowed...
 			else if(!isCustom && removalAllowed) {
-				FormulaShareRulesSelector fsRulesSelector = FormulaShareRulesSelector.construct();
+				FormulaShareRulesSelector fsRulesSelector = new FormulaShareInjectionService().getRulesSelector();
 				List<FormulaShareRule> allRules = fsRulesSelector.getRulesSharingObject(type);
 
 				// Check whether the number of rules sharing object is the same as the number of rules considered by service
@@ -203,11 +203,11 @@ public inherited sharing class FormulaShareHelperService {
 
 	// If we're removing records for the shared object, key includes this format so it's processed in the
 	// separately from any related object sharing which references the same object
-	private String getDetailsMapKey(String sharedObjectName) {
+	public String getDetailsMapKey(String sharedObjectName) {
 		String key = sharedObjectName;
 		Boolean removeForThisType = removeSharesForThisType(sharedObjectName);
 		if(removeForThisType) {
-			key =+ '|removeShares';
+			key += '_removeShares';
 		}
 		return key;
 	}
@@ -246,10 +246,14 @@ public inherited sharing class FormulaShareHelperService {
 		// that the rules in the type service share. Logic definied in each implementation of type service
 		for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
 			String processedObjectKey = getDetailsMapKey(objectName);
-			detailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords, processedObjectKey);
+			System.debug('processedObjectKey: '+processedObjectKey);
+			detailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords, this);
 		}
 
-		System.debug('Details service values map: '+detailsMap.values());
+		for(String key : detailsMap.keySet()) {
+			System.debug('detailsMap key: '+key);
+			System.debug('detailsMap value: '+detailsMap.get(key));
+		}
 
         return detailsMap.values();
     }

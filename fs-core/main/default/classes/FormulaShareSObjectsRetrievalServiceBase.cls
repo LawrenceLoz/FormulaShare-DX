@@ -23,40 +23,47 @@ public abstract inherited sharing class FormulaShareSObjectsRetrievalServiceBase
 
     protected Schema.SObjectType type;
     protected List<FormulaShareRule> rules;
-    protected List<SObject> sharedRecords = new List<SObject>();
+    private List<SObject> rawSharedRecords = new List<SObject>();
     protected List<FormulaShareRetrievedRecordDetails> sharedRecordWithControllingDetails = new List<FormulaShareRetrievedRecordDetails>();
-    private Boolean requery = false;  // Set to true if we should requery records
+    protected Boolean requery = false;  // Set to true if we should requery records
 
     public abstract List<FormulaShareRetrievedRecordDetails> getDetailsForSharing();
 
-    public void setDetails(Schema.SObjectType type, List<FormulaShareRule> rules, List<SObject> sharedRecords) {
+    public void setDetails(Schema.SObjectType type, List<FormulaShareRule> rules, List<SObject> rawSharedRecords) {
         this.type = type;
         this.rules = rules;
-        this.sharedRecords = sharedRecords;
-    }
-
-    public void setRequery() {
-        this.requery = true;
+        this.rawSharedRecords = rawSharedRecords;
     }
 
     // Records are requeried when calling from batch context, or when querying fields on related objects 
     // via lookups and related syntax from shared record might be necessary
-    protected void requeryIfNeeded() {
+    public void setRequery() {
+        this.requery = true;
+    }
 
+    protected List<SObject> getSharedRecords() {
+        System.debug('sharedRecords before requery: ' + rawSharedRecords);
+
+        List<SObject> sharedRecords = new List<SObject>(); // Augmented with related fields if needed
+
+        // If needed, requery shared records to get extra lookups
         if(requery) {
 
-            // Build id set so we can re-query for lookup fields
-            Set<Id> sharedObjIdSet = new Set<Id> (new Map<Id,SObject>(sharedRecords).keySet());
+            Set<Id> sharedObjIdSet = new Set<Id> (new Map<Id,SObject>(rawSharedRecords).keySet());
     
-            // Query for shared object records and establish map
             if(sharedObjIdSet != null && !sharedObjIdSet.isEmpty()) {
-                sharedRecords.clear();
                 FormulaShareSObjectsRetrievalShared sharedService = new FormulaShareSObjectsRetrievalShared();
-                System.debug('Selector type: '+type.getDescribe().getName());
-                List<SObject> queriedRecords = sharedService.retrieveSharedObjects(type, rules, sharedObjIdSet);
-                sharedRecords.addAll(queriedRecords);
+                sharedRecords = sharedService.retrieveSharedObjects(type, rules, sharedObjIdSet);
             }
         }
+
+        // Otherwise use supplied versions
+        else {
+            sharedRecords = rawSharedRecords;
+        }
+
+        System.debug('sharedRecords after requery: ' + sharedRecords);
+        return sharedRecords;
     }
 
     // Add details of all shared records into map (to be augmented with controlling object details)

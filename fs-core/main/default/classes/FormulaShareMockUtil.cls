@@ -26,8 +26,17 @@ public class FormulaShareMockUtil {
     public static FormulaShareMockProvider getInstance() {
         return new FormulaShareMockProvider();
     }
+    public static FormulaShareMockProvRulesSelector getMockProvRulesSelectorInstance() {
+        return new FormulaShareMockProvRulesSelector();
+    }
     
     public static Object createMock(Type typeToMock) {
         return Test.createStub(typeToMock, FormulaShareMockUtil.getInstance());
     }
+
+    // Used to set a standard mock for rules provider (can be used instead of related version when we want to test standard rules only)
+    public static Object createMockProvRulesSelectorMock(Type typeToMock) {
+        return Test.createStub(typeToMock, FormulaShareMockUtil.getMockProvRulesSelectorInstance());
+    }
+
 }
