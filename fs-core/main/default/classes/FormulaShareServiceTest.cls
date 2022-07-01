@@ -68,12 +68,9 @@ public class FormulaShareServiceTest {
 
     public static void setMocks() {
 
-        // Mock standard rules selector
         FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
             new FormulaShareInjectionService().getRulesSelectorType()
         );
-//        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMockProvRulesSelectorMock(FormulaShareRulesSelector.class);
-//        FormulaShareRulesSelector.mock = mockFSRulesSelector;
 
         FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
         FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
