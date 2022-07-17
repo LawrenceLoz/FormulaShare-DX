@@ -21,6 +21,11 @@
 
 public inherited sharing class FormulaShareInjectionService {
 
+    @AuraEnabled(cacheable=true)
+    public static Boolean versionSupportsRelatedRules() {
+        return false;
+    }
+
     public FormulaShareRulesSelector getRulesSelector() {
         return FormulaShareRulesSelector.construct();
     }

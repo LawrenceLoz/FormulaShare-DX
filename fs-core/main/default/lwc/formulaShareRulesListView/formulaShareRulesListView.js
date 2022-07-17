@@ -7,6 +7,7 @@ import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewControlle
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
+import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
 
@@ -14,6 +15,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     @track columns = [];
 
     setColumns() {
+
+        // Add shared object, shares wtih and shared to field
         this.columns = [
             {type: 'text'
                 , fieldName: 'tableLabel'
@@ -29,11 +32,28 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 , fieldName:'sharedToLink'
                 , label:'Specified in Field'
                 , typeAttributes: {label: {fieldName:'sharedToLinkLabel'}, target:'_blank', tooltip: 'Open field in setup menu'}
-            },
-            {type: 'text'
-                , fieldName: 'controllingObject'
-                , label: 'On Object'
-            },
+            }
+        ];
+
+        // Add controlling object column if related sharing supported
+        versionSupportsRelatedRules()
+            .then((supportsRelated) => {
+                if(supportsRelated) {
+                    this.columns.push(
+                        {type: 'text'
+                            , fieldName: 'controllingObject'
+                            , label: 'On Object'
+                        },
+                    );
+                }
+            })
+            .catch(error => {
+                //console.log('Error getting namespace prefix');
+                this.showError(error, 'Error checking for related object support');
+            });
+
+        // Add assessment status and no records shared
+        this.columns.push(
             {type: 'text'
                 , fieldName: 'lastCalcStatus'
                 , label: 'Last Full Assessment'
@@ -43,26 +63,35 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 , fieldName: 'noSharesApplied'
                 , label:'Records Shared'
             }
-        ];
+        );
 
         // Iterate all child rows to check for warnings
         var showWarnings = false;
         for(var rowNo in this.treeItems) {
             for(var ruleRowNo in this.treeItems[rowNo]._children) {
-                // If rule is active and warning URL populated, recognise we need to show warning column
                 var thisRow = this.treeItems[rowNo]._children[ruleRowNo];
-                if(thisRow.warningUrlLabel && thisRow.warningUrlLabel === 'Schedule batch job' && thisRow.active) {
-                    showWarnings = 'scheduleWarning';
-                    this.scheduleWarningsUrl = thisRow.warningUrl;
-                    break;
-                }
-                else if(thisRow.warningUrlLabel && thisRow.active) {
-                    showWarnings = 'processingWarning';
-                    break;
+
+                // If we have a warning, push column with relevant type for the warning
+                if(thisRow.warningUrlLabel && thisRow.active) {
+
+                    // If we have schedule warnings (included for all rowx)
+                    // we'll need to push a column with a button to open modal
+                    if(thisRow.warningUrlLabel === 'Schedule batch job') {
+                        showWarnings = 'scheduleWarning';                            
+                        this.scheduleWarningsUrl = thisRow.warningUrl;
+                        break;
+                    }
+
+                    // Otherwise, we'll push a column which allows link to be set by row
+                    else {
+                        showWarnings = 'rowSpecificWarnings';
+                        break;                        
+                    }
                 }
             }
         }
 
+        // Add approriate warning column if any warnings found
         if(showWarnings === 'scheduleWarning') {
             this.columns.push(
                 {   type: 'button'
@@ -77,7 +106,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 }
             );
         }
-        else if(showWarnings === 'processingWarning') {
+        else if(showWarnings === 'rowSpecificWarnings') {
             this.columns.push(
                 {type: 'url'
                     , fieldName: 'warningUrl'
@@ -91,6 +120,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             );
         }
 
+        // Add active column and row actions
         this.columns.push(
             {type: 'boolean'
                 , fieldName: 'active'

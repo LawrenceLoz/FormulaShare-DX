@@ -42,32 +42,35 @@
     </div>
 
 
-    <template if:true={rule.relationship}>
-        <div class="slds-p-top_xx-small stackOrderTop">
+    <!-- Show section only if related object details -->
+    <template if:true={supportsRelated.data}>
+        <template if:true={rule.relationship}>
+            <div class="slds-p-top_xx-small stackOrderTop">
 
-            <div class="slds-section slds-is-open">
-                <h3 class="slds-section__title slds-theme_shade">
-                    <span 
-                        class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
-                        title="Location of field with user, role or group">
-                        Location of field with user, role or group
-                    </span>
-                </h3>
-                <div aria-hidden="false" class="slds-section__content">
-                    <c-formula-share-rule-detail-location 
-                        relationship={rule.relationship}
-                        controlling-object-api-name={rule.controllingObjectApiName}
-                        selected-location={selectedLocation}
-                        onruletypechange={handleRuleTypeChange}
-                        onrelationshipchange={handleRelationshipChange}>
-                    </c-formula-share-rule-detail-location>
+                <div class="slds-section slds-is-open">
+                    <h3 class="slds-section__title slds-theme_shade">
+                        <span 
+                            class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
+                            title="Location of field with user, role or group">
+                            Location of field with user, role or group
+                        </span>
+                    </h3>
+                    <div aria-hidden="false" class="slds-section__content">
+                        <c-formula-share-rule-detail-location 
+                            relationship={rule.relationship}
+                            controlling-object-api-name={rule.controllingObjectApiName}
+                            selected-location={selectedLocation}
+                            onruletypechange={handleRuleTypeChange}
+                            onrelationshipchange={handleRelationshipChange}>
+                        </c-formula-share-rule-detail-location>
+                    </div>
                 </div>
+
             </div>
+        </template>
 
-        </div>
-
-<!-- Line below can be added to monitor full JSON        
-    Relationship detail: {ruleDetail}       -->
+        <!-- Line below can be added to monitor full JSON        
+            Relationship detail: {ruleDetail}       -->
     </template>
 
     <template if:true={sharedObjectDetail}>

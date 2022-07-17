@@ -100,6 +100,15 @@ public with sharing class FormulaShareRulesListViewController {
             rw.sharedObjectClass = 'slds-tree__item';
 
             rw.setMetricsDetails(objectName, metricsMap);
+            
+            // Show warning if rule isn't valid
+
+            if(!rule.isValid()) {
+                System.debug('Invalid rule: '+rule.developerName);
+                rw.warningUrlLabel = 'Rule not valid';
+                rw.warningTooltip = 'One or more fields on this rule are not set correctly. Edit this rule and complete all required fields';
+                rw.warningIcon = 'utility:warning';
+            }
 
             // Set URL for shared to field if populated
             System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
