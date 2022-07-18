@@ -95,12 +95,6 @@ jobs:
       run: |
         sfdx force:org:delete -p
 
-    # Output information related to processing
-    - name: Output sfdx logs
-      if: ${{ always() }}
-      run: |
-        tail -n100 ~/.sfdx/sfdx.log
-
 
   deploy-and-test-with-namespace:
     name: Deploy and Test with Namespace
@@ -158,9 +152,3 @@ jobs:
     - name: Delete scratch org
       run: |
         sfdx force:org:delete -p
-
-    # Output information related to processing
-    - name: Output sfdx logs
-      if: ${{ always() }}
-      run: |
-        tail -n100 ~/.sfdx/sfdx.log
