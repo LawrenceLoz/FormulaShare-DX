@@ -5,6 +5,7 @@ name: Sync to FS-App repo
 
 # Run for all commits to main
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
