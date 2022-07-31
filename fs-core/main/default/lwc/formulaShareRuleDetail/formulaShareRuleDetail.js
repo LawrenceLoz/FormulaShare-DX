@@ -195,7 +195,20 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
         // Otherwise (standard rules and the final relationship) return the final controlling object
         else {
-            return {thisObjectApiName: this.rule.controllingObjectApiName, thisObjectLabel: this.rule.controllingObjectLabel};
+            let lastRel = {
+                thisObjectApiName: this.rule.controllingObjectApiName,
+                thisObjectLabel: this.rule.controllingObjectLabel,
+                sharedToFieldApiName: this.rule.controllingObjectSharedToFieldAPIName
+            }
+
+            // If a relationship was set, also ensure we capture label and lookups
+            if(rel) {
+                lastRel.thisObjectLabel = rel.thisObjectLabel;
+                lastRel.lookupToPrevObjectApiName = rel.lookupToPrevObjectApiName;
+                lastRel.lookupFromPrevObjectApiName = rel.lookupFromPrevObjectApiName;
+            }
+
+            return lastRel;
         }
     }
 

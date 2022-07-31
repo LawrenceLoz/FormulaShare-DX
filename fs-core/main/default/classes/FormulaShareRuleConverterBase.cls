@@ -2,6 +2,7 @@ public abstract inherited sharing class FormulaShareRuleConverterBase {
 
     // Returns a rule of the approriate object
     public abstract FormulaShareRule getRule(FormulaShare_Rule__mdt mdRule);
+    public abstract FormulaShare_Rule__mdt getMetadataRuleFromString(String fsRuleString);
     public abstract FormulaShare_Rule__mdt getMetadataRule(FormulaShareRule rule);
 
     

@@ -21,6 +21,11 @@ public inherited sharing class FormulaShareRuleConverterStandard extends Formula
         return rule;        
     }
 
+    // Called during conversion to deploy custom metadata records
+    public override FormulaShare_Rule__mdt getMetadataRuleFromString(String fsRuleString) {
+        FormulaShareRule rule = (FormulaShareRule) JSON.deserialize(fsRuleString, FormulaShareRule.class);
+        return getMetadataRule(rule);
+    }
 
     // Map fields back to a metadata record and return this
     public override FormulaShare_Rule__mdt getMetadataRule(FormulaShareRule rule) {
