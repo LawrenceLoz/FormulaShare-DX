@@ -22,6 +22,23 @@
 @IsTest
 public with sharing class FormulaShareServiceBulkTest {
 
+    public static void setMocks() {
+
+        // Always use standard rules mock (avoids issues around populating fake details object, which would
+        // otherwise need appropriate controlling records set for each related rule)
+//        FormulaShareInjectionService.useStandardRulesSelector = true;
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
+
+        FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
+        FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
+
+        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
+    }
+
+
     static Integer noSharesOfEachType = 40;   // Will create and submit 3x this many share records in total
 
     @testSetup
@@ -64,7 +81,7 @@ public with sharing class FormulaShareServiceBulkTest {
     // Method will insert records to trigger various combinations of rules
     @isTest
     public static void testInsertSharing() {
-        FormulaShareServiceTest.setMocks();
+        setMocks();
 
         UserRole role = FormulaShareServiceTest.getOneRole();
 
@@ -191,7 +208,7 @@ public with sharing class FormulaShareServiceBulkTest {
     // Sharing should be removed and new sharing applied in various combinations
     @isTest
     public static void testUpdateSharing() {
-        FormulaShareServiceTest.setMocks();
+        setMocks();
 
         // Retrieve two roles
         List<UserRole> roles = [SELECT Id, DeveloperName FROM UserRole 
@@ -237,12 +254,23 @@ public with sharing class FormulaShareServiceBulkTest {
         List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
         FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
         
+        // Inject details object set with records (assumes only standard rules, and no controlling objects set)
         List<FormulaShareRetrievedRecordDetails> recordDetails = new List<FormulaShareRetrievedRecordDetails>();
         for(FormulaShare_Log__c log : fsLogs) {
             FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
             details.sharedRecord = log;
+
+            // For any non-standard rule, add a details object with empty list to controllingRecordsForRulesMap
+            // This indicates no relevant related records to process
+            for(FormulaShareRule rule : fsRules) {
+                if(!(rule instanceof FormulaShareRuleStandard)) {
+                    details.controllingRecordsForRulesMap.put(rule.developerName, new List<SObject>());
+                }
+            }
+
             recordDetails.add(details);
         }
+
         fsService.setSharedRecordDetails(recordDetails);
         
 		fsService.processFormulaShares();
