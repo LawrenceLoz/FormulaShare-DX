@@ -14,7 +14,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     @track data = [];
     @track columns = [];
 
-    setColumns() {
+    setColumns(supportsRelated) {
 
         // Add shared object, shares wtih and shared to field
         this.columns = [
@@ -36,21 +36,14 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         ];
 
         // Add controlling object column if related sharing supported
-        versionSupportsRelatedRules()
-            .then((supportsRelated) => {
-                if(supportsRelated) {
-                    this.columns.push(
-                        {type: 'text'
-                            , fieldName: 'controllingObject'
-                            , label: 'On Object'
-                        },
-                    );
-                }
-            })
-            .catch(error => {
-                //console.log('Error getting namespace prefix');
-                this.showError(error, 'Error checking for related object support');
-            });
+        if(supportsRelated) {
+            this.columns.push(
+                {type: 'text'
+                    , fieldName: 'controllingObject'
+                    , label: 'On Object'
+                },
+            );
+        }
 
         // Add assessment status and no records shared
         this.columns.push(
@@ -149,23 +142,29 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
 
-            this.setColumns();
-            this.countRows(tempjson);
-
-            // Expand all rows when table first loaded, and subscribe to events
-            if(this.firstLoad) {
-                this.expandAllRows(tempjson);
-                this.manageRefreshEvents();     // Subscribe to event channel
-                this.firstLoad = false;
-            }
-
-            // Expand all rows if a rule was just set up or modified
-            if(this.createOrUpdate) {
-                this.expandAllRows(tempjson);
-                this.createOrUpdate = false;
-            }
-
-            this.processingLoad = false;
+            versionSupportsRelatedRules()
+                .then((supportsRelated) => {
+                    this.setColumns(supportsRelated);
+                    this.countRows(tempjson);
+        
+                    // Expand all rows when table first loaded, and subscribe to events
+                    if(this.firstLoad) {
+                        this.expandAllRows(tempjson);
+                        this.manageRefreshEvents();     // Subscribe to event channel
+                        this.firstLoad = false;
+                    }
+        
+                    // Expand all rows if a rule was just set up or modified
+                    if(this.createOrUpdate) {
+                        this.expandAllRows(tempjson);
+                        this.createOrUpdate = false;
+                    }
+        
+                    this.processingLoad = false;
+                })
+                .catch(error => {
+                    this.showError(error, 'Error checking for related object support');
+                });
         }
 
         else if(error) {
