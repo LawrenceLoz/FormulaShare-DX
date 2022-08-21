@@ -23,13 +23,52 @@
 public with sharing class FormulaShareRulesSelectorTest {
 
     @IsTest
-    public static void testGetRulesSharingObject() {
+    public static void testGetRulesSharingObjectByType() {
         FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
         selector.isUnitTest = true;
         Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
 
         List<FormulaShareRule> rules = selector.getRulesSharingObject(fsLogShareType);
         System.assertEquals('Test reason', rules[0].sharingReason);
+    }
+
+    @IsTest
+    public static void testGetRulesSharingObjectByString() {
+
+        FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();        
+        List<FormulaShareRule> rules = selector.getStandardAndAncestorRulesSharingObject('FormulaShare_Log__c');
+
+        // We won't know and can't guarantee rules exist or not, so verify for both cases
+        List<FormulaShare_Rule__mdt> rulesByQuery = [
+            SELECT Id FROM FormulaShare_Rule__mdt 
+            WHERE Object_Shared__r.QualifiedApiName = 'FormulaShare_Log__c'];
+
+        System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the number of rules sharing log records');
+    }
+
+    @IsTest
+    public static void testGetAllRules() {
+
+        FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();        
+        List<FormulaShareRule> rules = selector.getAllRules();
+
+        // We won't know and can't guarantee rules exist or not, so verify for both cases
+        List<FormulaShare_Rule__mdt> rulesByQuery = [
+            SELECT Id FROM FormulaShare_Rule__mdt 
+            WHERE Object_Shared__c != null];
+
+        System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the total number of rules in the org');
+    }
+
+    @IsTest
+    public static void testGetSpecificRule() {
+        // We can't guarantee any rules are set up in the org, so this is a negative test only
+        Id wrongId = UserInfo.getUserId();
+
+        FormulaShareRulesSelector selector = FormulaShareRulesSelector.construct();
+        FormulaShareRule rule = selector.getSpecificRule(wrongId);
+
+        System.assertEquals(null, rule, 'Expected no rule for this id');
     }
 
     @IsTest

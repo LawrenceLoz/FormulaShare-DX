@@ -163,10 +163,14 @@ public virtual inherited sharing class FormulaShareRulesSelector {
         String condition = 'Id = \'' + ruleId + '\' LIMIT 1';
         String query = getQueryWithCondition(condition);
         System.debug('specific rule query: '+ query);
-        FormulaShare_Rule__mdt rule = Database.query(query);
-        FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
-        FormulaShareRule ruleToReturn = ruleConverter.getRule(rule);
-        System.debug('ruleToReturn: '+ ruleToReturn);
+        List<FormulaShare_Rule__mdt> ruleInList = Database.query(query);
+        FormulaShareRule ruleToReturn;
+
+        if(!ruleInList.isEmpty()) {
+            FormulaShareRuleConverterBase ruleConverter = new FormulaShareInjectionService().getRuleConverter();
+            ruleToReturn = ruleConverter.getRule(ruleInList[0]);
+            System.debug('ruleToReturn: '+ ruleToReturn);
+        }
 
 		return ruleToReturn;
     }
