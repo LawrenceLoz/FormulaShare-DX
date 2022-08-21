@@ -7,7 +7,7 @@
     <description>API Name relates to legacy usage of this field - both standard and custom objects can be selected and settings are now controlled by other fields on these custom metadata records</description>
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>FormulaShare Object Settings</relationshipLabel>
-    <relationshipName>FormulaShare_Object_Settings</relationshipName>
+    <relationshipName>FormulaShare_Std_Objcts_to_Remove_Shares</relationshipName>
     <required>true</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>
