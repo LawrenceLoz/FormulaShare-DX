@@ -8,7 +8,7 @@
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>FormulaShare Object Settings</relationshipLabel>
     <relationshipName>FormulaShare_Std_Objcts_to_Remove_Shares</relationshipName>
-    <required>true</required>
+    <required>false</required>
     <type>MetadataRelationship</type>
     <unique>false</unique>
 </CustomField>
