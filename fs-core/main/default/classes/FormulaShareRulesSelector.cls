@@ -140,22 +140,26 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    public Set<String> selectObjectsWithRules() {
-        Set<String> objNames = new Set<String>();
+    public Map<String,String> selectObjectsWithRules() {
+        Map<String,String> objMap = new Map<String,String>();
 
         // If test, populate Set with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
         if(isUnitTest) {
-            objNames.add('Test object');
+            objMap.put('Test object', 'Test label');
         }
         
         else {
-            Map<String, FormulaShare_Rule__mdt> fsRulesMap = FormulaShare_Rule__mdt.getAll();
-            for(FormulaShare_Rule__mdt rule : fsRulesMap.values()) {
-                objNames.add(rule.Object_Shared__r.QualifiedApiName);
+            // Can't use FormulaShare_Rule__mdt.getAll() as this doesn't return entity relationship lookups
+            String condition = 'Object_Shared__c != null';
+            String query = getQueryWithCondition(condition);
+            List<FormulaShare_Rule__mdt> rules = Database.query(query);
+
+            for(FormulaShare_Rule__mdt rule : rules) {
+                objMap.put(rule.Object_Shared__r.QualifiedApiName, rule.Object_Shared__r.MasterLabel);
             }
         }
 
-        return objNames;
+        return objMap;
     }
 
 

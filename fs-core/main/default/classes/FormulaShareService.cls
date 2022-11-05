@@ -38,7 +38,8 @@ public inherited sharing class FormulaShareService {
 
 	// Or get rules if only type provided
 	public static FormulaShareService construct(Schema.SObjectType type) {
-		List<FormulaShareRule> rules = FormulaShareRulesSelector.construct().getRulesSharingObject(type);
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+		List<FormulaShareRule> rules = rulesSelector.getRulesSharingObject(type);
 		return construct(type, rules);
 	}
 
@@ -711,7 +712,8 @@ public inherited sharing class FormulaShareService {
 		Set<SObjectType> typesSet = new Set<SObjectType>();
 
 		// Loop through all rules and populate set of shared objects
-		for(String objName : FormulaShareRulesSelector.construct().selectObjectsWithRules()) {
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+		for(String objName : rulesSelector.selectObjectsWithRules().keySet()) {
 			SObjectType type = FormulaShareUtilities.globalDescribe.get(objName);
 			typesSet.add(type);
 		}

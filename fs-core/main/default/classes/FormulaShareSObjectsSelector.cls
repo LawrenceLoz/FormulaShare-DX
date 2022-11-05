@@ -61,7 +61,18 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
         return Database.getQueryLocator(
             newQueryFactory().toSOQL()
         );
-    }   
+    }
+
+    public Database.QueryLocator selectFilteredLocator(String filterField, String filterCondition) {
+        fields.addAll(fieldsSet);
+        fflib_QueryFactory factory = newQueryFactory();
+
+        return Database.getQueryLocator(
+            factory
+                .setCondition(filterField + ' = ' + filterCondition)
+                .toSOQL()
+        );
+    }
 
 
     // Used to query for a set of records with specific ids

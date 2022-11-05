@@ -193,7 +193,7 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
         public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) {
 
             if (result.status == Metadata.DeployStatus.Succeeded) {
-                system.debug('Deploy job successful');
+                system.debug('Deploy job successful: '+JSON.serializePretty(result));
                 instance.handleDeploySuccess(result);
             }
             

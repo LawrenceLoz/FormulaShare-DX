@@ -251,7 +251,9 @@ public with sharing class FormulaShareServiceBulkTest {
 
         // Carry out processing to share records (we won't use a batch as only one can be called per test)
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
+
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        List<FormulaShareRule> fsRules = rulesSelector.getRulesSharingObject(fsLogType);
         FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
         
         // Inject details object set with records (assumes only standard rules, and no controlling objects set)

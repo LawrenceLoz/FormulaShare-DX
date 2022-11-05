@@ -29,9 +29,9 @@ public with sharing class FormulaShareMockProvRulesSelector implements System.St
 
 
         else if(stubbedMethodName == 'selectObjectsWithRules') {
-            Set<String> objNames = new Set<String>();
-            objNames.add(prefix + 'FormulaShare_Log__c');
-            objNames.add(prefix + 'FormulaShare_Record_Log__c');
+            Map<String, String> objNames = new Map<String, String>();
+            objNames.put(prefix + 'FormulaShare_Log__c', 'FormulaShare Batch Log');
+            objNames.put(prefix + 'FormulaShare_Record_Log__c', 'FormulaShare Record Log');
             return objNames;
         }
 

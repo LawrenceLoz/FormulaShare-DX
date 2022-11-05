@@ -36,7 +36,9 @@ public class FormulaShareServiceTest {
 
     public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
+
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        List<FormulaShareRule> fsRules = rulesSelector.getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
 
         List<FormulaShareRetrievedRecordDetails> recordDetails = new List<FormulaShareRetrievedRecordDetails>();

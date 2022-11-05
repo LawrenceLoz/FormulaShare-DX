@@ -28,22 +28,48 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
     // fflib selector pattern isn't used because it fails for metadata relationship fields.
     // The basic query below is sufficient - FLS and sharing checks aren't needed 
     // since custom metadata does not support either.
-    public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getSettingsForType(Schema.sObjectType type) {
+    private static Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsForTypeMap = new Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt>();
+    public FormulaShare_Std_Object_to_Remove_Shares__mdt getSettingsForType(Schema.sObjectType type) {
+        FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings;
+        
+        // Get settings from cache if we've queried already
+        String objectName = type.getDescribe().getName();
+        if(settingsForTypeMap.containsKey(objectName)) {
+            objSettings = settingsForTypeMap.get(objectName);
+        }
 
-		String objectName = type.getDescribe().getName();
+        // Otherwise query, and add to cache if a settings record exists
+        else {
+            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = 
+                [SELECT Id, Retain_Sharing_After_Record_Changes__c
+                    , Maximum_Recursive_Reassessments__c, Allow_Recursive_Reassessment__c
+                FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+                WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
+            
+            if(!settingsList.isEmpty()) {
+                objSettings = settingsList[0];
+                settingsForTypeMap.put(objectName, objSettings);
+            }
+        }
 
-		List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLinesToReturn = 
-            [SELECT Id, Retain_Sharing_After_Record_Changes__c
-			FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-			WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName];
-
-        return removalLinesToReturn;
+        return objSettings;
     }
 
     public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getAllSettings() {
         return [
-            SELECT Id, Standard_Object_to_Remove_Sharing__r.QualifiedApiName, Retain_Sharing_After_Record_Changes__c
+            SELECT DeveloperName, MasterLabel, Standard_Object_to_Remove_Sharing__r.QualifiedApiName, Retain_Sharing_After_Record_Changes__c
+                , Maximum_Recursive_Reassessments__c, Allow_Recursive_Reassessment__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getObjectsForTargetedJobs(){
+        return [
+            SELECT Standard_Object_to_Remove_Sharing__r.QualifiedApiName
+            FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+            WHERE Sharing_Calculation_Schedule__c 
+            IN ('Targeted Calculation Jobs Only','Targeted Calculation Jobs and Full Recalculation on Batch')
         ];
     }
 }

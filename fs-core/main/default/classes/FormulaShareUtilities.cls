@@ -330,6 +330,24 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	public static List<Schema.SObjectField> getBooleanFields(String objectApiName) {
+		List<Schema.SObjectField> booleanFields = new List<Schema.SObjectField>();
+		
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(objectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+			
+			// Check whether field could contain information for sharing 
+			if(fieldType == Schema.DisplayType.BOOLEAN) {
+				booleanFields.add(field);
+			}
+		}
+
+		return booleanFields;
+	}
+
+
 	// Checks and excludes compound fields
 	private static Boolean isSupportedFieldForCustomMetadata(String objectApiName, Schema.DescribeFieldResult fieldDesc) {
 
