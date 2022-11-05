@@ -62,14 +62,5 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
         ];
     }
-
-    @AuraEnabled(cacheable=true)
-    public static List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getObjectsForTargetedJobs(){
-        return [
-            SELECT Standard_Object_to_Remove_Sharing__r.QualifiedApiName
-            FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-            WHERE Sharing_Calculation_Schedule__c 
-            IN ('Targeted Calculation Jobs Only','Targeted Calculation Jobs and Full Recalculation on Batch')
-        ];
-    }
+    
 }

@@ -22,10 +22,6 @@
                 <behavior>Edit</behavior>
                 <field>Allow_Recursive_Reassessment__c</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Sharing_Calculation_Schedule__c</field>
-            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
