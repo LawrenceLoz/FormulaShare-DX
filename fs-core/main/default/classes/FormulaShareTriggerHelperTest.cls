@@ -24,6 +24,8 @@ public with sharing class FormulaShareTriggerHelperTest {
 
     @TestSetup
     static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+
         List<UserRole> roles = FormulaShareTestDataFactory.getRoles(3);
         insert roles;
         List<User> usersList = FormulaShareTestDataFactory.getUsers(1, roles[0].Id);
@@ -41,88 +43,94 @@ public with sharing class FormulaShareTriggerHelperTest {
     @IsTest
     public static void testStandardRuleOnInsert() {
         setMocks();
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-
-        FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
-
-        // Create log which should be considered for sharing
-        FormulaShare_Log__c log1 = FormulaShareTestDataFactory.getBatchLog();
-        Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
-        log1.Type_In_Scope__c = grp.Id;      // Should trigger group sharing rule
-        insert log1;
-
-        // Create log which shouldn't be considered for sharing (all fields involved in sharing set to null)
-        FormulaShare_Log__c log2 = FormulaShareTestDataFactory.getBatchLog();
-        log2.Context__c = null;
-        log2.Type_In_Scope__c = null;
-        log2.Exception_Type__c = null;
-        log2.Failed_Batches__c = null;
-        insert log2;
-
-        Map<Id,SObject> newRecords = new Map<Id,SObject>();
-        newRecords.put(log1.Id, log1);
-        newRecords.put(log2.Id, log2);
-
-        helper.setServiceObjectsWithRecords(fsLogType, null, newRecords);
-
-        // Check that class variables populated as expected
-        System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
-        System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
         
-        FormulaShareService service = helper.populatedFsServiceList[0];
-        List<FormulaShareRetrievedRecordDetails> details = service.recordDetails;
-        System.assertEquals(1, details.size(), 'Expected one record in processing map');
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
 
-        FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
-        System.assertEquals(log1.Id, record.Id, 'Record included isn\'t the one we expected');
-        System.assertEquals(grp.Id, record.Type_In_Scope__c, 'Field on record isn\'t populated with expected value');
+            FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
+
+            // Create log which should be considered for sharing
+            FormulaShare_Log__c log1 = FormulaShareTestDataFactory.getBatchLog();
+            Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
+            log1.Type_In_Scope__c = grp.Id;      // Should trigger group sharing rule
+            insert log1;
+
+            // Create log which shouldn't be considered for sharing (all fields involved in sharing set to null)
+            FormulaShare_Log__c log2 = FormulaShareTestDataFactory.getBatchLog();
+            log2.Context__c = null;
+            log2.Type_In_Scope__c = null;
+            log2.Exception_Type__c = null;
+            log2.Failed_Batches__c = null;
+            insert log2;
+
+            Map<Id,SObject> newRecords = new Map<Id,SObject>();
+            newRecords.put(log1.Id, log1);
+            newRecords.put(log2.Id, log2);
+
+            helper.setServiceObjectsWithRecords(fsLogType, null, newRecords);
+
+            // Check that class variables populated as expected
+            System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
+            System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
+            
+            FormulaShareService service = helper.populatedFsServiceList[0];
+            List<FormulaShareRetrievedRecordDetails> details = service.recordDetails;
+            System.assertEquals(1, details.size(), 'Expected one record in processing map');
+
+            FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
+            System.assertEquals(log1.Id, record.Id, 'Record included isn\'t the one we expected');
+            System.assertEquals(grp.Id, record.Type_In_Scope__c, 'Field on record isn\'t populated with expected value');
+        }
     }
 
 
     @IsTest
     public static void testStandardRuleOnUpdate() {
         setMocks();
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
-        FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            Group grp = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
-        FormulaShare_Log__c log1Old = FormulaShareTestDataFactory.getBatchLog();
-        log1Old.Type_In_Scope__c = grp.Id;
-        insert log1Old;
+            FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        FormulaShare_Log__c log2Old = FormulaShareTestDataFactory.getBatchLog();
-        log2Old.Type_In_Scope__c = grp.Id;
-        insert log2Old;
+            FormulaShare_Log__c log1Old = FormulaShareTestDataFactory.getBatchLog();
+            log1Old.Type_In_Scope__c = grp.Id;
+            insert log1Old;
 
-        // Simulate record being modifed in a way which would trigger sharing recalculation
-        FormulaShare_Log__c log1New = log1Old.clone(true, true, false, false);
-        log1New.Type_In_Scope__c = 'something different';       // This should ensure that sharing field recognised as modified
+            FormulaShare_Log__c log2Old = FormulaShareTestDataFactory.getBatchLog();
+            log2Old.Type_In_Scope__c = grp.Id;
+            insert log2Old;
 
-        // Simulate record being modifed in a way which should be excluded from sharing recalculation
-        FormulaShare_Log__c log2New = log2Old.clone(true, true, false, false);
-        log2New.Number_Of_Rules__c = 14;      // Should not trigger sharing rule
+            // Simulate record being modifed in a way which would trigger sharing recalculation
+            FormulaShare_Log__c log1New = log1Old.clone(true, true, false, false);
+            log1New.Type_In_Scope__c = 'something different';       // This should ensure that sharing field recognised as modified
 
-        Map<Id,SObject> existingRecords = new Map<Id,SObject>();
-        Map<Id,SObject> newRecords = new Map<Id,SObject>();
-        existingRecords.put(log1Old.Id, log1Old);
-        existingRecords.put(log2Old.Id, log2Old);
-        newRecords.put(log1New.Id, log1New);
-        newRecords.put(log2New.Id, log2New);
+            // Simulate record being modifed in a way which should be excluded from sharing recalculation
+            FormulaShare_Log__c log2New = log2Old.clone(true, true, false, false);
+            log2New.Number_Of_Rules__c = 14;      // Should not trigger sharing rule
 
-        // Call helper method
-        helper.setServiceObjectsWithRecords(fsLogType, existingRecords, newRecords);
+            Map<Id,SObject> existingRecords = new Map<Id,SObject>();
+            Map<Id,SObject> newRecords = new Map<Id,SObject>();
+            existingRecords.put(log1Old.Id, log1Old);
+            existingRecords.put(log2Old.Id, log2Old);
+            newRecords.put(log1New.Id, log1New);
+            newRecords.put(log2New.Id, log2New);
 
-        // Check that class variables populated as expected
-        System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
-        System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
-        
-        List<FormulaShareRetrievedRecordDetails> details = helper.populatedFsServiceList[0].recordDetails;
-        System.assertEquals(1, details.size(), 'Expected one record in processing map');
+            // Call helper method
+            helper.setServiceObjectsWithRecords(fsLogType, existingRecords, newRecords);
 
-        FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
-        System.assertEquals(log1New.Id, record.Id, 'Record included isn\'t the one we expected');
-        System.assertEquals('something different', record.Type_In_Scope__c, 'Modified field value not set to new version');
+            // Check that class variables populated as expected
+            System.assert(!helper.populatedFsServiceList.isEmpty(), 'FormulaShareService not initialised by method call');
+            System.assertEquals(1, helper.populatedFsServiceList.size(), 'Expected one object in scope');
+            
+            List<FormulaShareRetrievedRecordDetails> details = helper.populatedFsServiceList[0].recordDetails;
+            System.assertEquals(1, details.size(), 'Expected one record in processing map');
+
+            FormulaShare_Log__c record = (FormulaShare_Log__c) details[0].sharedRecord;
+            System.assertEquals(log1New.Id, record.Id, 'Record included isn\'t the one we expected');
+            System.assertEquals('something different', record.Type_In_Scope__c, 'Modified field value not set to new version');
+        }
     }
 
 
@@ -170,31 +178,37 @@ public with sharing class FormulaShareTriggerHelperTest {
 
     @IsTest
     public static void testGetSharesToInsert() {
-        FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-//        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        helper.populatedFsServiceList.add(mockFSService);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
+//          Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        List<FormulaShare_Log__Share> sharesToInsert = (List<FormulaShare_Log__Share>) helper.getSharesToInsert();
+            helper.populatedFsServiceList.add(mockFSService);
 
-        system.assert(!sharesToInsert.isEmpty(), 'No shares to insert returned');
-        system.assertEquals(1, sharesToInsert.size());
+            List<FormulaShare_Log__Share> sharesToInsert = (List<FormulaShare_Log__Share>) helper.getSharesToInsert();
+
+            system.assert(!sharesToInsert.isEmpty(), 'No shares to insert returned');
+            system.assertEquals(1, sharesToInsert.size());
+        }
     }
 
 
     @IsTest
     public static void testGetSharesToDelete() {
-        FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
-//        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        helper.populatedFsServiceList.add(mockFSService);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
+//          Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareTriggerHelper helper = new FormulaShareTriggerHelper();
 
-        List<FormulaShare_Log__Share> sharesToDelete = (List<FormulaShare_Log__Share>) helper.getSharesToDelete();
+            helper.populatedFsServiceList.add(mockFSService);
 
-        system.assert(!sharesToDelete.isEmpty(), 'No shares to delete returned');
-        system.assertEquals(1, sharesToDelete.size());
+            List<FormulaShare_Log__Share> sharesToDelete = (List<FormulaShare_Log__Share>) helper.getSharesToDelete();
+
+            system.assert(!sharesToDelete.isEmpty(), 'No shares to delete returned');
+            system.assertEquals(1, sharesToDelete.size());
+        }
     }
 
 

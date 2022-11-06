@@ -1,53 +1,64 @@
 @IsTest
 public with sharing class FormulaShareRuleTest {
 
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
+    
 
     // Tests use a custom SObject only - we can't guarantee share records for Account and related
     // objects exist so can't test with this
     @IsTest
     public static void checkShareMorePermissiveWithLowerAccessShare() {
         
-        FormulaShareRule rule = new FormulaShareRule();
-        rule.accessLevel = 'All';
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRule rule = new FormulaShareRule();
+            rule.accessLevel = 'All';
 
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
 
-        FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
+            FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
 
-        Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
 
-        System.assert(!isEqualOrMorePermissive, 'Share is LOWER access level than rule');
+            System.assert(!isEqualOrMorePermissive, 'Share is LOWER access level than rule');
+        }
     }
 
 
     @IsTest
     public static void checkShareMorePermissiveWithHigherAccessShare() {
-        
-        FormulaShareRule rule = new FormulaShareRule();
-        rule.accessLevel = 'Read';
 
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRule rule = new FormulaShareRule();
+            rule.accessLevel = 'Read';
 
-        FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Edit');
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
 
-        Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Edit');
 
-        System.assert(isEqualOrMorePermissive, 'Share is HIGHER access level than rule');
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+
+            System.assert(isEqualOrMorePermissive, 'Share is HIGHER access level than rule');
+        }
     }
 
 
     @IsTest
     public static void checkShareMorePermissiveWithSameAccessShare() {
-        
-        FormulaShareRule rule = new FormulaShareRule();
-        rule.accessLevel = 'Read';
 
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRule rule = new FormulaShareRule();
+            rule.accessLevel = 'Read';
 
-        FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
 
-        Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
 
-        System.assert(isEqualOrMorePermissive, 'Share is SAME access level as rule');
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+
+            System.assert(isEqualOrMorePermissive, 'Share is SAME access level as rule');
+        }
     }
 }

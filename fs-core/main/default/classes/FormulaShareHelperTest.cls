@@ -22,38 +22,51 @@
 @IsTest
 public with sharing class FormulaShareHelperTest {
 
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
+
     @IsTest
     public static void testCorrectDefaultType() {
-        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
-        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        FormulaShareHelper helper = new FormulaShareHelper();
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+            FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        system.assert(helper.iHelper instanceof FormulaShareTriggerHelper, 'Expected an instance of FormulaShareTriggerHelper');
+            FormulaShareHelper helper = new FormulaShareHelper();
+
+            system.assert(helper.iHelper instanceof FormulaShareTriggerHelper, 'Expected an instance of FormulaShareTriggerHelper');
+        }
     }
 
     @IsTest
     public static void testGetSharesToInsert() {
-        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
-        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+            FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        FormulaShareHelper helper = new FormulaShareHelper();
+            FormulaShareHelper helper = new FormulaShareHelper();
 
-        List<FormulaShare_Log__Share> sharesToInsert = (List<FormulaShare_Log__Share>) helper.getSharesToInsert();
+            List<FormulaShare_Log__Share> sharesToInsert = (List<FormulaShare_Log__Share>) helper.getSharesToInsert();
 
-        system.assert(sharesToInsert.isEmpty(), 'No records expected (implementation not run from trigger context)');
+            system.assert(sharesToInsert.isEmpty(), 'No records expected (implementation not run from trigger context)');
+        }
     }
 
     @IsTest
     public static void testGetSharesToDelete() {
-        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
-        FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        FormulaShareHelper helper = new FormulaShareHelper();
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
+            FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
-        List<FormulaShare_Log__Share> sharesToDelete = (List<FormulaShare_Log__Share>) helper.getSharesToDelete();
+            FormulaShareHelper helper = new FormulaShareHelper();
 
-        system.assert(sharesToDelete.isEmpty(), 'No records expected (implementation not run from trigger context)');
+            List<FormulaShare_Log__Share> sharesToDelete = (List<FormulaShare_Log__Share>) helper.getSharesToDelete();
+
+            system.assert(sharesToDelete.isEmpty(), 'No records expected (implementation not run from trigger context)');
+        }
     }
     
 }

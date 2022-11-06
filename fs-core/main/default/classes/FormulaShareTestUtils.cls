@@ -26,6 +26,61 @@ public inherited sharing class FormulaShareTestUtils {
         return FormulaShareUtilities.getNamespacePrefix();
     }
 
+    public static final String ADMIN_ALIAS = 'sdfsTest';
+    public static final String ADMIN_EMAIL = 'sdfsTest@example.com';
+
+    // All tests should use System.runAs() with a user with permission set assisgned
+    // Ensures packages can be created which include test classes
+	public static User setupAdmin() {
+        return setupAdmin(false);
+    }
+
+	public static User setupAdmin(Boolean useAdminProfile) {
+
+        // Select either the standard system admin profile or minimum access
+        // System Admin should be used only when required, e.g.:
+        //  - Select row causes
+        //  - Access AsyncApexJob object
+        //  - Access standard share objects, e.g. ContactShare
+        String profileName = useAdminProfile ? 'System Administrator' : 'Minimum Access - Salesforce';
+        Profile p = [SELECT Id, Name FROM Profile WHERE Name = :profileName];
+
+		//username global uniqueness is still enforced in tests 
+		//make sure we get something unique to avoid issues with parallel tests
+		String uniqueness = DateTime.now()+':'+Math.random();
+		try{ 
+			throw new NullPointerException();
+		}catch(Exception e){
+			uniqueness += e.getStackTraceString(); //includes the top level test method name without having to pass it
+		}
+		User usr = new User(
+			username = UserInfo.getUserId()+'.'+uniqueness.HashCode()+'@'+UserInfo.getOrganizationId()+'.sfdcOrg',
+			alias = ADMIN_ALIAS,
+			email = ADMIN_EMAIL,
+			emailencodingkey = 'UTF-8',
+			lastname = 'Testing',
+			languagelocalekey = 'en_US',
+			localesidkey = 'en_US',
+			profileid = p.Id,
+			timezonesidkey = 'America/Los_Angeles'
+		);
+		insert usr;
+        
+        PermissionSet adminPS = [SELECT Id FROM PermissionSet WHERE Name = 'FormulaShare_Admin_User'];
+        PermissionSetAssignment psa = new PermissionSetAssignment(AssigneeId = usr.Id, PermissionSetId = adminPS.Id);
+        insert psa;
+
+        return usr;
+	}
+
+    public static User getAdmin() {
+        User usr = [SELECT Id FROM User 
+            WHERE Alias = :ADMIN_ALIAS
+            AND Email = :ADMIN_EMAIL][0];
+        return usr;
+    }
+
+
     public static String batchLogRowCause  = getNamespacePrefix() + 'FormulaShare_Log_Share__c';
     public static String recordLogRowCause = getNamespacePrefix() + 'FormulaShare_Record_Log_Share__c';
 
