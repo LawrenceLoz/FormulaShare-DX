@@ -44,7 +44,7 @@
 
     <!-- Show section only if related object details -->
     <template if:true={supportsRelated.data}>
-        <template if:true={rule.relationship}>
+        <template if:true={rule.objectSharedLabel}>
             <div class="slds-p-top_xx-small stackOrderTop">
 
                 <div class="slds-section slds-is-open">
@@ -59,6 +59,7 @@
                         <c-formula-share-rule-detail-location 
                             relationship={rule.relationship}
                             controlling-object-api-name={rule.controllingObjectApiName}
+                            shared-object-label={rule.objectSharedLabel}
                             selected-location={selectedLocation}
                             saved-rule-type={savedRuleType}
                             onruletypechange={handleRuleTypeChange}
@@ -69,7 +70,6 @@
 
             </div>
         </template>
-
         <!-- Line below can be added to monitor full JSON -->
     <!-- Relationship detail: {ruleDetail} -->
     </template>
