@@ -159,7 +159,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                         this.expandAllRows(tempjson);
                         this.createOrUpdate = false;
                     }
-        
+
                     this.processingLoad = false;
                 })
                 .catch(error => {
@@ -250,6 +250,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             });
     }
 
+
     // Set available drop-down actions for each grid row
     getRowActions(row, doneCallback) {
         // Check the retention days before populating (this is used in an action label)
@@ -279,7 +280,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             else {
                 actions.push({
                     'label': 'Activate',
-                    'name': 'activate'
+                    'name': 'activate',
+                    'disabled': row['enableActivate']
                 });
             }
 

@@ -199,4 +199,12 @@ public virtual inherited sharing class FormulaShareRulesSelector {
         return rulesToReturn;
     }
 
+    // By default allow activation of any rules
+    public virtual Boolean isStandardActivationDisabled() {
+        return false;
+    }
+    public virtual Boolean isCrossObjectActivationDisabled() {
+        return false;
+    }
+
 }

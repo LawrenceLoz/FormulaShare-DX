@@ -71,6 +71,11 @@ public with sharing class FormulaShareRulesListViewController {
             metricsMap.put(metrics.FormulaShare_Rule_Name__c + metrics.Context__c, metrics);
         }
 
+        // Determine whether activation should be disabled for any rule types
+		FormulaShareRulesSelector fsRulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        Boolean stdActivationDisabled = fsRulesSelector.isStandardActivationDisabled();
+        Boolean crossObjActivationDisabled = fsRulesSelector.isCrossObjectActivationDisabled();
+
         for(FormulaShareRule rule : rules) {
             rulesMap.put(rule.developerName, rule);
             
@@ -96,8 +101,16 @@ public with sharing class FormulaShareRulesListViewController {
             rw.shareWith = rule.shareWith;
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
+            rw.type = rule.type;
             rw.active = rule.active;
             rw.sharedObjectClass = 'slds-tree__item';
+
+            if(rule.type == 'standard') {
+                rw.enableActivate = stdActivationDisabled;
+            }
+            else {
+                rw.enableActivate = crossObjActivationDisabled;
+            }
 
             rw.setMetricsDetails(objectName, metricsMap);
             
@@ -258,6 +271,10 @@ public with sharing class FormulaShareRulesListViewController {
         public String sharingReason {get;set;}
         @AuraEnabled
         public String accessLevel {get;set;}
+        @AuraEnabled
+        public String type {get;set;}
+        @AuraEnabled
+        public Boolean enableActivate {get;set;}
         @AuraEnabled
         public Boolean active {get;set;}
         @AuraEnabled
