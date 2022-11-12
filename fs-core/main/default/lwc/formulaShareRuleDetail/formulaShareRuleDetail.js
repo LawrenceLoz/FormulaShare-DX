@@ -112,17 +112,17 @@ export default class FormulaShareRuleDetail extends LightningElement {
     handleSetSharedObjectDetail(event) {
         this.sharedObjectDetail = event.detail;
 
-        // Fire event for create component to disable button
-        const evt = new CustomEvent('disablesave');
+        // Fire event for create component to enable save button
+        const evt = new CustomEvent('enablesave');
         this.dispatchEvent(evt);
 
         this.rule.objectSharedAPIName = this.sharedObjectDetail.objectApiName;
         this.fireEventWithRule();
     }
 
-    // Propogate disable save button event to create component
-    handleDisableSave(event) {
-        const evt = new CustomEvent('disablesave');
+    // Propogate preventing save button to create rule component
+    handlePreventSave(event) {
+        const evt = new CustomEvent('onpreventsave');
         this.dispatchEvent(evt);
     }
 

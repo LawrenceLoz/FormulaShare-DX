@@ -8,7 +8,8 @@
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                     <c-formula-share-rule-detail
                         onruledetail={updateRule}
-                        ondisablesave={handleDisableSave}>
+                        onenablesave={handleEnableSave}
+                        onpreventsave={handlePreventSave}>
                     </c-formula-share-rule-detail>
                     <template if:true={processing}>
                         <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="x-large"></lightning-spinner>

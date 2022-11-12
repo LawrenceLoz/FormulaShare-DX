@@ -62,8 +62,17 @@ export default class FormulaShareRuleCreate extends LightningElement {
     }
 
     @track saveDisabled = true;
-    handleDisableSave(event) {
-        this.saveDisabled = false;
+    handleEnableSave(event) {
+        if(!this.preventSave) {
+            this.saveDisabled = false;
+        }
+    }
+
+    // Don't allow save to be enabled if it's prevented
+    preventSave = false;
+    handlePreventSave(event) {
+        this.saveDisabled = true;
+        this.preventSave = true;
     }
 
     closeModal() {
