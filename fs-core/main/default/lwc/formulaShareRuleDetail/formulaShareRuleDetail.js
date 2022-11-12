@@ -44,13 +44,20 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @api
     checkValidity() {
         //console.log('checking validity');
-        var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
-        var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
-        var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
-        var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
-        var ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
-        //console.log('ruleDetailValid '+ruleDetailValid);
-        return ruleDetailValid;
+        const componentsValid = [
+            this.template.querySelector('c-formula-share-rule-detail-name-label'),
+            this.template.querySelector('c-formula-share-rule-detail-location'),
+            this.template.querySelector('c-formula-share-rule-detail-field'),
+            this.template.querySelector('c-formula-share-rule-detail-access')
+        ].reduce((validSoFar, inputCmp) => {
+            if(inputCmp) {
+                return validSoFar && inputCmp.checkValidity();
+            }
+            else {
+                return validSoFar;
+            }
+        }, true);
+        return componentsValid;
     }
 
     @track rule = {};
@@ -60,12 +67,14 @@ export default class FormulaShareRuleDetail extends LightningElement {
     // Fixed test data for offline component updates
     //    rule = {"accessLevel":"Read","active":true,"caseAccess":"None","contactAccess":"None","controllingObjectApiName":"sdfs__Programme_Support_Officer__c","controllingObjectLabel":"Programme Support Officer","controllingObjectSharedToFieldAPIName":"sdfs__User__c","controllingObjectSharedToFieldLabel":"User","controllingObjectSharedToFieldToken":"01I26000000cvxA.00N260000063Lub","controllingObjectSharedToFieldType":"Id","developerName":"Share_Countries_with_Prog_Support_Office","label":"Share Countries with Prog Support Office","objectSharedAPIName":"sdfs__Country__c","objectSharedLabel":"Country","opportunityAccess":"None","relationship":{"nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Country__c","nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Programme__c","sharedToFieldApiName":"sdfs__User__c","thisObjectApiName":"sdfs__Programme_Support_Officer__c"},"thisObjectApiName":"sdfs__Programme__c"},"thisObjectApiName":"sdfs__Country__c"},"ruleId":"m00260000000nmlAAA","shareWith":"Users","type":"descendant"};
 
+    savedRuleType;
     populateRule() {
         //console.log('_ruleId '+this._ruleid);
         getSpecificRule({ ruleId : this._ruleId })
         .then((data) => {
             //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
+            this.savedRuleType = this.rule.type;
             this.fireEventWithRule();
         });
     }
