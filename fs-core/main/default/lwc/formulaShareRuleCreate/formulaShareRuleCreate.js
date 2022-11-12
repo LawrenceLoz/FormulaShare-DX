@@ -62,7 +62,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
     }
 
     @track saveDisabled = true;
-    handleSharedObjectSelected(event) {
+    handleDisableSave(event) {
         this.saveDisabled = false;
     }
 

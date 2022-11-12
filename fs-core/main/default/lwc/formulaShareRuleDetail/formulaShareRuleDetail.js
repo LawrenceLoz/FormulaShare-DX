@@ -113,11 +113,17 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.sharedObjectDetail = event.detail;
 
         // Fire event for create component to disable button
-        const evt = new CustomEvent('sharedobjectselected');
+        const evt = new CustomEvent('disablesave');
         this.dispatchEvent(evt);
 
         this.rule.objectSharedAPIName = this.sharedObjectDetail.objectApiName;
         this.fireEventWithRule();
+    }
+
+    // Propogate disable save button event to create component
+    handleDisableSave(event) {
+        const evt = new CustomEvent('disablesave');
+        this.dispatchEvent(evt);
     }
 
     selectedLocation;
@@ -127,6 +133,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
         // On change of shared object, assume that rule will be standard
         // Default object with share field to be the selected object (ensures field list populates)
         this.rule.controllingObjectApiName = event.detail.objectApiName;
+        this.rule.objectSharedLabel = event.detail.objectLabel;
+
         this.rule.relationship = {thisObjectApiName: this.rule.controllingObjectApiName, thisObjectLabel: event.detail.objectLabel};
 
         this.selectedLocation = 'thisObject';
