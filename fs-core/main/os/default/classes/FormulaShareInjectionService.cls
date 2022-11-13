@@ -56,6 +56,10 @@ public inherited sharing class FormulaShareInjectionService {
         return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type);
     }
 
+    public FormulaShareRecursionService getRecursionService() {
+        return new FormulaShareRecursionService();
+    }
+
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();
     }
