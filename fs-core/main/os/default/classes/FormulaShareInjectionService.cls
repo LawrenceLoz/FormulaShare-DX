@@ -60,6 +60,10 @@ public inherited sharing class FormulaShareInjectionService {
         return new FormulaShareRecursionService();
     }
 
+    public FormulaShareRegularJobs getRegularJobs() {
+        return new FormulaShareRegularJobs();
+    }
+
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();
     }

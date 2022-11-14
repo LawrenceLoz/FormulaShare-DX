@@ -1,5 +1,5 @@
 /**
-*Copyright 2019 Lawrence Newcombe
+*Copyright 2022 Lawrence Newcombe
 *
 *Permission is hereby granted, free of charge, to any person obtaining a copy 
 *of this software and associated documentation files (the "Software"), to deal 
@@ -19,14 +19,17 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareSchedulableSubmitter implements Schedulable {
+public virtual inherited sharing class FormulaShareRegularJobs {
 
-    public void execute(SchedulableContext SC) {
-        system.debug('Scheduled recalculation of FormulaShare rules begun');
-        FormulaShareService.recalculateAll();   // Full recalculation of rules
-
-        // Submit other regular jobs
-		FormulaShareRegularJobs rj = new FormulaShareInjectionService().getRegularJobs();
-        rj.process();
+    // Override to call additional jobs
+    public virtual void process() {
+        submitRemoveLogsBatch();
     }
+
+    protected void submitRemoveLogsBatch() {
+        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
+        Integer batchSize = settings.Logs_Removal_Batch_Size__c.intValue();
+        Id batchJobId = Database.executeBatch(new FormulaShareRemoveLogsBatch(), batchSize);
+    }
+
 }
