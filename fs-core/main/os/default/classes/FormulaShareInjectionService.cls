@@ -64,6 +64,10 @@ public inherited sharing class FormulaShareInjectionService {
         return new FormulaShareRegularJobs();
     }
 
+    public FormulaShareProcessedRecordShare getProcessedRecordShare() {
+        return new FormulaShareProcessedRecordShare();
+    }
+
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();
     }

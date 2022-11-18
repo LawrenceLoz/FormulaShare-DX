@@ -29,7 +29,7 @@ public inherited sharing class FormulaShareApplication {
 			FormulaShare_Rule_in_Batch__c.SObjectType,
 			FormulaShare_Record_Log__c.SObjectType,
 			FormulaShare_Processed_Record_Share__c.SObjectType,
-			FormulaShare_Metrics__c.SObjectType
+			FormulaShare_Metrics__c.SObjectType	//
 		}
 	);
 	
