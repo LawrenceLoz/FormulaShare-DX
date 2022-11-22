@@ -18,8 +18,22 @@ export default class FormulaShareRuleCreate extends LightningElement {
         const messageCallback = (response) => {
             this.processing = false;
 
+            const payload = response.data.payload;
+
+            // Determine success and error property names (with namespace if present)
+            let successPropName;
+            let errorPropName;
+            for(let [key, value] of Object.entries(payload)) {
+                if(key.endsWith('Successful__c')) {
+                    successPropName = key;
+                }
+                else if(key.endsWith('Error__c')) {
+                    errorPropName = key;
+                }
+            }
+
             // Pop toast to confirm successful deployment
-            if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
+            if(payload[successPropName]) {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'FormulaShare Rule created',
@@ -31,13 +45,7 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
             // Show error toast if response indicates errors
             else {
-                var errorMessage;
-                if(response.data.payload.sdfs__Error__c) {
-                    errorMessage = response.data.payload.sdfs__Error__c
-                }
-                else {
-                    errorMessage = response.data.payload.Error__c;
-                }
+                let errorMessage = payload[errorPropName];
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Create Failed',

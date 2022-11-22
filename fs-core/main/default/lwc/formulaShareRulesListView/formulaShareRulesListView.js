@@ -233,7 +233,22 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
-                    if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
+                    const payload = response.data.payload;
+
+                    // Determine success and error property names (with namespace if present)
+                    let successPropName;
+                    let errorPropName;
+                    for(let [key, value] of Object.entries(payload)) {
+                        if(key.endsWith('Successful__c')) {
+                            successPropName = key;
+                        }
+                        else if(key.endsWith('Error__c')) {
+                            errorPropName = key;
+                        }
+                    }
+
+                    // Refresh list if successful event recieved
+                    if(payload[successPropName]) {
                         //console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
