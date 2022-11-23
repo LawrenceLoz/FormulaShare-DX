@@ -122,7 +122,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     // Propogate preventing save button to create rule component
     handlePreventSave(event) {
-        const evt = new CustomEvent('onpreventsave');
+        const evt = new CustomEvent('preventsave');
         this.dispatchEvent(evt);
     }
 

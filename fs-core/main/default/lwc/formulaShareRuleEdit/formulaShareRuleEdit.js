@@ -72,6 +72,12 @@ export default class FormulaShareRuleEdit extends LightningElement {
             });
     }
 
+    // Don't allow save to be enabled if it's prevented
+    saveDisabled = false;
+    handlePreventSave(event) {
+        this.saveDisabled = true;
+    }
+
     closeModal() {
         this.dispatchEvent(new CustomEvent('close'));
     }
