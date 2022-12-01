@@ -21,6 +21,16 @@
 
 public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjectUnitOfWork.IDML {
 
+	public void dmlInsert(SObject obj) {
+		dmlInsert(new List<SObject>{obj});
+	}
+	public void dmlUpdate(SObject obj) {
+		dmlUpdate(new List<SObject>{obj});
+	}
+	public void dmlDelete(SObject obj) {
+		dmlDelete(new List<SObject>{obj});
+	}
+
 	// Override standard fflibs methods to check object and field access
 	public void dmlInsert(List<SObject> objList) {
 

@@ -64,7 +64,9 @@ public inherited sharing class FormulaShareTestUtils {
 			profileid = p.Id,
 			timezonesidkey = 'America/Los_Angeles'
 		);
-		insert usr;
+
+        FormulaShareUnitOfWorkDML uowDml = new FormulaShareUnitOfWorkDML();
+        uowDml.dmlInsert(usr);
         
         PermissionSet adminPS = [SELECT Id FROM PermissionSet WHERE Name = 'FormulaShare_Admin_User'];
         PermissionSetAssignment psa = new PermissionSetAssignment(AssigneeId = usr.Id, PermissionSetId = adminPS.Id);

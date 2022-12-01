@@ -57,9 +57,11 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
 
     public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getAllSettings() {
         return [
-            SELECT DeveloperName, MasterLabel, Standard_Object_to_Remove_Sharing__r.QualifiedApiName, Retain_Sharing_After_Record_Changes__c
+            SELECT DeveloperName, MasterLabel, Standard_Object_to_Remove_Sharing__r.QualifiedApiName
+                , Retain_Sharing_After_Record_Changes__c
                 , Maximum_Recursive_Reassessments__c, Allow_Recursive_Reassessment__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+            LIMIT 50000
         ];
     }
     
