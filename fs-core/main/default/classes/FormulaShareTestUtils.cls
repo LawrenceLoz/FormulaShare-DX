@@ -66,7 +66,7 @@ public inherited sharing class FormulaShareTestUtils {
 		);
 
         FormulaShareUnitOfWorkDML uowDml = new FormulaShareUnitOfWorkDML();
-        uowDml.dmlInsert(usr);
+        uowDml.dmlInsert(new List<User> {usr});
         
         PermissionSet adminPS = [SELECT Id FROM PermissionSet WHERE Name = 'FormulaShare_Admin_User'];
         PermissionSetAssignment psa = new PermissionSetAssignment(AssigneeId = usr.Id, PermissionSetId = adminPS.Id);
