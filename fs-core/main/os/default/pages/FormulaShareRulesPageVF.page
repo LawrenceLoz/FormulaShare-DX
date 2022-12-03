@@ -10,8 +10,8 @@
     <div id="lightningvf" />
 
     <script>
-        $Lightning.use("sdfs:FormulaShareLightningOutApp", function () {
-            $Lightning.createComponent("sdfs:formulaShareRulesPage",
+        $Lightning.use("c:FormulaShareLightningOutApp", function () {
+            $Lightning.createComponent("c:formulaShareRulesPage",
                 {},
                 "lightningvf",
                 function (cmp) { }
@@ -22,7 +22,7 @@
         $(document).ready(function() {
         
             $.cometd.configure({
-                url: window.location.protocol + '//' + window.location.hostname + '/cometd/49.0',
+                url: window.location.protocol + '//' + window.location.hostname + '/cometd/55.0',
                 requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}' },
                 appendMessageTypeToURL: false
             });
