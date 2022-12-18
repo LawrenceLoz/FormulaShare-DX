@@ -12,9 +12,6 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             new FormulaShareInjectionService().getRulesSelectorType()
         );
 
-        FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
-        FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
-
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
 
