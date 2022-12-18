@@ -22,11 +22,15 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import infoCloud from '@salesforce/resourceUrl/InfoCloud';
+import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
+
+    infoCloudLogo = infoCloud;
 
     @api disableShareField;
 
@@ -57,6 +61,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             //console.log('setting share with: ',value);
             this._shareWith = value;
             this.updateShareFieldTypeOptions();
+            this.updateshareWithFlags();            
         }
     }
     _shareWith;
@@ -96,6 +101,21 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     fullFieldList = [];
     namesOnlyFieldList = [];
 
+    usersLink;
+    rolesLink;
+    publicGroupsLink;
+    queuesLink;
+    connectedCallback() {
+        getLightningDomain()
+            .then((domainName) => {
+                this.usersLink = domainName + '/lightning/setup/ManageUsers/home';
+                this.rolesLink = domainName + '/lightning/setup/Roles/home';
+                this.publicGroupsLink = domainName + '/lightning/setup/PublicGroups/home';
+                this.queuesLink = domainName + '/lightning/setup/Queues/home';
+            });
+    }
+
+
     @track shareWithOptions;
     updateShareWithOptions() {
         var optionsList = [
@@ -113,7 +133,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             optionsList.push( { label: 'Roles, Internal and Portal Subordinates', value: 'Roles, Internal and Portal Subordinates' } );
         }
 
-        optionsList.push( { label: 'Public Groups', value: 'Public Groups' } );
+        optionsList.push( { label: 'Public Groups or Queues', value: 'Public Groups' } );
 
         if(this.managerSharingSupported) {
             optionsList.push( { label: 'Managers of Users', value: 'Managers of Users' } );
@@ -214,8 +234,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Public Groups':
                 //console.log('updated to public groups');
                 this.shareFieldTypeOptions = [
-                    { label: 'Name of public group', value: 'Name' },
-                    { label: 'Id of public group', value: 'Id' },
+                    { label: 'Name of public group or queue', value: 'Name' },
+                    { label: 'Id of public group or queue', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
                 break;
@@ -231,15 +251,61 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
     }
 
+
+    shareWithFlags;
+    updateshareWithFlags() {
+        this.shareWithFlags = {};
+        switch (this._shareWith) {
+            case 'Users':
+                this.shareWithFlags.users = true;
+                break;
+            case 'Roles':
+                this.shareWithFlags.roles = true;
+                break;
+            case 'Roles and Internal Subordinates':
+                this.shareWithFlags.rolesAndInternalSubordinates = true;
+                break;
+            case 'Roles, Internal and Portal Subordinates':
+                this.shareWithFlags.rolesInternalAndPortalSubordinates = true;
+                break;
+            case 'Public Groups':
+                this.shareWithFlags.publicGroups = true;
+                break;
+            case 'Managers of Users':
+                this.shareWithFlags.managersOfusers = true;
+                break;
+            case 'Users and Manager Subordinates':
+                this.shareWithFlags.usersAndManagerSubordinates = true;
+                break;
+        }
+    }
+
+
     setDefaultFieldType() {
         // Default share type to 'Name' if shareWith allows this (otherwise will set to 'Id')
         this.updateShareFieldType('Name');
     }
 
-    @track viewFieldDetails;
+    viewHowWorks;
+    viewHowWorksClosed = 'How does this work?';
+    viewHowWorksOpen = 'Hide';
+    viewHowWorksToggleText = this.viewHowWorksClosed;
+    toggleViewHowWorks() {
+        if(this.viewHowWorks) {
+            this.viewHowWorks = false;
+            this.viewHowWorksToggleText = this.viewHowWorksClosed;
+        }
+        else {
+            this.viewHowWorks = true;
+            this.viewHowWorksToggleText = this.viewHowWorksOpen;
+        }
+    }
+
+
+    viewFieldDetails;
     viewFieldDetailsClosed = 'Browse field contents';
     viewFieldDetailsOpen = 'Hide field contents';
-    @track fieldDetailsToggleText = this.viewFieldDetailsClosed;
+    fieldDetailsToggleText = this.viewFieldDetailsClosed;
     toggleViewFieldDetails() {
         if(this.viewFieldDetails) {
             this.viewFieldDetails = false;
@@ -259,6 +325,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         });
         this.dispatchEvent(evt);
         this.updateShareFieldTypeOptions();
+        this.updateshareWithFlags();
         this.setDefaultFieldType();
         this.setFieldOptions();
         //console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
