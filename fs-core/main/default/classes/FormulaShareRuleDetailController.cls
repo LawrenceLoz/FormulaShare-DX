@@ -138,6 +138,17 @@ public with sharing class FormulaShareRuleDetailController {
         return sfoList;
     }
 
+
+    // If Manager sharing is enabled in Sharing Settings then groups for Manager (ManagerUp__userid)
+    // and ManagerAndSubordinatesInternal (ManagerDown_userid) will exist
+    // Note there is no external manager group type
+    @AuraEnabled(cacheable=true)
+    public static Boolean isManagerSharingSupported() {
+        Group mgrGroup = [SELECT Id from Group WHERE Type = 'Manager' LIMIT 1];
+        return mgrGroup != null;
+    }
+
+
     @AuraEnabled(cacheable=true)
     public static String getSampleData(String objectApiName, String fieldApiName) {
         

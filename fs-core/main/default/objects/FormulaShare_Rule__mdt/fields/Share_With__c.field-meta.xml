@@ -35,6 +35,16 @@
                 <default>false</default>
                 <label>Public Groups</label>
             </value>
+            <value>
+                <fullName>Managers of Users</fullName>
+                <default>false</default>
+                <label>Managers of Users</label>
+            </value>
+            <value>
+                <fullName>Users and Manager Subordinates</fullName>
+                <default>false</default>
+                <label>Users and Manager Subordinates</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

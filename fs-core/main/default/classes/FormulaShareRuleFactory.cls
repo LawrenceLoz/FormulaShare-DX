@@ -5,6 +5,7 @@ public with sharing class FormulaShareRuleFactory {
     public static String groupRuleName = 'Group_rule';
     public static String roleSubName = 'Role_sub_rule';
     public static String roleRuleName = 'Role_rule';
+    public static String mgrUpRuleName = 'Mgr_up_rule';
     public static String accountRuleName = 'Account_rule';
     private String prefix = FormulaShareTestUtils.getNamespacePrefix();
 
@@ -26,6 +27,9 @@ public with sharing class FormulaShareRuleFactory {
         // Will add a sharing record for the user with the user id in Exception_Type__c field
         FormulaShareRuleStandard userRule = getUserRule();
         rules.add(userRule);
+
+        FormulaShareRuleStandard mgrUpRule = getMgrUpRule();
+        rules.add(mgrUpRule);
 
         return rules;
     }
@@ -77,6 +81,19 @@ public with sharing class FormulaShareRuleFactory {
         rule.type = 'standard';
         rule.accessLevel = 'Edit';
         rule.shareWith = 'Roles';
+        rule.controllingObjectSharedToFieldType = 'Id';
+
+        return rule;
+    }
+
+    public static FormulaShareRuleStandard getMgrUpRule() {
+        String prefix = FormulaShareTestUtils.getNamespacePrefix();
+        FormulaShareRuleStandard rule = getBasicRule(prefix + 'Type_In_Scope__c');
+        rule.developerName = mgrUpRuleName;
+
+        rule.type = 'standard';
+        rule.accessLevel = 'Edit';
+        rule.shareWith = 'Managers of Users';
         rule.controllingObjectSharedToFieldType = 'Id';
 
         return rule;

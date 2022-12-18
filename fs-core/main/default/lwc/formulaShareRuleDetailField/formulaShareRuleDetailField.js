@@ -23,6 +23,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
+import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
@@ -37,12 +38,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         // Clear shareField and shareFieldType if object with share field is changed
         if(this._objectWithShareField && this._objectWithShareField != value) {
             this.updateShareField(null);
+            this.updateShareFieldType(null);
+
             this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
-            
-            // Retain id type if users selected
-            if(this.shareWith != 'Users') {
-                this.updateShareFieldType(null);
-            }
         }
         this._objectWithShareField = value;
         //console.log('Set object with share field: '+this._objectWithShareField);
@@ -117,8 +115,25 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
         optionsList.push( { label: 'Public Groups', value: 'Public Groups' } );
 
+        if(this.managerSharingSupported) {
+            optionsList.push( { label: 'Managers of Users', value: 'Managers of Users' } );
+            optionsList.push( { label: 'Users and Manager Subordinates', value: 'Users and Manager Subordinates' } );
+        }
+
         this.shareWithOptions = optionsList;
     }
+
+    managerSharingSupported;
+    @wire(isManagerSharingSupported)
+    wiredIsManagerSharingSupported(value) {
+        const { data, error } = value;
+        if(data) {
+            this.managerSharingSupported = data;
+            this.updateShareWithOptions();
+        }
+    }        
+
+
 
     @track fieldOptions;
     shareFieldOptions;
@@ -167,9 +182,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         })
     }
     
-    // Set options to include id fields (user lookups) only if "Users" selected
+    // Set options to include id fields (user lookups) only if Users or a Manager Groups option selected
     setFieldOptions() {
-        if(this.shareWith === 'Users') {
+        if(['Users', 'Managers of Users', 'Users and Manager Subordinates'].includes(this.shareWith)) {
             //console.log('setting to full list ',this.fullFieldList);
             this.fieldOptions = this.fullFieldList;
         }
@@ -183,10 +198,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     @track shareFieldTypeOptions;
     @track fieldTypeIsReadOnly;
     updateShareFieldTypeOptions() {
+
         //console.log('this._shareWith ',this._shareWith);
         switch (this._shareWith) {
             case 'Users':
-                //console.log('updated to users');
+            case 'Managers of Users':
+            case 'Users and Manager Subordinates':
+
+                console.log('updated to users or manager group');
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
@@ -213,12 +232,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
     setDefaultFieldType() {
-        if(this._shareWith === 'Users') {
-            this.updateShareFieldType('Id');
-        }
-        else {
-            this.updateShareFieldType('Name');
-        }
+        // Default share type to 'Name' if shareWith allows this (otherwise will set to 'Id')
+        this.updateShareFieldType('Name');
     }
 
     @track viewFieldDetails;
@@ -325,7 +340,18 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
     updateShareFieldType(value) {
-        this.shareFieldType = value;
+
+        // If sharing to users or manager groups, type should always be Id
+        if(this.shareWith && 
+            ['Users', 'Managers of Users', 'Users and Manager Subordinates'].includes(this.shareWith)) {
+            this.shareFieldType = 'Id';
+        }
+
+        // Otherwise set to provided value (either 'Id' 'Name' or null)
+        else {
+            this.shareFieldType = value;
+        }
+ 
         const evt = new CustomEvent('sharefieldtypechange', {
             detail: this.shareFieldType
         });
