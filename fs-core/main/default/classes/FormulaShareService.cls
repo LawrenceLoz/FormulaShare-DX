@@ -444,7 +444,9 @@ public inherited sharing class FormulaShareService {
 	
 				// If user not found log this as error
 				else if(!activeUsersIdSet.contains(userId)) {
-					String logMessage = 'No active user found with id ' + userId;
+					String logMessage = 'No active user found with id \'' + userId 
+						+ '\'. This could be because the user is inactive, or because their profile has a license'
+						+ ' which doesn\'t support sharing (Customer Community or Customer Community Login)';
 					captureEntityNotFound(recRule, logMessage);
 				}
 			}
@@ -453,7 +455,12 @@ public inherited sharing class FormulaShareService {
 
 
 	private static Set<Id> getActiveUsers(Set<Id> userQueryIdSet) {
-		Map<Id,User> activeUserMap = new Map<Id,User>([SELECT Id FROM User WHERE Id IN :userQueryIdSet AND IsActive = TRUE]);
+		Map<Id,User> activeUserMap = new Map<Id,User>(
+			[SELECT Id FROM User 
+			WHERE Id IN :userQueryIdSet 
+			AND IsActive = TRUE
+			AND Profile.UserLicense.Name NOT IN ('Customer Community','Customer Community Login')]
+		);
 		return activeUserMap.keySet();
 	}
 
