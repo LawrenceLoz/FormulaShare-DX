@@ -36,28 +36,25 @@ public virtual inherited sharing class FormulaShareRecursionService {
 
 
     public virtual RecordsToProcess getRecordsToProcess(Schema.SObjectType type, Map<Id,SObject> oldRecordsMap, Map<Id,SObject> newRecordsMap) {
-        setProcessed(newRecordsMap);
-        Map<Id,SObject> oldStripped = stripProcessed(oldRecordsMap);
-        Map<Id,SObject> newStripped = stripProcessed(newRecordsMap);
-        return new RecordsToProcess(oldStripped, newStripped);
-    }
 
-
-    private void setProcessed(Map<Id,SObject> recordsMap) {
+        // If recursion allowed don't bother maintaining processed list for performance
         if(this.settings.Allow_Recursive_Reassessment__c) {
-            return;
+            return new RecordsToProcess(oldRecordsMap, newRecordsMap);
         }
 
-        processedIds.addAll(recordsMap.keySet());
+        // Otherwise remove any records previously processed
+        else {
+            Map<Id,SObject> oldStripped = stripProcessed(oldRecordsMap);
+            Map<Id,SObject> newStripped = stripProcessed(newRecordsMap);
+            processedIds.addAll(newRecordsMap.keySet());
+            return new RecordsToProcess(oldStripped, newStripped);
+        }
     }
 
 	// Returns a map with records processed this transaction removed
     private Map<Id,SObject> stripProcessed(Map<Id,SObject> recordsMap) {
-        if(this.settings.Allow_Recursive_Reassessment__c) {
-            return recordsMap;
-        }
 
-        else if(recordsMap == null) {
+        if(recordsMap == null) {
             return null;
         }
 

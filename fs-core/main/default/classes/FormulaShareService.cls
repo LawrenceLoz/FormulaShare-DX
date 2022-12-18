@@ -230,10 +230,12 @@ public inherited sharing class FormulaShareService {
 		
 		Set<Id> userQueryIdSet = new Set<Id>();
 		Set<Id> roleQueryIdSet = new Set<Id>();
+		Set<Id> mgrGroupQueryIdSet = new Set<Id>();
 
 		Set<RecordRule> userRecordRules = new Set<RecordRule>();
 		Set<RecordRule> roleRecordRules = new Set<RecordRule>();
 		Set<RecordRule> groupRecordRules = new Set<RecordRule>();
+		Set<RecordRule> mgrGroupRecordRules = new Set<RecordRule>();
 
 		Set<String> sharedToNamesGroups = new Set<String>();
 		Set<String> sharedToNamesRoles = new Set<String>();
@@ -256,55 +258,72 @@ public inherited sharing class FormulaShareService {
 			if(rule.isValid() && rule.active) {
 				System.debug('rule.controllingObjectSharedToFieldType: '+rule.controllingObjectSharedToFieldType);
 
-				// Add User Id to map
-				if(rule.shareWith == 'Users') {
-					if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.User.getSObjectType())) {
-						userQueryIdSet.add((Id) sharedToString);
-						userRecordRules.add(recRule);
-					}
-					else {
-						String logMessage = 'Expected field to contain valid user id. Instead found: ' + sharedToString;
-						captureEntityNotFound(recRule, logMessage);
-					}
-				}
+				switch on rule.shareWith {
 
-				// Add Group Id to map
-				else if(rule.shareWith == 'Public Groups') {
-					if(rule.controllingObjectSharedToFieldType == 'Id') {
-						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
-							updateShareMaps(recRule.recordToShare.Id, (Id) sharedToString, rule);
+					// Add User Id to map
+					when 'Users' {
+						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.User.getSObjectType())) {
+							userQueryIdSet.add((Id) sharedToString);
+							userRecordRules.add(recRule);
 						}
 						else {
-							String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
+							String logMessage = 'Expected field to contain valid user id. Instead found: ' + sharedToString;
 							captureEntityNotFound(recRule, logMessage);
 						}
 					}
-					else if(rule.controllingObjectSharedToFieldType == 'Name') {
-						sharedToNamesGroups.add(sharedToString);
-						groupRecordRules.add(recRule);
-					}
-				}
 
-				// Add Role Id to role group query set
-				else if(rule.shareWith == 'Roles' || rule.shareWith == 'Roles and Internal Subordinates' || rule.shareWith == 'Roles, Internal and Portal Subordinates') {
-					if(rule.controllingObjectSharedToFieldType == 'Id') {
-						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
-							roleQueryIdSet.add((Id) sharedToString);
+					// Add Group Id to map
+					when 'Public Groups' {
+						if(rule.controllingObjectSharedToFieldType == 'Id') {
+							if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
+								updateShareMaps(recRule.recordToShare.Id, (Id) sharedToString, rule);
+							}
+							else {
+								String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
+								captureEntityNotFound(recRule, logMessage);
+							}
+						}
+						else if(rule.controllingObjectSharedToFieldType == 'Name') {
+							sharedToNamesGroups.add(sharedToString);
+							groupRecordRules.add(recRule);
+						}
+					}
+
+					// Add Role Id to role group query set
+					when 'Roles', 'Roles and Internal Subordinates', 'Roles, Internal and Portal Subordinates' {
+						if(rule.controllingObjectSharedToFieldType == 'Id') {
+							if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.UserRole.getSObjectType())) {
+								roleQueryIdSet.add((Id) sharedToString);
+								roleRecordRules.add(recRule);
+							}
+							else {
+								String logMessage = 'Expected field to contain valid role id. Instead found: ' + sharedToString;
+								captureEntityNotFound(recRule, logMessage);
+							}
+						}
+						else if(rule.controllingObjectSharedToFieldType == 'Name') {
+							System.debug('Adding share for role rule with name');
+							sharedToNamesRoles.add(sharedToString);
 							roleRecordRules.add(recRule);
 						}
+					}
+
+					// Add user ids in fields to query set for manager group sharing
+					when 'Managers of Users', 'Users and Manager Subordinates' {
+						if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.User.getSObjectType())) {
+							mgrGroupQueryIdSet.add((Id) sharedToString);
+							mgrGroupRecordRules.add(recRule);
+						}
 						else {
-							String logMessage = 'Expected field to contain valid role id. Instead found: ' + sharedToString;
+							String logMessage = 'Expected field to contain valid user id. Instead found: ' + sharedToString;
 							captureEntityNotFound(recRule, logMessage);
 						}
 					}
-					else if(rule.controllingObjectSharedToFieldType == 'Name') {
-						System.debug('Adding share for role rule with name');
-						sharedToNamesRoles.add(sharedToString);
-						roleRecordRules.add(recRule);
+
+					when else {
+						system.debug('Share With value ' + rule.shareWith + ' does not match allowed options');
 					}
 				}
-
-				else system.debug('Share With value ' + rule.shareWith + ' does not match allowed options');
 			}
 
 			else if(!rule.isValid()) {
@@ -321,6 +340,11 @@ public inherited sharing class FormulaShareService {
 		// Process group sharing
 		if(!groupRecordRules.isEmpty()) {
 			assessGroupSharingFromNames(sharedToNamesGroups, groupRecordRules);
+		}
+
+		// Process manager group sharing
+		if(!mgrGroupRecordRules.isEmpty()) {
+			assessManagerGroupSharingFromIds(mgrGroupQueryIdSet, mgrGroupRecordRules);
 		}
 
 		// Query for role Ids if needed and create map
@@ -471,6 +495,53 @@ public inherited sharing class FormulaShareService {
 	}
 
 
+	private void assessManagerGroupSharingFromIds(Set<Id> mgrGroupQueryIdSet,Set<RecordRule> mgrGroupRecordRules) {
+		Map<String,Id> groupsMap = getMgrGroupsFromIds(mgrGroupQueryIdSet);
+
+		for(RecordRule recRule : mgrGroupRecordRules) {
+
+			// Update share maps or log only if group is set on record
+			if(recRule.sharedToString != null) {
+				Id userId = (Id) recRule.sharedToString;
+
+				String mgrGroupName;
+				if(recRule.rule.shareWith == 'Managers of Users') {
+					mgrGroupName = 'ManagerUp_' + userId;
+				}
+				else if(recRule.rule.shareWith == 'Users and Manager Subordinates') {
+					mgrGroupName = 'ManagerDown_' + userId;
+				}
+
+				Id mgrGroupId = groupsMap.get(mgrGroupName);
+	
+				if(mgrGroupId != null) {
+					updateShareMaps(recRule.recordToShare.Id, mgrGroupId, recRule.rule);
+				}
+	
+				else {
+					String logMessage = 'Field value \''+userId
+						+'\' should correspond to a user id which is valid for manager sharing of the type \'' + recRule.rule.shareWith
+						+ '\', but no manager sharing group was found with the name \''+mgrGroupName+'\'';
+					captureEntityNotFound(recRule, logMessage);
+				}
+			}
+		}
+	}
+
+
+	private static Map<String,Id> getMgrGroupsFromIds(Set<Id> mgrGroupQueryIdSet) {
+		Map<String,Id> mgrGroups = new Map<String,Id>();
+
+		// Query for matching public groups and queues
+		for(Group grp : [SELECT Id, DeveloperName FROM Group 
+			WHERE RelatedId IN :mgrGroupQueryIdSet
+			AND (Type = 'Manager' OR Type = 'ManagerAndSubordinatesInternal')]) {
+			mgrGroups.put(grp.DeveloperName,grp.Id);
+		}
+		return mgrGroups;
+	}	
+
+
 	private void assessRoleSharing(Set<Id> roleQueryIdSet, Set<RecordRule> roleRecordRules, Map<String,Id> roleNamesToIdsMap) {
 
 		// Build map of required group Ids for role groups
@@ -517,32 +588,32 @@ public inherited sharing class FormulaShareService {
 				}
 	
 				String shortSharedToId = FormulaShareIdUtilities.get15CharacterId(sharedToId);
-	
-				// Get group for Roles sharing
-				if(recRule.rule.shareWith == 'Roles') {
-					roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
-				}
-	
-				// Get group for Roles and Internal Subordinates sharing
-				else if(recRule.rule.shareWith == 'Roles and Internal Subordinates') {
-	
-					// If role and subordinates internal group exists, use this
-					if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
-						roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
+
+				switch on recRule.rule.shareWith {
+
+					// Get group for Roles sharing
+					when 'Roles' {
+						roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
 					}
-	
-					// If no role and subordinates internal group exists, use the role and subordinates group
-					// This will be the case when communities are not enabled
-					else {
+
+					when 'Roles and Internal Subordinates' {
+						// If role and subordinates internal group exists, use this
+						if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
+							roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
+						}
+		
+						// If no role and subordinates internal group exists, use the role and subordinates group
+						// This will be the case when communities are not enabled
+						else {
+							roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+						}
+					}
+
+					when 'Roles, Internal and Portal Subordinates' {
 						roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
 					}
 				}
-	
-				// Get group for Roles, Internal and Portal Subordinates sharing
-				else if(recRule.rule.shareWith == 'Roles, Internal and Portal Subordinates') {
-					roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
-				}
-	
+				
 				if(roleGroupId != null) {
 					updateShareMaps(recRule.recordToShare.Id, roleGroupId, recRule.rule);
 				}
