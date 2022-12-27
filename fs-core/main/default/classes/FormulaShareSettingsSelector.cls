@@ -38,7 +38,8 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
     private FormulaShare_Settings__mdt cachedSettings;
     
     public List<Schema.SObjectField> getSObjectFieldList() {
-        return new List<Schema.SObjectField> {
+
+        List<Schema.SObjectField> fields = new List<Schema.SObjectField> {
             FormulaShare_Settings__mdt.DeveloperName,
             FormulaShare_Settings__mdt.Recalculation_Batch_Size__c,
             FormulaShare_Settings__mdt.Trigger_Helper_Class_Override__c,
@@ -54,6 +55,9 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
             FormulaShare_Settings__mdt.Batch_Errors_Report_Name__c,
             FormulaShare_Settings__mdt.Allow_Recursive_Reassessment__c
         };
+
+        fields.addAll(new FormulaShareInjectionService().getExtraSettingsFields());
+        return fields;
     }
 
     public Schema.SObjectType getSObjectType() {

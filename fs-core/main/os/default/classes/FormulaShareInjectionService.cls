@@ -72,4 +72,8 @@ public inherited sharing class FormulaShareInjectionService {
         return new Set<String>();
     }
 
+    public List<Schema.SObjectField> getExtraSettingsFields() {
+        return new List<Schema.SObjectField>();
+    }
+
 }
