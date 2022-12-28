@@ -267,33 +267,40 @@ public inherited sharing class FormulaShareBatchService {
 	}
 
 
-    // Call from finish()
-    public void finaliseLogsAndMetrics() {
-		System.debug('totalValidSharesForRule for finish: '+ totalValidSharesForRule);
+    // Finalse methods called from finish()
+	FormulaShareLogs fsLogs;
+	fflib_ISObjectUnitOfWork finalUow;
+    public void finaliseLogs() {
 
-		FormulaShareLogs fsLogs = new FormulaShareLogs(this.logsList);
+		fsLogs = new FormulaShareLogs(this.logsList);
 		fsLogs.trimFailedBatches();
 		fsLogs.setBatchProcessingComplete();
 
+		// Update batch log records
+		finalUow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
+		finalUow.registerDirty(fsLogs.setFinalisedLogs());
+	}
+
+	public void finaliseMetrics() {
+		System.debug('totalValidSharesForRule for finish: '+ totalValidSharesForRule);
+
+		// Indicate batch failure in metrics if any failed batches
+		if(atLeastOneBatchFailed) {
+			finalUow = FormulaShareProcessedShareEventService.processForBatchFail(finalUow, rulesForType);
+		}
+
+		// Update total shares in batch finish metrics provided no metric capture issues
+		if(!atLeastOneMetricsUpdateFailed) {
+			FormulaShare_Log__c log = this.logsList[0];
+			finalUow = FormulaShareProcessedShareEventService.processForBatchFinish(finalUow, totalValidSharesForRule, totalErrorSharesForRule, log);
+		}
+	}
+
+	public void commitFinalUow() {
+
 		Exception metricsException;
-
 		try {
-			// Update batch log records
-			fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
-			uow.registerDirty(fsLogs.setFinalisedLogs());
-
-			// Indicate batch failure in metrics if any failed batches
-			if(atLeastOneBatchFailed) {
-				uow = FormulaShareProcessedShareEventService.processForBatchFail(uow, rulesForType);
-			}
-
-			// Update total shares in batch finish metrics provided no metric capture issues
-			if(!atLeastOneMetricsUpdateFailed) {
-				FormulaShare_Log__c log = this.logsList[0];
-				uow = FormulaShareProcessedShareEventService.processForBatchFinish(uow, totalValidSharesForRule, totalErrorSharesForRule, log);
-			}
-			
-			uow.commitWork();
+			finalUow.commitWork();
 			listViewUpdate();
 		}
 
@@ -308,9 +315,8 @@ public inherited sharing class FormulaShareBatchService {
 			catch(Exception exp) {
 				System.debug('Error updating batch log after metrics error: '+exp.getMessage());
 			}
-		}        
-    }
-    
+		}
+	}
 
 
 	private void listViewUpdate() {
