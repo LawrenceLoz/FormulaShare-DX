@@ -326,9 +326,11 @@ public with sharing class FormulaShareRulesListViewController {
 
             // Separate metrics for contexts
             String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
+            String targetedJobContext = FormulaShareProcessedShareEventService.targetedJobContext;
             String batchContext = FormulaShareProcessedShareEventService.batchContext;
             String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
             FormulaShare_Metrics__c triggerMetrics = metricsMap.get(developerName + triggerContext);
+            FormulaShare_Metrics__c targetedJobMetrics = metricsMap.get(developerName + targetedJobContext);
             FormulaShare_Metrics__c batchMetrics = metricsMap.get(developerName + batchContext);
             FormulaShare_Metrics__c batchFinishMetrics = metricsMap.get(developerName + batchFinishContext);
 
@@ -340,10 +342,8 @@ public with sharing class FormulaShareRulesListViewController {
             FormulaShareReportsService reportsService = FormulaShareReportsService.construct();
             recordLogsReportId = reportsService.getReportIdForName(settings.All_Record_Logs_Report_Name__c);
 
-            // If complete batch metrics are available, use these together with more recent trigger metrics
-            String ruleName;
+            // If complete batch metrics are available, use these together with more recent trigger and targeted job metrics
             if(batchFinishMetrics != null) {
-                ruleName = batchFinishMetrics.FormulaShare_Rule_Name__c;
 
                 noSharesApplied = batchFinishMetrics.Successful_Inserts__c;
                 noSharesFailed = (Integer) batchFinishMetrics.Failed_Inserts__c;
@@ -353,6 +353,12 @@ public with sharing class FormulaShareRulesListViewController {
                 if(triggerMetrics != null && triggerMetrics.Last_Batch_Run__c == lastBatchId) {
                     noSharesApplied += triggerMetrics.Successful_Inserts__c;
                     noSharesFailed += (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // ... and from targeted job metrics if captured after last batch
+                if(targetedJobMetrics != null && targetedJobMetrics.Last_Batch_Run__c == lastBatchId) {
+                    noSharesApplied += targetedJobMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) targetedJobMetrics.Failed_Inserts__c;
                 }
 
                 // Indicate batch failure if last finshed batches failed...
@@ -377,19 +383,23 @@ public with sharing class FormulaShareRulesListViewController {
                 }
             }
 
-            else if(triggerMetrics != null || batchMetrics != null) {
+            else if(triggerMetrics != null || targetedJobMetrics != null || batchMetrics != null) {
                 noSharesApplied = 0;
 
                 // Set number of shares from trigger metrics
                 if(triggerMetrics != null) {
-                    ruleName = triggerMetrics.FormulaShare_Rule_Name__c;
-                    noSharesApplied = triggerMetrics.Successful_Inserts__c;
-                    noSharesFailed = (Integer) triggerMetrics.Failed_Inserts__c;
+                    noSharesApplied += triggerMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // Set number of shares from trigger metrics
+                if(targetedJobMetrics != null) {
+                    noSharesApplied += targetedJobMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) targetedJobMetrics.Failed_Inserts__c;
                 }
 
                 // Add details from batch metrics
                 if(batchMetrics != null) {
-                    ruleName = batchMetrics.FormulaShare_Rule_Name__c;
                     noSharesApplied += batchMetrics.Successful_Inserts__c;
                     noSharesFailed += (Integer) batchMetrics.Failed_Inserts__c;
                     if(batchMetrics.Last_Failed_Batch__c != null) {
@@ -427,6 +437,7 @@ public with sharing class FormulaShareRulesListViewController {
                 else if(recordFailure) {
                     warningUrlLabel = noSharesFailed + ' record errors';
                     warningTooltip = 'View record error logs';
+                    String ruleName = this.developerName;
                     
                     // ..Record errors since last batch if batch run completed before
                     if(lastBatchId != null && batchFinishEpoch != null) {

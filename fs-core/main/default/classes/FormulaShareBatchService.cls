@@ -1,5 +1,6 @@
 public inherited sharing class FormulaShareBatchService {
 
+	String executeContext;
     Schema.SObjectType typeInThisBatch;
     String targetedJobInScope;
     List<FormulaShareRule> rulesForType;
@@ -11,13 +12,16 @@ public inherited sharing class FormulaShareBatchService {
     Boolean atLeastOneBatchFailed = false;
 	Boolean atLeastOneMetricsUpdateFailed = false;
 
-    public static final String batchContext = FormulaShareProcessedShareEventService.batchContext;
-
+	// Constructor for full batch processing
     public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType) {
-        this(typeInThisBatch, rulesForType, null);
+		this.executeContext = FormulaShareProcessedShareEventService.batchContext;
+        this.typeInThisBatch = typeInThisBatch;
+        this.rulesForType = rulesForType;
     }
 
+	// Constructor for targeted job processing
     public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType, String targetedJobInScope) {
+		this.executeContext = FormulaShareProcessedShareEventService.targetedJobContext;
         this.typeInThisBatch = typeInThisBatch;
         this.rulesForType = rulesForType;
         this.targetedJobInScope = targetedJobInScope;
@@ -60,7 +64,7 @@ public inherited sharing class FormulaShareBatchService {
             uow.registerNew(rib, FormulaShare_Rule_in_Batch__c.FormulaShare_Log__c, log);
         }
 
-        // Create metrics for any rules which don't have them already
+        // Create metrics for the execute context for any rules which don't have them already
         List<FormulaShare_Metrics__c> metrics = createMetricsForNewRules();
         uow.registerNew(metrics);
 
@@ -190,9 +194,9 @@ public inherited sharing class FormulaShareBatchService {
 			publisher.addEventsForEntitiesNotFound(entitiesNotFound);
 
 			System.debug('No insert events: '+insertDetails.size());
-			System.debug('No delete events: '+insertDetails.size());
+			System.debug('No delete events: '+deleteDetails.size());
 			FormulaShare_Log__c log = logsList[0];
-			FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = publisher.processForBatch(uow, log);
+			FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = publisher.processForTargetedJobOrBatch(uow, log, executeContext);
 			uow = incWithUow.uow;
 			system.debug('Processing for batch. UOW3: '+uow);
 
@@ -281,20 +285,33 @@ public inherited sharing class FormulaShareBatchService {
 		finalUow.registerDirty(fsLogs.setFinalisedLogs());
 	}
 
-	public void finaliseMetrics() {
-		System.debug('totalValidSharesForRule for finish: '+ totalValidSharesForRule);
+	public void finaliseFullBatchMetrics() {
 
 		// Indicate batch failure in metrics if any failed batches
 		if(atLeastOneBatchFailed) {
 			finalUow = FormulaShareProcessedShareEventService.processForBatchFail(finalUow, rulesForType);
 		}
 
-		// Update total shares in batch finish metrics provided no metric capture issues
+		// Set metrics in batch finish based on all valid sharing
 		if(!atLeastOneMetricsUpdateFailed) {
 			FormulaShare_Log__c log = this.logsList[0];
-			finalUow = FormulaShareProcessedShareEventService.processForBatchFinish(finalUow, totalValidSharesForRule, totalErrorSharesForRule, log);
-		}
+			finalUow = FormulaShareProcessedShareEventService.processForFullBatchFinish(finalUow, totalValidSharesForRule, totalErrorSharesForRule, log);
+		}		
 	}
+
+//	public void finaliseTargetedJobMetrics() {
+//
+//		// Indicate batch failure in metrics if any failed batches
+//		if(atLeastOneBatchFailed) {
+//			finalUow = FormulaShareProcessedShareEventService.processForBatchFail(finalUow, rulesForType);
+//		}
+//
+//		// Set metrics in batch finish based on sharing inserted in this batch
+//		if(!atLeastOneMetricsUpdateFailed) {
+//			FormulaShare_Log__c log = this.logsList[0];
+//			finalUow = FormulaShareProcessedShareEventService.processForTargetedJobFinish(finalUow, totalInsertedSharesForRule, totalErrorSharesForRule, log);
+//		}
+//	}
 
 	public void commitFinalUow() {
 
@@ -350,13 +367,13 @@ public inherited sharing class FormulaShareBatchService {
 			ruleNames.add(rule.developerName);
 		}
 		FormulaShareMetricsSelector fsmSelector = new FormulaShareMetricsSelector();
-		List<FormulaShare_Metrics__c> existingMetrics = fsmSelector.getMetricsForRulesAndContext(ruleNames, batchContext);
+		List<FormulaShare_Metrics__c> existingMetrics = fsmSelector.getMetricsForRulesAndContext(ruleNames, executeContext);
 		for(FormulaShare_Metrics__c m : existingMetrics) {
 			ruleNames.remove(m.FormulaShare_Rule_Name__c);	// Take rules with metrics out of the set
 		}
 
 		// Get list of blank metrics records for all rules which don't yet have batch metrics
-		List<FormulaShare_Metrics__c> allMetrics = FormulaShareMetrics.getBlankMetrics(ruleNames, batchContext);
+		List<FormulaShare_Metrics__c> allMetrics = FormulaShareMetrics.getBlankMetrics(ruleNames, executeContext);
 
 		return allMetrics;
 	}

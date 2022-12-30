@@ -25,7 +25,21 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     static FormulaShare_Log__c batchLog;
     static FormulaShare_Settings__mdt settings;
     static fflib_ISObjectUnitOfWork uow;
+
+    // Metrics type names defined below.
+    // Typically we would expect each rule to have at most one metrics record for the following:
+    // 
+    // 'Last Batch' - Set in the full batch finish method with all valid shares meeting the criteria of the rule (whether or not these were created in this batch)
+    // 'Batch Operations Since Last Batch' - Incremented with number of shares created in a currently running full batch. Set to zero after full batch run
+    // 'Targeted Job Operations Since Last Batch' - Incremented with number of shares created by targeted jobs since the last full batch run. Set to zero after full batch run
+    // 'Trigger Operations Since Last Batch' - Incremented with number of shares created by targeted jobs since the last full batch run. Set to zero after full batch run
+    //
+    // Together these metrics allow us to represent the true number of shares immediately after the last batch run,
+    // But show the total plus any created since a full run between full batch runs.
+    // Logic for this is in FormulaShareRulesListViewController
+
     public static final String batchContext = 'Batch Operations Since Last Batch';
+    public static final String targetedJobContext = 'Targeted Job Operations Since Last Batch';
     public static final String triggerContext = 'Trigger Operations Since Last Batch';
     public static final String batchFinishContext = 'Last Batch';
 
@@ -37,8 +51,9 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         uow.commitWork();   // Commit all DML
     }
 
-    public static IncrementsWithUow processForBatch(fflib_ISObjectUnitOfWork batchUow, List<FormulaShare_Processed_Share_Event__e> pseList, FormulaShare_Log__c relatedBatchLog) {
-        context = batchContext;
+
+    public static IncrementsWithUow processForTargetedJobOrBatch(fflib_ISObjectUnitOfWork batchUow, List<FormulaShare_Processed_Share_Event__e> pseList, FormulaShare_Log__c relatedBatchLog, String executeContext) {
+        context = executeContext;
         uow = batchUow;
         system.debug('Processing for batch. UOW1: '+uow);
         batchLog = relatedBatchLog;
@@ -51,7 +66,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         incWithUow.uow = uow;
         system.debug('Processing for batch. UOW2: '+uow);
 
-        return incWithUow;     // Pass uow back to ProcessBatch class
+        return incWithUow;
     }
 
     public static fflib_ISObjectUnitOfWork processForBatchFail(fflib_ISObjectUnitOfWork batchUow, List<FormulaShareRule> rules) {
@@ -61,7 +76,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         return uow;
     }
 
-    public static fflib_ISObjectUnitOfWork processForBatchFinish(fflib_ISObjectUnitOfWork batchUow, Map<String,Integer> totalValidSharesForRule, Map<String,Integer> totalErrorSharesForRule, FormulaShare_Log__c relatedBatchLog) {
+    public static fflib_ISObjectUnitOfWork processForFullBatchFinish(fflib_ISObjectUnitOfWork batchUow, Map<String,Integer> totalValidSharesForRule, Map<String,Integer> totalErrorSharesForRule, FormulaShare_Log__c relatedBatchLog) {
         context = batchFinishContext;
         uow = batchUow;
         batchLog = relatedBatchLog;
@@ -69,7 +84,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         clearMetricsAfterBatchFinish(totalValidSharesForRule.keySet(), relatedBatchLog);
         return uow;
     }
-    
+
 
     private static Map<String,FormulaShareMetrics.Increment> process(List<FormulaShare_Processed_Share_Event__e> pseList) {
         settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
@@ -168,15 +183,19 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     }
 
 
+    // Will update any metrics representing inserts/errors since the last batch (trigger ops, targeted jobs and inserts from the running batch)
+    // These will be replaced by the batch finish metrics (Context = "Last Batch")
     private static void clearMetricsAfterBatchFinish(Set<String> ruleNamesSet, FormulaShare_Log__c batchLog) {
 
         // Get existing metrics for rules
         List<FormulaShare_Metrics__c> metricsObjectList = new FormulaShareMetricsSelector().getAllMetricsForRules(ruleNamesSet);
 
-        // Consider only batch and trigger metrics
+        // Consider only batch, trigger and targeted job metrics
         List<FormulaShare_Metrics__c> metricsOjectsToUpdate = new List<FormulaShare_Metrics__c>();
         for(FormulaShare_Metrics__c metricsObj : metricsObjectList) {
-            if(metricsObj.Context__c == batchContext || metricsObj.Context__c == triggerContext) {
+            if(metricsObj.Context__c == batchContext 
+                || metricsObj.Context__c == triggerContext
+                || metricsObj.Context__c == targetedJobContext) {
                 metricsOjectsToUpdate.add(metricsObj);
             }
         }

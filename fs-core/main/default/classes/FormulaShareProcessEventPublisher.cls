@@ -84,10 +84,11 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
 
     // Method to process insertion of record logs directly rather than via published events
-    public FormulaShareProcessedShareEventService.IncrementsWithUow processForBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog) {
+    // This is called by the full batch job and by targeted batches with appropriate context for metrics records
+    public FormulaShareProcessedShareEventService.IncrementsWithUow processForTargetedJobOrBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog, String context) {
         
         // Set logs for processed shares
-        FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = FormulaShareProcessedShareEventService.processForBatch(uow, pseList, relatedBatchLog);
+        FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = FormulaShareProcessedShareEventService.processForTargetedJobOrBatch(uow, pseList, relatedBatchLog, context);
         system.debug('Processing for batch. UOW3: '+uow);
         pseList.clear();
 
