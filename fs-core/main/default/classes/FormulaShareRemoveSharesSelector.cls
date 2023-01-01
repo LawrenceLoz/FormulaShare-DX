@@ -40,7 +40,7 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
 
         // Otherwise query, and add to cache if a settings record exists
         else {
-            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = getSettingsList();
+            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = getSettingsList(objectName);
             
             if(!settingsList.isEmpty()) {
                 objSettings = settingsList[0];
@@ -58,6 +58,5 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
             WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
     }
-    
-    
+
 }
