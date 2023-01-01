@@ -59,4 +59,5 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
             WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
     }
     
+    
 }
