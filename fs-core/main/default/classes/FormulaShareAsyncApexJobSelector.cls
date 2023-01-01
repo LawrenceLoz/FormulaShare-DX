@@ -5,28 +5,52 @@ public with sharing class FormulaShareAsyncApexJobSelector extends fflib_SObject
     }
 
     public List<Schema.SObjectField> getSObjectFieldList() {
-        return new List<Schema.SObjectField> { AsyncApexJob.Id };
-    }
-
-    @TestVisible static Boolean isScheduled;
-    private void setIsScheduled() {
-        List<String> finishedReasons = new List<String> {
-            'Aborted', 'Completed', 'Failed'
+        return new List<Schema.SObjectField> {
+            AsyncApexJob.Id         
         };
-        String query = newQueryFactory()
-            .setCondition('Status NOT IN :finishedReasons AND ApexClass.Name = \'FormulaShareProcessSchedulable\'')
-            .toSOQL();
-        
-        List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
-        isScheduled = !jobs.isEmpty();
     }
 
     // Returns true if a job is scheduled for the future or false otherwise
-    public static Boolean isScheduled() {
-        if(isScheduled == null) {
+    // Designed to be safe to call in a loop (done from list view controller)
+    @TestVisible static Boolean isFullBatchScheduled;
+    public static Boolean isFullBatchScheduled() {
+        if(isFullBatchScheduled == null) {
             FormulaShareAsyncApexJobSelector jobSelector = new FormulaShareAsyncApexJobSelector();
-            jobSelector.setIsScheduled();
+            List<AsyncApexJob> jobs = jobSelector.getScheduledJobs('FormulaShareProcessSchedulable');
+            isFullBatchScheduled = !jobs.isEmpty();
         }
-        return isScheduled;
+        return isFullBatchScheduled;
     }
+
+
+    public List<AsyncApexJob> getScheduledJobs(String className) {
+        List<String> finishedReasons = new List<String> {
+            'Aborted', 'Completed', 'Failed'
+        };
+        // Querying CronTrigger requires API version 52+, so can switch to code below after FFLibs upgrade
+//        String query = newQueryFactory()
+//            .selectField(AsyncApexJob.Id)
+//            .selectField('CronTrigger.OwnerId')
+//            .setCondition('Status NOT IN :finishedReasons AND ApexClass.Name = :className')
+//            .toSOQL();
+        String query = 'SELECT Id, CronTriggerId, CronTrigger.OwnerId FROM AsyncApexJob WHERE Status NOT IN :finishedReasons AND ApexClass.Name = :className WITH SECURITY_ENFORCED';
+        List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
+
+        return jobs;
+    }
+
+
+    public Integer getNoJobsProcessingAndInQueue(String className) {
+        List<String> processingAndInQueueReasons = new List<String> {
+            'Queued', 'Preparing', 'Processing' // Processing
+            , 'Holding'                         // Holding
+        };
+        String query = newQueryFactory()
+            .setCondition('Status IN :processingAndInQueueReasons AND ApexClass.Name = :className')
+            .toSOQL();
+        
+        List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
+        return jobs.size();
+    }
+
 }

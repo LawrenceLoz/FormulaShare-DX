@@ -45,14 +45,19 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		Database.QueryLocator ql;
 
 		if(!rulesForType.isEmpty()) {
-
-			// Get query locator
-			ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
-			system.debug('query locator: ' + ql);
-
-			// Save initial batch and RIB logs
-			this.batchService = new FormulaShareBatchService(typeInThisBatch, rulesForType);
-			this.batchService.createBatchAndRibLogs(ql, this.batchSize);
+			
+			this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, rulesForType);
+			
+			// Continue only if object settings allow processing for full batch
+			if(batchService.processingAllowed()) {
+				
+				// Get query locator
+				ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);
+				system.debug('query locator: ' + ql);
+	
+				// Save initial batch and RIB logs
+				this.batchService.createBatchAndRibLogs(ql, this.batchSize);
+			}
 		}
 
 		return ql;

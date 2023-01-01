@@ -194,7 +194,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
     public static void testBatchFinishMetricsPopulate() {
 
         System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareAsyncApexJobSelector.isScheduled = true;
+            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
     
             List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
@@ -235,7 +235,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
     public static void testBatchFinishFailPlusOtherMetrics() {
         
         System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareAsyncApexJobSelector.isScheduled = true;
+            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
 
             List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
@@ -278,7 +278,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
     public static void testBatchAndTriggerOnly() {
         
         System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareAsyncApexJobSelector.isScheduled = true;
+            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
     
             List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
@@ -316,7 +316,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
     public static void testNoJobScheduled() {
         
         System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareAsyncApexJobSelector.isScheduled = false;   // Should trigger error message relating to scheduled job
+            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = false;   // Should trigger error message relating to scheduled job
             setMocks();
 
             List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();

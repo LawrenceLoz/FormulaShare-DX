@@ -294,7 +294,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     // Create record logs only if setting allows
     // And only if job is scheduled (to prevent data volumes growing without cleanup job running)    
     private static Boolean createRecordLogs() {
-        return settings.Log_Processing_Events__c == 'All' && FormulaShareAsyncApexJobSelector.isScheduled();
+        return settings.Log_Processing_Events__c == 'All' && FormulaShareAsyncApexJobSelector.isFullBatchScheduled();
     }
 
 

@@ -1,9 +1,9 @@
-public inherited sharing class FormulaShareBatchService {
+public virtual inherited sharing class FormulaShareBatchService {
 
-	String executeContext;
-    Schema.SObjectType typeInThisBatch;
-    String targetedJobInScope;
-    List<FormulaShareRule> rulesForType;
+	protected String executeContext;
+    protected Schema.SObjectType typeInThisBatch;
+    protected String targetedJobInScope;
+    protected List<FormulaShareRule> rulesForType;
 
 	List<FormulaShare_Log__c> logsList;
 
@@ -19,13 +19,13 @@ public inherited sharing class FormulaShareBatchService {
         this.rulesForType = rulesForType;
     }
 
-	// Constructor for targeted job processing
-    public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType, String targetedJobInScope) {
-		this.executeContext = FormulaShareProcessedShareEventService.targetedJobContext;
-        this.typeInThisBatch = typeInThisBatch;
-        this.rulesForType = rulesForType;
-        this.targetedJobInScope = targetedJobInScope;
-    }
+	// Zero arg constructor needed to allow inheritence - not actually used
+	protected FormulaShareBatchService() {}
+
+	// Full batch processing allowed by default, but can be overridden
+	public virtual Boolean processingAllowed() {
+		return true;
+	}
 
 
     // Call from start()

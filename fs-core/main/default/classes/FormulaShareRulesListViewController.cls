@@ -414,7 +414,7 @@ public with sharing class FormulaShareRulesListViewController {
 
             // If job isn't scheduled, set icon and link
             warningUrlLabel = '';
-            if(!FormulaShareAsyncApexJobSelector.isScheduled()) {
+            if(!FormulaShareAsyncApexJobSelector.isFullBatchScheduled()) {
                 warningIcon = warningTriangle;
                 warningUrlLabel = 'Schedule batch job';
                 warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';

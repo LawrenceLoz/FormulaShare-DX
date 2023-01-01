@@ -68,6 +68,12 @@ public inherited sharing class FormulaShareInjectionService {
         return new FormulaShareProcessedRecordShare();
     }
 
+    public FormulaShareBatchService getBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType) {
+        return new FormulaShareBatchService(typeInThisBatch, rulesForType);
+    }
+
+
+
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();
     }

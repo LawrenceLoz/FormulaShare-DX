@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRemoveSharesSelector {
+public virtual inherited sharing class FormulaShareRemoveSharesSelector {
 
     public static FormulaShareRemoveSharesSelector construct() {
         return new FormulaShareRemoveSharesSelector();
@@ -40,11 +40,7 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
 
         // Otherwise query, and add to cache if a settings record exists
         else {
-            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = 
-                [SELECT Id, Retain_Sharing_After_Record_Changes__c
-                    , Maximum_Recursive_Reassessments__c, Allow_Recursive_Reassessment__c
-                FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-                WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
+            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = getSettingsList();
             
             if(!settingsList.isEmpty()) {
                 objSettings = settingsList[0];
@@ -55,14 +51,12 @@ public inherited sharing class FormulaShareRemoveSharesSelector {
         return objSettings;
     }
 
-    public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getAllSettings() {
+    // Can be overridden to return additional fields
+    public virtual List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getSettingsList(String objectName) {
         return [
-            SELECT DeveloperName, MasterLabel, Standard_Object_to_Remove_Sharing__r.QualifiedApiName
-                , Retain_Sharing_After_Record_Changes__c
-                , Maximum_Recursive_Reassessments__c, Allow_Recursive_Reassessment__c
+            SELECT Id, Retain_Sharing_After_Record_Changes__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-            LIMIT 50000
-        ];
+            WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
     }
     
 }
