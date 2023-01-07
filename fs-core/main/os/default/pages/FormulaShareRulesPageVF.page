@@ -1,50 +1,38 @@
 <apex:page>
+    <head>
+        <apex:slds />
+        <apex:includeLightning />
 
-    <apex:includeLightning />
-
-    <apex:includeScript value="{!$Resource.cometd}"/>
-    <apex:includeScript value="{!$Resource.jquery}"/>
-    <apex:includeScript value="{!$Resource.json2}"/>
-    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
-
-    <div id="lightningvf" />
-
-    <script>
-        $Lightning.use("c:FormulaShareLightningOutApp", function () {
-            $Lightning.createComponent("c:formulaShareRulesPage",
-                {},
-                "lightningvf",
-                function (cmp) { }
-            );
-        });
-
-        (function($){
-        $(document).ready(function() {
-        
-            $.cometd.configure({
-                url: window.location.protocol + '//' + window.location.hostname + '/cometd/55.0',
-                requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}' },
-                appendMessageTypeToURL: false
+        <!-- Note that automatic refreshes in response to platform events aren't supported 
+            for the following reasons:
+                - Use of session id to authenticate using cometd is not permitted in AppExchange security reivew
+                - Lightning Message Service isn't supported for Visualforce pages running in Classic
+        -->
+        <script>
+            $Lightning.use("c:FormulaShareLightningOutApp", function () {
+                $Lightning.createComponent("c:formulaShareRulesPage",
+                    {},
+                    "lightningvf",
+                    function (cmp) { }
+                );
             });
+        </script>
+    </head>
 
-            $.cometd.websocketEnabled = false;
+    <body class="slds-scope" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-            $.cometd.handshake();
+        <!-- Replaced with aura component embedding LWC -->
+        <div id="lightningvf" />
 
-            // Subscribe to DML and list update events and reload page when required
-            $.cometd.addListener('/meta/handshake', function (message) {
-                // Unpackaged (no namespace) event listeners
-                $.cometd.subscribe('/event/FormulaShare_Rule_DML__e', function (message) {
-                    window.location.reload();
-                });
-                $.cometd.subscribe('/event/FormulaShare_List_Update__e', function (message) {
-                    window.location.reload();
-                });
-            });
+        <div class="slds-box slds-theme_shade slds-m-horizontal_xx-large slds-m-top_large">
+            <div style="display:flex; align-items:center;">
+                <div class="slds-m-left_medium">
+                    FormulaShare is optimised for use in Lightning. When using the rules page from
+                    Classic it's necessary to refresh the browser manually each time a rule is saved or 
+                    a recalculation is initiated.        
+                </div>
+            </div>
+        </div>
 
-        });
-        })(jQuery)
-
-    </script>
-
+    </body>
 </apex:page>
