@@ -26,6 +26,12 @@ public inherited sharing class FormulaShareInjectionService {
         return false;
     }
 
+    @AuraEnabled(cacheable=false)
+    public static void processOnActionClick(String baseUrl) {
+        return;
+    }
+
+
     public FormulaShareRulesSelector getRulesSelector() {
         return FormulaShareRulesSelector.construct();
     }

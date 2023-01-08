@@ -8,6 +8,7 @@ import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewContro
 import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
 import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
+import processOnActionClick from '@salesforce/apex/FormulaShareInjectionService.processOnActionClick';
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
 
@@ -319,9 +320,20 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         //console.log('loaded actions');
     }
 
+    baseURL;
+    renderedCallback() {
+        this.baseURL = window.location.origin;
+    }
 
     // Delegate processing of treegrid actions
     handleRowAction(event) {
+        processOnActionClick({ baseUrl : this.baseURL.toString() })
+            .then(result => {
+                // console.log('Processed apex on action click: ',result);
+            })
+            .catch(error => {
+                // console.log('Error processing apex on action click: ',error);
+            });
 
         // If click is on a schedule warning button, toggle the modal
         if(event.detail.action.name === 'scheduleWarning') {
