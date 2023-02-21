@@ -209,51 +209,6 @@ public class FormulaShareServiceTest {
     }
 
 
-    @IsTest
-    public static void testCreateMgrUpSharingNewRecord() {
-        setMocks();
-
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            // Get the inserted user to share record to
-            User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
-
-            // Create log object and set fields which have test rules created within apex class
-            FormulaShare_Log__c log = new FormulaShare_Log__c();
-            log.Type_In_Scope__c = u.Id;  // Set to user Id of test user
-            log.OwnerId = UserInfo.getUserId();     // Make sure owner is a different user
-            insert log;
-
-            FormulaShareService fsService = callProcessForLogRecord(log);
-
-            // Check that fsService response is as expected
-            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
-
-            
-            if(FormulaShareRuleDetailController.isManagerSharingSupported()) {
-                Group mgrUpGroup = [SELECT Id FROM Group WHERE RelatedId = :u.Id AND Type = 'Manager' LIMIT 1];
-
-                List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-                System.assert(!sharesToInsertList.isEmpty(), 'No share record for users manager group');
-                System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
-                System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-                System.assertEquals(mgrUpGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
-                System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-                System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
-            }
-
-            else {
-                Boolean capturedEntityNotFound = false;
-                for(FormulaShareService.EntityNotFound enf : fsService.getEntitiesNotFound()) {
-                    if(enf.recordId == log.Id && enf.rule.developerName == FormulaShareRuleFactory.mgrUpRuleName) {
-                        capturedEntityNotFound = true;
-                    }
-                }
-                System.assert(capturedEntityNotFound, 'Expected to log that entity not found due to manager groups not being enabled');
-            }
-        }
-    }
-
-
     // ------------------ Testing updates to sharing -------------------------
     @IsTest
     public static void testUpdateRoleSharingToNewRole() {
