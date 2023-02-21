@@ -113,8 +113,22 @@
                     Sharing provided
                 </span>
             </h3>
+
+            <!-- Show default team sharing configurtion if this option selected -->
+            <template if:true={shareWithDefaultTeam}>
+
+                <c-formula-share-rule-detail-team-access
+                    rule={rule}
+                    share-with={rule.shareWith}
+                    onteamaccessupdate={handleTeamAccessUpdate}
+                >
+                </c-formula-share-rule-detail-team-access> 
+                
+            </template>
+
             <div aria-hidden="false" class="slds-section__content">
                 <c-formula-share-rule-detail-access 
+                    suppress-access-level={shareWithDefaultTeam}
                     internal-sharing-model={sharedObjectDetail.internalSharingModel}
                     external-sharing-model={sharedObjectDetail.externalSharingModel}
                     account-related-owd={accountRelatedOwd}

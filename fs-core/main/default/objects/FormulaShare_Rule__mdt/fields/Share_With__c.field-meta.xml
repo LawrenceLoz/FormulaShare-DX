@@ -45,6 +45,16 @@
                 <default>false</default>
                 <label>Users and Manager Subordinates</label>
             </value>
+            <value>
+                <fullName>Default Account Teams of Users</fullName>
+                <default>false</default>
+                <label>Default Account Teams of Users</label>
+            </value>
+            <value>
+                <fullName>Default Opportunity Teams of Users</fullName>
+                <default>false</default>
+                <label>Default Opportunity Teams of Users</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

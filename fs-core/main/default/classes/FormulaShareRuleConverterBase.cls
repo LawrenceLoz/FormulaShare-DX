@@ -22,6 +22,10 @@ public abstract inherited sharing class FormulaShareRuleConverterBase {
         mdRule.Opportunity_Access__c = rule.opportunityAccess;
         mdRule.Sharing_Reason__c = rule.sharingReason;
 
+        mdRule.Access_For_Team__c = rule.accessForTeam;
+        mdRule.Access_For_Owner_Of_Teams_User_Is_On__c = rule.accessForOwnerOfTeamsUserIsOn;
+        mdRule.Access_For_Team_Comembers__c = rule.accessForTeamComembers;
+
         return mdRule;
     }
 

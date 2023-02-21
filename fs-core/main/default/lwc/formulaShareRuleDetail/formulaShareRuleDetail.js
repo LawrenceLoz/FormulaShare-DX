@@ -75,6 +75,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
             //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
             this.savedRuleType = this.rule.type;
+            this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
             this.fireEventWithRule();
         });
     }
@@ -192,9 +193,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
         //console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
         this.fireEventWithRule();
     }
+
+    shareWithDefaultTeam = false;
     handleShareWithChange(event) {
         //console.log('sharewith change');
         this.rule.shareWith = event.detail;
+        this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
         this.fireEventWithRule();
     }
     handleShareFieldTypeChange(event) {
@@ -227,6 +231,25 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
             return lastRel;
         }
+    }
+
+
+    //-------- Event handlers for Account / Opp Default Team access component --------// 
+
+    handleTeamAccessUpdate(event) {
+        
+        switch (event.detail.type) {
+            case 'accessForTeam':
+                //console.log('contact access updated');
+                this.rule.accessForTeam = event.detail.setting;
+                break;
+            case 'accessForOwnerOfTeamsUserIsOn':
+                this.rule.accessForOwnerOfTeamsUserIsOn = event.detail.setting;
+                break;
+            case 'accessForTeamComembers':
+                this.rule.accessForTeamComembers = event.detail.setting;
+        }
+        this.fireEventWithRule();
     }
 
 

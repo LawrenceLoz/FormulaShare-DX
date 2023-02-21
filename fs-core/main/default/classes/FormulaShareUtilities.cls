@@ -507,17 +507,22 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	private static Boolean contactSharingControlledByAccount;
 	@AuraEnabled(cacheable=true)
 	public static Boolean isContactSharingControlledByAccount() {
-		Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
-		SObject share = accountShareType.newSObject();
-		try {
-			share.put('ContactAccessLevel', 'Read');
+		if(contactSharingControlledByAccount == null) {
+			Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
+			SObject share = accountShareType.newSObject();	// This will be possible even if account is Read/Write access
+			try {
+				share.put('ContactAccessLevel', 'Read');
+			}
+			catch(Exception e) {
+				contactSharingControlledByAccount = true;	// If exception assigning contact access level, sharing is controlled by account
+				return true;
+			}
+			contactSharingControlledByAccount = false;
 		}
-		catch(Exception e) {
-			return true;	// If exception assigning contact access level, sharing is controlled by account
-		}
-		return false;
+		return contactSharingControlledByAccount;
 	}
 
 	public static Map<String,SObject> cmdtToCmdtMap(FormulaShare_Rule__mdt rule) {

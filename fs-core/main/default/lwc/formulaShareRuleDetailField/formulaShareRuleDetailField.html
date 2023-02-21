@@ -195,6 +195,42 @@
                             This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
                             id of the user whose Manager Subordinates Group should have access.
                         </template>
+
+                        <template if:true={shareWithFlags.defaultAccountTeamsOfUsers}>
+                            When <b>Default Account Teams of Users</b> is selected, rules will share to all users within the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=000382679&type=1" 
+                                label="Default Account Team" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose team should have access.
+                            Default Account Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
+                        </template>
+
+                        <template if:true={shareWithFlags.defaultOpportunityTeamsOfUsers}>
+                            When <b>Default Opportunity Teams of Users</b> is selected, rules will share to all users within the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=000382679&type=1" 
+                                label="Default Opportunity Team" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose team should have access.
+                            Default Opportunity Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
+                        </template>
                     </div>
                 </div>
             </div>

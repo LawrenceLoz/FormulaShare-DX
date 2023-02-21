@@ -31,7 +31,10 @@ public inherited sharing virtual class FormulaShareMetadataDMLRules extends Form
         // Set or clear any fields which are either set or cleared depending on level of the relationship 
         this.fieldsToSetOrClear = new Set<String> {
             namespacePrefix + 'Shared_To_Field_Type__c',
-            namespacePrefix + 'Shared_To__c'
+            namespacePrefix + 'Shared_To__c',
+            namespacePrefix + 'Access_For_Team__c',
+            namespacePrefix + 'Access_For_Owner_Of_Teams_User_Is_On__c',
+            namespacePrefix + 'Access_For_Team_Comembers__c'
         };
         this.fieldsToSetOrClear.addAll(new FormulaShareInjectionService().getExtraRelationshipFields());
 

@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Access_Level__c</fullName>
+    <fullName>Access_For_Owner_Of_Teams_User_Is_On__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <label>Access Level</label>
-    <required>true</required>
+    <label>Access For Owner Of Teams User Is On</label>
+    <required>false</required>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
+            <value>
+                <fullName>None</fullName>
+                <default>false</default>
+                <label>None</label>
+            </value>
             <value>
                 <fullName>Read</fullName>
                 <default>false</default>
@@ -19,11 +24,6 @@
                 <fullName>Edit</fullName>
                 <default>false</default>
                 <label>Edit</label>
-            </value>
-            <value>
-                <fullName>Varies</fullName>
-                <default>false</default>
-                <label>Varies</label>
             </value>
         </valueSetDefinition>
     </valueSet>

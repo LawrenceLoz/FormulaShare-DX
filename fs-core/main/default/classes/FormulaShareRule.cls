@@ -61,6 +61,10 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String controllingObjectSharedToFieldToken;
     @AuraEnabled public String controllingObjectSharedToFieldType;
 
+    @AuraEnabled public String accessForTeam;
+    @AuraEnabled public String accessForOwnerOfTeamsUserIsOn;
+    @AuraEnabled public String accessForTeamComembers;
+
     // **************** Variables to support trigger assessment ************** //
 
     // Populates with the field which might be relevant to a sharing change for a trigger
@@ -114,6 +118,11 @@ public virtual inherited sharing class FormulaShareRule {
         caseAccess = rule.Case_Access__c;
         opportunityAccess = rule.Opportunity_Access__c;
 
+        // Access levels for default team sharing
+        accessForTeam = rule.Access_For_Team__c;
+        accessForOwnerOfTeamsUserIsOn = rule.Access_For_Owner_Of_Teams_User_Is_On__c;
+        accessForTeamComembers = rule.Access_For_Team_Comembers__c;
+
         // Object to share
         objectSharedAPIName = rule.Object_Shared__r.QualifiedApiName;
         objectSharedLabel = rule.Object_Shared__r.MasterLabel;
@@ -156,12 +165,12 @@ public virtual inherited sharing class FormulaShareRule {
 
 
     // Used to create a share at the access levels of the rule, and appropriate values for the record and shared to entity
-    public SObject getShareWithRuleDefaults(Schema.SObjectType type, Id recordId, Id sharedTo, Boolean contactIsControlledByAccount) {
+    public SObject getShareWithRuleDefaults(Schema.SObjectType type, Id recordId, Id sharedTo, String targetAccessLevel, Boolean contactIsControlledByAccount) {
 
 		// Set access level names according to whether custom or standard
 		Map<String,String> objectAccessLevels = new Map<String,String>();
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
-        objectAccessLevels.put(objectUtils.accessLevelFieldName(), accessLevel);
+        objectAccessLevels.put(objectUtils.accessLevelFieldName(), targetAccessLevel);
 
         // For accounts, also set related access according to rule
         if(objectUtils.objectName == 'Account') {
@@ -178,12 +187,12 @@ public virtual inherited sharing class FormulaShareRule {
 
 
     // Check if all share levels in a share object are equal to the rule
-    public Boolean shareEqualToRule(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
+    public Boolean shareEqualToRule(Schema.SObjectType type, SOBject share, String targetAccessLevel, Boolean contactIsControlledByAccount) {
 
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
         String objectAccess = (String) share.get(objectUtils.accessLevelFieldName());
 
-        if(accessLevel != objectAccess) {
+        if(targetAccessLevel != objectAccess) {
             return false;
         }
 
@@ -209,12 +218,12 @@ public virtual inherited sharing class FormulaShareRule {
 
 
     // Check if all share levels in a share object are equal to or provide wider access than the rule
-    public Boolean shareEqualOrMorePermissiveThanRule(Schema.SObjectType type, SOBject share, Boolean contactIsControlledByAccount) {
+    public Boolean shareEqualOrMorePermissiveThanRule(Schema.SObjectType type, SOBject share, String targetAccessLevel, Boolean contactIsControlledByAccount) {
 
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
         String objectAccess = (String) share.get(objectUtils.accessLevelFieldName());
 
-        if(FormulaShareUtilities.accessLevelIsHigher(accessLevel, objectAccess)) {
+        if(FormulaShareUtilities.accessLevelIsHigher(targetAccessLevel, objectAccess)) {
             return false;
         }
 
@@ -239,7 +248,7 @@ public virtual inherited sharing class FormulaShareRule {
     }
 
     // Used to create a share with the highest permissions of the rule and an existing provided share
-    public SObject getMostPermissiveShare(Schema.SObjectType type, Id recordId, Id sharedTo, SObject currentShare, Boolean contactIsControlledByAccount) {
+    public SObject getMostPermissiveShare(Schema.SObjectType type, Id recordId, Id sharedTo, String targetAccessLevel, SObject currentShare, Boolean contactIsControlledByAccount) {
 
         Map<String,String> objectAccessLevels = new Map<String,String>();
 
@@ -247,7 +256,7 @@ public virtual inherited sharing class FormulaShareRule {
         FormulaShareSOBjectUtilities objectUtils = new FormulaShareSOBjectUtilities(type);
         String accessLevelFieldName = objectUtils.accessLevelFieldName();
         String currentShareObjectAccess = (String) currentShare.get(accessLevelFieldName);
-        String targetObjectAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentShareObjectAccess, accessLevel});
+        String targetObjectAccess = FormulaShareUtilities.getHighestAccess(new List<String>{currentShareObjectAccess, targetAccessLevel});
 
         objectAccessLevels.put(accessLevelFieldName, targetObjectAccess);
 

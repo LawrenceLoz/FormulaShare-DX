@@ -4,18 +4,21 @@
             <div class="slds-form slds-form_stacked">
                 <div class="slds-form-element">
                     <div class="slds-form-element__control">
-                        <lightning-combobox 
-                            id="accessLevel" 
-                            name="accessLevel"
-                            label={accessLevelLabel} 
-                            value={accessLevel}
-                            options={accessLevelOptions}
-                            placeholder="Select"
-                            onchange={handleAccessLevelChange}
-                            read-only={accessLevelIsReadOnly}
-                            field-level-help={accessLevelHelpText}
-                            required>
-                        </lightning-combobox>
+                        
+                        <template if:false={suppressAccessLevel}>
+                            <lightning-combobox 
+                                id="accessLevel" 
+                                name="accessLevel"
+                                label={accessLevelLabel} 
+                                value={accessLevel}
+                                options={accessLevelOptions}
+                                placeholder="Select"
+                                onchange={handleAccessLevelChange}
+                                read-only={accessLevelIsReadOnly}
+                                field-level-help={accessLevelHelpText}
+                                required>
+                            </lightning-combobox>
+                        </template>
 
                         <template if:true={showAccountRelatedAccess}>
                             <div class="slds-p-top_medium">

@@ -92,11 +92,18 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
         // Check all components report positive validity
         var allValid = this.template.querySelector('c-formula-share-rule-detail').checkValidity();
-
+        
         if(allValid) {
             //console.log('this.ruleDetails '+  JSON.stringify(this.ruleDetails));
             this.processing = true;
             this.spinnerClasses = 'processingMessage';
+
+            // Access level field is required in the CMDT, so if it's not set explicity then set to N/A
+            // This is required for team sharing where different fields are used to define access
+            if(!this.ruleDetails.accessLevel) {
+                this.ruleDetails.accessLevel = 'Varies';
+            }
+
             submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
                 .then(() => {
 

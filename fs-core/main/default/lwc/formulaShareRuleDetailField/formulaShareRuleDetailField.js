@@ -26,6 +26,8 @@ import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
+import isAccountTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isAccountTeamSharingSupported';
+import isOpportunityTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isOpportunityTeamSharingSupported';
 import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
@@ -140,6 +142,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             optionsList.push( { label: 'Users and Manager Subordinates', value: 'Users and Manager Subordinates' } );
         }
 
+        if(this.atmSharingSupported) {
+            optionsList.push( { label: 'Default Account Teams of Users', value: 'Default Account Teams of Users' } );
+        }
+
+        if(this.otmSharingSupported) {
+            optionsList.push( { label: 'Default Opportunity Teams of Users', value: 'Default Opportunity Teams of Users' } );
+        }
+
         this.shareWithOptions = optionsList;
     }
 
@@ -151,7 +161,27 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.managerSharingSupported = data;
             this.updateShareWithOptions();
         }
-    }        
+    }
+
+    atmSharingSupported;
+    @wire(isAccountTeamSharingSupported)
+    wiredIsAccountTeamSharingSupported(value) {
+        const { data, error } = value;
+        if(data) {
+            this.atmSharingSupported = data;
+            this.updateShareWithOptions();
+        }
+    }
+
+    otmSharingSupported;
+    @wire(isOpportunityTeamSharingSupported)
+    wiredIsOpportunityTeamSharingSupported(value) {
+        const { data, error } = value;
+        if(data) {
+            this.otmSharingSupported = data;
+            this.updateShareWithOptions();
+        }
+    }
 
 
 
@@ -204,7 +234,11 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     
     // Set options to include id fields (user lookups) only if Users or a Manager Groups option selected
     setFieldOptions() {
-        if(['Users', 'Managers of Users', 'Users and Manager Subordinates'].includes(this.shareWith)) {
+        if(['Users'
+            , 'Managers of Users'
+            , 'Users and Manager Subordinates'
+            , 'Default Account Teams of Users',
+            , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
             //console.log('setting to full list ',this.fullFieldList);
             this.fieldOptions = this.fullFieldList;
         }
@@ -224,8 +258,10 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Users':
             case 'Managers of Users':
             case 'Users and Manager Subordinates':
+            case 'Default Account Teams of Users':
+            case 'Default Opportunity Teams of Users':
 
-                console.log('updated to users or manager group');
+                console.log('updated to user-based option');
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
@@ -276,6 +312,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 break;
             case 'Users and Manager Subordinates':
                 this.shareWithFlags.usersAndManagerSubordinates = true;
+                break;
+            case 'Default Account Teams of Users':
+                this.shareWithFlags.defaultAccountTeamsOfUsers = true;
+                break;
+            case 'Default Opportunity Teams of Users':
+                this.shareWithFlags.defaultOpportunityTeamsOfUsers = true;
                 break;
         }
     }
@@ -328,7 +370,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.updateshareWithFlags();
         this.setDefaultFieldType();
         this.setFieldOptions();
-        //console.log('shareFieldTypeOptions ',this.shareFieldTypeOptions[0]);
     }
 
     handleShareFieldChange(event) {
@@ -410,7 +451,11 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
         // If sharing to users or manager groups, type should always be Id
         if(this.shareWith && 
-            ['Users', 'Managers of Users', 'Users and Manager Subordinates'].includes(this.shareWith)) {
+            ['Users'
+            , 'Managers of Users'
+            , 'Users and Manager Subordinates'
+            , 'Default Account Teams of Users',
+            , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
             this.shareFieldType = 'Id';
         }
 

@@ -69,7 +69,11 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             'Object_Shared__r.MasterLabel',
             'Shared_To__c',
             'Shared_To__r.QualifiedApiName',
-            'Shared_To__r.MasterLabel'
+            'Shared_To__r.MasterLabel',
+
+            'Access_For_Team__c',
+            'Access_For_Owner_Of_Teams_User_Is_On__c',
+            'Access_For_Team_Comembers__c'
         };
         return fieldNames;
     }

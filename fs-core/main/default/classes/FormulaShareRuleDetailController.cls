@@ -148,6 +148,25 @@ public with sharing class FormulaShareRuleDetailController {
         return !mgrGroupList.isEmpty();
     }
 
+    // Account Team and Default Account Team sharing will be possible if Account Team Member exists
+    @AuraEnabled(cacheable=true)
+    public static Boolean isAccountTeamSharingSupported() {
+        if(new FormulaShareInjectionService().versionSupportsTeamSharing()) {
+            Schema.DescribeSObjectResult atmDesc = FormulaShareUtilities.describe('AccountTeamMember');
+            return atmDesc != null;
+        }
+        else return false;
+    }
+    // Opportunity Team and Default Opp Team sharing will be possible if Opportunity Team Member exists
+    @AuraEnabled(cacheable=true)
+    public static Boolean isOpportunityTeamSharingSupported() {
+        if(new FormulaShareInjectionService().versionSupportsTeamSharing()) {
+            Schema.DescribeSObjectResult otmDesc = FormulaShareUtilities.describe('OpportunityTeamMember');
+            return otmDesc != null;
+        }
+        else return false;
+    }
+
 
     @AuraEnabled(cacheable=true)
     public static String getSampleData(String objectApiName, String fieldApiName) {

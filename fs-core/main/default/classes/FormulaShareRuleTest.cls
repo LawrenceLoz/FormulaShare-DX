@@ -20,7 +20,7 @@ public with sharing class FormulaShareRuleTest {
 
             FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
 
-            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, 'All', null);
 
             System.assert(!isEqualOrMorePermissive, 'Share is LOWER access level than rule');
         }
@@ -38,7 +38,7 @@ public with sharing class FormulaShareRuleTest {
 
             FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Edit');
 
-            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share,  'Read', null);
 
             System.assert(isEqualOrMorePermissive, 'Share is HIGHER access level than rule');
         }
@@ -56,7 +56,7 @@ public with sharing class FormulaShareRuleTest {
 
             FormulaShare_Log__Share share = FormulaShareTestDataFactory.getShareForBatchLog(null, null, 'Read');
 
-            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, null);
+            Boolean isEqualOrMorePermissive = rule.shareEqualOrMorePermissiveThanRule(fsLogType, share, 'Read', null);
 
             System.assert(isEqualOrMorePermissive, 'Share is SAME access level as rule');
         }

@@ -88,4 +88,16 @@ public inherited sharing class FormulaShareInjectionService {
         return new List<Schema.SObjectField>();
     }
 
+    public Boolean versionSupportsTeamSharing() {
+        return false;
+    }
+
+    public List<FormulaShareShareWithBase> getShareWithClasses(FormulaShareService service) {
+        return new List<FormulaShareShareWithBase> {
+            new FormulaShareShareWithUsers(service),
+            new FormulaShareShareWithRoles(service),
+            new FormulaShareShareWithPublicGroups(service)
+        };
+    }
+
 }
