@@ -51,11 +51,15 @@ public inherited sharing class FormulaShareService {
 //	@TestVisible private Map<Id,SObject> recordsMap = new Map<Id,SObject>();
 
 	@TestVisible private Set<Id> sharedRecordIdsSet = new Set<Id>();
+	private Set<Id> recordsSharingStillInPlace = new Set<Id>();	// All records where FS sharing will remain in place
+	private Set<Id> existingSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
+	private Set<Id> newSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
 	@TestVisible private List<FormulaShareRetrievedRecordDetails> recordDetails;
 	
 	private Map<String,Integer> noValidSharesForRules = new Map<String,Integer>();
 	@TestVisible private Map<String,ShareDetail> mapToDelete = new Map<String,ShareDetail>();
 	private Map<String,ShareDetail> mapToInsert = new Map<String,ShareDetail>();
+
 	@TestVisible Set<String> existingShareKeys = new Set<String>();
 	private List<EntityNotFound> entitiesNotFound = new List<EntityNotFound>();
 
@@ -83,6 +87,40 @@ public inherited sharing class FormulaShareService {
 		}
 		return sharesList;
 	}
+
+	Integer noRecordsSharingStillInPlace;
+	Integer noRecordsNotShared;
+	public Integer getNoRecordsSharingStillInPlace() {
+		if(noRecordsSharingStillInPlace == null) {
+			assessNoRecordsShared();
+		}
+		return noRecordsSharingStillInPlace;
+	}
+	public Integer getNoRecordsNotShared() {
+		if(noRecordsNotShared == null) {
+			assessNoRecordsShared();
+		}
+		return noRecordsNotShared;
+	}
+	
+	private void assessNoRecordsShared() {
+
+		// We'll want to count only records which aren't present in at least one of the maps to attempt to insert or delete
+		Set<Id> recordsWithShareChanges = new Set<Id>();
+		recordsWithShareChanges.addAll(newSharesValidSet);
+		for(String shareKey : mapToDelete.keySet()) {
+			ShareDetail sd = mapToDelete.get(shareKey);
+			recordsWithShareChanges.add(sd.recordId);
+		}
+
+		// Records with sharing to remain in place will have 
+		recordsSharingStillInPlace.removeAll(recordsWithShareChanges);
+		this.noRecordsSharingStillInPlace = recordsSharingStillInPlace.size();
+
+		// All other records considered by the batch are not shared by FormulaShare
+		this.noRecordsNotShared = sharedRecordIdsSet.size() - recordsWithShareChanges.size() - noRecordsSharingStillInPlace;
+	}
+
 
 	// Return number of valid shares per rule (to create metrics on batch run if they don't exist)
 	public Map<String,Integer> getNoValidSharesForRules() {
@@ -170,10 +208,11 @@ public inherited sharing class FormulaShareService {
 		// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
 		for(SObject share : sharesQueryResult) {
 			FormulaShareSObjectUtilities objectUtils = new FormulaShareSObjectUtilities(type);
-			String shareKey = objectUtils.getShareKey(share);
 			ShareDetail sd = new ShareDetail();
 			sd.shareRecord = share;
 			sd.type = type;
+			sd.recordId = objectUtils.getParentIdFromShare(share);
+			String shareKey = objectUtils.getShareKey(share, sd.recordId);
 			mapToDelete.put(shareKey, sd);
 		}
 
@@ -183,11 +222,43 @@ public inherited sharing class FormulaShareService {
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares();
 
+		// Get set of records with sharing which is no longer valid (based on mapToDelete)
+		Set<Id> existingSharesInvalidSet = getInvalidIdSet();
+
 		// Clear deletion map if removal of standard sharing is not permitted
 		if(!isShareRemovalAllowed()) {
 			mapToDelete.clear();
 		}
+
+		// Add indication whether each record with sharing to INSERT was shared already
+		augmentWithExistingSharing(mapToInsert, existingSharesValidSet);
+		augmentWithExistingSharing(mapToInsert, existingSharesInvalidSet);
+
+		// Add indication whether each record with sharing to DELETE still has valid sharing which will be created or kept
+		augmentWithExistingSharing(mapToDelete, newSharesValidSet);
+		augmentWithExistingSharing(mapToDelete, existingSharesValidSet);
 	}
+
+	private Set<Id> getInvalidIdSet() {
+		Set<Id> invalidIdsSet = new Set<Id>();
+		for(ShareDetail sd : mapToDelete.values()) {
+			invalidIdsSet.add(sd.recordId);
+		}
+		return invalidIdsSet;
+	}
+
+	private void augmentWithExistingSharing(Map<String,ShareDetail> inputMap, Set<Id> setToCheck) {
+		for(String shareKey : inputMap.keySet()) {
+			String recordIdString = shareKey.left(15);	// Left-most 15 characters of share key are the shared record id
+			Id recordId = (Id) recordIdString;
+			if(setToCheck.contains(recordId)) {
+				ShareDetail sd = inputMap.get(shareKey);
+				sd.existingSharingOnRecord = true;
+				inputMap.put(shareKey, sd);
+			}
+		}
+	}	
+
 
 
 	// Retrieve shares for all shared objects identified as being in scope
@@ -345,6 +416,7 @@ public inherited sharing class FormulaShareService {
 			// ...keep if it relates to record ownership (these shares can't be created by apex sharing)
 			if(objectAccess == 'All') {
 				System.debug('/// Existing share with full access, keep this: '+share);
+				incrementShareMetrics(rule);
 			}
 
 			// If we're not permitted to remove sharing
@@ -353,6 +425,8 @@ public inherited sharing class FormulaShareService {
 				// ...keep if all access levels for the share are the same or higher than the rule
 				if(rule.shareEqualOrMorePermissiveThanRule(type, share, targetAccessLevel, contactIsControlledByAccount)) {
 					System.debug('/// Share exists which is the same or more permissive than rule, keep this: '+share);
+					recordsSharingStillInPlace.add(recordId);
+					incrementShareMetrics(rule);
 				}
 
 				// ...if access levels differ, create a new share with highest access levels
@@ -368,6 +442,8 @@ public inherited sharing class FormulaShareService {
 				// ...keep if all access levels for the share are identical
 				if(rule.shareEqualToRule(type, share, targetAccessLevel, contactIsControlledByAccount)) {
 					System.debug('/// Share exists which is identical to the rule, keep this: '+share);
+					recordsSharingStillInPlace.add(recordId);
+					incrementShareMetrics(rule);
 				}
 
 				else {
@@ -379,8 +455,8 @@ public inherited sharing class FormulaShareService {
 			// Remove from map to delete - share will be kept or updated
 			mapToDelete.remove(shareKey);
 
-			// Track this as a valid share record to populate metrics
-			incrementShareMetrics(rule);
+			// Add to set tracking which records were already shared by FormulaShare
+			this.existingSharesValidSet.add(recordId);
 		}
 
 		// Otherwise if we've already identified sharing is needed for this record...
@@ -398,9 +474,6 @@ public inherited sharing class FormulaShareService {
 		else if(!existingShareKeys.contains(shareKey)) {
 			System.debug('/// creating new share based on rule');
 			populateMapNewShare(recordId, sharedTo, shareKey, targetAccessLevel, rule, contactIsControlledByAccount);
-
-			// Track this as a valid share record to populate metrics
-			incrementShareMetrics(rule);
 		}
 	}
 
@@ -427,7 +500,7 @@ public inherited sharing class FormulaShareService {
 
 
 	private void populateMapNewShare(Id recordId, Id sharedTo, String shareKey, String targetAccessLevel, FormulaShareRule rule, Boolean contactIsControlledByAccount) {
-		
+
 		// Check share can be constructed (might fail if OWD doesn't allow)
 		SObject newShare;
 		try {
@@ -439,7 +512,7 @@ public inherited sharing class FormulaShareService {
 		
 		// Set up new share detail and add to insert map
 		if(newShare != null) {
-			addShareDetailToInsertMap(shareKey, rule, newShare);
+			addShareDetailToInsertMap(shareKey, recordId, targetAccessLevel, rule, newShare);
 		}
 	}
 
@@ -456,20 +529,33 @@ public inherited sharing class FormulaShareService {
 		
 		// Set up new share detail and add to insert map
 		if(newShare != null) {
-			addShareDetailToInsertMap(shareKey, rule, newShare);
+			addShareDetailToInsertMap(shareKey, recordId, targetAccessLevel, rule, newShare);
 		}
 	}
 
 
 	// Create share detail object and add to insert map
-	private void addShareDetailToInsertMap(String shareKey, FormulaShareRule rule, SObject newShare) {
-		System.debug('shareKey: '+shareKey);
-		ShareDetail sd = new ShareDetail();
-		sd.rule = rule;
-		sd.shareRecord = newShare;
-		sd.type = type;
-		System.debug('ShareDetail: '+sd);
-		mapToInsert.put(shareKey, sd);
+	FormulaShareIOrgControls controls = new FormulaShareInjectionService().getOrgControls();
+	private void addShareDetailToInsertMap(String shareKey, Id recordId, String targetAccessLevel, FormulaShareRule rule, SObject newShare) {
+
+		if(controls.preventSharingInserts()) {
+			String logMessage = controls.getErrorForPreventedSharingInserts();
+			captureEntityNotFound(recordId, targetAccessLevel, rule, logMessage);
+		}
+
+		else {
+			ShareDetail sd = new ShareDetail();
+			sd.rule = rule;
+			sd.shareRecord = newShare;
+			sd.type = type;
+			sd.recordId = recordId;
+			mapToInsert.put(shareKey, sd);
+			newSharesValidSet.add(recordId);
+
+			// Track this as a valid share record to populate metrics
+			incrementShareMetrics(rule);			
+		}
+
 	}
 	
 
@@ -508,6 +594,8 @@ public inherited sharing class FormulaShareService {
 		public SObject shareRecord;
 		public Schema.SObjectType type;
 		public FormulaShareRule rule;
+		public Id recordId;
+		public Boolean existingSharingOnRecord = false;	// True if sharing identified matching rules which will be kept
 	}
 
 	// Holds details of a record and a rule sharing this record

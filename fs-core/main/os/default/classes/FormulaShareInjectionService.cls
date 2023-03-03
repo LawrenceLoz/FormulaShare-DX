@@ -78,6 +78,9 @@ public inherited sharing class FormulaShareInjectionService {
         return new FormulaShareBatchService(typeInThisBatch, rulesForType);
     }
 
+    public FormulaShareIOrgControls getOrgControls() {
+        return new FormulaShareOrgControls();        
+    }
 
 
     public Set<String> getExtraRelationshipFields() {

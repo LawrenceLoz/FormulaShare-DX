@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Records_w_Sharing_Applied_for_1st_Time__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Number of records which were identified as having sharing applied by this batch which were not previously shared by FormulaShare Rules. These records will contribute towards the limit of total number of records shared</inlineHelpText>
+    <label>Records w/ Sharing Applied for 1st Time</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -23,13 +23,37 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
 
     // Adds record sharing level DML into supplied unit of work
     public fflib_ISObjectUnitOfWork uow;
-    public List<FormulaShare_Processed_Record_Share__c> processedRecordShares = new List<FormulaShare_Processed_Record_Share__c>();
+    public List<PRSWrapper> wrappedRecordShares = new List<PRSWrapper>();
 
+    protected Set<Id> recordsSharingAppliedFirstTime = new Set<Id>();
+    protected Set<Id> recordsAllSharingRemoved = new Set<Id>();
+    protected Set<Id> noRecordsSharingUpdated = new Set<Id>();
+    protected Set<Id> recordsWithFailedDeletes = new Set<Id>();
+
+    // Record ids kept in wrapper so we can count unique records shared
+    public class PRSWrapper {
+        public PRSWrapper(FormulaShare_Processed_Record_Share__c processedRecordShare, Id recordId) {
+            this.processedRecordShare = processedRecordShare;
+            this.recordId = recordId;
+        }
+        public FormulaShare_Processed_Record_Share__c processedRecordShare;
+        public Id recordId;
+    }
 
     public virtual fflib_ISObjectUnitOfWork prepare(fflib_ISObjectUnitOfWork uow, String context, List<FormulaShare_Record_Log__c> recordLogs, Map<String,List<FormulaShare_Processed_Share_Event__e>> eventsByType, Boolean createRecordLogs) {
         this.uow = uow;
         processRecordShares(recordLogs, eventsByType, createRecordLogs);
         return uow;
+    }
+    
+    public Integer getRecordsSharingAppliedFirstTime() {
+        return recordsSharingAppliedFirstTime.size();
+    }
+    public Integer getRecordsAllSharingRemoved() {
+        return recordsAllSharingRemoved.size();
+    }
+    public Integer getNoRecordsSharingUpdated() {
+        return noRecordsSharingUpdated.size();
     }
 
 
@@ -57,7 +81,11 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
                 if(pse.Status__c != null) {
                     System.debug('Adding share with status set: '+pse);
                     FormulaShare_Processed_Record_Share__c prs = mapEventToProcessedRecordShare(pse, recordLogsMap, groupsMap, createRecordLogs);
-                    processedRecordShares.add(prs);
+                    PRSWrapper prsWrapper = new PRSWrapper(prs, pse.Record_Id__c);
+                    wrappedRecordShares.add(prsWrapper);
+
+                    // Indicate sharing exists on record
+                    assessExistingSharing(pse.Existing_Sharing_On_Record__c, prs.Operation__c, prs.Status__c, pse.Record_Id__c);
                 }
 
                 // Otherwise track in list to be augmented with status
@@ -132,12 +160,66 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
                         }
                     }
 
-                    processedRecordShares.add(prs);
+                    assessExistingSharing(pse.Existing_Sharing_On_Record__c, prs.Operation__c, prs.Status__c, pse.Record_Id__c);
+
+                    PRSWrapper prsWrapper = new PRSWrapper(prs, pse.Record_Id__c);
+                    wrappedRecordShares.add(prsWrapper);
+                }
+
+                // Set indication that all sharing removed if all deletion successful
+                recordsAllSharingRemoved.removeAll(recordsWithFailedDeletes);
+            }
+        }
+
+        if(createRecordLogs) {
+            processRecordLogUpdates(recordLogs);
+        }
+
+        System.debug('Full wrappedRecordShares list: '+wrappedRecordShares);
+    }
+
+
+    // Sets indication that sharing is for a record which is shared for first time, or has had all sharing removed
+    private void assessExistingSharing(Boolean existingSharingOnRecord, String operation, String status, Id recordId) {
+
+        // If there was no existing sharing identified on the record other than for this change
+        // this could indcate it's the first time this record is shared, or that all sharing is removed
+        if(!existingSharingOnRecord) {
+            if(operation == 'Insert' && status == 'Success') {
+                recordsSharingAppliedFirstTime.add(recordId);   // Note we don't failed inserts in totals
+            }
+            else if(operation == 'Delete') {
+                if(status == 'Success') {
+                    recordsAllSharingRemoved.add(recordId);
+                }
+                else {
+                    recordsWithFailedDeletes.add(recordId);
+                    noRecordsSharingUpdated.add(recordId);
                 }
             }
         }
 
-        System.debug('Full processedRecordShare list: '+processedRecordShares);
+        // Otherwise, we consider that this record should be part of the count of existing shared records
+        else {
+            noRecordsSharingUpdated.add(recordId);
+        }
+
+        // Note that records which had any kind of error won't be counted in the total
+    }
+
+
+    // If creating record logs, update these to have correct values for usage:
+    // Sharing_Applied_for_First_Time__c - Set if any successful share created and sharing didn't already exist
+    // All_Sharing_Removed__c - Set if all sharing 
+    protected void processRecordLogUpdates(List<FormulaShare_Record_Log__c> recordLogs) {
+        for(FormulaShare_Record_Log__c log : recordLogs) {
+            if(recordsSharingAppliedFirstTime.contains((Id) log.Record_Id__c)) {
+                log.Sharing_Applied_for_First_Time__c = true;
+            }
+            else if(recordsAllSharingRemoved.contains((Id) log.Record_Id__c)) {
+                log.All_Sharing_Removed__c = true;
+            }
+        }
     }
 
 

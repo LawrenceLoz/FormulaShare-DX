@@ -43,6 +43,10 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     public static final String triggerContext = 'Trigger Operations Since Last Batch';
     public static final String batchFinishContext = 'Last Batch';
 
+    private static Integer noRecordsSharingAppliedFirstTime;
+    private static Integer noRecordsAllSharingRemoved;
+    private static Integer noRecordsSharingUpdated;
+
     public static void processForEvents(List<FormulaShare_Processed_Share_Event__e> pseList, String eventContext) {
         System.debug('pseList: '+ pseList);
         context = eventContext;
@@ -60,10 +64,16 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
         Map<String,FormulaShareMetrics.Increment> incMap;
         incMap = process(pseList);
-        
+
         IncrementsWithUow incWithUow = new IncrementsWithUow();
         incWithUow.incrementsMap = incMap;
         incWithUow.uow = uow;
+
+        // Pass back sharing changes from this batch
+        incWithUow.noRecordsSharingAppliedFirstTime = noRecordsSharingAppliedFirstTime;
+        incWithUow.noRecordsAllSharingRemoved = noRecordsAllSharingRemoved;
+        incWithUow.noRecordsSharingUpdated = noRecordsSharingUpdated;
+
         system.debug('Processing for batch. UOW2: '+uow);
 
         return incWithUow;
@@ -93,15 +103,19 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         Map<String,List<FormulaShare_Processed_Share_Event__e>> eventsByType = new Map<String,List<FormulaShare_Processed_Share_Event__e>>();
     
         for(FormulaShare_Processed_Share_Event__e pse : pseList) {
-    
+
             // Contruct processed record logs
+            FormulaShare_Record_Log__c pr;
             if(!processedRecords.containsKey(pse.Record_Id__c)) {
-                FormulaShare_Record_Log__c pr = new FormulaShare_Record_Log__c();
+                pr = new FormulaShare_Record_Log__c();
                 pr.Object__c = pse.Object__c;
                 pr.Record_Id__c = pse.Record_Id__c;
                 pr.Processed_Date_Time__c = pse.Processed_Date_Time__c;
-                processedRecords.put(pr.Record_Id__c, pr);
             }
+            else {
+                pr = processedRecords.get(pse.Record_Id__c);
+            }
+            processedRecords.put(pr.Record_Id__c, pr);
 
             // Populate map with records split by object type
             List<FormulaShare_Processed_Share_Event__e> pseForObjectList;
@@ -133,8 +147,12 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         FormulaShareProcessedRecordShare prs = new FormulaShareInjectionService().getProcessedRecordShare();
         uow = prs.prepare(uow, context, recordLogs, eventsByType, createRecordLogs);
 
+        noRecordsSharingAppliedFirstTime = prs.getRecordsSharingAppliedFirstTime();
+        noRecordsAllSharingRemoved = prs.getRecordsAllSharingRemoved();
+        noRecordsSharingUpdated = prs.getNoRecordsSharingUpdated();
+
         // Query for and update, or create new metrics records
-        Map<String,FormulaShareMetrics.Increment> increments = setMetricsProcessedRecords(prs.processedRecordShares);
+        Map<String,FormulaShareMetrics.Increment> increments = setMetricsProcessedRecords(prs.wrappedRecordShares);
 
         // Fire event to update rules list view
         List<String> objectLabels = new List<String>();
@@ -215,10 +233,11 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         uow = metrics.overwriteMetrics(uow, metricsIncrements, batchLog);
     }
 
-    private static Map<String,FormulaShareMetrics.Increment> setMetricsProcessedRecords(List<FormulaShare_Processed_Record_Share__c> prsList) {
+    private static Map<String,FormulaShareMetrics.Increment> setMetricsProcessedRecords(List<FormulaShareProcessedRecordShare.PRSWrapper> wrappedRecordShares) {
         Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
 
-        for(FormulaShare_Processed_Record_Share__c prs : prsList) {
+        for(FormulaShareProcessedRecordShare.PRSWrapper wrappedRecordShare : wrappedRecordShares) {
+            FormulaShare_Processed_Record_Share__c prs = wrappedRecordShare.processedRecordShare;
 
             // Capture metrics only for insert operations related to a specific rule (deletes won't have rule name associated)
             if(prs.FormulaShare_Rule_Name__c != null && prs.Operation__c == 'Insert') {
@@ -301,6 +320,9 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     public class IncrementsWithUow {
         public Map<String,FormulaShareMetrics.Increment> incrementsMap;
         public fflib_ISObjectUnitOfWork uow;
+        public Integer noRecordsSharingAppliedFirstTime;
+        public Integer noRecordsAllSharingRemoved;
+        public Integer noRecordsSharingUpdated;
     }
 
 }

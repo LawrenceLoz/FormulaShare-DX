@@ -83,8 +83,17 @@ public inherited sharing class FormulaShareSObjectUtilities {
         return FormulaShareUtilities.getSObjectFieldFromName(fieldName, shareObj) != null;
     }
 
-	public String getShareKey(SObject share) {
-        String shareKeyBase = getShareKeyBase(share);
+    public Id getParentIdFromShare(SObject share) {
+        return (Id) share.get(parentIdFieldName());
+    }
+
+    public String getShareKey(SObject share) {
+        Id parentId = getParentIdFromShare(share);
+        return getShareKey(share, parentId);
+    }
+
+	public String getShareKey(SObject share, Id parentId) {
+        String shareKeyBase = getShareKeyBase(share, parentId);
 
         // Only custom objects allow for a custom RowCause (apex sharing reason)
         if(isCustom) {
@@ -97,13 +106,9 @@ public inherited sharing class FormulaShareSObjectUtilities {
         }
     }
     
-    private String getShareKeyBase(SObject share) {
-        System.debug('share base: '+share);
-		Id parentId = (Id) share.get(parentIdFieldName());
+    private String getShareKeyBase(SObject share, Id parentId) {
 		Id userOrGroupId = (Id) share.get('UserOrGroupId');
-        System.debug('share parentId: '+parentId);
 		String parentId15 = FormulaShareIdUtilities.get15CharacterId(parentId);
-        System.debug('share parentId15: '+parentId15);
 		String userOrGroupId15 = FormulaShareIdUtilities.get15CharacterId(userOrGroupId);
         String shareKeyBase = parentId15 + userOrGroupId15;
         return shareKeyBase;

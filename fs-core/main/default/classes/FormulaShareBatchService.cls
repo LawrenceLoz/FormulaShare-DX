@@ -12,6 +12,13 @@ public virtual inherited sharing class FormulaShareBatchService {
     Boolean atLeastOneBatchFailed = false;
 	Boolean atLeastOneMetricsUpdateFailed = false;
 
+	// Track total record sharing processed by this job - incrememented with each batch
+	@TestVisible protected Integer noRecordsSharingAppliedFirstTime = 0;
+	@TestVisible protected Integer noRecordsAllSharingRemoved = 0;
+	@TestVisible protected Integer noRecordsSharingUpdated = 0;
+	@TestVisible protected Integer noRecordsSharingStillInPlace = 0;
+	protected Integer noRecordsNotShared = 0;
+
 	// Constructor for full batch processing
     public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType) {
 		this.executeContext = FormulaShareProcessedShareEventService.batchContext;
@@ -73,7 +80,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 
     // Call from execute()
-    public void processSharingAndLogs(List<SObject> scope) {
+    public virtual void processSharingAndLogs(List<SObject> scope) {
 		FormulaShareService fsService = FormulaShareService.construct(this.typeInThisBatch, rulesForType);
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 		fsLogs.incrementBatches();
@@ -196,8 +203,24 @@ public virtual inherited sharing class FormulaShareBatchService {
 			System.debug('No insert events: '+insertDetails.size());
 			System.debug('No delete events: '+deleteDetails.size());
 			FormulaShare_Log__c log = logsList[0];
+
 			FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = publisher.processForTargetedJobOrBatch(uow, log, executeContext);
 			uow = incWithUow.uow;
+			
+			// We pass number of processed records with sharing in place so this can be used in creating usage by object
+			this.noRecordsSharingAppliedFirstTime += incWithUow.noRecordsSharingAppliedFirstTime;
+			this.noRecordsAllSharingRemoved 	  += incWithUow.noRecordsAllSharingRemoved;
+			this.noRecordsSharingUpdated 		  += incWithUow.noRecordsSharingUpdated;
+			this.noRecordsSharingStillInPlace 	  += fsService.getNoRecordsSharingStillInPlace();
+			this.noRecordsNotShared 			  += fsService.getNoRecordsNotShared();
+
+			// Incremement batch records with numbers of records processed
+			log.Records_w_Sharing_Applied_for_1st_Time__c = noRecordsSharingAppliedFirstTime;
+			log.Records_w_All_Sharing_Removed__c 		  = noRecordsAllSharingRemoved;
+			log.Records_w_Sharing_Updated__c 			  = noRecordsSharingUpdated;
+			log.Records_w_Sharing_Still_In_Place__c 	  = noRecordsSharingStillInPlace;
+			log.Records_Not_Shared_by_FormulaShare__c 	  = noRecordsNotShared;
+			
 			system.debug('Processing for batch. UOW3: '+uow);
 
 			// Get rule in batch records to be updated
@@ -274,7 +297,7 @@ public virtual inherited sharing class FormulaShareBatchService {
     // Finalse methods called from finish()
 	FormulaShareLogs fsLogs;
 	fflib_ISObjectUnitOfWork finalUow;
-    public void finaliseLogs() {
+    public virtual void finaliseLogs() {
 
 		fsLogs = new FormulaShareLogs(this.logsList);
 		fsLogs.trimFailedBatches();

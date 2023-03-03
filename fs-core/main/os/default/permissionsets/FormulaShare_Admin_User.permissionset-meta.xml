@@ -462,6 +462,31 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>FormulaShare_Log__c.Records_Not_Shared_by_FormulaShare__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Log__c.Records_w_All_Sharing_Removed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Log__c.Records_w_Sharing_Applied_for_1st_Time__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Log__c.Records_w_Sharing_Still_In_Place__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Log__c.Records_w_Sharing_Updated__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>FormulaShare_Log__c.Related_Log_Required_for_Test_Class__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -582,6 +607,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>FormulaShare_Record_Log__c.All_Sharing_Removed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>FormulaShare_Record_Log__c.Batch_Log_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -643,6 +673,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>FormulaShare_Record_Log__c.Record__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>FormulaShare_Record_Log__c.Sharing_Applied_for_First_Time__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

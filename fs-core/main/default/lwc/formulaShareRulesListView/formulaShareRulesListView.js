@@ -421,6 +421,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Refreshes provisioned list of rules
     refreshView() {
         refreshApex(this.provisionedValue);
+        const evt = new CustomEvent('refreshview');
+        this.dispatchEvent(evt);
     }
 
     // Action method to update a rule to active/inactive
