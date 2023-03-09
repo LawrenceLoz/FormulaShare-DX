@@ -26,16 +26,6 @@ public with sharing class FormulaShareE2EBatchTest {
     @IsTest
     public static void testInsertSharing() {
 
-        // Given
-//        fflib_ApexMocks mocks = new fflib_ApexMocks();
-//        FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) mocks.mock(FormulaShareSettingsSelector.class);
-//        FormulaShare_Settings__mdt fsSettings = new FormulaShare_Settings__mdt();
-//        fsSettings.DeveloperName = 'Mock Settings';
-//        fsSettings.Recalculation_Batch_Size__c = 5;
-//        mocks.startStubbing();
-//        mocks.when(mockFSSettingsSelector.selectActiveSettings()).thenReturn(fsSettings);
-//        mocks.stopStubbing();
-//        FormulaShareApplication.Selector.setMock(mockFSSettingsSelector);
         setMocks();
 
         System.runAs(FormulaShareTestUtils.getAdmin()) {
@@ -64,13 +54,19 @@ public with sharing class FormulaShareE2EBatchTest {
             childLog.Related_Log_Required_for_Test_Class__c = log.Id;
             insert childLog;
 
+            // Mock SObjectShares - required as async job was running without sufficient permissions to insert sharing
+            fflib_ApexMocks mocks = new fflib_ApexMocks();
+            FormulaShareSObjectShares.mock = (FormulaShareSObjectShares) mocks.mock(FormulaShareSObjectShares.class);
+
             // Call recalculate method to set sharing
             Test.startTest();
             FormulaShareService.recalculateAll();
             Test.stopTest();
 
-            // Retrieve share records for the inserted log
-            List<FormulaShare_Log__Share> shares = [SELECT Id, UserOrGroupId, AccessLevel, RowCause FROM FormulaShare_Log__Share WHERE ParentId = :log.Id];
+            // Retrieve the argument supplied to insertShares() for the mock
+            fflib_ArgumentCaptor argument = fflib_ArgumentCaptor.forClass(FormulaShareSObjectShares.class);
+            ((FormulaShareSObjectShares) mocks.verify(FormulaShareSObjectShares.mock)).insertShares((List<SObject>) argument.capture());
+            List<FormulaShare_Log__Share> shares = (List<FormulaShare_Log__Share>) argument.getValue();
 
             // Get relevant ids we expect to be in share records
             Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role1.Id AND Type = 'Role'][0];

@@ -66,10 +66,10 @@ public with sharing class FormulaShareSObjectSharesTest {
             Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
 
             // Construct domain instance
-            FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(sharesList, fsLogShareType);
+            FormulaShareSObjectShares sharesDomain = FormulaShareSObjectShares.construct(fsLogShareType);
 
             // Attempt to insert share
-            sharesDomain.insertShares();
+            sharesDomain.insertShares(sharesList);
 
             // Look for inserted record and assert values
             List<FormulaShare_Log__Share> insertedShares = [SELECT Id, ParentId FROM FormulaShare_Log__Share WHERE RowCause = :reason];
@@ -122,22 +122,5 @@ public with sharing class FormulaShareSObjectSharesTest {
 //        system.assert(insertedShares.isEmpty(), 'Share record remains');
 //    }
 
-    @IsTest
-    public static void testContructor() {
-        
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareSObjectShares.Constructor cons = new FormulaShareSObjectShares.Constructor();
-
-            FormulaShare_Log__c log = [SELECT Id FROM FormulaShare_Log__c WHERE Type_In_Scope__c = 'AllInternalUsers'][0];
-            // Set constructor parameters
-            List<FormulaShare_Log__Share> sharesList = getSharesListForLog(log);
-            Schema.SObjectType fsLogShareType = FormulaShare_Log__Share.SObjectType;
-
-            fflib_SObjectDomain sharesDomain = cons.construct(sharesList, fsLogShareType);
-            List<FormulaShare_Log__Share> shares = (List<FormulaShare_Log__Share>) sharesDomain.Records;
-
-            system.assertEquals(log.Id, shares[0].ParentId, 'Records does not contain a share for the create log');
-        }
-    }
 
 }

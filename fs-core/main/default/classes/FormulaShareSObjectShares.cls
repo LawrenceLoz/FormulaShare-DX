@@ -19,44 +19,29 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDomain {
+// Domain class isn't used so we can pass to methods directly for mocking
+public inherited sharing class FormulaShareSObjectShares {
+    
+    private Schema.SObjectType type;
+    public class FormulaShareException extends Exception {}    
 
     public static FormulaShareSObjectShares mock;
-    public static FormulaShareSObjectShares construct(List<SObject> sObjectList, Schema.SObjectType type) {
+    public static FormulaShareSObjectShares construct(Schema.SObjectType type) {
         if(Test.isRunningTest() && mock != null ) {
             return mock;
         }
         else {
-            return new FormulaShareSObjectShares(sObjectList, type);
+            return new FormulaShareSObjectShares(type);
         }
     }
-    
-    public class FormulaShareException extends Exception {}    
 
-    public Schema.SObjectType type;
-
-    public FormulaShareSObjectShares(List<SObject> sObjectList, Schema.SObjectType type) {
-        super(sObjectList, type);
+    public FormulaShareSObjectShares(Schema.SObjectType type) {
         this.type = type;
-    }
-
-    public class Constructor implements fflib_SObjectDomain.IConstructable2 {
-
-        // Defined type constructor must be implemented but isn't required
-        public fflib_SObjectDomain construct(List<SObject> sObjectList) {
-            return null;
-        }
-
-        // Dynamic type constructor is used
-        public fflib_SObjectDomain construct(List<SObject> sObjectList, Schema.SObjectType type) {
-            return new FormulaShareSObjectShares(sObjectList, type);
-        }
     }
 
 
     // To insert sharing records identified by FormulaShare as being required
-    public void insertShares() {
-        List<SObject> shares = Records;
+    public void insertShares(List<SObject> shares) {
 
         // Check that object can be created by current or requesting user (or bypass if this is a test run)
         // Note there's no need to check field security as this can't be set on share records
@@ -65,6 +50,13 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
             // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
             // update the existing share rather than create a new one. For this reason, assessment of sharing will only
             // delete shares if there is no sharing of any level to be applied
+            for(SObject share : shares) {
+                System.debug('share: '+share);
+            }
+
+            Map<String,String> reasons = FormulaShareUtilities.getSharingReasons('FormulaShare_Log__c');
+            system.debug('reasons: '+reasons);
+            
             insert shares;
             system.debug('DML inserted shares '+ shares);
         }
@@ -79,8 +71,7 @@ public inherited sharing class FormulaShareSObjectShares extends fflib_SObjectDo
     }
 
     // To remove sharing identified by FormulaShareService as no longer being required
-    public void deleteShares() {
-        List<SObject> shares = Records;
+    public void deleteShares(List<SObject> shares) {
 
         // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
         if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {

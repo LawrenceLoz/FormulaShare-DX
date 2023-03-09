@@ -139,10 +139,10 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 		// Insert if required
 		if(!sharesToInsert.isEmpty()) {
-			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(sharesToInsert, typeInThisBatch);
+			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(typeInThisBatch);
 
 			try {
-				fsSharesToInsert.insertShares();
+				fsSharesToInsert.insertShares(sharesToInsert);
 				insertStatus = 'Success';
 			}
 			catch(Exception e) {
@@ -172,9 +172,9 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 		// Delete if required
 		if(!sharesToDelete.isEmpty()) {
-			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(sharesToDelete, typeInThisBatch);
+			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(typeInThisBatch);
 			try {
-				fsSharesToDelete.deleteShares();
+				fsSharesToDelete.deleteShares(sharesToDelete);
 				deleteStatus = 'Success';
 			}
 
