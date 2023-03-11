@@ -46,17 +46,11 @@ public inherited sharing class FormulaShareSObjectShares {
         // Check that object can be created by current or requesting user (or bypass if this is a test run)
         // Note there's no need to check field security as this can't be set on share records
         if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
+
             // Insert the sharing record
             // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
             // update the existing share rather than create a new one. For this reason, assessment of sharing will only
             // delete shares if there is no sharing of any level to be applied
-            for(SObject share : shares) {
-                System.debug('share: '+share);
-            }
-
-            Map<String,String> reasons = FormulaShareUtilities.getSharingReasons('FormulaShare_Log__c');
-            system.debug('reasons: '+reasons);
-            
             insert shares;
             system.debug('DML inserted shares '+ shares);
         }
