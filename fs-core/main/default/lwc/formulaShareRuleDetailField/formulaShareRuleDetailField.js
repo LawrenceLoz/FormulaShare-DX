@@ -261,7 +261,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Default Account Teams of Users':
             case 'Default Opportunity Teams of Users':
 
-                console.log('updated to user-based option');
                 this.shareFieldTypeOptions = [
                     { label: 'Id of user', value: 'Id' }
                 ];
