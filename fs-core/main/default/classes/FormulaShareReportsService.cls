@@ -83,13 +83,15 @@ public inherited sharing class FormulaShareReportsService {
         reportNames.add(settings.Batch_Errors_Report_Name__c);
 
         // Query for all reports and populate cached map of ids
-        List<Report> fsReports = [
-            SELECT Id, DeveloperName 
-            FROM Report 
-            WHERE DeveloperName IN :reportNames
-            WITH SECURITY_ENFORCED];
-        for(Report r : fsReports) {
-            reportIdsMap.put(r.DeveloperName, r.Id);
+        if(Schema.SObjectType.Report.isAccessible()) {
+            List<Report> fsReports = [
+                SELECT Id, DeveloperName 
+                FROM Report 
+                WHERE DeveloperName IN :reportNames
+                WITH SECURITY_ENFORCED];
+            for(Report r : fsReports) {
+                reportIdsMap.put(r.DeveloperName, r.Id);
+            }
         }
     }
 

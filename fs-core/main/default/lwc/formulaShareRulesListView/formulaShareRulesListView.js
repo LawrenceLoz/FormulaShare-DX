@@ -447,6 +447,16 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
 
     openLogsReport(row) {
+        if(!row['recordLogsReportId']) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Unable to load report',
+                    message: 'System permissions "Run Reports" and "View Reports in Public Folders" are required to view summaries of sharing applied',
+                    variant: 'error'
+                })
+            );
+        }
+
         // Set filter parameter for report ("fv0" is the convention for the first filter)
         var params = {};
         params['fv0'] = encodeURI(row['developerName']);
