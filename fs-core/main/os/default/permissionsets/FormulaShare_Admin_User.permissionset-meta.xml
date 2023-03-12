@@ -606,7 +606,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
         <field>FormulaShare_Record_Log__c.All_Sharing_Removed__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -676,7 +676,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
         <field>FormulaShare_Record_Log__c.Sharing_Applied_for_First_Time__c</field>
         <readable>true</readable>
     </fieldPermissions>
