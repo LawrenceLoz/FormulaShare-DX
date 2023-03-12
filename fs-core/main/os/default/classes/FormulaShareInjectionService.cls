@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareInjectionService {
+public with sharing class FormulaShareInjectionService {
 
     @AuraEnabled(cacheable=true)
     public static Boolean versionSupportsRelatedRules() {

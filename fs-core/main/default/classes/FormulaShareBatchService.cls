@@ -207,7 +207,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 			FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = publisher.processForTargetedJobOrBatch(uow, log, executeContext);
 			uow = incWithUow.uow;
 			
-			// We pass number of processed records with sharing in place so this can be used in creating usage by object
+			// We pass number of processed records w/ sharing in place so this can be used in creating usage by object
 			this.noRecordsSharingAppliedFirstTime += incWithUow.noRecordsSharingAppliedFirstTime;
 			this.noRecordsAllSharingRemoved 	  += incWithUow.noRecordsAllSharingRemoved;
 			this.noRecordsSharingUpdated 		  += incWithUow.noRecordsSharingUpdated;

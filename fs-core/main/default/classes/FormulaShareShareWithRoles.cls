@@ -1,4 +1,4 @@
-public with sharing class FormulaShareShareWithRoles extends FormulaShareShareWithBase {
+public inherited sharing class FormulaShareShareWithRoles extends FormulaShareShareWithBase {
 
     public FormulaShareShareWithRoles(FormulaShareService service) {
         this.service = service;

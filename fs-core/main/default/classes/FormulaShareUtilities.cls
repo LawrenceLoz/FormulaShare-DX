@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareUtilities {
+public with sharing class FormulaShareUtilities {
 
     // Method returns the namespace of the package with underscores appended
     // Used to determine what to add to object and field names

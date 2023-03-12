@@ -1,4 +1,4 @@
-public with sharing class FormulaShareAsyncApexJobSelector extends fflib_SObjectSelector {
+public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SObjectSelector {
 
     public Schema.SObjectType getSObjectType() {
         return AsyncApexJob.sObjectType;

@@ -113,7 +113,7 @@ public inherited sharing class FormulaShareService {
 			recordsWithShareChanges.add(sd.recordId);
 		}
 
-		// Records with sharing to remain in place will have 
+		// Records w/ sharing to remain in place will have 
 		recordsSharingStillInPlace.removeAll(recordsWithShareChanges);
 		this.noRecordsSharingStillInPlace = recordsSharingStillInPlace.size();
 
@@ -222,7 +222,7 @@ public inherited sharing class FormulaShareService {
 		// Assess sharing to be created or kept (will update deletion and insertion maps)
 		assessRequiredShares();
 
-		// Get set of records with sharing which is no longer valid (based on mapToDelete)
+		// Get set of records w/ sharing which is no longer valid (based on mapToDelete)
 		Set<Id> existingSharesInvalidSet = getInvalidIdSet();
 
 		// Clear deletion map if removal of standard sharing is not permitted
@@ -230,11 +230,11 @@ public inherited sharing class FormulaShareService {
 			mapToDelete.clear();
 		}
 
-		// Add indication whether each record with sharing to INSERT was shared already
+		// Add indication whether each record w/ sharing to INSERT was shared already
 		augmentWithExistingSharing(mapToInsert, existingSharesValidSet);
 		augmentWithExistingSharing(mapToInsert, existingSharesInvalidSet);
 
-		// Add indication whether each record with sharing to DELETE still has valid sharing which will be created or kept
+		// Add indication whether each record w/ sharing to DELETE still has valid sharing which will be created or kept
 		augmentWithExistingSharing(mapToDelete, newSharesValidSet);
 		augmentWithExistingSharing(mapToDelete, existingSharesValidSet);
 	}

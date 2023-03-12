@@ -1,4 +1,4 @@
-public abstract with sharing class FormulaShareShareWithBase {
+public abstract inherited sharing class FormulaShareShareWithBase {
 
     protected FormulaShareService service;
     protected Set<Id> queryIdSet = new Set<Id>();

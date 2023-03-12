@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareNamespaceInfo {
+public inherited sharing class FormulaShareNamespaceInfo {
 
     // Returns namespace expected for the package
     // Class can be replaced with a method returning appropriate NS if implemented within a package
