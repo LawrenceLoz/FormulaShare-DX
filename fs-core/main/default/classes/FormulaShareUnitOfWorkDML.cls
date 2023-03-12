@@ -50,10 +50,9 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 		Schema.SObjectType type = objList[0].getSObjectType();
 		if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
 
-            // NOPMD required (false apexcrudviolation)
 			// If mulitple types in uow, fflibs will split these and call dmlDelete by object
 			// so we only need to check one record to know the type
-			delete objList;  //NOPMD
+			delete objList;  //NOPMD (false apexcrudviolation)
 		}
 	}
 

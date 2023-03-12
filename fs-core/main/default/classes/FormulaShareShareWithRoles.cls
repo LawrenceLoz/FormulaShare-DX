@@ -36,10 +36,10 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
 		// Query for role Ids if needed and create map
 		Map<String,Id> roleNamesToIdsMap = new Map<String,Id>();
 		if(!sharedToNamesRoles.isEmpty()) {
-			List<UserRole> rolesList = [
+			List<UserRole> rolesList = [                    //NOPMD (false apexcrudviolation) - system object query for IDs
                 SELECT Id, DeveloperName 
                 FROM UserRole 
-                WHERE DeveloperName IN :sharedToNamesRoles];    //NOPMD - system object query for IDs
+                WHERE DeveloperName IN :sharedToNamesRoles];
 
 			for(UserRole role : rolesList) {
 				roleNamesToIdsMap.put(role.DeveloperName, role.Id);

@@ -52,9 +52,8 @@ public inherited sharing class FormulaShareSObjectShares {
             // update the existing share rather than create a new one. For this reason, assessment of sharing will only
             // delete shares if there is no sharing of any level to be applied
 
-            // NOPMD required (false apexcrudviolation)
             // Batch operates on a single object and all shares will be of this type (access checked above)
-            insert shares;  //NOPMD
+            insert shares;  //NOPMD (false apexcrudviolation)
 
             system.debug('DML inserted shares '+ shares);
         }
@@ -75,9 +74,8 @@ public inherited sharing class FormulaShareSObjectShares {
         if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
             system.debug('DML shares to be deleted '+ shares);
 
-            // NOPMD required (false apexcrudviolation)
             // Batch operates on a single object and all shares will be of this type (access checked above)
-            delete shares;  //NOPMD
+            delete shares;  //NOPMD (false apexcrudviolation)
         }
 
         else if(!type.getDescribe().isAccessible()) {
