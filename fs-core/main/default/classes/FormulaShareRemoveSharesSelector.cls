@@ -56,7 +56,9 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
         return [
             SELECT Id, Retain_Sharing_After_Record_Changes__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-            WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName LIMIT 1];
+            WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName
+            WITH SECURITY_ENFORCED
+            LIMIT 1];
     }
 
 }

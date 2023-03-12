@@ -40,7 +40,8 @@ public inherited sharing class FormulaShareUtilities {
 				List<ApexClass> nsClassList = [
 					SELECT Id from ApexClass 
 					WHERE Name = :classInPackage 
-					AND NamespacePrefix = :expectedNamespace];
+					AND NamespacePrefix = :expectedNamespace
+					WITH SECURITY_ENFORCED];
 				if(!nsClassList.isEmpty()) {
 					namespacePrefix = expectedNamespace + '__';
 				}

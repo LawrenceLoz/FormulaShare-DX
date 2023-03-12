@@ -144,7 +144,11 @@ public with sharing class FormulaShareRuleDetailController {
     // Note there is no external manager group type
     @AuraEnabled(cacheable=true)
     public static Boolean isManagerSharingSupported() {
-        List<Group> mgrGroupList = [SELECT Id from Group WHERE Type = 'Manager' LIMIT 1];
+        List<Group> mgrGroupList = [
+            SELECT Id from Group
+            WHERE Type = 'Manager'
+            WITH SECURITY_ENFORCED
+            LIMIT 1];
         return !mgrGroupList.isEmpty();
     }
 

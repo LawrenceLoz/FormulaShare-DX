@@ -22,6 +22,12 @@
 // Note that fflib selector pattern isn't used because it fails for metadata relationship fields.
 // FLS and sharing checks aren't needed since custom metadata does not support either.
 
+
+// Suppress injection detection - in no circumstances are variables received by user input,
+// only from the objects referenced in custom metadata relationship fields, internally defined lists
+// or record ids detected by FormulaShare
+@SuppressWarnings('PMD.ApexSOQLInjection')
+
 public virtual inherited sharing class FormulaShareRulesSelector {
 
     public static Object mock;
@@ -116,7 +122,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     // Returns rules where the shared object and shared to field are the object in scope
     // Used by trigger helper to get rules which might be affected by object DML
     public List<FormulaShareRule> getRulesSharingObject(String objectName) {
-        String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\'';
+        String condition = 'Object_Shared__r.QualifiedApiName = \'' + String.escapeSingleQuotes(objectName) + '\'';
         String query = getQueryWithCondition(condition);
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 

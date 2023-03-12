@@ -36,7 +36,11 @@ public with sharing class FormulaShareShareWithRoles extends FormulaShareShareWi
 		// Query for role Ids if needed and create map
 		Map<String,Id> roleNamesToIdsMap = new Map<String,Id>();
 		if(!sharedToNamesRoles.isEmpty()) {
-			List<UserRole> rolesList = [SELECT Id, DeveloperName FROM UserRole WHERE DeveloperName IN :sharedToNamesRoles];
+			List<UserRole> rolesList = [
+                SELECT Id, DeveloperName 
+                FROM UserRole 
+                WHERE DeveloperName IN :sharedToNamesRoles
+                WITH SECURITY_ENFORCED];
 
 			for(UserRole role : rolesList) {
 				roleNamesToIdsMap.put(role.DeveloperName, role.Id);
@@ -53,7 +57,7 @@ public with sharing class FormulaShareShareWithRoles extends FormulaShareShareWi
                 FROM Group 
                 WHERE (RelatedId IN :queryIdSet OR RelatedId IN :roleNamesToIdsMap.values())
                 AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal' OR Type = 'RoleAndSubordinates')
-                ]) {
+                WITH SECURITY_ENFORCED]) {
 
                 String shortRelatedToId = FormulaShareIdUtilities.get15CharacterId(grp.RelatedId);
                 String key = shortRelatedToId + grp.Type;

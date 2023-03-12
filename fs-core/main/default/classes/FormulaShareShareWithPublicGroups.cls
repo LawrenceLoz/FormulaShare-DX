@@ -57,9 +57,11 @@ public with sharing class FormulaShareShareWithPublicGroups extends FormulaShare
 		Map<String,Id> groups = new Map<String,Id>();
 
 		// Query for matching public groups and queues
-		for(Group grp : [SELECT Id, DeveloperName FROM Group 
+		for(Group grp : [
+            SELECT Id, DeveloperName FROM Group 
 			WHERE DeveloperName IN :groupNames
-			AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')]) {
+			AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')
+            WITH SECURITY_ENFORCED]) {
 			groups.put(grp.DeveloperName,grp.Id);
 		}
 		return groups;
