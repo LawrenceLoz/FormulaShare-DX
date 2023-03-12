@@ -39,8 +39,7 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
 			List<UserRole> rolesList = [
                 SELECT Id, DeveloperName 
                 FROM UserRole 
-                WHERE DeveloperName IN :sharedToNamesRoles
-                WITH SECURITY_ENFORCED];
+                WHERE DeveloperName IN :sharedToNamesRoles];    //NOPMD - system object query for IDs
 
 			for(UserRole role : rolesList) {
 				roleNamesToIdsMap.put(role.DeveloperName, role.Id);
