@@ -45,7 +45,7 @@ public inherited sharing class FormulaShareSObjectShares {
 
         // Check that object can be created by current or requesting user (or bypass if this is a test run)
         // Note there's no need to check field security as this can't be set on share records
-        if(type.getDescribe().isAccessible() && type.getDescribe().isCreateable()) {
+        if(type.getDescribe().isCreateable() == true) {
 
             // Insert the sharing record
             // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
@@ -58,11 +58,7 @@ public inherited sharing class FormulaShareSObjectShares {
             system.debug('DML inserted shares '+ shares);
         }
 
-        else if(!type.getDescribe().isAccessible()) {
-            throw new FormulaShareException('Share insert failed - share object not accessible to running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
-        }
-
-        else if(!type.getDescribe().isCreateable()) {
+        else {
             throw new FormulaShareException('Share insert failed - share object not creatable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
         }
     }
@@ -71,18 +67,14 @@ public inherited sharing class FormulaShareSObjectShares {
     public void deleteShares(List<SObject> shares) {
 
         // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
-        if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
+        if(type.getDescribe().isDeletable() == true) {
             system.debug('DML shares to be deleted '+ shares);
 
             // Batch operates on a single object and all shares will be of this type (access checked above)
             delete shares;  //NOPMD (false apexcrudviolation)
         }
 
-        else if(!type.getDescribe().isAccessible()) {
-            throw new FormulaShareException('Share delete failed - share object not accessible to running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
-        }
-
-        else if(!type.getDescribe().isDeletable()) {
+        else {
             throw new FormulaShareException('Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
         }
     }
