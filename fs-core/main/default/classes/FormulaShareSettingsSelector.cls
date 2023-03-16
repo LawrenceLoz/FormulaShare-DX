@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjectSelector {
+public inherited sharing class FormulaShareSettingsSelector {
 
 	public class FormulaShareSettingsSelectorException extends Exception{}
 
@@ -37,23 +37,22 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
 
     private FormulaShare_Settings__mdt cachedSettings;
     
-    public List<Schema.SObjectField> getSObjectFieldList() {
+    public List<String> getSObjectFieldList() {
 
-        List<Schema.SObjectField> fields = new List<Schema.SObjectField> {
-            FormulaShare_Settings__mdt.DeveloperName,
-            FormulaShare_Settings__mdt.Recalculation_Batch_Size__c,
-            FormulaShare_Settings__mdt.Trigger_Helper_Class_Override__c,
-            FormulaShare_Settings__mdt.Log_Processing_Events__c,
-            FormulaShare_Settings__mdt.Logs_Removal_Batch_Size__c,
-            FormulaShare_Settings__mdt.Recalculation_Batch_Size__c,
-            FormulaShare_Settings__mdt.Days_to_Retain_Batch_Logs__c,
-            FormulaShare_Settings__mdt.Days_to_Retain_Record_Logs__c,
-            FormulaShare_Settings__mdt.All_Record_Logs_Report_Name__c,
-            FormulaShare_Settings__mdt.Record_Logs_Since_Last_Batch_Report_Name__c,
-            FormulaShare_Settings__mdt.All_Record_Errors_Report_Name__c,
-            FormulaShare_Settings__mdt.Rec_Errors_Since_Last_Batch_Report_Name__c,
-            FormulaShare_Settings__mdt.Batch_Errors_Report_Name__c,
-            FormulaShare_Settings__mdt.Allow_Recursive_Reassessment__c
+        List<String> fields = new List<String> {
+            'DeveloperName',
+            'Trigger_Helper_Class_Override__c',
+            'Log_Processing_Events__c',
+            'Logs_Removal_Batch_Size__c',
+            'Recalculation_Batch_Size__c',
+            'Days_to_Retain_Batch_Logs__c',
+            'Days_to_Retain_Record_Logs__c',
+            'All_Record_Logs_Report_Name__c',
+            'Record_Logs_Since_Last_Batch_Report_Name__c',
+            'All_Record_Errors_Report_Name__c',
+            'Rec_Errors_Since_Last_Batch_Report_Name__c',
+            'Batch_Errors_Report_Name__c',
+            'Allow_Recursive_Reassessment__c'
         };
 
         fields.addAll(new FormulaShareInjectionService().getExtraSettingsFields());
@@ -108,7 +107,7 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
 
         // Check whether any settings are blank
         Boolean queryForDefaultSettings;
-        for(Schema.SObjectField field : getSObjectFieldList()) {
+        for(String field : getSObjectFieldList()) {
             if(settingsToReturn.get(field) == null) {
                 queryForDefaultSettings = true;
             }
@@ -119,7 +118,7 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
             FormulaShare_Settings__mdt defaultSettings = selectDefaultSettings()[0];
 
             // Set default values for blank fields
-            for(Schema.SObjectField field : getSObjectFieldList()) {
+            for(String field : getSObjectFieldList()) {
                 if(settingsToReturn.get(field) == null) {
                     settingsToReturn.put(field, defaultSettings.get(field));
                     system.debug('field: '+field);
@@ -133,19 +132,18 @@ public inherited sharing class FormulaShareSettingsSelector extends fflib_SObjec
 
 
     private List<FormulaShare_Settings__mdt> selectActiveSettingsNoCache() {
-        List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(
-            newQueryFactory().
-            setCondition('Active__c = true').
-            toSOQL());
+        List<String> fields = getSObjectFieldList();
+        String query = 'SELECT ' + String.join(fields, ',') 
+            + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true LIMIT 1';
+        List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }
 
     private List<FormulaShare_Settings__mdt> selectDefaultSettings() {
-        List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(
-            newQueryFactory().
-            setCondition('DeveloperName = \'Default\'').
-            setLimit(1).
-            toSOQL());
+        List<String> fields = getSObjectFieldList();
+        String query = 'SELECT ' + String.join(fields, ',') 
+            + ' FROM FormulaShare_Settings__mdt WHERE DeveloperName = \'Default\' LIMIT 1';
+        List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }
 

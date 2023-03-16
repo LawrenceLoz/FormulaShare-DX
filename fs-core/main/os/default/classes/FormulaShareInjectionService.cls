@@ -87,8 +87,8 @@ public with sharing class FormulaShareInjectionService {
         return new Set<String>();
     }
 
-    public List<Schema.SObjectField> getExtraSettingsFields() {
-        return new List<Schema.SObjectField>();
+    public List<String> getExtraSettingsFields() {
+        return new List<String>();
     }
 
     public Boolean versionSupportsTeamSharing() {
