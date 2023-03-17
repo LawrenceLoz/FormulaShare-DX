@@ -26,8 +26,7 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
     }
 
     // fflib selector pattern isn't used because it fails for metadata relationship fields.
-    // The basic query below is sufficient - FLS and sharing checks aren't needed 
-    // since custom metadata does not support either.
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     private static Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsForTypeMap = new Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt>();
     public FormulaShare_Std_Object_to_Remove_Shares__mdt getSettingsForType(Schema.sObjectType type) {
         FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings;
@@ -52,8 +51,9 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
     }
 
     // Can be overridden to return additional fields
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public virtual List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getSettingsList(String objectName) {
-        return [
+        return [     //NOPMD - Query is on custom metadata and results only used in apex so security check not required
             SELECT Id, Retain_Sharing_After_Record_Changes__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
             WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName

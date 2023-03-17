@@ -566,7 +566,8 @@ public inherited sharing class FormulaShareService {
 
 		// Loop through all rules and populate set of shared objects
         FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
-		for(String objName : rulesSelector.selectObjectsWithRules().keySet()) {
+
+		for(String objName : rulesSelector.selectObjectsWithRules(false).keySet()) {
 			SObjectType type = FormulaShareUtilities.globalDescribe.get(objName);
 			typesSet.add(type);
 		}

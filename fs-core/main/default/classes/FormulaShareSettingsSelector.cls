@@ -59,10 +59,6 @@ public inherited sharing class FormulaShareSettingsSelector {
         return fields;
     }
 
-    public Schema.SObjectType getSObjectType() {
-        return FormulaShare_Settings__mdt.sObjectType;
-    }
-
 
     // Cache and return the single active setting
     public FormulaShare_Settings__mdt selectActiveSettings() {
@@ -131,17 +127,19 @@ public inherited sharing class FormulaShareSettingsSelector {
     }
 
 
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     private List<FormulaShare_Settings__mdt> selectActiveSettingsNoCache() {
         List<String> fields = getSObjectFieldList();
-        String query = 'SELECT ' + String.join(fields, ',') 
+        String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ','))
             + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true LIMIT 1';
         List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }
 
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     private List<FormulaShare_Settings__mdt> selectDefaultSettings() {
         List<String> fields = getSObjectFieldList();
-        String query = 'SELECT ' + String.join(fields, ',') 
+        String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ',')) 
             + ' FROM FormulaShare_Settings__mdt WHERE DeveloperName = \'Default\' LIMIT 1';
         List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;

@@ -27,7 +27,7 @@ public with sharing class FormulaShareRulesListViewController {
     public static List<ObjectRulesWrapper> getTreeGridData() {
 
         FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
-        List<FormulaShareRule> rules = rulesSelector.getAllRules();
+        List<FormulaShareRule> rules = rulesSelector.getAllRulesWithSecurityEnforced();
 
         Map<String, List<RuleWrapper>> objectsWithRulesMap = new Map<String, List<RuleWrapper>>();
         Map<String, String> objectNameToLabelMap = new Map<String,String>();

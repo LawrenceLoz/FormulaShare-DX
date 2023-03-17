@@ -94,6 +94,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
     // Returns a list of wrapper objects rather than custom metadata objects, which is necessary   
     // to support unit tests since custom metadata relationships can't be mocked
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public List<FormulaShareRule> getRulesSharingObject(Schema.sObjectType type) {
 
 		String objectName = type.getDescribe().getName();
@@ -121,6 +122,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
     // Returns rules where the shared object and shared to field are the object in scope
     // Used by trigger helper to get rules which might be affected by object DML
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public List<FormulaShareRule> getRulesSharingObject(String objectName) {
         String condition = 'Object_Shared__r.QualifiedApiName = \'' + String.escapeSingleQuotes(objectName) + '\'';
         String query = getQueryWithCondition(condition);
@@ -137,8 +139,8 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    // Returns rules where type in scope is the child object in a child object rule
-    // Used by trigger helper to get rules which might be affected by object DML
+    // Security enforcement not required as CMDT rules are used only to determine usage summaries
+    // calculated as part of batch job and written to telemetry feature parameters
     public List<FormulaShareRule> getAllRules() {
         String condition = 'Object_Shared__c != null';
         String query = getQueryWithCondition(condition);
@@ -150,7 +152,22 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     }
 
 
-    public Map<String,String> selectObjectsWithRules() {
+    // Enforce security when rules are retrieved for display in FormulaShare rules list 
+    // or for determining which object settings to display
+    public List<FormulaShareRule> getAllRulesWithSecurityEnforced() {
+        String condition = 'Object_Shared__c != null';
+        String query = getQueryWithCondition(condition);
+        query += ' WITH SECURITY_ENFORCED';   // Returns for display/changes in setup component, so enforce security
+        List<FormulaShare_Rule__mdt> rules = Database.query(query);
+
+        List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+
+		return rulesToReturn;
+    }
+
+
+    // Enforce security option used when calling from context where CMDT influences UI
+    public Map<String,String> selectObjectsWithRules(Boolean enforceSecurity) {
         Map<String,String> objMap = new Map<String,String>();
 
         // If test, populate Set with a fake object name so we can test logic of method (can't otherwise guarantee rules exist)
@@ -162,6 +179,12 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             // Can't use FormulaShare_Rule__mdt.getAll() as this doesn't return entity relationship lookups
             String condition = 'Object_Shared__c != null';
             String query = getQueryWithCondition(condition);
+
+            // When called from context which influences the UI (provides picklist options for targeted jobs), enforce security
+            if(enforceSecurity) {
+                query += ' WITH SECURITY_ENFORCED';
+            }
+
             List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
             for(FormulaShare_Rule__mdt rule : rules) {
@@ -173,6 +196,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     }
 
 
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public FormulaShareRule getSpecificRule(Id ruleId) {
         String condition = 'Id = \'' + ruleId + '\' LIMIT 1';
         String query = getQueryWithCondition(condition);

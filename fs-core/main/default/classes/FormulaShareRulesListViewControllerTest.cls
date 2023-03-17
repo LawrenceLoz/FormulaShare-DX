@@ -25,7 +25,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         System.runAs(FormulaShareTestUtils.getAdmin()) {
             setMocks();
             
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 
             // Run core method
             List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
@@ -82,7 +82,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         System.runAs(FormulaShareTestUtils.getAdmin()) {
             setMocks();
 
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
             
             // Insert a log and RIB record for the first rule indicating processing not yet complete
             FormulaShare_Log__c log = new FormulaShare_Log__c();
@@ -134,7 +134,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
         System.runAs(FormulaShareTestUtils.getAdmin()) {
             setMocks();
 
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
             
             // Insert two logs and RIB records for the first rule indicating processing not yet complete
             DateTime now = DateTime.now();
@@ -197,7 +197,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
     
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 
             // Create batch log
             FormulaShare_Log__c batchLog = FormulaShareTestDataFactory.getBatchLog();
@@ -238,7 +238,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
 
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 
             // Create batch log
             FormulaShare_Log__c batchLog = FormulaShareTestDataFactory.getBatchLog();
@@ -281,7 +281,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
             setMocks();
     
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 
             // Create sample metrics for user rule
             FormulaShare_Metrics__c batchMetrics = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(FormulaShareRuleFactory.userRuleName, null);
@@ -319,7 +319,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             FormulaShareAsyncApexJobSelector.isFullBatchScheduled = false;   // Should trigger error message relating to scheduled job
             setMocks();
 
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 
             // Run core method
             List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
@@ -346,7 +346,7 @@ public with sharing class FormulaShareRulesListViewControllerTest {
 //    @IsTest
 //    public static void checkRecalculation() {
 //        setMocks();
-//        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRules();
+//        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
 //        String objApiName = fsRules[0].objectSharedAPIName;
 //
 //        Test.startTest();

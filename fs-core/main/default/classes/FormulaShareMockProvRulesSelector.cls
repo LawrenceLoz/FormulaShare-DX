@@ -6,7 +6,7 @@ public with sharing class FormulaShareMockProvRulesSelector implements System.St
         Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames, 
         List<Object> listOfArgs) {
 
-        if(stubbedMethodName == 'getRulesSharingObject' || stubbedMethodName == 'getAllRules') {
+        if(stubbedMethodName == 'getRulesSharingObject' || stubbedMethodName == 'getAllRules' || stubbedMethodName == 'getAllRulesWithSecurityEnforced') {
             return FormulaShareRuleFactory.getStandardRulesSharingBatchLogs();
         }
 

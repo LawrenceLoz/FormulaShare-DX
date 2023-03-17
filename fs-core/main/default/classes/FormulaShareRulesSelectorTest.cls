@@ -73,6 +73,23 @@ public with sharing class FormulaShareRulesSelectorTest {
         }
     }
 
+
+    @IsTest
+    public static void testGetAllRulesWithSecurityEnforced() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            List<FormulaShareRule> rules = selector.getAllRulesWithSecurityEnforced();
+
+            // We won't know and can't guarantee rules exist or not, so verify for both cases
+            List<FormulaShare_Rule__mdt> rulesByQuery = [
+                SELECT Id FROM FormulaShare_Rule__mdt 
+                WHERE Object_Shared__c != null];
+
+            System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the total number of rules in the org');
+        }
+    }
+
     @IsTest
     public static void testGetSpecificRule() {
 
@@ -94,7 +111,7 @@ public with sharing class FormulaShareRulesSelectorTest {
             FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
             selector.isUnitTest = true;
 
-            Set<String> objectsWithRules = selector.selectObjectsWithRules().keySet();
+            Set<String> objectsWithRules = selector.selectObjectsWithRules(true).keySet();
             System.assert(objectsWithRules.contains('Test object'));
         }
     }
