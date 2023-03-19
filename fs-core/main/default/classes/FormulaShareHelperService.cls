@@ -227,11 +227,21 @@ public inherited sharing class FormulaShareHelperService {
 
 		// We may have extra information to requery from the records (values of relationship parents for example)
 		if(!recordsToQuery.isEmpty()) {
-			fullQueriedRecords = getFullQueriedRecords(type);
+			List<SObject> recordsToReturn;
+
+			// Risk of query exception if user doesn't have access to all fields and objects in query
+			// If this is the case, return records as-is (log errors later)
+			try {
+				fullQueriedRecords = getFullQueriedRecords(type);
+			}
+			catch(fflib_SecurityUtils.FlsException e) {
+				System.debug('Issue re-querying records: '+e.getMessage());
+			}
 		}
 
-		// ... but if not we can just use the versions from the trigger as the full queried records
-		else {
+		// ... but if no need to requery, or if security exception re-querying, 
+		// we can use the versions from the trigger as the full queried records
+		if(recordsToQuery.isEmpty() || fullQueriedRecords == null) {
 			fullQueriedRecords = new Map<Id,SObject>();
 
 			for(FormulaShareRuleTypeServiceBase service : ruleTypeServices) {
@@ -292,10 +302,13 @@ public inherited sharing class FormulaShareHelperService {
 			}
 		}
 
-		List<SObject> queriedList = selector.selectWithFields(recordsToQuery);
-		Map<Id,SObject> fullQueriedRecords = new Map<Id,SObject>((List<SObject>) queriedList);
+		// Risk of query exception if user doesn't have access to all fields and objects in query
+		// This is caught and handled by calling method
+		List<SObject> recordsToReturn = selector.selectWithFields(recordsToQuery);
+
+		Map<Id,SObject> recordsToReturnMap = new Map<Id,SObject>((List<SObject>) recordsToReturn);
 		
-		return fullQueriedRecords;
+		return recordsToReturnMap;
 	}
 
 }

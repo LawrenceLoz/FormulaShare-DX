@@ -202,42 +202,62 @@ public inherited sharing class FormulaShareService {
 		}
 
 		// Query for existing shares
-		List<SObject> sharesQueryResult = getExistingShares();
-
-		// Create map of all record shares with unique key
-		// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
-		for(SObject share : sharesQueryResult) {
-			FormulaShareSObjectUtilities objectUtils = new FormulaShareSObjectUtilities(type);
-			ShareDetail sd = new ShareDetail();
-			sd.shareRecord = share;
-			sd.type = type;
-			sd.recordId = objectUtils.getParentIdFromShare(share);
-			String shareKey = objectUtils.getShareKey(share, sd.recordId);
-			mapToDelete.put(shareKey, sd);
+		List<SObject> sharesQueryResult;
+		try {
+			sharesQueryResult = getExistingShares();
+		}
+		catch(fflib_SObjectDomain.DomainException e) {
+			System.debug('Exception due to user access permissions: '+e);
+			logExceptionAllRecords('Triggering user missing permission ('+type.getDescribe().getName()+'): '+e);
 		}
 
-		// Clone so we can check existing sharing after removing shares from deletion map
-		existingShareKeys = mapToDelete.keySet().clone();
+		if(sharesQueryResult != null) {
 
-		// Assess sharing to be created or kept (will update deletion and insertion maps)
-		assessRequiredShares();
+			// Create map of all record shares with unique key
+			// Any required shares will be removed from this map and the remainder deleted (if settings allow this)
+			for(SObject share : sharesQueryResult) {
+				FormulaShareSObjectUtilities objectUtils = new FormulaShareSObjectUtilities(type);
+				ShareDetail sd = new ShareDetail();
+				sd.shareRecord = share;
+				sd.type = type;
+				sd.recordId = objectUtils.getParentIdFromShare(share);
+				String shareKey = objectUtils.getShareKey(share, sd.recordId);
+				mapToDelete.put(shareKey, sd);
+			}
 
-		// Get set of records w/ sharing which is no longer valid (based on mapToDelete)
-		Set<Id> existingSharesInvalidSet = getInvalidIdSet();
+			// Clone so we can check existing sharing after removing shares from deletion map
+			existingShareKeys = mapToDelete.keySet().clone();
 
-		// Clear deletion map if removal of standard sharing is not permitted
-		if(!isShareRemovalAllowed()) {
-			mapToDelete.clear();
+			// Assess sharing to be created or kept (will update deletion and insertion maps)
+			assessRequiredShares();
+
+			// Get set of records w/ sharing which is no longer valid (based on mapToDelete)
+			Set<Id> existingSharesInvalidSet = getInvalidIdSet();
+
+			// Clear deletion map if removal of standard sharing is not permitted
+			if(!isShareRemovalAllowed()) {
+				mapToDelete.clear();
+			}
+
+			// Add indication whether each record w/ sharing to INSERT was shared already
+			augmentWithExistingSharing(mapToInsert, existingSharesValidSet);
+			augmentWithExistingSharing(mapToInsert, existingSharesInvalidSet);
+
+			// Add indication whether each record w/ sharing to DELETE still has valid sharing which will be created or kept
+			augmentWithExistingSharing(mapToDelete, newSharesValidSet);
+			augmentWithExistingSharing(mapToDelete, existingSharesValidSet);
 		}
-
-		// Add indication whether each record w/ sharing to INSERT was shared already
-		augmentWithExistingSharing(mapToInsert, existingSharesValidSet);
-		augmentWithExistingSharing(mapToInsert, existingSharesInvalidSet);
-
-		// Add indication whether each record w/ sharing to DELETE still has valid sharing which will be created or kept
-		augmentWithExistingSharing(mapToDelete, newSharesValidSet);
-		augmentWithExistingSharing(mapToDelete, existingSharesValidSet);
 	}
+
+
+	private void logExceptionAllRecords(String logMessage) {
+		for(FormulaShareRule rule : rules) {
+			for(FormulaShareRetrievedRecordDetails details : recordDetails) {
+				captureEntityNotFound(details.sharedRecord, rule, logMessage);
+			}
+		}
+	}
+
 
 	private Set<Id> getInvalidIdSet() {
 		Set<Id> invalidIdsSet = new Set<Id>();
@@ -282,13 +302,14 @@ public inherited sharing class FormulaShareService {
 			String rowCausesString = FormulaShareUtilities.buildStringFromSetQuotes(rowCauseSet);
 			System.debug('rowCausesString: '+rowCausesString);
 
-			// Query for relevant share records via selector
+			// Query for relevant share records via selector. Exception if user doesn't have access
+			// (e.g. if related object user doesn't have permissions for). This is handled in calling method
 			sharesQueryResult = sharesSelector.selectByParentIdsAndRowCauses(parentIdsString, rowCausesString);
 		}
 
 		// If standard, select by parent Ids only
 		else {
-			sharesQueryResult = sharesSelector.selectByParentIds(parentIdsString);
+			sharesQueryResult = sharesSelector.selectByParentIds(parentIdsString);	// Exception handled in calling method
 		}
 
 		system.debug('Share query result: '+sharesQueryResult);
@@ -334,15 +355,18 @@ public inherited sharing class FormulaShareService {
 		}
 	}
 
-
 	public void captureEntityNotFound(RecordRule recRule, String logMessage) {
+		captureEntityNotFound(recRule.recordToShare, recRule.rule, logMessage);
+	}
+
+	private void captureEntityNotFound(SObject recordToShare, FormulaShareRule rule, String logMessage) {
 		String targetAccessLevel = 'Not yet assessed';
 
 		// Unless rule is for a default team, target access level is defined in the rule
-		if(recRule.rule.shareWith == 'Default Account Teams of Users' || recRule.rule.shareWith == 'Default Opportunity Teams of Users') {
-			targetAccessLevel = recRule.rule.accessLevel;
+		if(rule.shareWith != 'Default Account Teams of Users' && rule.shareWith != 'Default Opportunity Teams of Users') {
+			targetAccessLevel = rule.accessLevel;
 		}
-		captureEntityNotFound(recRule.recordToShare.Id, targetAccessLevel, recRule.rule, logMessage);
+		captureEntityNotFound(recordToShare.Id, targetAccessLevel, rule, logMessage);
 	}
 
 	public void captureEntityNotFound(Id recordId, String targetAccessLevel, FormulaShareRule rule, String logMessage) {
