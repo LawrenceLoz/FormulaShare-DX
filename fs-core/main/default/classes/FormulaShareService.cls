@@ -55,6 +55,7 @@ public inherited sharing class FormulaShareService {
 	private Set<Id> existingSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
 	private Set<Id> newSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
 	@TestVisible private List<FormulaShareRetrievedRecordDetails> recordDetails;
+	private Exception queryException;
 	
 	private Map<String,Integer> noValidSharesForRules = new Map<String,Integer>();
 	@TestVisible private Map<String,ShareDetail> mapToDelete = new Map<String,ShareDetail>();
@@ -152,6 +153,10 @@ public inherited sharing class FormulaShareService {
 		}
 	}
 
+	public void setQueryException(Exception e) {
+		this.queryException = e;
+	}
+
 
 	// Used by batch job start to retrieve core query selector (ids only)
 	public static Database.QueryLocator getAllSharedObjectsLocator(Schema.sObjectType type) {
@@ -203,14 +208,20 @@ public inherited sharing class FormulaShareService {
 
 		// Query for existing shares
 		List<SObject> sharesQueryResult;
-		try {
-			sharesQueryResult = getExistingShares();
+		if(queryException != null) {
+			logExceptionAllRecords('Running user permission error for '+type.getDescribe().getName()+' sharing: '+queryException.getMessage());
 		}
-		catch(fflib_SObjectDomain.DomainException e) {
-			System.debug('Exception due to user access permissions: '+e);
-			logExceptionAllRecords('Triggering user missing permission ('+type.getDescribe().getName()+'): '+e);
+		else {
+			try {
+				sharesQueryResult = getExistingShares();
+			}
+			catch(fflib_SObjectDomain.DomainException e) {
+				System.debug('Exception due to user access permissions: '+e.getMessage());
+				logExceptionAllRecords('Running user permission error for '+type.getDescribe().getName()+' share object: '+e.getMessage());
+			}
 		}
 
+		// Continue if no exceptions querying source object or shares
 		if(sharesQueryResult != null) {
 
 			// Create map of all record shares with unique key

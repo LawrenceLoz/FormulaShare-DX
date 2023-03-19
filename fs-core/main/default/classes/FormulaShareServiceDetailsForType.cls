@@ -26,6 +26,7 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 	public Boolean removeExistingShares;
 	public List<FormulaShareRule> rules = new List<FormulaShareRule>();
 	public Map<Id,FormulaShareRetrievedRecordDetails> retrieveRecordDetails = new Map<Id,FormulaShareRetrievedRecordDetails>();
+	public Exception queryException;
 
 	public FormulaShareServiceDetailsForType(Schema.SObjectType type, Boolean removeExistingShares) {
 		this.sharedType = type;

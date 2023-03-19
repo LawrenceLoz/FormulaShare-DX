@@ -226,6 +226,7 @@ public inherited sharing class FormulaShareHelperService {
 		Map<Id,SObject> fullQueriedRecords;
 
 		// We may have extra information to requery from the records (values of relationship parents for example)
+		Exception queryException;
 		if(!recordsToQuery.isEmpty()) {
 			List<SObject> recordsToReturn;
 
@@ -236,6 +237,7 @@ public inherited sharing class FormulaShareHelperService {
 			}
 			catch(fflib_SecurityUtils.FlsException e) {
 				System.debug('Issue re-querying records: '+e.getMessage());
+				queryException = e;
 			}
 		}
 
@@ -260,9 +262,11 @@ public inherited sharing class FormulaShareHelperService {
 			detailsMap = service.makeUpdatedDetailsMap(detailsMap, fullQueriedRecords, this);
 		}
 
-		for(String key : detailsMap.keySet()) {
-			System.debug('detailsMap key: '+key);
-			System.debug('detailsMap value: '+detailsMap.get(key));
+		// In case we had an exception, add this to the values to log in service
+		if(queryException != null) {
+			for(FormulaShareServiceDetailsForType details : detailsMap.values()) {
+				details.queryException = queryException;
+			}
 		}
 
         return detailsMap.values();
