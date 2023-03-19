@@ -55,7 +55,7 @@ public inherited sharing class FormulaShareService {
 	private Set<Id> existingSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
 	private Set<Id> newSharesValidSet = new Set<Id>();		// All ids which were previously shared (regardless of whether sharing will be changed)
 	@TestVisible private List<FormulaShareRetrievedRecordDetails> recordDetails;
-	private Exception queryException;
+	private String queryExceptionMessage;
 	
 	private Map<String,Integer> noValidSharesForRules = new Map<String,Integer>();
 	@TestVisible private Map<String,ShareDetail> mapToDelete = new Map<String,ShareDetail>();
@@ -153,8 +153,9 @@ public inherited sharing class FormulaShareService {
 		}
 	}
 
-	public void setQueryException(Exception e) {
-		this.queryException = e;
+	// Passing exception causes Internal Salesforce Error when moissues with mocking
+	public void testSetQueryException(String queryExceptionMessage) {
+		this.queryExceptionMessage = queryExceptionMessage;
 	}
 
 
@@ -208,8 +209,8 @@ public inherited sharing class FormulaShareService {
 
 		// Query for existing shares
 		List<SObject> sharesQueryResult;
-		if(queryException != null) {
-			logExceptionAllRecords('Running user permission error for '+type.getDescribe().getName()+' sharing: '+queryException.getMessage());
+		if(queryExceptionMessage != null) {
+			logExceptionAllRecords('Running user permission error for '+type.getDescribe().getName()+' sharing: '+queryExceptionMessage);
 		}
 		else {
 			try {

@@ -67,7 +67,7 @@ public abstract inherited sharing class FormulaShareHelperBase {
 			}
 			fsService.setSharedRecordDetails(details.retrieveRecordDetails.values());
 			if(details.queryException != null) {
-				fsService.setQueryException(details.queryException);
+				fsService.testSetQueryException(details.queryException.getMessage());
 			}
 
 			system.debug('Processing ' + fsService.getType());

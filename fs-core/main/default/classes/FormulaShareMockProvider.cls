@@ -167,6 +167,10 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
             return null;
         }
 
+        else if(stubbedMethodName == 'setQueryException') {
+            return null;
+        }
+
         // -------------------- FormulaShareRulesMetadataDMLService Mocks ------------------- //
 
         else if(stubbedMethodName == 'submitForDml') {
