@@ -2,32 +2,28 @@
 
 ![build status](https://github.com/LawrenceLoz/FormulaShare-DX/actions/workflows/validate-branch-deployable.yml/badge.svg)
 
-Click-and-configure rules to share records based on parent records and formula field contents. Salesforce provides great in-platform config options to share records, but none of these effectively address these common use cases.
+This repository is the sharing framework for the [open-core](https://en.wikipedia.org/wiki/Open-core_model) project FormulaShare. FormulaShare is offered on the Salesforce [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1), with code from this repository augmented with additional features and capabiltiies.
 
-FormulaShare lets you do this and more without resorting to complex development.
-
-FormulaShare is published on the AppExchange as a free managed package https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1. Using the package version means separate governor limits are allocated, minimising the risk of your org's limits being exceeded.
-
-## Deprecation notice - Related object sharing
-Please be aware that related object sharing, the functionality to share by selecting fields based on objects other than the shared object, will be removed from the main branch of this repo by approximately early July 2022.
-
-Further details on what this might mean for your org are outlined in the related issue: https://github.com/LawrenceLoz/FormulaShare-DX/issues/84
+Salesforce provides great in-platform config options to share records, but none of these effectively address a common use case of needing to control access based on a record's relationship to other records. FormulaShare provides click-and-configure rules to do this, letting you use fields from related records and values of formula fields as criteria to determine access. 
 
 ## How does it work?
 
+The framework in this repository provides the following capabilties:
+
 * Records are shared to a user, role or group specified in a formula, lookup or text field
 * Information from a parent object can be used to determine sharing access by using a formula field
-* Sharing assessment can be carried out in real time by calling FormulaShare from trigger handlers
-* A regular batch applies any updates to sharing changes not initiated by triggers
+* A regular batch applies any updates to sharing changes
 * Standard and custom objects are supported
 
+When used together with the features of the [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) FormulaShare provides:
+* Real time assessment from triggers
+* Sharing to uesrs, roles and groups on records related by a series of lookups (parent or child) to the shared object
+* Sharing to other entity types such as Manager Groups and Account or Opportunity Default Teams
+* Targeted Assessment Jobs to assess a subset of records in shared objects for more frequent and performant batch jobs
+* Control over each object's recursion strategy 
+* Additional stability. The security-reviewed package provides FormulaShare with separate governor limits for DML statements, SOQL query rows and other transaction resources, minimising risk of limits being exceeded
+
 By leveraging standard formula fields, FormulaShare lets admins and app builders quickly specify how records should be shared using a familiar feature, and complex relationships and conditions can be set where needed. Behind the scenes, FormulaShare creates and removes [apex managed sharing](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_bulk_sharing_creating_with_apex.htm) to match access to the conditions specified in rules.
-
-The FormulaShare app is the control and monitoring centre for your org:
-
-* Creating a rule in the app takes just a few clicks, and as simple as creating a standard Salesforce sharing rule
-* Rules are stored as custom metadata, so are copied to sandboxes and can be deployed through change sets or other means
-* Log records are created for monitoring and reporting, and removed in line with customisable retention periods
 
 ## Example applications
 
@@ -39,13 +35,14 @@ The FormulaShare app is the control and monitoring centre for your org:
 
 ## Design approach
 
-Apex managed sharing is notoriously difficult to implement well - FormulaShare covers core scenarios where real time recalculation might be needed (for example creation of records and changes to formula field values), and handles all other scenarios (e.g. changes to parent objects referenced in a formula field) in a catch-up batch job.
+Apex managed sharing is notoriously difficult to implement well - the approach of using a batch job to efficiently reassess all records on a schedule ensures that sharing is always up date with each batch run, whatever changes may have happened in the shared record or related records which might be involved in sharing.
 
-Real time assessment of sharing if needed is called from apex triggers - just 3 lines of code need to be added to a trigger or handler class.
+Creating a rule in the app is just a few clicks, and is as simple as creating a Salesforce sharing rule. Rules are stored as custom metadata, so are copied to sandboxes and can be deployed through change sets or other means. The app also allows for capturing, retaining and removing logs for monitoring and reporting.
+
 
 ## Installing to your org
 
-The recommended way to deploy FormulaShare is to install the security reviewed [AppExchange package](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1). This ensures you can benefit from increased and separate transaction limits, automatic package upgrades, extra features and technical support. For information on deploying without the package, see the section [Deploying to an Org](#deploying-to-an-org).
+The recommended way to deploy FormulaShare is to install the security reviewed [AppExchange package](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1). The app has additional features to apply sharing in real time, share to other types of entities such as Manager Groups and Default Account or Opportunity Teams, create targeted calculation jobs for more frequent batch assessment and much more. The pacakge also ensures you benefit from increased and separate transaction limits, automatic package upgrades and technical support. For information on deploying without the package, see the section [Deploying to an Org](#deploying-to-an-org).
 
 ## Getting started
 
@@ -53,20 +50,6 @@ The basics of how to get up and running once FormulaShare is installed are below
 
 * **Assign permissions** Assign the permission set FormulaShare Admin to anyone who will be creating or managing rules
 * **Schedule batch recalculation of FormulaShare rules** [Schedule the apex class](https://help.salesforce.com/articleView?id=code_schedule_batch_apex.htm&type=5) FormulaShareProcessSchedulable to recalculate all rules on a regular basis
-* _Optional_ **Call FormulaShareService from shared object triggers** The following code can be added to any trigger or trigger handler code called during the after insert, update, delete and undelete invocations of a trigger to manage sharing changes for this object:
-```
-sdfs.FormulaShareHelper helper = new sdfs.FormulaShareHelper();
-insert helper.getSharesToInsert();
-delete helper.getSharesToDelete();
-```
-Note that if you've deployed metadata from this repo directly rather than by installing the managed package, the package namespace should be removed from the first line:
-```
-FormulaShareHelper helper = new FormulaShareHelper();
-```
-
-If you have a trigger framework with centralised handler logic, FormulaShare can be called using the same code in a central shared class instead of individually for each object.
-
-If there are no rules sharing an object and a trigger for this object calls FormulaShare, the app will cease processing after a single (efficient) metadata query checking for rules so performance overhead is minimal.
 
 ## Setting up a FormulaShare rule
 
@@ -85,7 +68,7 @@ Formula fields allow for referencing records from parent, grandparent or anscest
 
 
 ### Create sharing reason (custom objects only)
-FormulaShare creates entries in the object's share table with a sharing reason, which ensures FormulaShare can keep track of everything shared by a rule and remove sharing which isn't required. Set up a sharing reason (Classic interface only) from the custom object's setup page in the section "Apex Sharing Reasons". If your org uses Lightning, sharing reasons can be set up by temporarily switching to Salesforce Classic.
+FormulaShare creates entries in the object's share table with a sharing reason, which ensures it can keep track of sharing applied by each rule and remove sharing which is no longer needed. Set up a sharing reason (Classic interface only) from the custom object's setup page in the section "Apex Sharing Reasons". If your org uses Lightning, sharing reasons can be set up by temporarily switching to Salesforce Classic.
 
 For standard objects, sharing reasons aren't available. As an alternative, FormulaShare provides options to process rules either as additive (so object sharing is not removed if data conditions change), or fully managed (meaning FormulaShare assumes all records in the object's share table are provided by the configured rule and removes sharing which doesn't meet the criteria of the rule).
 
@@ -98,7 +81,7 @@ For full details around what can be set here, check the [online guide](https://c
 
 ### Test it works!
 
-Create a record in the shared object - if you have a trigger in place this should apply sharing right away, otherwise recalculate sharing for the object from the FormulaShare Rules tab.
+Create a record in the shared object, and recalculate sharing from the FormulaShare Rules tab.
 
 As a system admin, the easiest way to check that the sharing is applied is to use the "Sharing" button from the record page. The summary should show that the record is shared to the user, role, role and subordinates or public group which is linked through the shared to field.
 
@@ -116,7 +99,7 @@ Known limitations are outlined in the guide: https://cloudsundial.com/formulasha
 
 ## Deploying to an org
 
-There are a few ways to deploy FormulaShare depending on how you're planning to use, adapt or contribute:
+There are a few ways to deploy depending on how you're planning to use or contribute:
 
 ### Install from the AppExchange
 _Best for_: Using the package as it's designed
@@ -124,14 +107,6 @@ _Best for_: Using the package as it's designed
  - Complete post-installation steps described in [Technical configuration](#technical-configuration)
 
 This is the simplest and most convenient way to introduce FormulaShare for your organisation. The package can be installed in a few clicks and is kept up to date through an automated release process. Since the app has been security reviewed, it's given its own set of limits and won't contribute to most limits in your org.
-
-### Deploy directly to a sandbox or production
-_Best for_: Getting source code into your own environment using traditional development methodologies
- - Clone or fork the repo, and use VS Code, Salesforce DX command line or another tool to deploy the source files to your org
- - Complete post-installation steps described in [Technical configuration](#technical-configuration)
- - Optionally, call execute FSSampleAppDataGenerationService.run(_noTestDonations_) to generate a set of test data in the sample app
-
-This is the simplest way of getting source files into an org with your configuration and the ability to view and edit components. If you'd like to contribute enhancements or fixes, just fork the repo, deploy, retrieve your changes, create an issue in GitHub and submit a PR.
 
 ### Deploy to a scratch org without using the namespace
 _Best for_: Working independently on contributions or custom versions using a scratch org workflow
@@ -150,4 +125,4 @@ This process enables development using a dev hub and scratch orgs which can simu
 
 ## Ethos
 
-FormulaShare is a community project and is free to use and distribute. Contributions, collaborations, feedback and suggestions are welcome. Feel free to raise issues for enhancements or fixes, and fork the repo and submit a pull request if you'd like to contribute your own work to the project.
+FormulaShare-DX is the open source element of the FormulaShare open-core project. Review, contributions, collaborations and feedback relating to the framework managed in this repository are welcome. Feel free to raise issues for enhancements or fixes, and fork the repo and submit a pull request if you'd like to contribute your own work to the project.
