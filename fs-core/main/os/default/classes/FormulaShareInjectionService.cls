@@ -40,12 +40,6 @@ public with sharing class FormulaShareInjectionService {
         return FormulaShareRulesSelector.class;
     }
 
-    public List<FormulaShareRuleTypeServiceBase> getRuleTypeServices() {
-        return new List<FormulaShareRuleTypeServiceBase>{
-            new FormulaShareRuleTypeServiceStandard()
-        };
-    }
-
     public FormulaShareRuleConverterBase getRuleConverter() {
         return new FormulaShareRuleConverterStandard();
     }
