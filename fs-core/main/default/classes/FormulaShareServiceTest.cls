@@ -26,6 +26,8 @@ public class FormulaShareServiceTest {
 
     @TestSetup
     public static void setup() {
+        FormulaShareTestUtils.setupAdmin(true);
+        
         List<UserRole> roles = FormulaShareTestDataFactory.getRoles(3);
         insert roles;
         List<User> usersList = FormulaShareTestDataFactory.getUsers(1, roles[0].Id);
@@ -34,29 +36,32 @@ public class FormulaShareServiceTest {
 
     //--------------------------------- Test utility methods ------------------------------------------------
 
-    // Called directly when related rules being tested
-    public static FormulaShareService callProcessForLogRecordWithRelated(List<FormulaShare_Log__c> fsLogs, Map<Id,Map<String,List<FormulaShare_Log__c>>> relatedRecordsMap) {
+    public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
         Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getRulesSharingObject(fsLogType);
+
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        List<FormulaShareRule> fsRules = rulesSelector.getRulesSharingObject(fsLogType);
 		FormulaShareService fsService = FormulaShareService.construct(fsLogType, fsRules);
 
         List<FormulaShareRetrievedRecordDetails> recordDetails = new List<FormulaShareRetrievedRecordDetails>();
         for(FormulaShare_Log__c log : fsLogs) {
             FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
             details.sharedRecord = log;
-            if(relatedRecordsMap != null && relatedRecordsMap.containsKey(log.Id)) {
-                details.controllingRecordsForRulesMap = relatedRecordsMap.get(log.Id);
+
+            // For any non-standard rule, add a details object with empty list to controllingRecordsForRulesMap
+            // This indicates no relevant related records to process
+            for(FormulaShareRule rule : fsRules) {
+                if(!(rule instanceof FormulaShareRuleStandard)) {
+                    details.controllingRecordsForRulesMap.put(rule.developerName, new List<SObject>());
+                }
             }
             recordDetails.add(details);
         }
+
         fsService.setSharedRecordDetails(recordDetails);
 
 		fsService.processFormulaShares();
         return fsService;
-    }
-
-    public static FormulaShareService callProcessForLogRecords(List<FormulaShare_Log__c> fsLogs) {
-        return callProcessForLogRecordWithRelated(fsLogs, null);
     }
 
     public static FormulaShareService callProcessForLogRecord(FormulaShare_Log__c log) {
@@ -66,11 +71,10 @@ public class FormulaShareServiceTest {
     }
 
     public static void setMocks() {
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
 
-        FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
-        FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
 
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
@@ -88,154 +92,122 @@ public class FormulaShareServiceTest {
     @IsTest
     public static void testCreateRoleSharingNewRecord() {
         setMocks();
-        UserRole role = getOneRole();
 
-        // Create log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Context__c = role.Id;  // Share with role (id)
-        insert log;
 
-        FormulaShareService fsService = callProcessForLogRecord(log);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            UserRole role = getOneRole();
 
-        // Get relevant id we expect to be in share records
-        Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
+            // Create log object and set fields which have test rules created within apex class
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Context__c = role.Id;  // Share with role (id)
+            insert log;
 
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+            FormulaShareService fsService = callProcessForLogRecord(log);
 
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
-        System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+            // Get relevant id we expect to be in share records
+            Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND Type = 'Role'][0];
+
+            // Check that fsService response is as expected
+            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+
+            List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+            System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
+            System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
+            System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+            System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
+            System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+            System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        }
     }
 
     @IsTest
     public static void testCreateRoleAndSubordinatesSharingNewRecord() {
-        setMocks();
-        UserRole role = getOneRole();
+        
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            setMocks();
+            UserRole role = getOneRole();
 
-        // Create log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
-        insert log;
+            // Create log object and set fields which have test rules created within apex class
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Failed_Batches__c = role.DeveloperName;  // Share with role and subordinates (name)
+            insert log;
 
-        FormulaShareService fsService = callProcessForLogRecord(log);
+            FormulaShareService fsService = callProcessForLogRecord(log);
 
-        // Get relevant id we expect to be in share records
-        Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND (Type = 'RoleAndSubordinates' OR Type = 'RoleAndSubordinatesInternal') ORDER BY Type Desc][0];
+            // Get relevant id we expect to be in share records
+            Group roleSubordinatesGroup = [SELECT Id FROM Group WHERE RelatedId = :role.Id AND (Type = 'RoleAndSubordinates' OR Type = 'RoleAndSubordinatesInternal') ORDER BY Type Desc][0];
 
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+            // Check that fsService response is as expected
+            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
 
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role and subordinates group');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role and subordinates group');
-        System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(roleSubordinatesGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
-        System.assertEquals('Read', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+            List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+            System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role and subordinates group');
+            System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role and subordinates group');
+            System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+            System.assertEquals(roleSubordinatesGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
+            System.assertEquals('Read', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+            System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        }
     }
 
     @IsTest
     public static void testCreatePublicGroupSharingNewRecord() {
         setMocks();
 
-        // Create log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-        insert log;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // Create log object and set fields which have test rules created within apex class
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
+            insert log;
 
-        FormulaShareService fsService = callProcessForLogRecord(log);
+            FormulaShareService fsService = callProcessForLogRecord(log);
 
-        // Get relevant id we expect to be in share records
-        Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
+            // Get relevant id we expect to be in share records
+            Group publicGroup = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0];
 
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+            // Check that fsService response is as expected
+            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
 
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this public group');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this public group');
-        System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(publicGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+            List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+            System.assert(!sharesToInsertList.isEmpty(), 'No share record for this public group');
+            System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this public group');
+            System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+            System.assertEquals(publicGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
+            System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+            System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        }
     }
 
-    @IsTest
-    public static void testRelatedCreateUserSharingNewRecord() {
-        setMocks();
-
-        // Get the inserted user to share record to
-        User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
-
-        // Create parent log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c parentLog = new FormulaShare_Log__c();
-        parentLog.OwnerId = UserInfo.getUserId();     // Make sure owner is different to the user we want to share with
-        insert parentLog;
-
-        FormulaShare_Log__c childLog = new FormulaShare_Log__c();
-        childLog.Exception_Type__c = u.Id;  // Share with user (Id)
-        childLog.Related_Log_Required_for_Test_Class__c = parentLog.Id;
-        insert childLog;
-
-        FormulaShare_Log__c childLog2 = new FormulaShare_Log__c();
-        childLog2.Exception_Type__c = u.Id;  // Share with user (Id)
-        childLog2.Related_Log_Required_for_Test_Class__c = parentLog.Id;
-        insert childLog2;
-
-        List<FormulaShare_Log__c> sharedList = new List<FormulaShare_Log__c>{
-            parentLog};
-        List<FormulaShare_Log__c> relatedList = new List<FormulaShare_Log__c>{
-            childLog, childLog2};
-        Map<String,List<FormulaShare_Log__c>> relatedRecordsForRules = new Map<String,List<FormulaShare_Log__c>>{
-            FormulaShareMockProvider.childUserRuleName => relatedList};
-        Map<Id,Map<String,List<FormulaShare_Log__c>>> relatedRecordsMap = new Map<Id,Map<String,List<FormulaShare_Log__c>>>{
-            parentLog.Id => relatedRecordsForRules};
-
-        FormulaShareService fsService = callProcessForLogRecordWithRelated(sharedList, relatedRecordsMap);
-
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(parentLog.Id), 'Record differs from one expected');
-
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
-        System.assertEquals(parentLog.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
-    }
-
+    
     @IsTest
     public static void testCreateUserSharingNewRecord() {
         setMocks();
 
-        // Get the inserted user to share record to
-        User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // Get the inserted user to share record to
+            User u = [SELECT Id FROM User WHERE Firstname LIKE 'FormulaShareTestUser%' AND LastName LIKE 'OnlyForUnitTests%'][0];
 
-        // Create log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Exception_Type__c = u.Id;  // Share with user (Id)
-        log.OwnerId = UserInfo.getUserId();     // Make sure owner is a different user
-        insert log;
+            // Create log object and set fields which have test rules created within apex class
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Exception_Type__c = u.Id;  // Share with user (Id)
+            log.OwnerId = UserInfo.getUserId();     // Make sure owner is a different user
+            insert log;
 
-        FormulaShareService fsService = callProcessForLogRecord(log);
+            FormulaShareService fsService = callProcessForLogRecord(log);
 
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+            // Check that fsService response is as expected
+            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
 
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
-        System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+            List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+            System.assert(!sharesToInsertList.isEmpty(), 'No share record for this user');
+            System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this user');
+            System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+            System.assertEquals(u.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct user');
+            System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+            System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        }
     }
+
 
     // ------------------ Testing updates to sharing -------------------------
     @IsTest
@@ -243,40 +215,42 @@ public class FormulaShareServiceTest {
 
         setMocks();
 
-        // Retrieve two roles
-        List<UserRole> roles = [SELECT Id, DeveloperName FROM UserRole 
-            WHERE DeveloperName LIKE 'TestRoleFormulaShare%' 
-            ORDER BY DeveloperName LIMIT 2];
-        
-        // Create log object and set fields which have test rules created within apex class
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Context__c = roles[0].Id;
-        insert log;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // Retrieve two roles
+            List<UserRole> roles = [SELECT Id, DeveloperName FROM UserRole 
+                WHERE DeveloperName LIKE 'TestRoleFormulaShare%' 
+                ORDER BY DeveloperName LIMIT 2];
+            
+            // Create log object and set fields which have test rules created within apex class
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Context__c = roles[0].Id;
+            insert log;
 
-        test.startTest();
+            test.startTest();
 
-        // Apply sharing for first role
-        FormulaShareService.recalculateAll();
+            // Apply sharing for first role
+            FormulaShareService.recalculateAll();
 
-        // Update log record to share with different role
-        log.Context__c = roles[1].Id;
-        update log;
+            // Update log record to share with different role
+            log.Context__c = roles[1].Id;
+            update log;
 
-        FormulaShareService fsService = callProcessForLogRecord(log);
+            FormulaShareService fsService = callProcessForLogRecord(log);
 
-        // Get relevant id we expect to be in share records
-        Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :roles[1].Id AND Type = 'Role'][0];
+            // Get relevant id we expect to be in share records
+            Group roleGroup = [SELECT Id FROM Group WHERE RelatedId = :roles[1].Id AND Type = 'Role'][0];
 
-        // Check that fsService response is as expected
-        System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
+            // Check that fsService response is as expected
+            System.assert(fsService.sharedRecordIdsSet.contains(log.Id), 'New record not included in map');
 
-        List<SObject> sharesToInsertList = fsService.getSharesToInsert();
-        System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
-        System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
-        System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
-        System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
-        System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
-        System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+            List<SObject> sharesToInsertList = fsService.getSharesToInsert();
+            System.assert(!sharesToInsertList.isEmpty(), 'No share record for this role group');
+            System.assertEquals(1, sharesToInsertList.size(), 'More than one share record for this role group');
+            System.assertEquals(log.Id, sharesToInsertList[0].get('ParentId'), 'Share record not associated to correct parent');
+            System.assertEquals(roleGroup.Id, sharesToInsertList[0].get('UserOrGroupId'), 'Share record not associated to correct group');
+            System.assertEquals('Edit', sharesToInsertList[0].get('AccessLevel'), 'Access level not correct');
+            System.assertEquals(reason, sharesToInsertList[0].get('RowCause'), 'Sharing reason different to expected');
+        }
     }
 
 
@@ -317,21 +291,23 @@ public class FormulaShareServiceTest {
     public static void testQueryingStandardObjectShares() {
         setMocks();
 
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        insert log;
-        
-        Schema.SObjectType ContactType = Schema.getGlobalDescribe().get('Contact');
-        FormulaShareService fsService = FormulaShareService.construct(ContactType);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            insert log;
+            
+            Schema.SObjectType ContactType = Schema.getGlobalDescribe().get('Contact');
+            FormulaShareService fsService = FormulaShareService.construct(ContactType);
 
-        FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
-        details.sharedRecord = log;
-        List<FormulaShareRetrievedRecordDetails> detailsList = new List<FormulaShareRetrievedRecordDetails>{details};
-        fsService.setSharedRecordDetails(detailsList);
+            FormulaShareRetrievedRecordDetails details = new FormulaShareRetrievedRecordDetails();
+            details.sharedRecord = log;
+            List<FormulaShareRetrievedRecordDetails> detailsList = new List<FormulaShareRetrievedRecordDetails>{details};
+            fsService.setSharedRecordDetails(detailsList);
 
-        fsService.processFormulaShares();
+            fsService.processFormulaShares();
 
-        // Check that no records included in the deletion map
-        system.assert(fsService.getSharesToDelete().isEmpty());
+            // Check that no records included in the deletion map
+            system.assert(fsService.getSharesToDelete().isEmpty());
+        }
     }
 
 

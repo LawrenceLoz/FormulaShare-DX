@@ -19,17 +19,13 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjectSelector {
+public virtual inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjectSelector {
 
     public Schema.SObjectType type;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
-    Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
-    Set<String> fieldStrings = new Set<String>();
+    protected Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
+    protected Set<String> fieldStrings = new Set<String>();
 
-    public static FormulaShareSObjectsSelector construct(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
-        return new FormulaShareSObjectsSelector(enforceObjectAndFieldSecurity, type);
-    }
-    
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
         super(false // Do not include FieldSet fields
             , enforceObjectAndFieldSecurity // Enforce field security if requested
@@ -42,16 +38,15 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         fieldsSet = suppliedFieldsSet;
     }
 
-    public void addField(Schema.SObjectField field) {
-        fieldsSet.add(field);
-    }
-
     // Can be used to populate based on field API name, or a lookup path to a parent object
     public void addFieldString(String fieldString) {
         System.debug('Adding field in selector: '+fieldString);
-        fieldStrings.add(fieldString);
-    }
 
+        if(fieldString != null) {
+            fieldStrings.add(fieldString);
+        }
+    }
+    
 
     public Schema.SObjectType getSObjectType() {
         return type;
@@ -68,48 +63,15 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         );
     }
 
-
-    public List<SObject> selectPopulatedRecordsBasedOnParentPath(String parentFieldPath, Set<Id> parentIdSet) {
+    public Database.QueryLocator selectFilteredLocator(String filterField, String filterCondition) {
         fields.addAll(fieldsSet);
-        
-        fflib_QueryFactory controllingObjQueryFactory = newQueryFactory();
+        fflib_QueryFactory factory = newQueryFactory();
 
-        // Add parent path to select
-        System.debug('Adding field: '+parentFieldPath+' to selector for type: '+type.getDescribe().getName());
-        controllingObjQueryFactory.selectField(parentFieldPath);
-
-        // Restrict to specific shared records in scope 
-        String parentIdsString = FormulaShareUtilities.buildStringFromSetQuotes(parentIdSet);
-        String queryCondition = parentFieldPath + ' IN (' + parentIdsString + ')';
-
-        // If fields are supplied, we'll select these and restrict to records with one or more populated
-        if(!fieldStrings.isEmpty()) {
-            queryCondition += ' AND (';
-
-            // Add fields provided as strings (this would be all fields controlling sharing)
-            Boolean firstField = true;
-            for(String fieldString : fieldStrings) {
-                System.debug('|SOQL Adding query field: '+fieldString);
-
-                controllingObjQueryFactory.selectField(fieldString);
-                if(firstField) {
-                    firstField = false;
-                }
-                else {
-                    queryCondition += ' OR ';
-                }
-                // Restrict to only records with a share field popualted
-                queryCondition += fieldString + ' != NULL';
-            }
-
-            queryCondition += ')';
-        }
-
-        System.debug('Full query condition: '+queryCondition);
-        controllingObjQueryFactory.setCondition(queryCondition);
-
-        system.debug('SOQL with condition: '+controllingObjQueryFactory.toSOQL());
-        return Database.query(controllingObjQueryFactory.toSOQL());
+        return Database.getQueryLocator(
+            factory
+                .setCondition(filterField + ' = ' + filterCondition)
+                .toSOQL()
+        );
     }
 
 
@@ -166,11 +128,5 @@ public inherited sharing class FormulaShareSObjectsSelector extends fflib_SObjec
         return returnList;
     }
 
-
-    public class RelatedObjectDetails {
-        public SObjectType type;
-        public Set<Schema.SObjectField> fields;
-        public String relationshipName;
-    }
 
 }

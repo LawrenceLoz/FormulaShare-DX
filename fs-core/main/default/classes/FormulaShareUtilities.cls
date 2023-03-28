@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareUtilities {
+public with sharing class FormulaShareUtilities {
 
     // Method returns the namespace of the package with underscores appended
     // Used to determine what to add to object and field names
@@ -30,10 +30,23 @@ public inherited sharing class FormulaShareUtilities {
 	@AuraEnabled(cacheable=true)
     public static String getNamespacePrefix() {
         if(!namespaceSet) {
-            ApexClass cs = [SELECT NamespacePrefix from ApexClass where Name = :classInPackage LIMIT 1][0];
-            if(!String.isBlank(cs.NamespacePrefix)) {
-                namespacePrefix = cs.NamespacePrefix + '__';
-            }
+			String expectedNamespace = FormulaShareNamespaceInfo.getExpectedNamespace();
+
+			// If app is expected to be used within a namespace, check whether a class exists with this namespace
+			// and if so then assume we're operating within a NS, otherwise assume we're not in a namespace.
+			// Approach allows same version of FormulaShare to be run within a namespace and outside of
+			// a namespace (e.g. metadata deployment to sandbox for testing)
+			if(expectedNamespace != null) {
+				List<ApexClass> nsClassList = [
+					SELECT Id from ApexClass 
+					WHERE Name = :classInPackage 
+					AND NamespacePrefix = :expectedNamespace
+					WITH SECURITY_ENFORCED];
+				if(!nsClassList.isEmpty()) {
+					namespacePrefix = expectedNamespace + '__';
+				}
+			}
+
             namespaceSet = true;
         }
         return namespacePrefix;
@@ -117,6 +130,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Deprecate?
 	public static Schema.sObjectField getSObjectFieldFromRelatedName(String fieldRelatedNameString, SOBjectType type) {
 		// Get a map of all fields for the current object, and loop through each to find the next object to lookup
 		Map<String, Schema.SObjectField> fieldsForObject = type.getDescribe().fields.getMap();
@@ -131,6 +145,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Deprecate?
 	public static String getRelationshipName(String parentObjectAPIName, String childObjectAPIName, String lookupFieldAPIName) {
 		String relationshipName;
 
@@ -167,6 +182,7 @@ public inherited sharing class FormulaShareUtilities {
 
 
 	// Returns details of all objects associated through a lookup
+	// Used by LWC formulaShareRelationshipButtons component
 	public static List<RelationshipDetails> getParentRelationships(String childObjectAPIName) {
 		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 
@@ -202,6 +218,7 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Used by LWC formulaShareRelationshipButtons component
 	public static List<RelationshipDetails> getChildRelationships(String parentObjectAPIName) {
 		List<RelationshipDetails> crdList = new List<RelationshipDetails>();
 		Schema.DescribeSObjectResult parentObjDesc = describe(parentObjectAPIName);
@@ -323,6 +340,24 @@ public inherited sharing class FormulaShareUtilities {
 		}
 
 		return shareFields;
+	}
+
+
+	public static List<Schema.SObjectField> getBooleanFields(String objectApiName) {
+		List<Schema.SObjectField> booleanFields = new List<Schema.SObjectField>();
+		
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(objectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+			
+			// Check whether field could contain information for sharing 
+			if(fieldType == Schema.DisplayType.BOOLEAN) {
+				booleanFields.add(field);
+			}
+		}
+
+		return booleanFields;
 	}
 
 
@@ -473,17 +508,22 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	private static Boolean contactSharingControlledByAccount;
 	@AuraEnabled(cacheable=true)
 	public static Boolean isContactSharingControlledByAccount() {
-		Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
-		SObject share = accountShareType.newSObject();
-		try {
-			share.put('ContactAccessLevel', 'Read');
+		if(contactSharingControlledByAccount == null) {
+			Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
+			SObject share = accountShareType.newSObject();	// This will be possible even if account is Read/Write access
+			try {
+				share.put('ContactAccessLevel', 'Read');
+			}
+			catch(Exception e) {
+				contactSharingControlledByAccount = true;	// If exception assigning contact access level, sharing is controlled by account
+				return true;
+			}
+			contactSharingControlledByAccount = false;
 		}
-		catch(Exception e) {
-			return true;	// If exception assigning contact access level, sharing is controlled by account
-		}
-		return false;
+		return contactSharingControlledByAccount;
 	}
 
 	public static Map<String,SObject> cmdtToCmdtMap(FormulaShare_Rule__mdt rule) {

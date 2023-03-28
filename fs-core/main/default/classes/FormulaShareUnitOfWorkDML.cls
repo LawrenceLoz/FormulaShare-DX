@@ -43,18 +43,19 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 		update securityDecision.getRecords();
 	}
 
-	// Check object is accessible and deleteable
-	// If mulitple types in uow, fflibs will split these and call dmlDelete by object 
-	// so we only need to check one record to know the type
 	public void dmlDelete(List<SObject> objList) {
 		if(objList.isEmpty()) {
 			return;
 		}
 		Schema.SObjectType type = objList[0].getSObjectType();
-		if(type.getDescribe().isAccessible() && type.getDescribe().isDeletable()) {
-			delete objList;
+		if(type.getDescribe().isDeletable() == true) {
+
+			// If mulitple types in uow, fflibs will split these and call dmlDelete by object
+			// so we only need to check one record to know the type
+			delete objList;  //NOPMD (false apexcrudviolation)
 		}
 	}
+
 
     public void eventPublish(List<SObject> records) {
         if (records == null || records.size() == 0) return; // avoid wasting any cycles

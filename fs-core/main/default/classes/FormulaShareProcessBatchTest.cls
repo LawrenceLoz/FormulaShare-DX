@@ -22,6 +22,12 @@
 @IsTest
 public with sharing class FormulaShareProcessBatchTest {
 
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
+
+    
     static void setMocks() {
         FormulaShareService mockFSService = (FormulaShareService) FormulaShareMockUtil.createMock(FormulaShareService.class);
         FormulaShareService.mock = mockFSService;
@@ -29,39 +35,42 @@ public with sharing class FormulaShareProcessBatchTest {
         FormulaShareSObjectShares mockFSSObjectShares = (FormulaShareSObjectShares) FormulaShareMockUtil.createMock(FormulaShareSObjectShares.class);
         FormulaShareSObjectShares.mock = mockFSSObjectShares;
 
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
     }
 
     @IsTest
     static void checkBatchRunsAsExpected() {
         setMocks();
 
-        // Create a log object in scope of mock rule so that execute method can be invoked
-        FormulaShare_Log__c log = new FormulaShare_Log__c();
-        log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
-        log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
-        insert log;
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // Create a log object in scope of mock rule so that execute method can be invoked
+            FormulaShare_Log__c log = new FormulaShare_Log__c();
+            log.Type_In_Scope__c = 'AllInternalUsers';    // Share with group (name)
+            log.Exception_Type__c = UserInfo.getUserId();  // Share with user (Id)
+            insert log;
 
-        List<Schema.SObjectType> types = new List<Schema.SObjectType>();
-        Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
-        types.add(fsLogType);
-        FormulaShareProcessBatch batchObj = new FormulaShareProcessBatch(types, 1);
+            List<Schema.SObjectType> types = new List<Schema.SObjectType>();
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            types.add(fsLogType);
+            FormulaShareProcessBatch batchObj = new FormulaShareProcessBatch(types, 1);
 
-        // Call recalculate method to set sharing (mocks are set so only DML should be the log record itself)
-        test.startTest();
-		Id batchJobId = Database.executeBatch(batchObj, 1);
-        test.stopTest();
+            // Call recalculate method to set sharing (mocks are set so only DML should be the log record itself)
+            test.startTest();
+            Id batchJobId = Database.executeBatch(batchObj, 1);
+            test.stopTest();
 
-        // Check one log has been inserted for process
-        List<FormulaShare_Log__c> insertedLogs = [SELECT Query__c, Batches_Processed__c, Exception_Type__c 
-            FROM FormulaShare_Log__c WHERE Type_In_Scope__c LIKE '%FormulaShare_Log__c'];
+            // Check one log has been inserted for process
+            List<FormulaShare_Log__c> insertedLogs = [SELECT Query__c, Batches_Processed__c, Exception_Type__c 
+                FROM FormulaShare_Log__c WHERE Type_In_Scope__c LIKE '%FormulaShare_Log__c'];
 
-        system.debug('*** inserted logs: '+insertedLogs);
+            system.debug('*** inserted logs: '+insertedLogs);
 
-        system.assert(!insertedLogs.isEmpty(), 'No log record created for batch process');
-        system.assertEquals(1, insertedLogs.size(), 'Only one log expected, but more than one created');
-        system.assertEquals(1, insertedLogs[0].Batches_Processed__c);
+            system.assert(!insertedLogs.isEmpty(), 'No log record created for batch process');
+            system.assertEquals(1, insertedLogs.size(), 'Only one log expected, but more than one created');
+            system.assertEquals(1, insertedLogs[0].Batches_Processed__c);
+        }
     }
 
 }

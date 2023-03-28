@@ -139,6 +139,31 @@
             <field>Exception_Message__c</field>
             <table>FormulaShare_Log__c</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Records_w_Sharing_Applied_for_1st_Time__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Records_w_All_Sharing_Removed__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Records_w_Sharing_Still_In_Place__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Records_w_Sharing_Updated__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Records_Not_Shared_by_FormulaShare__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
         <masterLabel>FormulaShare Batch Logs</masterLabel>
     </sections>
     <sections>
@@ -230,6 +255,16 @@
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>Context__c</field>
+            <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Sharing_Applied_for_First_Time__c</field>
+            <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>All_Sharing_Removed__c</field>
             <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
         </columns>
         <masterLabel>FormulaShare Record Logs</masterLabel>

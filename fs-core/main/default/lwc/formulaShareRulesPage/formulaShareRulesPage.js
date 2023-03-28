@@ -40,4 +40,14 @@ export default class FormulaShareRulesPage extends LightningElement {
         //console.log('this.rulesNotSetUp '+ this.rulesNotSetUp);
         this.processingRulesLoad = false;
     }
+
+    // Call refreshView method on subheader
+    handleRefreshView() {
+        this.template.querySelector('c-formula-share-rules-page-subheader').refreshView();
+    }
+
+    disableNewRule = false;
+    handleEnableDisableNewRule(event) {
+        this.disableNewRule = event.detail;
+    }
 }

@@ -22,12 +22,16 @@
 @isTest
 public with sharing class FormulaShareProcessSchedulableTest {
 
-    public static void setMocks() {
-        FormulaShareRulesSelector mockFSRulesSelector = (FormulaShareRulesSelector) FormulaShareMockUtil.createMock(FormulaShareRulesSelector.class);
-        FormulaShareRulesSelector.mock = mockFSRulesSelector;
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
 
-        FormulaShareIdUtilities mockFSShareIdUtilities = (FormulaShareIdUtilities) FormulaShareMockUtil.createMock(FormulaShareIdUtilities.class);
-        FormulaShareIdUtilities.mock = mockFSShareIdUtilities;
+
+    public static void setMocks() {
+        FormulaShareRulesSelector.mock = FormulaShareMockUtil.createMock(
+            new FormulaShareInjectionService().getRulesSelectorType()
+        );
 
         FormulaShareSettingsSelector mockFSSettingsSelector = (FormulaShareSettingsSelector) FormulaShareMockUtil.createMock(FormulaShareSettingsSelector.class);
         FormulaShareSettingsSelector.mock = mockFSSettingsSelector;
@@ -36,16 +40,19 @@ public with sharing class FormulaShareProcessSchedulableTest {
 	@isTest
 	public static void testScheduling() {
         setMocks();
-        String CRON_EXP = '0 0 23 * * ?';
 
-        // Schedule the recalculation job
-        Test.startTest();
-        String jobId = System.schedule('Test FormulaShare Scheduling', CRON_EXP, new FormulaShareProcessSchedulable());
-        Test.stopTest();
+        System.runAs(FormulaShareTestUtils.getAdmin()) {        
+            String CRON_EXP = '0 0 23 * * ?';
 
-        // Check that cron trigger set correctly
-        CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime FROM CronTrigger WHERE id = :jobId];
-        System.assertEquals(CRON_EXP, ct.CronExpression);
-        System.assertEquals(0, ct.TimesTriggered);
+            // Schedule the recalculation job
+            Test.startTest();
+            String jobId = System.schedule('Test FormulaShare Scheduling', CRON_EXP, new FormulaShareProcessSchedulable());
+            Test.stopTest();
+
+            // Check that cron trigger set correctly
+            CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime FROM CronTrigger WHERE id = :jobId];
+            System.assertEquals(CRON_EXP, ct.CronExpression);
+            System.assertEquals(0, ct.TimesTriggered);
+        }
 	}
 }

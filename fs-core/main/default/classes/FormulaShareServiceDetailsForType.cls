@@ -26,13 +26,15 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 	public Boolean removeExistingShares;
 	public List<FormulaShareRule> rules = new List<FormulaShareRule>();
 	public Map<Id,FormulaShareRetrievedRecordDetails> retrieveRecordDetails = new Map<Id,FormulaShareRetrievedRecordDetails>();
+	public Exception queryException;
 
 	public FormulaShareServiceDetailsForType(Schema.SObjectType type, Boolean removeExistingShares) {
 		this.sharedType = type;
 		this.removeExistingShares = removeExistingShares;
 	}
 
-    // Sets standard and ancestor rules in core retrieveRecordDetails
+	// Sets the shared record in object structure
+    // Used when application of sharing depends on a single record (e.g. standard and ancestor rules for triggers ops)
 	public void setSharedObjectRetrievedRecord(String sharedObjectApiName, SObject sharedRecord) {
 
         FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(retrieveRecordDetails, sharedRecord.Id);
@@ -46,6 +48,8 @@ public inherited sharing class FormulaShareServiceDetailsForType {
 	}
     
 
+	// Sets a related record for the shared record in object structure
+	// Used when application of sharing depends on a set of related records (e.g. descendant and inlaw rules in trigger op)
 	public void setRetrievedRecordWithRelatedDetails(SObject relatedRecord, Id sharedObjectId, Id sharedObjectOwnerId, FormulaShareRule rule) {
 
 		FormulaShareRetrievedRecordDetails details = getRetrievedRecordDetails(retrieveRecordDetails, sharedObjectId);

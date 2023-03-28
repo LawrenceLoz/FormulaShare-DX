@@ -12,13 +12,18 @@
             <sorted>false</sorted>
             <value>
                 <fullName>Read</fullName>
-                <default>true</default>
+                <default>false</default>
                 <label>Read</label>
             </value>
             <value>
                 <fullName>Edit</fullName>
                 <default>false</default>
                 <label>Edit</label>
+            </value>
+            <value>
+                <fullName>Varies</fullName>
+                <default>false</default>
+                <label>Varies</label>
             </value>
         </valueSetDefinition>
     </valueSet>

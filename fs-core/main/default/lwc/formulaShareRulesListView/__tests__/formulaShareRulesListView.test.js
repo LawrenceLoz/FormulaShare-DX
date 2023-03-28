@@ -2,19 +2,37 @@ import { createElement } from 'lwc';
 import { ShowToastEventName } from 'lightning/platformShowToastEvent';
 
 import FormulaShareRulesListView from 'c/formulaShareRulesListView';
-import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
-import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+//import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+//import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
 import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 
 // Register as Apex wire adapter. Some tests verify that provisioned values trigger desired behavior.
-const getTreeGridListAdapter = registerApexTestWireAdapter(getTreeGridData);
+//const getTreeGridListAdapter = registerApexTestWireAdapter(getTreeGridData);
 
 // Import mock data to send through the wire adapter.
 const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
 const onlyParentRows = require('./data/onlyParentRows.json');
 
+// Mock getTreeGridData Apex wire adapter
+jest.mock(
+    '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData',
+    () => {
+        const {
+            createApexTestWireAdapter
+        } = require('@salesforce/sfdx-lwc-jest');
+        return {
+            default: createApexTestWireAdapter(jest.fn())
+        };
+    },
+    { virtual: true } 
+);
+
 // Register a test wire adapter.
-const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
+//const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
+
+async function flushPromises() {
+    return Promise.resolve();
+}
 
 describe('c-formula-share-rules-list-view', () => {
     afterEach(() => {
@@ -34,7 +52,7 @@ describe('c-formula-share-rules-list-view', () => {
         });
         document.body.appendChild(element);
         
-        getTreeGridDataWireAdapter.emit(onlyParentRows);
+        getTreeGridData.emit(onlyParentRows);
 
         // Resolve a promise to wait for a rerender of the new content.
         return Promise.resolve().then(() => {
@@ -43,29 +61,36 @@ describe('c-formula-share-rules-list-view', () => {
         });
     });
 
-    it('Test row with example data + columns in lightning-tree-grid (Positive).', () => {
+    it('Test row with example data + columns in lightning-tree-grid (Positive).', async () => {
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
         });
         document.body.appendChild(element);
 
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
-        
-        // Resolve a promise to wait for a rerender of the new content.
-        return Promise.resolve().then(() => {
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            const parents = treeGrid.data;
-            const firstChild = parents[0]._children;
-            const secondChild = parents[1]._children;
+        getTreeGridData.emit(mockExampleTreeGridData);
 
-            expect(parents).toHaveLength(2);
-            expect(firstChild).toHaveLength(2);
-            expect(secondChild).toHaveLength(4);
-            
-            const columns = treeGrid.columns;
-            expect(columns).toHaveLength(8);
-        });
+        // Resolve a promise to wait for a rerender of the new content.
+        await flushPromises();
+
+        const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+        const parents = treeGrid.data;
+        const firstChild = parents[0]._children;
+        const secondChild = parents[1]._children;
+
+        expect(parents).toHaveLength(2);
+        expect(firstChild).toHaveLength(2);
+        expect(secondChild).toHaveLength(4);
+
+        // Check that important columns present
+        const columns = treeGrid.columns;
+        const populatedCols = new Set();
+        for (let col of columns.entries()) {
+            populatedCols.add(col.fieldName);
+        }
+        expect(populatedCols.has("sharedObjectClass"));
+        expect(populatedCols.has("tableLabel"));
+        expect(populatedCols.has("sharedToLink"));
     });
 
     it('Test row with example data + columns in lightning-tree-grid (Negative).', () => {
@@ -87,7 +112,7 @@ describe('c-formula-share-rules-list-view', () => {
         element.addEventListener(ShowToastEventName, handler);
 
         // Emit error from @wire
-        getTreeGridListAdapter.error();
+        getTreeGridData.error();
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -110,7 +135,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before

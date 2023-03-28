@@ -138,6 +138,40 @@ public with sharing class FormulaShareRuleDetailController {
         return sfoList;
     }
 
+
+    // If Manager sharing is enabled in Sharing Settings then groups for Manager (ManagerUp__userid)
+    // and ManagerAndSubordinatesInternal (ManagerDown_userid) will exist
+    // Note there is no external manager group type
+    @AuraEnabled(cacheable=true)
+    public static Boolean isManagerSharingSupported() {
+        List<Group> mgrGroupList = [
+            SELECT Id from Group
+            WHERE Type = 'Manager'
+            WITH SECURITY_ENFORCED
+            LIMIT 1];
+        return !mgrGroupList.isEmpty();
+    }
+
+    // Account Team and Default Account Team sharing will be possible if Account Team Member exists
+    @AuraEnabled(cacheable=true)
+    public static Boolean isAccountTeamSharingSupported() {
+        if(new FormulaShareInjectionService().versionSupportsTeamSharing()) {
+            Schema.DescribeSObjectResult atmDesc = FormulaShareUtilities.describe('AccountTeamMember');
+            return atmDesc != null;
+        }
+        else return false;
+    }
+    // Opportunity Team and Default Opp Team sharing will be possible if Opportunity Team Member exists
+    @AuraEnabled(cacheable=true)
+    public static Boolean isOpportunityTeamSharingSupported() {
+        if(new FormulaShareInjectionService().versionSupportsTeamSharing()) {
+            Schema.DescribeSObjectResult otmDesc = FormulaShareUtilities.describe('OpportunityTeamMember');
+            return otmDesc != null;
+        }
+        else return false;
+    }
+
+
     @AuraEnabled(cacheable=true)
     public static String getSampleData(String objectApiName, String fieldApiName) {
         
@@ -151,7 +185,7 @@ public with sharing class FormulaShareRuleDetailController {
         Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};
 
         // Call selector method to retrieve sample data, and concatenate to a single string
-        FormulaShareSObjectsSelector soSelector = FormulaShareSObjectsSelector.construct(true, type);
+		FormulaShareSObjectsSelector soSelector = new FormulaShareInjectionService().getSObjectsSelector(true, type);
         soSelector.setFields(fieldSet);
         List<String> sampleList;
         try {

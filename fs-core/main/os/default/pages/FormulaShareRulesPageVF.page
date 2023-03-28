@@ -1,0 +1,38 @@
+<apex:page>
+    <head>
+        <apex:slds />
+        <apex:includeLightning />
+
+        <!-- Note that automatic refreshes in response to platform events aren't supported 
+            for the following reasons:
+                - Use of session id to authenticate using cometd is not permitted in AppExchange security reivew
+                - Lightning Message Service isn't supported for Visualforce pages running in Classic
+        -->
+        <script>
+            $Lightning.use("c:FormulaShareLightningOutApp", function () {
+                $Lightning.createComponent("c:formulaShareRulesPage",
+                    {},
+                    "lightningvf",
+                    function (cmp) { }
+                );
+            });
+        </script>
+    </head>
+
+    <body class="slds-scope" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+        <!-- Replaced with aura component embedding LWC -->
+        <div id="lightningvf" />
+
+        <div class="slds-box slds-theme_shade slds-m-horizontal_xx-large slds-m-top_large">
+            <div style="display:flex; align-items:center;">
+                <div class="slds-m-left_medium">
+                    FormulaShare is optimised for use in Lightning. When using the rules page from
+                    Classic it's necessary to refresh the browser manually each time a rule is saved or 
+                    a recalculation is initiated.        
+                </div>
+            </div>
+        </div>
+
+    </body>
+</apex:page>

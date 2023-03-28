@@ -25,8 +25,8 @@ public inherited sharing class FormulaShareSchedulableSubmitter implements Sched
         system.debug('Scheduled recalculation of FormulaShare rules begun');
         FormulaShareService.recalculateAll();   // Full recalculation of rules
 
-        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-        Integer batchSize = settings.Logs_Removal_Batch_Size__c.intValue();
-        Id batchJobId = Database.executeBatch(new FormulaShareRemoveLogsBatch(), batchSize);
+        // Submit other regular jobs
+		FormulaShareRegularJobs rj = new FormulaShareInjectionService().getRegularJobs();
+        rj.process();
     }
 }

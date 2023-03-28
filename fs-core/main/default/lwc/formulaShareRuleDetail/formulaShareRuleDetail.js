@@ -21,7 +21,8 @@
 
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getSpecificRule from '@salesforce/apex/FormulaShareRulesSelector.getSpecificRule';
+import getSpecificRule from '@salesforce/apex/FormulaShareRulesQueriesController.getSpecificRule';
+import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
 
 export default class FormulaShareRuleDetail extends LightningElement {
 
@@ -43,26 +44,38 @@ export default class FormulaShareRuleDetail extends LightningElement {
     @api
     checkValidity() {
         //console.log('checking validity');
-        var nameLabelValid = this.template.querySelector('c-formula-share-rule-detail-name-label').checkValidity();
-        var locationValid = this.template.querySelector('c-formula-share-rule-detail-location').checkValidity();
-        var fieldValid = this.template.querySelector('c-formula-share-rule-detail-field').checkValidity();
-        var accessValid = this.template.querySelector('c-formula-share-rule-detail-access').checkValidity();
-        var ruleDetailValid = nameLabelValid && locationValid && fieldValid && accessValid;
-        //console.log('ruleDetailValid '+ruleDetailValid);
-        return ruleDetailValid;
+        const componentsValid = [
+            this.template.querySelector('c-formula-share-rule-detail-name-label'),
+            this.template.querySelector('c-formula-share-rule-detail-location'),
+            this.template.querySelector('c-formula-share-rule-detail-field'),
+            this.template.querySelector('c-formula-share-rule-detail-access')
+        ].reduce((validSoFar, inputCmp) => {
+            if(inputCmp) {
+                return validSoFar && inputCmp.checkValidity();
+            }
+            else {
+                return validSoFar;
+            }
+        }, true);
+        return componentsValid;
     }
 
     @track rule = {};
 
+    @wire(versionSupportsRelatedRules) supportsRelated;    
+
     // Fixed test data for offline component updates
     //    rule = {"accessLevel":"Read","active":true,"caseAccess":"None","contactAccess":"None","controllingObjectApiName":"sdfs__Programme_Support_Officer__c","controllingObjectLabel":"Programme Support Officer","controllingObjectSharedToFieldAPIName":"sdfs__User__c","controllingObjectSharedToFieldLabel":"User","controllingObjectSharedToFieldToken":"01I26000000cvxA.00N260000063Lub","controllingObjectSharedToFieldType":"Id","developerName":"Share_Countries_with_Prog_Support_Office","label":"Share Countries with Prog Support Office","objectSharedAPIName":"sdfs__Country__c","objectSharedLabel":"Country","opportunityAccess":"None","relationship":{"nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Country__c","nextRelationship":{"lookupToPrevObjectApiName":"sdfs__Programme__c","sharedToFieldApiName":"sdfs__User__c","thisObjectApiName":"sdfs__Programme_Support_Officer__c"},"thisObjectApiName":"sdfs__Programme__c"},"thisObjectApiName":"sdfs__Country__c"},"ruleId":"m00260000000nmlAAA","shareWith":"Users","type":"descendant"};
 
+    savedRuleType;
     populateRule() {
         //console.log('_ruleId '+this._ruleid);
         getSpecificRule({ ruleId : this._ruleId })
         .then((data) => {
             //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
+            this.savedRuleType = this.rule.type;
+            this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
             this.fireEventWithRule();
         });
     }
@@ -100,12 +113,18 @@ export default class FormulaShareRuleDetail extends LightningElement {
     handleSetSharedObjectDetail(event) {
         this.sharedObjectDetail = event.detail;
 
-        // Fire event for create component to disable button
-        const evt = new CustomEvent('sharedobjectselected');
+        // Fire event for create component to enable save button
+        const evt = new CustomEvent('enablesave');
         this.dispatchEvent(evt);
 
         this.rule.objectSharedAPIName = this.sharedObjectDetail.objectApiName;
         this.fireEventWithRule();
+    }
+
+    // Propogate preventing save button to create rule component
+    handlePreventSave(event) {
+        const evt = new CustomEvent('preventsave');
+        this.dispatchEvent(evt);
     }
 
     selectedLocation;
@@ -115,6 +134,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
         // On change of shared object, assume that rule will be standard
         // Default object with share field to be the selected object (ensures field list populates)
         this.rule.controllingObjectApiName = event.detail.objectApiName;
+        this.rule.objectSharedLabel = event.detail.objectLabel;
+
         this.rule.relationship = {thisObjectApiName: this.rule.controllingObjectApiName, thisObjectLabel: event.detail.objectLabel};
 
         this.selectedLocation = 'thisObject';
@@ -172,9 +193,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
         //console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
         this.fireEventWithRule();
     }
+
+    shareWithDefaultTeam = false;
     handleShareWithChange(event) {
         //console.log('sharewith change');
         this.rule.shareWith = event.detail;
+        this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
         this.fireEventWithRule();
     }
     handleShareFieldTypeChange(event) {
@@ -184,12 +208,48 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     // Use iterative method to navigate to bottom object, and update each level using spread
     getRelationshipWithNewControllingDetails(rel) {
-        if(rel.nextRelationship) {
+
+        // If relationship exists and there's another embedded, iteratively build the relationship
+        if(rel && rel.nextRelationship) {
             return {...rel, nextRelationship: this.getRelationshipWithNewControllingDetails(rel.nextRelationship)};
         }
+
+        // Otherwise (standard rules and the final relationship) return the final controlling object
         else {
-            return {...rel, sharedToFieldApiName: this.rule.controllingObjectSharedToFieldAPIName};
+            let lastRel = {
+                thisObjectApiName: this.rule.controllingObjectApiName,
+                thisObjectLabel: this.rule.controllingObjectLabel,
+                sharedToFieldApiName: this.rule.controllingObjectSharedToFieldAPIName
+            }
+
+            // If a relationship was set, also ensure we capture label and lookups
+            if(rel) {
+                lastRel.thisObjectLabel = rel.thisObjectLabel;
+                lastRel.lookupToPrevObjectApiName = rel.lookupToPrevObjectApiName;
+                lastRel.lookupFromPrevObjectApiName = rel.lookupFromPrevObjectApiName;
+            }
+
+            return lastRel;
         }
+    }
+
+
+    //-------- Event handlers for Account / Opp Default Team access component --------// 
+
+    handleTeamAccessUpdate(event) {
+        
+        switch (event.detail.type) {
+            case 'accessForTeam':
+                //console.log('contact access updated');
+                this.rule.accessForTeam = event.detail.setting;
+                break;
+            case 'accessForOwnerOfTeamsUserIsOn':
+                this.rule.accessForOwnerOfTeamsUserIsOn = event.detail.setting;
+                break;
+            case 'accessForTeamComembers':
+                this.rule.accessForTeamComembers = event.detail.setting;
+        }
+        this.fireEventWithRule();
     }
 
 

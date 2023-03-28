@@ -84,10 +84,11 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
 
     // Method to process insertion of record logs directly rather than via published events
-    public FormulaShareProcessedShareEventService.IncrementsWithUow processForBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog) {
+    // This is called by the full batch job and by targeted batches with appropriate context for metrics records
+    public FormulaShareProcessedShareEventService.IncrementsWithUow processForTargetedJobOrBatch(fflib_ISObjectUnitOfWork uow, FormulaShare_Log__c relatedBatchLog, String context) {
         
         // Set logs for processed shares
-        FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = FormulaShareProcessedShareEventService.processForBatch(uow, pseList, relatedBatchLog);
+        FormulaShareProcessedShareEventService.IncrementsWithUow incWithUow = FormulaShareProcessedShareEventService.processForTargetedJobOrBatch(uow, pseList, relatedBatchLog, context);
         system.debug('Processing for batch. UOW3: '+uow);
         pseList.clear();
 
@@ -114,6 +115,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             pse.Share_Id__c = share.Id;
             pse.Share_Key__c = key;
             pse.Processed_Date_Time__c = System.now();
+            pse.Existing_Sharing_On_Record__c = sd.existingSharingOnRecord;
 
             // Set statuses if provided (if left blank, shares will be queried as part of processing for logs)
             pse.Status__c = status;
@@ -121,7 +123,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
             // Set attributes from share record according to whether standard or custom object
             FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(sd.type);
-            pse.Record_Id__c = String.valueOf(share.get(objUtils.parentIdFieldName()));
+            pse.Record_Id__c = sd.recordId;
             pse.Access_Level__c = (String) share.get(objUtils.accessLevelFieldName());
             pse.Sharing_Reason__c = (String) share.get('RowCause');
 

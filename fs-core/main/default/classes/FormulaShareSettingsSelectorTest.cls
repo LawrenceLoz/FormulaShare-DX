@@ -22,13 +22,22 @@
 @IsTest
 public with sharing class FormulaShareSettingsSelectorTest {
 
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
+
+    
     @IsTest
     public static void testSelectActiveSettings() {
-        FormulaShareSettingsSelector selector = FormulaShareSettingsSelector.construct();
-        FormulaShare_Settings__mdt activeSettings = selector.selectActiveSettings();
+        
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareSettingsSelector selector = FormulaShareSettingsSelector.construct();
+            FormulaShare_Settings__mdt activeSettings = selector.selectActiveSettings();
 
-        // Check that the settings returned have a recalc batch size greater than 0
-        System.assert(activeSettings.Recalculation_Batch_Size__c > 0);
+            // Check that the settings returned have a recalc batch size greater than 0
+            System.assert(activeSettings.Recalculation_Batch_Size__c > 0);
+        }
     }
 
 }

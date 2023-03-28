@@ -1,12 +1,44 @@
 import { createElement } from 'lwc';
 import FormulaShareRulesListView from 'c/formulaShareRulesListView';
-
-import { registerLdsTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
-import { registerApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
-
-import { getTreeGridData } from '@salesforce/apex/FormulaShareMetadataControllerRules.getTreeGridData';
+import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import { activateDeactivate } from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 
+// Use a mocked navigation plugin.
+// fs-core/test/jest-mocks/lightning/platformShowToastEvent.js for the mock
+// and see jest.config.js for jest config to use the mock
+import { ShowToastEventName } from 'lightning/platformShowToastEvent';
+
+
+// Import mock data to send through the wire adapter.
+const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
+const batchIsProcessingTrue = require('./data/batchIsProcessingTrue.json');
+const batchIsProcessingFalse = require('./data/batchIsProcessingFalse.json');
+
+// Mock JSONs for activate/deactivate
+const ERROR_JSON = {
+    body: {
+        message: 'Error',
+    }
+}
+const SUCCESS_JSON = {
+    body: {
+        message: 'Success',
+    }
+}
+
+// Mock getTreeGridData Apex wire adapter
+jest.mock(
+    '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData',
+    () => {
+        const {
+            createApexTestWireAdapter
+        } = require('@salesforce/sfdx-lwc-jest');
+        return {
+            default: createApexTestWireAdapter(jest.fn())
+        };
+    },
+    { virtual: true } 
+);
 // Mocking imperative Apex method call
 jest.mock(
     '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate',
@@ -18,32 +50,8 @@ jest.mock(
     { virtual: true }
 );
 
-// Use a mocked navigation plugin.
-// fs-core/test/jest-mocks/lightning/platformShowToastEvent.js for the mock
-// and see jest.config.js for jest config to use the mock
-import { ShowToastEventName } from 'lightning/platformShowToastEvent';
-
-// Import mock data to send through the wire adapter.
-const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
-const batchIsProcessingTrue = require('./data/batchIsProcessingTrue.json');
-const batchIsProcessingFalse = require('./data/batchIsProcessingFalse.json');
-
-// Register a test wire adapter.
-const getTreeGridDataWireAdapter = registerLdsTestWireAdapter(getTreeGridData);
-
-// Register as Apex wire adapter. Some tests verify that provisioned values trigger desired behavior.
-const getActivateDeactivateAdapter = registerApexTestWireAdapter(activateDeactivate);
-
-const ERROR_JSON = {
-    body: {
-        message: 'Error',
-    }
-}
-
-const SUCCESS_JSON = {
-    body: {
-        message: 'Success',
-    }
+async function flushPromises() {
+    return Promise.resolve();
 }
 
 describe('c-formula-share-rules-list-view', () => {
@@ -60,11 +68,10 @@ describe('c-formula-share-rules-list-view', () => {
 
     // Helper function to wait until the microtask queue is empty. This is needed for promise
     // timing when calling createRecord.
-    function flushPromises() {
-        // eslint-disable-next-line no-undef
-        return new Promise((resolve) => setImmediate(resolve));
-    }
-
+    // eslint-disable-next-line no-undef
+//    function flushPromises() {
+//        return new Promise((resolve) => setImmediate(resolve));
+//    }
     it('Test activate/deactivate rule (Negative).', () => {
         // Assign mock value for resolved Apex promise
         activateDeactivate.mockRejectedValue(ERROR_JSON);
@@ -82,7 +89,7 @@ describe('c-formula-share-rules-list-view', () => {
         element.addEventListener(ShowToastEventName, handler);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
         
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -147,7 +154,7 @@ describe('c-formula-share-rules-list-view', () => {
         element.addEventListener(ShowToastEventName, handler);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(batchIsProcessingTrue);
+        getTreeGridData.emit(batchIsProcessingTrue);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -188,7 +195,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(batchIsProcessingFalse);
+        getTreeGridData.emit(batchIsProcessingFalse);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -244,7 +251,7 @@ describe('c-formula-share-rules-list-view', () => {
         element.addEventListener(ShowToastEventName, handler);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(batchIsProcessingFalse);
+        getTreeGridData.emit(batchIsProcessingFalse);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -284,7 +291,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -323,7 +330,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
 
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -366,7 +373,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
         
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -407,7 +414,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
         
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before
@@ -445,7 +452,7 @@ describe('c-formula-share-rules-list-view', () => {
         document.body.appendChild(element);
 
         // Mock data.
-        getTreeGridDataWireAdapter.emit(mockExampleTreeGridData);
+        getTreeGridData.emit(mockExampleTreeGridData);
         
         // Return a promise to wait for any asynchronous DOM updates. Jest
         // will automatically wait for the Promise chain to complete before

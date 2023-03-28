@@ -83,8 +83,17 @@ public inherited sharing class FormulaShareSObjectUtilities {
         return FormulaShareUtilities.getSObjectFieldFromName(fieldName, shareObj) != null;
     }
 
-	public String getShareKey(SObject share) {
-        String shareKeyBase = getShareKeyBase(share);
+    public Id getParentIdFromShare(SObject share) {
+        return (Id) share.get(parentIdFieldName());
+    }
+
+    public String getShareKey(SObject share) {
+        Id parentId = getParentIdFromShare(share);
+        return getShareKey(share, parentId);
+    }
+
+	public String getShareKey(SObject share, Id parentId) {
+        String shareKeyBase = getShareKeyBase(share, parentId);
 
         // Only custom objects allow for a custom RowCause (apex sharing reason)
         if(isCustom) {
@@ -97,13 +106,9 @@ public inherited sharing class FormulaShareSObjectUtilities {
         }
     }
     
-    private String getShareKeyBase(SObject share) {
-        System.debug('share base: '+share);
-		Id parentId = (Id) share.get(parentIdFieldName());
+    private String getShareKeyBase(SObject share, Id parentId) {
 		Id userOrGroupId = (Id) share.get('UserOrGroupId');
-        System.debug('share parentId: '+parentId);
 		String parentId15 = FormulaShareIdUtilities.get15CharacterId(parentId);
-        System.debug('share parentId15: '+parentId15);
 		String userOrGroupId15 = FormulaShareIdUtilities.get15CharacterId(userOrGroupId);
         String shareKeyBase = parentId15 + userOrGroupId15;
         return shareKeyBase;
@@ -113,18 +118,18 @@ public inherited sharing class FormulaShareSObjectUtilities {
         if(removeSharesForObject == null) {
 
             FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
-            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> objSettings = selector.getSettingsForType(type);
+            FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings = selector.getSettingsForType(type);
 
             // If explicit settings, default to:
             //  - Remove for custom objects, as we distinguish FS sharing by row cause
             //  - Do not remove for standard objects, as we can't distinguish FS sharing from other apex/manual sharing
-            if(objSettings.isEmpty()) {
+            if(objSettings == null) {
                 removeSharesForObject = isCustom;
             }
 
             // If settings exist, determing whether to remove based on the retain setting (we assume only a single settings record per object)
             else {
-                removeSharesForObject = !objSettings[0].Retain_Sharing_After_Record_Changes__c;
+                removeSharesForObject = !objSettings.Retain_Sharing_After_Record_Changes__c;
             }
         }
         return removeSharesForObject;

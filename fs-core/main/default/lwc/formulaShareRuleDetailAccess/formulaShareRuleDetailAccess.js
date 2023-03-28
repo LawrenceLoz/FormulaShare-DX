@@ -8,6 +8,9 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
     infoCloudLogo = infoCloud;
 
+    // For team member sharing, access level set using a different component so hide this field
+    @api suppressAccessLevel;
+
     @api
     get internalSharingModel() {
         return this._internalSharingModel;

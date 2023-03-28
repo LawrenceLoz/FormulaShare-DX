@@ -4,37 +4,52 @@ public with sharing class FormulaShareReportsServiceTest {
     static String reportPrefix = FormulaShareReportsService.reportPrefix;
     static String ruleName = 'Testrule';
     static String objectName = 'FormulaShare_Log__c';
+
+    @TestSetup
+    public static void setup() {
+        FormulaShareTestUtils.setupAdmin();
+    }
     
+
     @IsTest
     public static void testGetRecordErrorsAllReportUrl() {
-        FormulaShareReportsService rs = FormulaShareReportsService.construct();
 
-        String reportUrl = rs.getRecordErrorsAllReportUrl(ruleName);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareReportsService rs = FormulaShareReportsService.construct();
 
-        String expectedUrl = reportPrefix + 'null' + '/view' + '?fv1=' + ruleName;
-        System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+            String reportUrl = rs.getRecordErrorsAllReportUrl(ruleName);
+
+            String expectedUrl = reportPrefix + 'null' + '/view' + '?fv1=' + ruleName;
+            System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+        }
     }
 
     @IsTest
     public static void testGetRecordErrorsSinceLastBatchReportUrl() {
-        FormulaShareReportsService rs = FormulaShareReportsService.construct();
-        Id lastBatchId = UserInfo.getUserId();  // Any ID is fine
-        Long batchFinishEpoch = 123456789;
 
-        String reportUrl = rs.getRecordErrorsSinceLastBatchReportUrl(ruleName, lastBatchId, batchFinishEpoch);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareReportsService rs = FormulaShareReportsService.construct();
+            Id lastBatchId = UserInfo.getUserId();  // Any ID is fine
+            Long batchFinishEpoch = 123456789;
 
-        String expectedUrl = reportPrefix + 'null' + '/view' + '?fv1=' + ruleName  + '&fv2=' + lastBatchId + '&fv3=' + batchFinishEpoch;
-        System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+            String reportUrl = rs.getRecordErrorsSinceLastBatchReportUrl(ruleName, lastBatchId, batchFinishEpoch);
+
+            String expectedUrl = reportPrefix + 'null' + '/view' + '?fv1=' + ruleName  + '&fv2=' + lastBatchId + '&fv3=' + batchFinishEpoch;
+            System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+        }
     }
 
     @IsTest
     public static void testGetBatchErrorReportUrl() {
-        FormulaShareReportsService rs = FormulaShareReportsService.construct();
 
-        String reportUrl = rs.getBatchErrorReportUrl(objectName);
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareReportsService rs = FormulaShareReportsService.construct();
 
-        String expectedUrl = reportPrefix + 'null' + '/view' + '?fv0=' + objectName;
-        System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+            String reportUrl = rs.getBatchErrorReportUrl(objectName);
+
+            String expectedUrl = reportPrefix + 'null' + '/view' + '?fv0=' + objectName;
+            System.assertEquals(expectedUrl, reportUrl, 'Report URL mismatch with expected string)');
+        }
     }
 
 }

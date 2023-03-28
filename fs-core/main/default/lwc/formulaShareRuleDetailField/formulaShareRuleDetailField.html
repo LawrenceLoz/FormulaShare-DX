@@ -15,6 +15,12 @@
                                     variant="label-hidden"
                                     required>
                                 </lightning-radio-group>
+
+                                <template if:true={_shareWith}>
+                                    <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_x-small" onclick={toggleViewHowWorks}>
+                                        {viewHowWorksToggleText}
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -87,6 +93,150 @@
             </div>
         </div>
 
+
+        <template if:true={viewHowWorks}>
+            <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-bottom_small slds-float_right">
+                
+                <div style="display:flex; align-items:center;">
+                    <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                    <div class="slds-m-left_medium">
+
+                        <template if:true={shareWithFlags.users}>
+                            When <b>Users</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="Users" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user to receive access.
+                        </template>
+
+                        <template if:true={shareWithFlags.roles}>
+                            When <b>Roles</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                            value={rolesLink} 
+                            label="Roles" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be a text or formula field populated with the Role Name (DeveloperName) of the role, or its 15 or 18 character id.
+                        </template>
+
+                        <template if:true={shareWithFlags.rolesAndInternalSubordinates}>
+                            When <b>Roles and Internal Subordinates</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                            value={rolesLink} 
+                            label="Roles" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field",
+                            as well as any internal roles which are below in the hierarchy.
+                            This field can be a text or formula field populated with the Role Name (DeveloperName) of the role, or its 15 or 18 character id.
+                        </template>
+
+                        <template if:true={shareWithFlags.rolesInternalAndPortalSubordinates}>
+                            When <b>Roles, Internal and Portal Subordinates</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                            value={rolesLink} 
+                            label="Roles" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field",
+                            as well as any internal or external (i.e. Experience Cloud) roles which are below in the hierarchy.
+                            This field can be a text or formula field populated with the Role Name (DeveloperName) of the role, or its 15 or 18 character id.
+                        </template>
+
+                        <template if:true={shareWithFlags.publicGroups}>
+                            When <b>Public Groups or Queues</b> is selected, rules will share to the groups or queues referenced in the field selected as "Specified in Field".
+                            These can either be&nbsp;
+                            <lightning-formatted-url 
+                            value={publicGroupsLink} 
+                            label="Public Groups" 
+                            target="_blank"></lightning-formatted-url>
+                            ,&nbsp;
+                            <lightning-formatted-url 
+                            value={queuesLink} 
+                            label="Queues" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;which support the shared object, or the standard organization group "AllInternalUsers".
+                            This field can be a text or formula field populated with the Group Name or Queue Name (DeveloperName), or its 15 or 18 character id.
+                        </template>
+
+                        <template if:true={shareWithFlags.managersOfusers}>
+                            When <b>Managers of Users</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=sf.users_managers_only.htm&type=5" 
+                                label="Manager Groups" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            Manager Groups are based on the "Manager" lookup on the user object, and include the direct and indirect managers of the selected user, but don't include the user themselves.
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose Manager Group should have access.
+                        </template>
+
+                        <template if:true={shareWithFlags.usersAndManagerSubordinates}>
+                            When <b>Users and Manager Subordinates</b> is selected, rules will share to the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=sf.users_managers_only.htm&type=5" 
+                                label="Manager Subordinates Groups" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            Manager Subordinates Groups are based on the "Manager" lookup on the user object, and include the selected user themselves, and all direct and indirect reports.
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose Manager Subordinates Group should have access.
+                        </template>
+
+                        <template if:true={shareWithFlags.defaultAccountTeamsOfUsers}>
+                            When <b>Default Account Teams of Users</b> is selected, rules will share to all users within the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=000382679&type=1" 
+                                label="Default Account Team" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose team should have access.
+                            Default Account Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
+                        </template>
+
+                        <template if:true={shareWithFlags.defaultOpportunityTeamsOfUsers}>
+                            When <b>Default Opportunity Teams of Users</b> is selected, rules will share to all users within the&nbsp;
+                            <lightning-formatted-url 
+                                value="https://help.salesforce.com/s/articleView?id=000382679&type=1" 
+                                label="Default Opportunity Team" 
+                                target="_blank">
+                            </lightning-formatted-url>
+                            &nbsp;of the&nbsp;
+                            <lightning-formatted-url 
+                            value={usersLink} 
+                            label="User" 
+                            target="_blank"></lightning-formatted-url>
+                            &nbsp;referenced in the field selected as "Specified in Field".
+                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
+                            id of the user whose team should have access.
+                            Default Opportunity Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+
         <template if:true={viewFieldDetails}>
             <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-bottom_medium">
 
@@ -118,16 +268,7 @@
                 </div>
             </div>
         </template>
-
+    
     </div>
-<!--
-    show pop: {showPop}
-    <c-formula-share-field-popover 
-        topmargin={top} 
-        leftmargin={left} 
-        show-pop={showPop}
-        field-type={fieldType} 
-        field-formula={fieldFormula}>
-    </c-formula-share-field-popover>
--->
+
 </template>

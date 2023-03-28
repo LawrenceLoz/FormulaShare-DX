@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Programme_or_Country_Updated_Today__c</fullName>
+    <externalId>false</externalId>
+    <formula>DATEVALUE(Programme_to_Support__r.LastModifiedDate) = TODAY() ||  DATEVALUE(Programme_to_Support__r.Country__r.LastModifiedDate) = TODAY()</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Programme or Country Updated Today</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

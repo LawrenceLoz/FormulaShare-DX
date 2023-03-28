@@ -26,7 +26,8 @@ public with sharing class FormulaShareRulesListViewController {
     @AuraEnabled(cacheable=true)
     public static List<ObjectRulesWrapper> getTreeGridData() {
 
-        List<FormulaShareRule> rules = FormulaShareRulesSelector.construct().getAllRules();
+        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        List<FormulaShareRule> rules = rulesSelector.getAllRulesWithSecurityEnforced();
 
         Map<String, List<RuleWrapper>> objectsWithRulesMap = new Map<String, List<RuleWrapper>>();
         Map<String, String> objectNameToLabelMap = new Map<String,String>();
@@ -70,6 +71,11 @@ public with sharing class FormulaShareRulesListViewController {
             metricsMap.put(metrics.FormulaShare_Rule_Name__c + metrics.Context__c, metrics);
         }
 
+        // Determine whether activation should be disabled for any rule types
+		FormulaShareRulesSelector fsRulesSelector = new FormulaShareInjectionService().getRulesSelector();
+        Boolean stdActivationDisabled = fsRulesSelector.isStandardActivationDisabled();
+        Boolean crossObjActivationDisabled = fsRulesSelector.isCrossObjectActivationDisabled();
+
         for(FormulaShareRule rule : rules) {
             rulesMap.put(rule.developerName, rule);
             
@@ -95,13 +101,30 @@ public with sharing class FormulaShareRulesListViewController {
             rw.shareWith = rule.shareWith;
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
+            rw.type = rule.type;
             rw.active = rule.active;
             rw.sharedObjectClass = 'slds-tree__item';
 
+            if(rule.type == 'standard') {
+                rw.enableActivate = stdActivationDisabled;
+            }
+            else {
+                rw.enableActivate = crossObjActivationDisabled;
+            }
+
             rw.setMetricsDetails(objectName, metricsMap);
+            
+            // Show warning if rule isn't valid
+
+            if(!rule.isValid()) {
+                System.debug('Invalid rule: '+rule.developerName);
+                rw.warningUrlLabel = 'Rule not valid';
+                rw.warningTooltip = 'One or more fields on this rule are not set correctly. Edit this rule and complete all required fields';
+                rw.warningIcon = 'utility:warning';
+            }
 
             // Set URL for shared to field if populated
-            System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
+//            System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
             if(!String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
                 
                 // Build URL to field from token (includes object and field id, separated by full stop)
@@ -249,6 +272,10 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String accessLevel {get;set;}
         @AuraEnabled
+        public String type {get;set;}
+        @AuraEnabled
+        public Boolean enableActivate {get;set;}
+        @AuraEnabled
         public Boolean active {get;set;}
         @AuraEnabled
         public String lastCalcStatus {get;set;}
@@ -299,9 +326,11 @@ public with sharing class FormulaShareRulesListViewController {
 
             // Separate metrics for contexts
             String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
+            String targetedJobContext = FormulaShareProcessedShareEventService.targetedJobContext;
             String batchContext = FormulaShareProcessedShareEventService.batchContext;
             String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
             FormulaShare_Metrics__c triggerMetrics = metricsMap.get(developerName + triggerContext);
+            FormulaShare_Metrics__c targetedJobMetrics = metricsMap.get(developerName + targetedJobContext);
             FormulaShare_Metrics__c batchMetrics = metricsMap.get(developerName + batchContext);
             FormulaShare_Metrics__c batchFinishMetrics = metricsMap.get(developerName + batchFinishContext);
 
@@ -313,10 +342,8 @@ public with sharing class FormulaShareRulesListViewController {
             FormulaShareReportsService reportsService = FormulaShareReportsService.construct();
             recordLogsReportId = reportsService.getReportIdForName(settings.All_Record_Logs_Report_Name__c);
 
-            // If complete batch metrics are available, use these together with more recent trigger metrics
-            String ruleName;
+            // If complete batch metrics are available, use these together with more recent trigger and targeted job metrics
             if(batchFinishMetrics != null) {
-                ruleName = batchFinishMetrics.FormulaShare_Rule_Name__c;
 
                 noSharesApplied = batchFinishMetrics.Successful_Inserts__c;
                 noSharesFailed = (Integer) batchFinishMetrics.Failed_Inserts__c;
@@ -326,6 +353,12 @@ public with sharing class FormulaShareRulesListViewController {
                 if(triggerMetrics != null && triggerMetrics.Last_Batch_Run__c == lastBatchId) {
                     noSharesApplied += triggerMetrics.Successful_Inserts__c;
                     noSharesFailed += (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // ... and from targeted job metrics if captured after last batch
+                if(targetedJobMetrics != null && targetedJobMetrics.Last_Batch_Run__c == lastBatchId) {
+                    noSharesApplied += targetedJobMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) targetedJobMetrics.Failed_Inserts__c;
                 }
 
                 // Indicate batch failure if last finshed batches failed...
@@ -350,19 +383,23 @@ public with sharing class FormulaShareRulesListViewController {
                 }
             }
 
-            else if(triggerMetrics != null || batchMetrics != null) {
+            else if(triggerMetrics != null || targetedJobMetrics != null || batchMetrics != null) {
                 noSharesApplied = 0;
 
                 // Set number of shares from trigger metrics
                 if(triggerMetrics != null) {
-                    ruleName = triggerMetrics.FormulaShare_Rule_Name__c;
-                    noSharesApplied = triggerMetrics.Successful_Inserts__c;
-                    noSharesFailed = (Integer) triggerMetrics.Failed_Inserts__c;
+                    noSharesApplied += triggerMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) triggerMetrics.Failed_Inserts__c;
+                }
+
+                // Set number of shares from trigger metrics
+                if(targetedJobMetrics != null) {
+                    noSharesApplied += targetedJobMetrics.Successful_Inserts__c;
+                    noSharesFailed += (Integer) targetedJobMetrics.Failed_Inserts__c;
                 }
 
                 // Add details from batch metrics
                 if(batchMetrics != null) {
-                    ruleName = batchMetrics.FormulaShare_Rule_Name__c;
                     noSharesApplied += batchMetrics.Successful_Inserts__c;
                     noSharesFailed += (Integer) batchMetrics.Failed_Inserts__c;
                     if(batchMetrics.Last_Failed_Batch__c != null) {
@@ -377,7 +414,7 @@ public with sharing class FormulaShareRulesListViewController {
 
             // If job isn't scheduled, set icon and link
             warningUrlLabel = '';
-            if(!FormulaShareAsyncApexJobSelector.isScheduled()) {
+            if(!FormulaShareAsyncApexJobSelector.isFullBatchScheduled()) {
                 warningIcon = warningTriangle;
                 warningUrlLabel = 'Schedule batch job';
                 warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';
@@ -400,6 +437,7 @@ public with sharing class FormulaShareRulesListViewController {
                 else if(recordFailure) {
                     warningUrlLabel = noSharesFailed + ' record errors';
                     warningTooltip = 'View record error logs';
+                    String ruleName = this.developerName;
                     
                     // ..Record errors since last batch if batch run completed before
                     if(lastBatchId != null && batchFinishEpoch != null) {

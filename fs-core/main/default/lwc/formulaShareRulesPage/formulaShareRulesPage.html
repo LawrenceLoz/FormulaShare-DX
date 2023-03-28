@@ -41,7 +41,8 @@
                   class="slds-p-left_x-small" 
                   variant="neutral" 
                   label="New Rule"
-                  onclick={handleNewRule}>
+                  onclick={handleNewRule}
+                  disabled={disableNewRule}>
                 </lightning-button>
               </template>
 
@@ -50,9 +51,16 @@
         </div>
       </div>
     </div>
+
   </div>
 
-  <c-formula-share-rules-list-view onruleload={handleRulesLoad}>
+  <c-formula-share-rules-page-subheader
+    onenabledisablenewrule={handleEnableDisableNewRule}>
+  </c-formula-share-rules-page-subheader>
+
+  <c-formula-share-rules-list-view 
+    onruleload={handleRulesLoad}
+    onrefreshview={handleRefreshView}>
   </c-formula-share-rules-list-view>
   <template if:true={processingRulesLoad}>
     <lightning-spinner alternative-text="Loading" size="x-large"></lightning-spinner>

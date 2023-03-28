@@ -19,31 +19,45 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRemoveSharesSelector {
+public virtual inherited sharing class FormulaShareRemoveSharesSelector {
 
     public static FormulaShareRemoveSharesSelector construct() {
         return new FormulaShareRemoveSharesSelector();
     }
 
     // fflib selector pattern isn't used because it fails for metadata relationship fields.
-    // The basic query below is sufficient - FLS and sharing checks aren't needed 
-    // since custom metadata does not support either.
-    public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getSettingsForType(Schema.sObjectType type) {
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
+    private static Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsForTypeMap = new Map<String,FormulaShare_Std_Object_to_Remove_Shares__mdt>();
+    public FormulaShare_Std_Object_to_Remove_Shares__mdt getSettingsForType(Schema.sObjectType type) {
+        FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings;
+        
+        // Get settings from cache if we've queried already
+        String objectName = type.getDescribe().getName();
+        if(settingsForTypeMap.containsKey(objectName)) {
+            objSettings = settingsForTypeMap.get(objectName);
+        }
 
-		String objectName = type.getDescribe().getName();
+        // Otherwise query, and add to cache if a settings record exists
+        else {
+            List<FormulaShare_Std_Object_to_Remove_Shares__mdt> settingsList = getSettingsList(objectName);
+            
+            if(!settingsList.isEmpty()) {
+                objSettings = settingsList[0];
+                settingsForTypeMap.put(objectName, objSettings);
+            }
+        }
 
-		List<FormulaShare_Std_Object_to_Remove_Shares__mdt> removalLinesToReturn = 
-            [SELECT Id, Retain_Sharing_After_Record_Changes__c
-			FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-			WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName];
-
-        return removalLinesToReturn;
+        return objSettings;
     }
 
-    public List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getAllSettings() {
-        return [
-            SELECT Id, Standard_Object_to_Remove_Sharing__r.QualifiedApiName, Retain_Sharing_After_Record_Changes__c
+    // Can be overridden to return additional fields
+    // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
+    public virtual List<FormulaShare_Std_Object_to_Remove_Shares__mdt> getSettingsList(String objectName) {
+        return [     //NOPMD - Query is on custom metadata and results only used in apex so security check not required
+            SELECT Id, Retain_Sharing_After_Record_Changes__c
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
-        ];
+            WHERE Standard_Object_to_Remove_Sharing__r.QualifiedApiName = :objectName
+            LIMIT 1];
     }
+
 }

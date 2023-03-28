@@ -9,7 +9,8 @@
                     <c-formula-share-rule-detail
                         rule-id={ruleId}
                         is-edit="true"
-                        onruledetail={updateRule}>
+                        onruledetail={updateRule}
+                        onpreventsave={handlePreventSave}>
                     </c-formula-share-rule-detail>
                     <template if:true={processingEdit}>
                         <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="x-large"></lightning-spinner>
@@ -24,7 +25,8 @@
                     <lightning-button 
                         label="Save" 
                         variant="brand" 
-                        onclick={saveMethod}>
+                        onclick={saveMethod}
+                        disabled={saveDisabled}>
                     </lightning-button>
                 </footer>
             </div>

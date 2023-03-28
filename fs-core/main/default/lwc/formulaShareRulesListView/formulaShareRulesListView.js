@@ -7,13 +7,17 @@ import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewControlle
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
 import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
+import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
+import processOnActionClick from '@salesforce/apex/FormulaShareInjectionService.processOnActionClick';
 
 export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     @track data = [];
     @track columns = [];
 
-    setColumns() {
+    setColumns(supportsRelated) {
+
+        // Add shared object, shares wtih and shared to field
         this.columns = [
             {type: 'text'
                 , fieldName: 'tableLabel'
@@ -29,11 +33,21 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 , fieldName:'sharedToLink'
                 , label:'Specified in Field'
                 , typeAttributes: {label: {fieldName:'sharedToLinkLabel'}, target:'_blank', tooltip: 'Open field in setup menu'}
-            },
-            {type: 'text'
-                , fieldName: 'controllingObject'
-                , label: 'On Object'
-            },
+            }
+        ];
+
+        // Add controlling object column if related sharing supported
+        if(supportsRelated) {
+            this.columns.push(
+                {type: 'text'
+                    , fieldName: 'controllingObject'
+                    , label: 'On Object'
+                },
+            );
+        }
+
+        // Add assessment status and no records shared
+        this.columns.push(
             {type: 'text'
                 , fieldName: 'lastCalcStatus'
                 , label: 'Last Full Assessment'
@@ -43,26 +57,35 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 , fieldName: 'noSharesApplied'
                 , label:'Records Shared'
             }
-        ];
+        );
 
         // Iterate all child rows to check for warnings
         var showWarnings = false;
         for(var rowNo in this.treeItems) {
             for(var ruleRowNo in this.treeItems[rowNo]._children) {
-                // If rule is active and warning URL populated, recognise we need to show warning column
                 var thisRow = this.treeItems[rowNo]._children[ruleRowNo];
-                if(thisRow.warningUrlLabel && thisRow.warningUrlLabel === 'Schedule batch job' && thisRow.active) {
-                    showWarnings = 'scheduleWarning';
-                    this.scheduleWarningsUrl = thisRow.warningUrl;
-                    break;
-                }
-                else if(thisRow.warningUrlLabel && thisRow.active) {
-                    showWarnings = 'processingWarning';
-                    break;
+
+                // If we have a warning, push column with relevant type for the warning
+                if(thisRow.warningUrlLabel && thisRow.active) {
+
+                    // If we have schedule warnings (included for all rowx)
+                    // we'll need to push a column with a button to open modal
+                    if(thisRow.warningUrlLabel === 'Schedule batch job') {
+                        showWarnings = 'scheduleWarning';                            
+                        this.scheduleWarningsUrl = thisRow.warningUrl;
+                        break;
+                    }
+
+                    // Otherwise, we'll push a column which allows link to be set by row
+                    else {
+                        showWarnings = 'rowSpecificWarnings';
+                        break;                        
+                    }
                 }
             }
         }
 
+        // Add approriate warning column if any warnings found
         if(showWarnings === 'scheduleWarning') {
             this.columns.push(
                 {   type: 'button'
@@ -77,7 +100,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 }
             );
         }
-        else if(showWarnings === 'processingWarning') {
+        else if(showWarnings === 'rowSpecificWarnings') {
             this.columns.push(
                 {type: 'url'
                     , fieldName: 'warningUrl'
@@ -91,6 +114,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             );
         }
 
+        // Add active column and row actions
         this.columns.push(
             {type: 'boolean'
                 , fieldName: 'active'
@@ -119,23 +143,29 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
 
-            this.setColumns();
-            this.countRows(tempjson);
+            versionSupportsRelatedRules()
+                .then((supportsRelated) => {
+                    this.setColumns(supportsRelated);
+                    this.countRows(tempjson);
+        
+                    // Expand all rows when table first loaded, and subscribe to events
+                    if(this.firstLoad) {
+                        this.expandAllRows(tempjson);
+                        this.manageRefreshEvents();     // Subscribe to event channel
+                        this.firstLoad = false;
+                    }
+        
+                    // Expand all rows if a rule was just set up or modified
+                    if(this.createOrUpdate) {
+                        this.expandAllRows(tempjson);
+                        this.createOrUpdate = false;
+                    }
 
-            // Expand all rows when table first loaded, and subscribe to events
-            if(this.firstLoad) {
-                this.expandAllRows(tempjson);
-                this.manageRefreshEvents();     // Subscribe to event channel
-                this.firstLoad = false;
-            }
-
-            // Expand all rows if a rule was just set up or modified
-            if(this.createOrUpdate) {
-                this.expandAllRows(tempjson);
-                this.createOrUpdate = false;
-            }
-
-            this.processingLoad = false;
+                    this.processingLoad = false;
+                })
+                .catch(error => {
+                    this.showError(error, 'Error checking for related object support');
+                });
         }
 
         else if(error) {
@@ -204,7 +234,22 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Scubscribe to dml events (raised by on rule create/edit)
                 const dmlUpdateCallback = (response) => {
-                    if(response.data.payload.Successful__c || response.data.payload.sdfs__Successful__c) {
+                    const payload = response.data.payload;
+
+                    // Determine success and error property names (with namespace if present)
+                    let successPropName;
+                    let errorPropName;
+                    for(let [key, value] of Object.entries(payload)) {
+                        if(key.endsWith('Successful__c')) {
+                            successPropName = key;
+                        }
+                        else if(key.endsWith('Error__c')) {
+                            errorPropName = key;
+                        }
+                    }
+
+                    // Refresh list if successful event recieved
+                    if(payload[successPropName]) {
                         //console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
@@ -220,6 +265,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.showError(error, 'Error getting namespace prefix');
             });
     }
+
 
     // Set available drop-down actions for each grid row
     getRowActions(row, doneCallback) {
@@ -250,7 +296,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             else {
                 actions.push({
                     'label': 'Activate',
-                    'name': 'activate'
+                    'name': 'activate',
+                    'disabled': row['enableActivate']
                 });
             }
 
@@ -273,9 +320,20 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         //console.log('loaded actions');
     }
 
+    baseURL;
+    renderedCallback() {
+        this.baseURL = window.location.origin;
+    }
 
     // Delegate processing of treegrid actions
     handleRowAction(event) {
+        processOnActionClick({ baseUrl : this.baseURL.toString() })
+            .then(result => {
+                // console.log('Processed apex on action click: ',result);
+            })
+            .catch(error => {
+                // console.log('Error processing apex on action click: ',error);
+            });
 
         // If click is on a schedule warning button, toggle the modal
         if(event.detail.action.name === 'scheduleWarning') {
@@ -363,6 +421,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     // Refreshes provisioned list of rules
     refreshView() {
         refreshApex(this.provisionedValue);
+        const evt = new CustomEvent('refreshview');
+        this.dispatchEvent(evt);
     }
 
     // Action method to update a rule to active/inactive
@@ -387,6 +447,16 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
 
     openLogsReport(row) {
+        if(!row['recordLogsReportId']) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Unable to load report',
+                    message: 'System permissions "Run Reports" and "View Reports in Public Folders" are required to view summaries of sharing applied',
+                    variant: 'error'
+                })
+            );
+        }
+
         // Set filter parameter for report ("fv0" is the convention for the first filter)
         var params = {};
         params['fv0'] = encodeURI(row['developerName']);
