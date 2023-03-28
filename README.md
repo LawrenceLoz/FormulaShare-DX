@@ -2,9 +2,9 @@
 
 ![build status](https://github.com/LawrenceLoz/FormulaShare-DX/actions/workflows/validate-branch-deployable.yml/badge.svg)
 
-This repository is the sharing framework for the [open-core](https://en.wikipedia.org/wiki/Open-core_model) project FormulaShare. FormulaShare is offered on the Salesforce [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1), with code from this repository augmented with additional features and capabilties.
+This repository is the sharing framework for the [open-core](https://en.wikipedia.org/wiki/Open-core_model) project FormulaShare. FormulaShare is offered as an [app on the Salesforce AppExchange](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1), which embeds code from this repository and extends with features and capabilities to enable a dynamic and responsive sharing model for orgs of all scales.
 
-The framework is provided open source in order for FormulaShare subscribers to be review and be confident that the app is designed securely. We also welcome contributions from our community of users or others who would like to collaborate and improve the design. The code can also be used in part or in its entirety to support other projects.
+The framework is provided open source in order for FormulaShare subscribers to be review and be confident that the app is designed in a secure and performant way. We also welcome contributions from our community of users or others who would like to collaborate and improve the design. The code can also be used in part or in its entirety to support other projects.
 
 ## What problem are we solving?
 
@@ -18,7 +18,7 @@ The framework in this repository allows:
 * A regular batch to be scheduled to apply sharing changes
 * Dynamic sharing to be implemented for standard and custom objects
 
-The [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) extends this framework with features to enable:
+The [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1) embeds this framework and provides features to enable:
 * Real time sharing on creation and update of records
 * Sharing to users, roles and groups on records related by a series of lookups (parent or child) to the shared object
 * Sharing to other entity types such as Manager Groups and Account or Opportunity Default Teams
@@ -27,7 +27,7 @@ The [AppExchange app](https://appexchange.salesforce.com/appxListingDetail?listi
 * A full Lightning setup interface
 * Reduced performance overhead. The security-reviewed package provides FormulaShare with separate governor limits for DML statements, SOQL query rows and other transaction resources, minimising risk of limits being exceeded
 
-By leveraging standard formula fields, FormulaShare lets admins and app builders quickly specify how records should be shared using a familiar feature, and complex relationships and conditions can be set where needed. Behind the scenes, FormulaShare creates and removes [apex managed sharing](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_bulk_sharing_creating_with_apex.htm) to match access to the conditions specified in rules.
+Behind the scenes, FormulaShare creates and removes [apex managed sharing](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_bulk_sharing_creating_with_apex.htm) to match access to the conditions specified in rules.
 
 ## Example applications
 
@@ -65,7 +65,7 @@ A custom field is needed on the object to be shared which indicates who should g
 
 The field type can be either a formula returning text with the ID or name, a lookup field (which is treated as an ID), or a text field populated through automation.
 
-Formula fields can be used to reference records from parent, grandparent or anscestor objects up to 5 levels. In the AppExchange app, it's also possible to select fields from objects which are related to the shared object through a series of parent or child lookup relationships, so sharing can be based on related records elsewhere in the schema.
+Formula fields can be used to reference records from parent, grandparent or ancestor objects up to 5 levels. In the AppExchange app, it's also possible to select fields from objects which are related to the shared object through a series of parent or child lookup relationships, so sharing can be based on related records elsewhere in the schema.
 
 ### Create sharing reason (custom objects only)
 FormulaShare creates entries in the object's share table with a sharing reason, which ensures it can keep track of sharing applied by each rule and remove sharing which is no longer needed. Set up a sharing reason (Classic interface only) from the custom object's setup page in the section "Apex Sharing Reasons". If your org uses Lightning, sharing reasons can be set up by temporarily switching to Salesforce Classic.
