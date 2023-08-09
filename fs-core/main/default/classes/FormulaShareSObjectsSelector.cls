@@ -63,6 +63,19 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
         );
     }
 
+    // Return a query locator with no records. Used to provide a valid input to batch execute
+    // when batch should not run (e.g. no rules sharing object or targeted jobs only)
+    public Database.QueryLocator selectNoneLocator() {
+        fields.addAll(fieldsSet);
+        fflib_QueryFactory factory = newQueryFactory();
+
+        return Database.getQueryLocator(
+            factory
+                .setCondition('Id = NULL')
+                .toSOQL()
+        );
+    }
+
     public Database.QueryLocator selectFilteredLocator(String filterField, String filterCondition) {
         fields.addAll(fieldsSet);
         fflib_QueryFactory factory = newQueryFactory();
