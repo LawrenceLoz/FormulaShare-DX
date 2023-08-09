@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-       - refactor-84_Deprecate_Related_Object_Rules
-#      - main
+       - main
 
 env:
   PAT_FOR_REPO_INTEGRATION:  ${{ secrets.PAT_FOR_REPO_INTEGRATION }}

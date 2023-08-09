@@ -22,30 +22,12 @@ jobs:
   run-jest-tests:
     name: Run Jest Tests
     runs-on: ubuntu-latest
+    container: salesforce/salesforcedx:latest-full
     steps:
 
-    # Checkout branch so we have source code in working directory
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
-    # Install currently supported node version
-    - name: Install node 14
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14.x'
-
-    # Call an action (from scripts subdirectory) to install DX and authenticate to the dev hub
-    - name: Install DX
-      uses: ./.github/workflows/scripts/install-and-authenticate-dx
-      with:
-        jwt-signing-key:  $JWT_SIGNING_KEY
-        consumer-key:     $CONSUMER_KEY
-        dev-hub-username: $DEV_HUB_USERNAME
-
-    - name: Install Jest
-      run: |
-        sfdx force:lightning:lwc:test:setup
-
     - name: Run all Jest tests
       run: |
         sfdx force:lightning:lwc:test:run
@@ -56,23 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    # Checkout branch so we have source code in working directory
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
-    # Install currently supported node version
-    - name: Install node 14
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14.x'
-
-    # Call an action (from scripts subdirectory) to install DX and authenticate to the dev hub
-    - name: Install DX
-      uses: ./.github/workflows/scripts/install-and-authenticate-dx
-      with:
-        jwt-signing-key:  $JWT_SIGNING_KEY
-        consumer-key:     $CONSUMER_KEY
-        dev-hub-username: $DEV_HUB_USERNAME
+    - name: Authenticate and set default DevHub
+      run: |
+        echo "$JWT_SIGNING_KEY" > server.key
+        sfdx force:auth:jwt:grant --clientid $CONSUMER_KEY --jwtkeyfile server.key --username $DEV_HUB_USERNAME --setdefaultdevhubusername -a devhub
+      shell: bash
 
     - name: Create scratch org
       run: |
