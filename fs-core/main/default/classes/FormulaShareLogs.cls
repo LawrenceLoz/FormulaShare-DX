@@ -59,6 +59,11 @@ public inherited sharing class FormulaShareLogs extends fflib_SObjectDomain {
             log.Exception_Line_Number__c = e.getLineNumber();
             log.Exception_Stack_Trace__c = e.getStackTraceString();
             log.Exception_Type__c = e.getTypeName();
+        }
+    }
+
+    public void incrementFailedBatches() {
+        for(FormulaShare_Log__c log : (List<FormulaShare_Log__c>) Records) {
             log.Batches_Failed__c++;
             if(log.Failed_Batches__c == null || log.Failed_Batches__c.length() < 248) {
                 log.Failed_Batches__c += String.valueOf(log.Batches_Processed__c) + ', ';

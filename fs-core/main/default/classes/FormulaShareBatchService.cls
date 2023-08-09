@@ -36,7 +36,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 
     // Call from start()
-    public void createBatchAndRibLogs(Database.QueryLocator ql, Integer batchSize) {
+    public void createBatchAndRibLogs(String query, Integer batchSize) {
 
         // Establish maps for finish metrics (set to zero here - will be updated if any records in batch execute)
         for(FormulaShareRule rule : rulesForType) {
@@ -54,7 +54,6 @@ public virtual inherited sharing class FormulaShareBatchService {
         FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
 
         // Set context in batch log
-        String query = ql.getQuery();
         String typeInScope = this.typeInThisBatch.getDescribe().getName();
         fsLogs.setContext('FormulaShareProcessBatch', batchSize, typeInScope, rulesForType, query);
         this.logsList = fsLogs.setFinalisedLogs();
@@ -78,8 +77,25 @@ public virtual inherited sharing class FormulaShareBatchService {
         uow.commitWork();
     }
 
+	public class FormulaShareBatchException extends Exception {}
 
-    // Call from execute()
+    // If we detected an error during batch start, no records to process so just log and process this error
+	public void logBatchStartError(String batchStartError) {
+		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
+
+		// Throw an exception to be logged in FormulaShare batch log
+		try {
+			throw new FormulaShareBatchException(batchStartError);
+		}
+		catch(FormulaShareBatchException e) {
+			fsLogs.logException(e);
+		}
+
+		this.atLeastOneBatchFailed = true;
+	}
+
+
+	// Called from execute
     public virtual void processSharingAndLogs(List<SObject> scope) {
 		FormulaShareService fsService = FormulaShareService.construct(this.typeInThisBatch, rulesForType);
 		FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);
@@ -102,6 +118,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 		catch(Exception e) {
 			e.setMessage('Issue populating batch scope. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
+			fsLogs.incrementFailedBatches();
 			this.atLeastOneBatchFailed = true;
 			return;
 		}
@@ -126,6 +143,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 		catch(Exception e) {
 			e.setMessage('FormulaShareService processing error. Message from Salesforce: ' + e.getMessage());
 			fsLogs.logException(e);
+			fsLogs.incrementFailedBatches();
 			atLeastOneBatchFailed = true;
 			return;
 		}
@@ -375,6 +393,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 	private void updateLogAfterMetricsFail(FormulaShareLogs fsLogs, Exception metricsException) {
 		metricsException.setMessage('Issue capturing logs or metrics. Message from Salesforce: ' + metricsException.getMessage());
 		fsLogs.logException(metricsException);
+		fsLogs.incrementFailedBatches();
 		
 		fflib_ISObjectUnitOfWork uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
 		uow.registerDirty(fsLogs.Records);

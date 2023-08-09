@@ -24,6 +24,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	List<Schema.SObjectType> types;
 	Integer batchSize;
 	Schema.SObjectType typeInThisBatch;
+	String batchStartError;
 
 	FormulaShareBatchService batchService;
 
@@ -56,8 +57,30 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 				system.debug('query locator: ' + ql);
 	
 				// Save initial batch and RIB logs
-				this.batchService.createBatchAndRibLogs(ql, this.batchSize);
+				this.batchService.createBatchAndRibLogs(ql.getQuery(), this.batchSize);
 			}
+
+			// If processing isn't allowed, process the batch but log this as an error in FormulaShare batch logs
+			// Avoids Salesforce "Start did not return a valid iterable object" batch fail message
+			else {
+				this.batchStartError = 
+					'Sharing Calculation Schedule does not allow Full Recalculation on Batch, so no records '
+					+ 'processed in this batch. Update configuration in Object Settings to allow this if required';
+			}
+		}
+
+		else {
+			this.batchStartError = 'No rules in place which share this object, so batch will be skipped';
+		}
+
+		// If an error was detected, return a query locator which will return no records
+		// and log the batch start error as an exception (batch log will have status "Skipped")
+		if(this.batchStartError != null) {
+			FormulaShareSObjectsSelector selector = new FormulaShareInjectionService().getSObjectsSelector(true, typeInThisBatch);
+			ql = selector.selectNoneLocator();
+
+			this.batchService.createBatchAndRibLogs('n/a', this.batchSize);
+			this.batchService.logBatchStartError(this.batchStartError);
 		}
 
 		return ql;
