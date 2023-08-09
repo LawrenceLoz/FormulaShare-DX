@@ -27,7 +27,11 @@ jobs:
 
     - name: 'Checkout source code'
       uses: actions/checkout@v2
-    
+
+    - name: Install Jest
+      run: |
+        sfdx force:lightning:lwc:test:setup
+
     - name: Run all Jest tests
       run: |
         sfdx force:lightning:lwc:test:run
@@ -36,6 +40,7 @@ jobs:
   deploy-and-test-without-namespace:
     name: Deploy and Test No Namespace
     runs-on: ubuntu-latest
+    container: salesforce/salesforcedx:latest-full
     steps:
 
     - name: 'Checkout source code'
