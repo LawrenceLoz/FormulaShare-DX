@@ -2,9 +2,9 @@
 
 ![build status](https://github.com/LawrenceLoz/FormulaShare-DX/actions/workflows/validate-branch-deployable.yml/badge.svg)
 
-This repository is the sharing framework for the [open-core](https://en.wikipedia.org/wiki/Open-core_model) project FormulaShare. FormulaShare is offered as an [app on the Salesforce AppExchange](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1), which embeds code from this repository and extends with features and capabilities to enable a dynamic and responsive sharing model for orgs of all scales.
+This repository contains the sharing framework for the [open-core](https://en.wikipedia.org/wiki/Open-core_model) project FormulaShare. FormulaShare is offered as an [app on the Salesforce AppExchange](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1), which embeds code from this repository and extends with features and capabilities to enable a dynamic and responsive sharing model for orgs of all scales.
 
-The framework is provided open source in order for FormulaShare subscribers to be review and be confident that the app is designed in a secure and performant way. We also welcome contributions from our community of users or others who would like to collaborate and improve the design. The code can also be used in part or in its entirety to support other projects.
+The framework is provided as open source so that organisations using the app can understand the design approach and be confident the app is built in a secure and performant way. We also welcome contributions from our community of users or others who would like to collaborate and improve the framework. The code can also be used in part or in its entirety to support other projects.
 
 ## What problem are we solving?
 
@@ -14,7 +14,7 @@ Salesforce provides great in-platform config options to share records, but none 
 
 The framework in this repository allows:
 
-* Records to be shared to a user, role or group specified in a formula, lookup or text field
+* Records to be shared to a user, role or group specified in a formula, lookup or text field on the shared object
 * A regular batch to be scheduled to apply sharing changes
 * Dynamic sharing to be implemented for standard and custom objects
 
