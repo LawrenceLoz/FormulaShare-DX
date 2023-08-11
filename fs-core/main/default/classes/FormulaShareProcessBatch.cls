@@ -95,7 +95,12 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	public void finish(Database.BatchableContext context) {
 
         this.batchService.finaliseLogs();
-        this.batchService.finaliseFullBatchMetrics();
+
+		// Update metrics only if there wasn't an error in the start method (retains shared totals if batch didn't run)
+		if(batchStartError == null) {
+			this.batchService.finaliseFullBatchMetrics();
+		}
+		this.batchService.additionalBatchFinishProcessing(this.batchStartError);
         this.batchService.commitFinalUow();
 
 		// If there are more types to process, submit another batch
