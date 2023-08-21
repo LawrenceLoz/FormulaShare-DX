@@ -315,7 +315,7 @@ public virtual inherited sharing class FormulaShareBatchService {
     // Finalse methods called from finish()
 	FormulaShareLogs fsLogs;
 	fflib_ISObjectUnitOfWork finalUow;
-    public virtual void finaliseLogs() {
+    public void finaliseLogs() {
 
 		fsLogs = new FormulaShareLogs(this.logsList);
 		fsLogs.trimFailedBatches();
@@ -340,19 +340,9 @@ public virtual inherited sharing class FormulaShareBatchService {
 		}		
 	}
 
-//	public void finaliseTargetedJobMetrics() {
-//
-//		// Indicate batch failure in metrics if any failed batches
-//		if(atLeastOneBatchFailed) {
-//			finalUow = FormulaShareProcessedShareEventService.processForBatchFail(finalUow, rulesForType);
-//		}
-//
-//		// Set metrics in batch finish based on sharing inserted in this batch
-//		if(!atLeastOneMetricsUpdateFailed) {
-//			FormulaShare_Log__c log = this.logsList[0];
-//			finalUow = FormulaShareProcessedShareEventService.processForTargetedJobFinish(finalUow, totalInsertedSharesForRule, totalErrorSharesForRule, log);
-//		}
-//	}
+	// Override to add additional processing in finish method
+	public virtual void additionalBatchFinishProcessing(String batchStartErorr) {}
+
 
 	public void commitFinalUow() {
 
