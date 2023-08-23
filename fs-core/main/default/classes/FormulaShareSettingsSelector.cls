@@ -131,7 +131,7 @@ public inherited sharing class FormulaShareSettingsSelector {
     private List<FormulaShare_Settings__mdt> selectActiveSettingsNoCache() {
         List<String> fields = getSObjectFieldList();
         String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ','))
-            + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true LIMIT 1';
+            + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true';
         List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }
