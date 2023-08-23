@@ -117,7 +117,7 @@ public inherited sharing class FormulaShareSObjectUtilities {
     public Boolean removeSharesForObject() {
         if(removeSharesForObject == null) {
 
-            FormulaShareRemoveSharesSelector selector = FormulaShareRemoveSharesSelector.construct();
+            FormulaShareRemoveSharesSelector selector = new FormulaShareInjectionService().getRemoveSharesSelector();
             FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings = selector.getSettingsForType(type);
 
             // If explicit settings, default to:

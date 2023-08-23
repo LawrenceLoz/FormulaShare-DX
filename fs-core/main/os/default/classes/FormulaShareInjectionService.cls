@@ -76,6 +76,11 @@ public with sharing class FormulaShareInjectionService {
         return new FormulaShareOrgControls();        
     }
 
+    public FormulaShareRemoveSharesSelector getRemoveSharesSelector() {
+        return new FormulaShareRemoveSharesSelector();
+    }
+
+
 
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();
