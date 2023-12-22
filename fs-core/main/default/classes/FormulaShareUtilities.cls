@@ -27,25 +27,32 @@ public with sharing class FormulaShareUtilities {
     static String namespacePrefix = '';
 	static Boolean namespaceSet = false;
 	
+	// If app is expected to be used within a namespace, check whether a class exists with this namespace
+	// and if so then assume we're operating within a NS, otherwise assume we're not in a namespace.
+	// Approach allows same version of FormulaShare to be run within a namespace and outside of
+	// a namespace (e.g. metadata deployment to sandbox for testing)
 	@AuraEnabled(cacheable=true)
     public static String getNamespacePrefix() {
         if(!namespaceSet) {
-			String expectedNamespace = FormulaShareNamespaceInfo.getExpectedNamespace();
 
-			// If app is expected to be used within a namespace, check whether a class exists with this namespace
-			// and if so then assume we're operating within a NS, otherwise assume we're not in a namespace.
-			// Approach allows same version of FormulaShare to be run within a namespace and outside of
-			// a namespace (e.g. metadata deployment to sandbox for testing)
-			if(expectedNamespace != null) {
-				List<ApexClass> nsClassList = [
-					SELECT Id from ApexClass 
-					WHERE Name = :classInPackage 
-					AND NamespacePrefix = :expectedNamespace
-					WITH SECURITY_ENFORCED];
-				if(!nsClassList.isEmpty()) {
-					namespacePrefix = expectedNamespace + '__';
-				}
+			// Refactored to avoid query
+			String uowClassName = FormulaShareUnitOfWorkDML.class.getName();
+			if(uowClassName.contains('.')) {
+				namespacePrefix = uowClassName.split('\\.')[0] + '__';	// Escape required
 			}
+
+			// Previous approach (replaced to avoid need to query system object)
+//			String expectedNamespace = FormulaShareNamespaceInfo.getExpectedNamespace();
+//			if(expectedNamespace != null) {
+//				List<ApexClass> nsClassList = [
+//					SELECT Id from ApexClass 
+//					WHERE Name = :classInPackage 
+//					AND NamespacePrefix = :expectedNamespace
+//					WITH SECURITY_ENFORCED];
+//				if(!nsClassList.isEmpty()) {
+//					namespacePrefix = expectedNamespace + '__';
+//				}
+//			}
 
             namespaceSet = true;
         }
@@ -415,6 +422,20 @@ public with sharing class FormulaShareUtilities {
 		shareObject = globalDescribe.get(typeName+'Share');
 		
 		return shareObject;
+	}
+
+	public static Schema.SObjectType getObjectFromShareName(String shareObjectName) {
+
+		Schema.SObjectType shareObject = globalDescribe.get(shareObjectName);
+		Schema.SObjectType sharedObject;
+		
+		// Remove the final "Share" from the Share or __Share suffix
+		String sharedObjectName = shareObjectName.left(shareObjectName.length()-5);
+
+		// For custom objects, append "c"
+		sharedObject = globalDescribe.get(sharedObjectName);
+		
+		return sharedObject;
 	}
 
 
