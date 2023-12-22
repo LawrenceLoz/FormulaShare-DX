@@ -417,6 +417,20 @@ public with sharing class FormulaShareUtilities {
 		return shareObject;
 	}
 
+	public static Schema.SObjectType getObjectFromShareName(String shareObjectName) {
+
+		Schema.SObjectType shareObject = globalDescribe.get(shareObjectName);
+		Schema.SObjectType sharedObject;
+		
+		// Remove the final "Share" from the Share or __Share suffix
+		String sharedObjectName = shareObjectName.left(shareObjectName.length()-5);
+
+		// For custom objects, append "c"
+		sharedObject = globalDescribe.get(sharedObjectName);
+		
+		return sharedObject;
+	}
+
 
 	public static String getHighestAccess(List<String> accessLevels) {
 		String highestLevel = 'None';
