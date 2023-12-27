@@ -23,7 +23,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
-import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
+import getLightningDomain from '@salesforce/apex/FormulaShareLWCUtilities.getLightningDomain';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import isAccountTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isAccountTeamSharingSupported';

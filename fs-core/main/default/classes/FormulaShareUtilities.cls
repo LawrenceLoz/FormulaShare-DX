@@ -19,19 +19,14 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public with sharing class FormulaShareUtilities {
+public inherited sharing class FormulaShareUtilities {
 
-    // Method returns the namespace of the package with underscores appended
-    // Used to determine what to add to object and field names
-    static String classInPackage = 'FormulaShareUnitOfWorkDML';
-    static String namespacePrefix = '';
-	static Boolean namespaceSet = false;
-	
 	// If app is expected to be used within a namespace, check whether a class exists with this namespace
 	// and if so then assume we're operating within a NS, otherwise assume we're not in a namespace.
 	// Approach allows same version of FormulaShare to be run within a namespace and outside of
 	// a namespace (e.g. metadata deployment to sandbox for testing)
-	@AuraEnabled(cacheable=true)
+    static String namespacePrefix = '';
+	static Boolean namespaceSet = false;
     public static String getNamespacePrefix() {
         if(!namespaceSet) {
 
@@ -42,6 +37,9 @@ public with sharing class FormulaShareUtilities {
 			}
 
 			// Previous approach (replaced to avoid need to query system object)
+			// This approach would have allowed for separate installed packages with the same class names
+			// However this isn't required with new Lite/Enterprise/Unlimited approach
+			//
 //			String expectedNamespace = FormulaShareNamespaceInfo.getExpectedNamespace();
 //			if(expectedNamespace != null) {
 //				List<ApexClass> nsClassList = [
@@ -491,24 +489,8 @@ public with sharing class FormulaShareUtilities {
         return queryString;
     }
 
-	// Used by controller to build links to setup menu items
-	@AuraEnabled(cacheable=true)
-	public static String getLightningDomain(){
-        return getMyDomain() + '.lightning.force.com';
-    }
-
-	@AuraEnabled(cacheable=true)
-	public static String getClassicDomain(){
-        return URL.getSalesforceBaseUrl().toExternalForm();
-    }
-
-    public static String getMyDomain(){
-        return URL.getOrgDomainUrl().getHost().split('\\.')[0].toLowerCase();
-	}
-
 
 	// Return a map of all sharing reasons for a particular object
-	@AuraEnabled(cacheable=true)
 	public static Map<String,String> getSharingReasons(String objectApiName) {
 		Map<String,String> reasons = new Map<String,String>();
 
@@ -530,7 +512,6 @@ public with sharing class FormulaShareUtilities {
 
 
 	private static Boolean contactSharingControlledByAccount;
-	@AuraEnabled(cacheable=true)
 	public static Boolean isContactSharingControlledByAccount() {
 		if(contactSharingControlledByAccount == null) {
 			Schema.SObjectType accountShareType = getSObjectTypeFromName('AccountShare');
