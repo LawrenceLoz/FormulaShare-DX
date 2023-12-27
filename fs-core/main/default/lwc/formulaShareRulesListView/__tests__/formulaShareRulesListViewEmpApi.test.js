@@ -2,7 +2,7 @@ import { createElement } from 'lwc';
 import {setImmediate} from 'timers';
 import FormulaShareRulesListView from 'c/formulaShareRulesListView';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
-import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
+import getNamespacePrefix from '@salesforce/apex/FormulaShareLWCUtilities.getNamespacePrefix';
 
 import { jestMockPublish } from 'lightning/empApi';
 
@@ -25,7 +25,7 @@ jest.mock(
 );
 // Mock getNamespacePrefix imperitive function
 jest.mock(
-    '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix',
+    '@salesforce/apex/FormulaShareLWCUtilities.getNamespacePrefix',
     () => {
         return {
             default: jest.fn()

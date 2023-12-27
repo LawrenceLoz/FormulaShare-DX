@@ -131,7 +131,7 @@ public with sharing class FormulaShareRulesListViewController {
                 Integer sharedToPoint = rule.controllingObjectSharedToFieldToken.indexOf('.');
                 String objectId = rule.controllingObjectSharedToFieldToken.left(sharedToPoint);
                 String fieldId = rule.controllingObjectSharedToFieldToken.mid(sharedToPoint + 1, 15);
-                rw.sharedToLink = FormulaShareUtilities.getLightningDomain() 
+                rw.sharedToLink = FormulaShareLWCUtilities.getLightningDomain() 
                     + '/lightning/setup/ObjectManager/' 
                     + objectId
                     + '/FieldsAndRelationships/' 
@@ -418,7 +418,7 @@ public with sharing class FormulaShareRulesListViewController {
                 warningIcon = warningTriangle;
                 warningUrlLabel = 'Schedule batch job';
                 warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';
-                String domainName = FormulaShareUtilities.getLightningDomain();
+                String domainName = FormulaShareLWCUtilities.getLightningDomain();
                 String apexClassesSetup = domainName + '/lightning/setup/ApexClasses/home';
                 warningUrl = apexClassesSetup;
             }

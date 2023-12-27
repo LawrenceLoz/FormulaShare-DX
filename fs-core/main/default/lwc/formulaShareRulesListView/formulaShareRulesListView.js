@@ -6,7 +6,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
-import getNamespacePrefix from '@salesforce/apex/FormulaShareUtilities.getNamespacePrefix';
+import getNamespacePrefix from '@salesforce/apex/FormulaShareLWCUtilities.getNamespacePrefix';
 import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
 import processOnActionClick from '@salesforce/apex/FormulaShareInjectionService.processOnActionClick';
 

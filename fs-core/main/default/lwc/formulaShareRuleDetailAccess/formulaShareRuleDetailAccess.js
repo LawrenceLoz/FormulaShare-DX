@@ -1,8 +1,8 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
-import getClassicDomain from '@salesforce/apex/FormulaShareUtilities.getClassicDomain';
-import getSharingReasons from '@salesforce/apex/FormulaShareUtilities.getSharingReasons';
+import getClassicDomain from '@salesforce/apex/FormulaShareLWCUtilities.getClassicDomain';
+import getSharingReasons from '@salesforce/apex/FormulaShareLWCUtilities.getSharingReasons';
 
 export default class FormulaShareRuleDetailAccess extends LightningElement {
 

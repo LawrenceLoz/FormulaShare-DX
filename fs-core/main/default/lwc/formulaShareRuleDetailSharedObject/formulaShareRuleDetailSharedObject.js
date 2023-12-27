@@ -2,8 +2,8 @@ import { LightningElement, track, api, wire } from 'lwc';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getShareableObjects from '@salesforce/apex/FormulaShareRuleDetailController.getShareableObjects';
-import getLightningDomain from '@salesforce/apex/FormulaShareUtilities.getLightningDomain';
-import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareUtilities.isContactSharingControlledByAccount';
+import getLightningDomain from '@salesforce/apex/FormulaShareLWCUtilities.getLightningDomain';
+import isContactSharingControlledByAccount from '@salesforce/apex/FormulaShareLWCUtilities.isContactSharingControlledByAccount';
 
 export default class FormulaShareRuleDetailSharedObject extends LightningElement {
 
