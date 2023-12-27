@@ -161,8 +161,12 @@ public virtual inherited sharing class FormulaShareRule {
             + ', sharingReason: '+sharingReason);
             return false;
         }
-    }    
+    }
 
+    // Returns list of all objects where trigger assessment could result in changes to shared object sharing
+    public virtual List<String> getTriggeringObectNames() {
+        return new List<String>();
+    }
 
     // Used to create a share at the access levels of the rule, and appropriate values for the record and shared to entity
     public SObject getShareWithRuleDefaults(Schema.SObjectType type, Id recordId, Id sharedTo, String targetAccessLevel, Boolean contactIsControlledByAccount) {
