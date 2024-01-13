@@ -406,8 +406,9 @@ public inherited sharing class FormulaShareUtilities {
 		return true;
 	}
 
+	// -------------------- SObject and share type and name conversion methods -------------------- //
 
-	public static Schema.SObjectType getShareObject(Schema.SObjectType type) {
+	private static String getShareObjectNameFromSObject(Schema.SObjectType type) {
 		Schema.SObjectType shareObject;
 		String typeName = type.getDescribe().getName();
 		
@@ -416,23 +417,39 @@ public inherited sharing class FormulaShareUtilities {
 			typeName = typeName.left(typeName.length()-1);
 		}
 
-		// Append "Share" to get the right object share name
-		shareObject = globalDescribe.get(typeName+'Share');
-		
+		return typeName + 'Share';
+	}
+
+	public static String getShareObjectNameFromSObjectName(String sObjectName) {
+		Schema.SObjectType type = getSObjectTypeFromName(sObjectName);
+		return getShareObjectNameFromSObject(type);
+	}
+
+	public static Schema.SObjectType getShareObject(Schema.SObjectType type) {
+		String shareObjectName = getShareObjectNameFromSObject(type);
+		Schema.SObjectType shareObject = globalDescribe.get(shareObjectName);
 		return shareObject;
 	}
 
-	public static Schema.SObjectType getObjectFromShareName(String shareObjectName) {
 
-		Schema.SObjectType shareObject = globalDescribe.get(shareObjectName);
-		Schema.SObjectType sharedObject;
-		
-		// Remove the final "Share" from the Share or __Share suffix
-		String sharedObjectName = shareObjectName.left(shareObjectName.length()-5);
+	private static String getSObjectNameFromShareObjectName(String shareObjectName) {
+		String sObjectName = '';
 
-		// For custom objects, append "c"
-		sharedObject = globalDescribe.get(sharedObjectName);
-		
+		// For custom objects, remove "__Share" and append "__c"
+		if(shareObjectName.right(7) == '__Share') {
+			sObjectName = shareObjectName.left(shareObjectName.length()-7) + '__c';
+		}
+		// For standard objects, remove "Share"
+		else {
+			sObjectName = shareObjectName.left(shareObjectName.length()-5);
+		}
+
+		return sObjectName;		
+	}
+
+	public static Schema.SObjectType getSObjectFromShareObjectName(String shareObjectName) {
+		String sObjectName = getSObjectNameFromShareObjectName(shareObjectName);
+		Schema.SObjectType sharedObject = globalDescribe.get(sObjectName);
 		return sharedObject;
 	}
 
