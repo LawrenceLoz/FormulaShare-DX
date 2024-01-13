@@ -99,7 +99,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
-    <label>Sample App Basic Edit Access</label>
+    <label>FormulaShare Sample App Basic Edit Access</label>
     <description>Edit, Create and View All access to main sample app objects. Edit and Create only on Donations (records shared to all internal users via criteria-based sharing)</description>
     <objectPermissions>
         <allowCreate>true</allowCreate>
