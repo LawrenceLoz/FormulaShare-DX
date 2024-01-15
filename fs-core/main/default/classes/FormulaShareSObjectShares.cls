@@ -20,7 +20,7 @@
 **/
 
 // Domain class isn't used so we can pass to methods directly for mocking
-public inherited sharing virtual class FormulaShareSObjectShares {
+public virtual inherited sharing class FormulaShareSObjectShares {
     
     private Schema.SObjectType type;
     public class FormulaShareException extends Exception {}    
