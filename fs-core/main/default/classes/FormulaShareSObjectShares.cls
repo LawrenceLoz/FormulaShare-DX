@@ -20,7 +20,7 @@
 **/
 
 // Domain class isn't used so we can pass to methods directly for mocking
-public inherited sharing class FormulaShareSObjectShares {
+public virtual inherited sharing class FormulaShareSObjectShares {
     
     private Schema.SObjectType type;
     public class FormulaShareException extends Exception {}    
@@ -41,7 +41,7 @@ public inherited sharing class FormulaShareSObjectShares {
 
 
     // To insert sharing records identified by FormulaShare as being required
-    public void insertShares(List<SObject> shares) {
+    public virtual void insertShares(List<SObject> shares) {
 
         // Check that object can be created by current or requesting user (or bypass if this is a test run)
         // Note there's no need to check field security as this can't be set on share records
@@ -64,7 +64,7 @@ public inherited sharing class FormulaShareSObjectShares {
     }
 
     // To remove sharing identified by FormulaShareService as no longer being required
-    public void deleteShares(List<SObject> shares) {
+    public virtual void deleteShares(List<SObject> shares) {
 
         // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
         if(type.getDescribe().isDeletable() == true) {
