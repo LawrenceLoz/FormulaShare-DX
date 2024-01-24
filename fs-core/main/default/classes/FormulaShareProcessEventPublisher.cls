@@ -21,6 +21,14 @@
 
 public inherited sharing class FormulaShareProcessEventPublisher {
 
+    String contextDetail;
+    String assessmentType;
+
+    public FormulaShareProcessEventPublisher(String contextDetail, String assessmentType) {
+        this.contextDetail = contextDetail;
+        this.assessmentType = assessmentType;
+    }
+
     List<FormulaShare_Processed_Share_Event__e> pseList = new List<FormulaShare_Processed_Share_Event__e>();
 
     // Log when service class has identified insert is needed
@@ -109,6 +117,9 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             String objectName = sd.type.getDescribe().getName();
             system.debug('obj name *** '+objectName);
             pse.Object__c = objectName;
+
+            pse.Context_Detail__c = this.contextDetail;
+            pse.Assessment_Type_Override__c = this.assessmentType;
 
             SObject share = sd.shareRecord;
             pse.Shared_to_Id__c = String.valueOf(share.get('UserOrGroupId'));

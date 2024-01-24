@@ -54,7 +54,7 @@ public with sharing class FormulaShareProcessBatchTest {
             List<Schema.SObjectType> types = new List<Schema.SObjectType>();
             Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
             types.add(fsLogType);
-            FormulaShareProcessBatch batchObj = new FormulaShareProcessBatch(types, 1);
+            FormulaShareProcessBatch batchObj = new FormulaShareProcessBatch(types, 'Full Recalculation Batch', 1);
 
             // Call recalculate method to set sharing (mocks are set so only DML should be the log record itself)
             test.startTest();

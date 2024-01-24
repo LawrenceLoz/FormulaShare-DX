@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Assessment_Type__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(!ISBLANK(Assessment_Type_Override__c), Assessment_Type_Override__c,
+IF( Context__c = &apos;Trigger&apos;, &apos;Transaction Safe&apos;, &apos;Full Assessment&apos;)
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>&quot;Full Assessment&quot; indicates all rules were evaluated for this record during sharing assessment, and is the default mode for batch assessment, as well as being an option for assessment triggered by flows. &quot;Transaction Safe&quot; means only rules which could be evaluated without querying and iterating collections of records were applied, and is the default for triggers and an option in flows</inlineHelpText>
+    <label>Assessment Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

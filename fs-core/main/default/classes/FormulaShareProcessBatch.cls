@@ -25,13 +25,15 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 	Integer batchSize;
 	Schema.SObjectType typeInThisBatch;
 	String batchStartError;
+	String contextDetail;
 
 	FormulaShareBatchService batchService;
 
 
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
-	public FormulaShareProcessBatch(List<Schema.SObjectType> types, Integer batchSize) {
+	public FormulaShareProcessBatch(List<Schema.SObjectType> types, String contextDetail, Integer batchSize) {
 		this.types = types;
+		this.contextDetail = contextDetail;
 		this.batchSize = batchSize;
 		this.typeInThisBatch = types[0];
 	}
@@ -47,7 +49,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 		if(!rulesForType.isEmpty()) {
 			
-			this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, rulesForType);
+			this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, contextDetail, rulesForType);
 			
 			// Continue only if object settings allow processing for full batch
 			if(batchService.processingAllowed()) {
@@ -106,7 +108,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {
 			types.remove(0);
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, contextDetail, batchSize), batchSize);
 			system.debug('Submitted next batch, Id = ' + batchJobId);
 		}
 	}

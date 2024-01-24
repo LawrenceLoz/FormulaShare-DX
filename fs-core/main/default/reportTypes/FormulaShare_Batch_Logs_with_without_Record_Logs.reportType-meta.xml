@@ -267,6 +267,21 @@
             <field>All_Sharing_Removed__c</field>
             <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Context_Detail__c</field>
+            <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Assessment_Type_Override__c</field>
+            <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Assessment_Type__c</field>
+            <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
+        </columns>
         <masterLabel>FormulaShare Record Logs</masterLabel>
     </sections>
     <sections>

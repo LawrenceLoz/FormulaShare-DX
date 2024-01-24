@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Context_Detail__c</fullName>
+    <description>Indicates operation type which initiated sharing assessment: &quot;Apex Trigger&quot;, &quot;Record Triggered Flow&quot;, &quot;Requested via Flow&quot;, &quot;Full Recalculation Batch&quot;, &quot;Manually Initiated Batch&quot; and &quot;Targeted Calculation Job&quot;</description>
+    <externalId>false</externalId>
+    <label>Context Detail</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
