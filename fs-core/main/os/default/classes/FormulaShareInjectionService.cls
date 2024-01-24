@@ -68,8 +68,8 @@ public with sharing class FormulaShareInjectionService {
         return new FormulaShareProcessedRecordShare();
     }
 
-    public FormulaShareBatchService getBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType) {
-        return new FormulaShareBatchService(typeInThisBatch, rulesForType);
+    public FormulaShareBatchService getBatchService(Schema.SObjectType typeInThisBatch, String contextDetail, List<FormulaShareRule> rulesForType) {
+        return new FormulaShareBatchService(typeInThisBatch, contextDetail, rulesForType);
     }
 
     public FormulaShareIOrgControls getOrgControls() {
