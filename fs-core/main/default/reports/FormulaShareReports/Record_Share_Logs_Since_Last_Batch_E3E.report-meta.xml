@@ -67,7 +67,7 @@
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>Trigger</value>
+            <value>Trigger,Record Triggered Flow,Apex Trigger,Requested via Apex,Requested via Trigger</value>
         </criteriaItems>
     </filter>
     <format>Tabular</format>

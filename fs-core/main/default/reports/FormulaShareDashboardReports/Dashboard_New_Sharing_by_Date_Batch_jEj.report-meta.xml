@@ -47,6 +47,9 @@
     <columns>
         <field>FormulaShare_Processed_Record_Share__c.Sharing_Reason__c</field>
     </columns>
+    <columns>
+        <field>FormulaShare_Record_Log__c.Context__c</field>
+    </columns>
     <filter>
         <criteriaItems>
             <column>FormulaShare_Processed_Record_Share__c.Operation__c</column>
@@ -67,7 +70,7 @@
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>Batch</value>
+            <value>Batch,Full Recalculation Batch,Manually Initiated Batch,Targeted Calculation Job</value>
         </criteriaItems>
     </filter>
     <format>Matrix</format>
