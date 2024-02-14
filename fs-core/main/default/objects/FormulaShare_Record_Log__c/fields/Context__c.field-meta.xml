@@ -2,7 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Context__c</fullName>
     <externalId>false</externalId>
-    <formula>if( ISBLANK(FormulaShare_Batch_Log__c), &quot;Trigger&quot;, &quot;Batch&quot;)</formula>
+    <formula>IF(!ISBLANK(Context_Detail__c), Context_Detail__c,
+IF(ISBLANK(FormulaShare_Batch_Log__c), &quot;Trigger&quot;, &quot;Batch&quot;)
+)</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Context</label>
     <required>false</required>

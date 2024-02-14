@@ -37,6 +37,7 @@ public virtual inherited sharing class FormulaShareSObjectShares {
 
     public FormulaShareSObjectShares(Schema.SObjectType type) {
         this.type = type;
+        System.debug('Type in scope: '+this.type.getDescribe().getLabel());
     }
 
 

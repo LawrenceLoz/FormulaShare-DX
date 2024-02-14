@@ -2,6 +2,8 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 	protected String executeContext;
     protected Schema.SObjectType typeInThisBatch;
+    protected Schema.SObjectType shareTypeInThisBatch;
+	protected String contextDetail;
     protected String targetedJobInScope;
     protected List<FormulaShareRule> rulesForType;
 
@@ -19,10 +21,13 @@ public virtual inherited sharing class FormulaShareBatchService {
 	@TestVisible protected Integer noRecordsSharingStillInPlace = 0;
 	protected Integer noRecordsNotShared = 0;
 
+
 	// Constructor for full batch processing
-    public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, List<FormulaShareRule> rulesForType) {
+    public FormulaShareBatchService(Schema.SObjectType typeInThisBatch, String contextDetail, List<FormulaShareRule> rulesForType) {
 		this.executeContext = FormulaShareProcessedShareEventService.batchContext;
+		this.contextDetail = contextDetail;
         this.typeInThisBatch = typeInThisBatch;
+		this.shareTypeInThisBatch = FormulaShareUtilities.getShareObject(typeInThisBatch);
         this.rulesForType = rulesForType;
     }
 
@@ -157,7 +162,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 		// Insert if required
 		if(!sharesToInsert.isEmpty()) {
-			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(typeInThisBatch);
+			FormulaShareSObjectShares fsSharesToInsert = FormulaShareSObjectShares.construct(shareTypeInThisBatch);
 
 			try {
 				fsSharesToInsert.insertShares(sharesToInsert);
@@ -190,7 +195,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 		// Delete if required
 		if(!sharesToDelete.isEmpty()) {
-			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(typeInThisBatch);
+			FormulaShareSObjectShares fsSharesToDelete = FormulaShareSObjectShares.construct(shareTypeInThisBatch);
 			try {
 				fsSharesToDelete.deleteShares(sharesToDelete);
 				deleteStatus = 'Success';
@@ -213,7 +218,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 			// Set record logs
 			List<FormulaShareService.EntityNotFound> entitiesNotFound = fsService.getEntitiesNotFound();
-			FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher();
+			FormulaShareProcessEventPublisher publisher = new FormulaShareProcessEventPublisher(contextDetail, 'Full Assessment');
 			publisher.addInsertEvents(insertDetails, insertStatus, insertStatusReason);
 			publisher.addDeleteEvents(deleteDetails, deleteStatus, deleteStatusReason);
 			publisher.addEventsForEntitiesNotFound(entitiesNotFound);

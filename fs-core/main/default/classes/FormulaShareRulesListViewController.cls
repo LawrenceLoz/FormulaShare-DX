@@ -210,7 +210,7 @@ public with sharing class FormulaShareRulesListViewController {
         typesList.add(type);
 
         // Submit batch
-        Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(typesList, batchSize), batchSize);
+        Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(typesList, 'Manually Initiated Batch', batchSize), batchSize);
     }
 
     

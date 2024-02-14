@@ -184,7 +184,7 @@ public inherited sharing class FormulaShareService {
 		if(!types.isEmpty()) {
 			FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 			Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, batchSize), batchSize);
+			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, 'Full Recalculation Batch', batchSize), batchSize);
 		}
 	}
 	

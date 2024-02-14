@@ -47,6 +47,9 @@
     <columns>
         <field>FormulaShare_Processed_Record_Share__c.Sharing_Reason__c</field>
     </columns>
+    <columns>
+        <field>FormulaShare_Record_Log__c.Context__c</field>
+    </columns>
     <filter>
         <criteriaItems>
             <column>FormulaShare_Processed_Record_Share__c.Operation__c</column>
@@ -67,7 +70,7 @@
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>Trigger</value>
+            <value>Trigger,Record Triggered Flow,Apex Trigger,Requested via Apex,Requested via Trigger</value>
         </criteriaItems>
     </filter>
     <format>Matrix</format>
