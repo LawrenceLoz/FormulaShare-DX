@@ -52,7 +52,10 @@ public inherited sharing class FormulaShareMetadataDMLRulesAccount extends Formu
 
         this.fieldsToSetOrClear = new Set<String> {
             namespacePrefix + 'Shared_To_Field_Type__c',
-            namespacePrefix + 'Shared_To__c'
+            namespacePrefix + 'Shared_To__c',
+            namespacePrefix + 'Metadata_Mapping_Type__c',
+            namespacePrefix + 'Metadata_Mapping_Match_Field__c',
+            namespacePrefix + 'Metadata_Mapping_Shared_To_Field__c'
         };
         this.fieldsToSetOrClear.addAll(new FormulaShareInjectionService().getExtraRelationshipFields());
 

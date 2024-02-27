@@ -26,4 +26,21 @@ public inherited sharing class FormulaShareRetrievedRecordDetails {
     public FormulaShareRetrievedRecordDetails() {
         controllingRecordsForRulesMap = new Map<String,List<SObject>>();
     }
+
+    public List<SObject> getControllingObjectsForRule(String ruleDeveloperName) {
+        List<SObject> controllingObjectsForRule;
+
+        // If controlling records map doesn't include this rule (e.g. standard rule)
+        // then controlling records are the shared records
+        if(!controllingRecordsForRulesMap.containsKey(ruleDeveloperName)) {
+            controllingObjectsForRule = new List<SObject>{sharedRecord};
+        }
+
+        // Otherwise, controlling records should be set in map
+        else {
+            controllingObjectsForRule = controllingRecordsForRulesMap.get(ruleDeveloperName);
+        }
+
+        return controllingObjectsForRule;
+    }
 }

@@ -80,6 +80,9 @@ public with sharing class FormulaShareInjectionService {
         return new FormulaShareRemoveSharesSelector();
     }
 
+    public FormulaShareSharedValueMapper getSharedValueMapper() {
+        return new FormulaShareSharedValueMapper();
+    }
 
 
     public Set<String> getExtraRelationshipFields() {

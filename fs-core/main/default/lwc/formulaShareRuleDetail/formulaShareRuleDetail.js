@@ -21,11 +21,31 @@
 
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { ruleDetailLocation, ruleDetailTeamAccess } from 'c/formulaShareLWCInjectionService';
 import getSpecificRule from '@salesforce/apex/FormulaShareRulesQueriesController.getSpecificRule';
 import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
 
 export default class FormulaShareRuleDetail extends LightningElement {
 
+    // Components allowing overrides initialised dynamically
+    ruleDetailLocationConstructor;
+    ruleDetailTeamAccessConstructor;
+    connectedCallback() {
+        const concreteRuleDetailLocation = ruleDetailLocation();
+        if(concreteRuleDetailLocation) {
+            import(concreteRuleDetailLocation)
+                .then(({ default: ctor }) => (this.ruleDetailLocationConstructor = ctor))
+                .catch((err) => console.log("Error importing ruleDetailLocation component"));
+        }
+
+        const concreteRuleDetailTeamAccess = ruleDetailTeamAccess();
+        if(concreteRuleDetailTeamAccess) {
+            import(concreteRuleDetailTeamAccess)
+                .then(({ default: ctor }) => (this.ruleDetailTeamAccessConstructor = ctor))
+                .catch((err) => console.log("Error importing ruleDetailTeamAccess component"));
+        }
+    }
+    
     @api
     get ruleId() {
         return this._ruleId;
@@ -82,10 +102,29 @@ export default class FormulaShareRuleDetail extends LightningElement {
     
     // Fire event with all details in rule
     fireEventWithRule() {
+        //console.log('firing: '+JSON.stringify(this.rule, null, 2));
         const evt = new CustomEvent('ruledetail', { detail : this.rule });
         this.dispatchEvent(evt);
     }
 
+    // Getters for ruleDetailField component - return CMDT type and field if set, otherwise SObject type and field
+    get objectWithShareField() {
+        if(this.rule.mdMappingType) {
+            return this.rule.mdMappingType;
+        }
+        else {
+            return this.rule.controllingObjectApiName;
+        }
+    }
+    get shareField() {
+        if(this.rule.mdMappingType) {
+            return this.rule.mdMappingSharedToField;
+        }
+        else {
+            return this.rule.controllingObjectSharedToFieldAPIName;
+        }
+    }
+    
 
     //--------------------- Event handlers for NameLabel component --------------------// 
 
@@ -129,7 +168,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     selectedLocation;
     handleSharedObjectChange(event) {
-       //console.log('in handleSharedObjectChange');
         
         // On change of shared object, assume that rule will be standard
         // Default object with share field to be the selected object (ensures field list populates)
@@ -174,23 +212,52 @@ export default class FormulaShareRuleDetail extends LightningElement {
     // Replace with handlers for generic change of relationship
     handleRelationshipChange(event) {
 
-        //console.log('Captured relationship change in top component: '+JSON.stringify(event.detail.relationship));
         this.rule.relationship = event.detail.relationship;
+
         this.rule.controllingObjectApiName = event.detail.controllingObjectApiName;
+        const lastRel = this.getLastRelationship(event.detail.relationship);
+        //console.log('Last rel: '+JSON.stringify(lastRel));
+
+        // If CMDT relationship, set shared to field to the selected match field on the last custom object
+        if(lastRel.isCmdtRelationship === true) {
+            this.rule.controllingObjectSharedToFieldAPIName = lastRel.objectMappingMatchField;
+            this.rule.mdMappingType = lastRel.thisObjectApiName;
+            this.rule.mdMappingMatchField = lastRel.cmdtMappingMatchField;
+            this.rule.mdMappingSharedToField = null;
+        }
+
+        // If not CMDT, clear all CMDT-specific fields
+        else {
+            this.rule.mdMappingType = null;
+            this.rule.mdMappingMatchField = null;
+            this.rule.mdMappingSharedToField = null;
+        }
+
         this.selectedLocation = event.detail.selectedLocation;
         this.disableEnableShareFieldSelect();
 
         this.fireEventWithRule();
     }
 
+    // Use iterative method to navigate to bottom object, and update each level using spread
+    getLastRelationship(rel) {
+        if(rel && rel.nextRelationship) {
+            return this.getLastRelationship(rel.nextRelationship);
+        }
+        else return rel;
+    }
     //--------------------- Event handlers for Field component ---------------------// 
 
     handleShareFieldChange(event) {
-        this.rule.controllingObjectSharedToFieldAPIName = event.detail;
-        
-        // Also set field in controlling object in relationship (this is referenced in rule DML)
-        this.rule.relationship = this.getRelationshipWithNewControllingDetails(this.rule.relationship);
-        //console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
+        if(this.rule.mdMappingType) {
+            this.rule.mdMappingSharedToField = event.detail;
+        }
+        else {
+            this.rule.controllingObjectSharedToFieldAPIName = event.detail;
+            // Also set field in controlling object in relationship (this is referenced in rule DML)
+            this.rule.relationship = this.getRelationshipWithNewControllingDetails(this.rule.relationship);
+            //console.log('Updated relationship after field change: '+JSON.stringify(this.rule.relationship));
+        }
         this.fireEventWithRule();
     }
 
@@ -227,6 +294,9 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 lastRel.thisObjectLabel = rel.thisObjectLabel;
                 lastRel.lookupToPrevObjectApiName = rel.lookupToPrevObjectApiName;
                 lastRel.lookupFromPrevObjectApiName = rel.lookupFromPrevObjectApiName;
+                lastRel.isCmdtRelationship = rel.isCmdtRelationship;
+                lastRel.objectMappingMatchField = rel.objectMappingMatchField;
+                lastRel.cmdtMappingMatchField = rel.cmdtMappingMatchField;
             }
 
             return lastRel;

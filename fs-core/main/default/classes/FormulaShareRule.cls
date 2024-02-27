@@ -61,9 +61,17 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String controllingObjectSharedToFieldToken;
     @AuraEnabled public String controllingObjectSharedToFieldType;
 
+    @AuraEnabled public String mdMappingType;
+    @AuraEnabled public String mdMappingMatchField;
+    @AuraEnabled public String mdMappingSharedToField;
+
     @AuraEnabled public String accessForTeam;
     @AuraEnabled public String accessForOwnerOfTeamsUserIsOn;
     @AuraEnabled public String accessForTeamComembers;
+
+    // Null if related object sharing isn't supported, otherwise will be populated with nested 
+    // relationships beginning with one representing the shared object itself
+    @AuraEnabled public FormulaShareSObjectRelationship relationship;
 
     // **************** Variables to support trigger assessment ************** //
 
@@ -117,6 +125,11 @@ public virtual inherited sharing class FormulaShareRule {
         contactAccess = rule.Contact_Access__c;
         caseAccess = rule.Case_Access__c;
         opportunityAccess = rule.Opportunity_Access__c;
+
+        // Metadata mapping
+        mdMappingType = rule.Metadata_Mapping_Type__c;
+        mdMappingMatchField = rule.Metadata_Mapping_Match_Field__c;
+        mdMappingSharedToField = rule.Metadata_Mapping_Shared_To_Field__c;
 
         // Access levels for default team sharing
         accessForTeam = rule.Access_For_Team__c;
@@ -345,6 +358,12 @@ public virtual inherited sharing class FormulaShareRule {
             else {
                 return false;
             }
+        }
+    }
+
+    public Boolean isMappedToMetadata {
+        get {
+            return mdMappingType != null;
         }
     }
 

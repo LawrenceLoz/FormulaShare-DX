@@ -236,36 +236,13 @@
             </div>
         </template>
 
-
         <template if:true={viewFieldDetails}>
-            <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-bottom_medium">
-
-                <div class="slds-form slds-form_stacked">
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-
-                            <template if:true={fieldFormula}>
-                                <lightning-textarea 
-                                    id="fieldFormula" 
-                                    label="Formula" 
-                                    value ={fieldFormula}
-                                    read-only>
-                                </lightning-textarea>
-                            </template>
-
-                            <lightning-textarea 
-                                id="sample" 
-                                label="Sample data (from first 100 records)" 
-                                value ={fieldSample}
-                                read-only>
-                            </lightning-textarea>
-                            <template if:true={loadingSample}>
-                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
-                            </template>
-
-                        </div>
-                    </div>
-                </div>
+            <div class="slds-m-horizontal_medium slds-m-bottom_medium">
+                <c-formula-share-browse-field-contents
+                    object-api-name={objectWithShareField}
+                    field-api-name={shareField}
+                    field-formula={fieldFormula}>
+                </c-formula-share-browse-field-contents>
             </div>
         </template>
     

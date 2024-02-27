@@ -70,6 +70,10 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             'Sharing_Reason__c',
             'Shared_To_Field_Type__c',
 
+            'Metadata_Mapping_Type__c',
+            'Metadata_Mapping_Match_Field__c',
+            'Metadata_Mapping_Shared_To_Field__c',
+
             'Object_Shared__c',
             'Object_Shared__r.QualifiedApiName',
             'Object_Shared__r.MasterLabel',
