@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareRuleStandard extends FormulaShareRule {
+public virtual inherited sharing class FormulaShareRuleStandard extends FormulaShareRule {
 
     public FormulaShareRuleStandard() {
         type = 'standard';

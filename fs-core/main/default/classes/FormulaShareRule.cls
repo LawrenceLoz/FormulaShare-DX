@@ -69,10 +69,6 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String accessForOwnerOfTeamsUserIsOn;
     @AuraEnabled public String accessForTeamComembers;
 
-    // Null if related object sharing isn't supported, otherwise will be populated with nested 
-    // relationships beginning with one representing the shared object itself
-    @AuraEnabled public FormulaShareSObjectRelationship relationship;
-
     // **************** Variables to support trigger assessment ************** //
 
     // Populates with the field which might be relevant to a sharing change for a trigger
