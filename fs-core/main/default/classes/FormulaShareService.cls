@@ -395,32 +395,38 @@ public inherited sharing class FormulaShareService {
 
 
 	private List<RecordRule> buildRecordRules() {
+
+		FormulaShareSharedValueMapper valueMapper = new FormulaShareInjectionService().getSharedValueMapper();
+		valueMapper.setRules(rules, recordDetails);
+
 		List<RecordRule> allRecordRules = new List<RecordRule>();
 
 		for(FormulaShareRule rule : rules) {
+
 			for(FormulaShareRetrievedRecordDetails details : recordDetails) {
 
-				List<SObject> controllingObjectsForRule = new List<SObject>();
+				List<SObject> controllingObjectsForRule = details.getControllingObjectsForRule(rule.developerName);
 
-				// If controlling records map doesn't include this rule (e.g. standard rule)
-				// then controlling records are the shared records
-				if(!details.controllingRecordsForRulesMap.containsKey(rule.developerName)) {
-					controllingObjectsForRule.add(details.sharedRecord);
-				}
-
-				// Otherwise, controlling records should be set in map
-				else {
-					controllingObjectsForRule = details.controllingRecordsForRulesMap.get(rule.developerName);
-				}
-
-				for(SOBject controllingObj : controllingObjectsForRule) {
+				for(SObject controllingObj : controllingObjectsForRule) {
 					System.debug('controllingObj: '+controllingObj);
 					System.debug('Rule: '+rule.developerName);
 					RecordRule recRule = new RecordRule();
 					recRule.recordToShare 			  = details.sharedRecord;
 					recRule.recordWithSharedToDetails = controllingObj;
-					recRule.sharedToString 			  = rule.getSharedToValueFromRecord(controllingObj);
 					recRule.rule 					  = rule;
+
+					try {
+						recRule.sharedToString = valueMapper.getSharedToValue(rule, controllingObj);
+					}
+					// FormulaShareException suggests share value can't be found for this record
+					catch(FormulaShareException e) {
+						captureEntityNotFound(recRule.recordToShare, recRule.rule, e.getMessage());
+					}
+					// Other exceptions are likely to be query exceptions, so log and don't add this record rule
+					catch(Exception e) {
+						logExceptionAllRecords(e.getMessage());
+						break;
+					}
 					
 					allRecordRules.add(recRule);
 				}
@@ -429,6 +435,7 @@ public inherited sharing class FormulaShareService {
 
 		return allRecordRules;
 	}
+
 
 
 	public void updateShareMaps(Id recordId, Id sharedTo, String targetAccessLevel, FormulaShareRule rule) {

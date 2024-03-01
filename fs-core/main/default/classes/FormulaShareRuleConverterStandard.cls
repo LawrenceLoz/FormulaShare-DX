@@ -12,7 +12,7 @@ public inherited sharing class FormulaShareRuleConverterStandard extends Formula
         rule.controllingObjectApiName = mdRule.Object_Shared__r.QualifiedApiName;
         rule.controllingObjectLabel = mdRule.Object_Shared__r.MasterLabel;
         rule.controllingObjectSharedToFieldAPIName = mdRule.Shared_To__r.QualifiedApiName;
-        rule.controllingObjectSharedToFieldLabel = mdRule.Shared_To__r.QualifiedApiName;
+        rule.controllingObjectSharedToFieldLabel = mdRule.Shared_To__r.MasterLabel;
         rule.controllingObjectSharedToFieldToken = mdRule.Shared_To__c;
         rule.controllingObjectSharedToFieldType = mdrule.Shared_To_Field_Type__c;
 

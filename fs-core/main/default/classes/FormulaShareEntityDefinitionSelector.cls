@@ -67,4 +67,14 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
         return entities;
     }
 
+    public List<EntityDefinition> getAllCustomMetadataTypes() {
+        List<EntityDefinition> entities = [SELECT QualifiedApiName, DurableId, Label, PluralLabel, DetailUrl 
+        FROM EntityDefinition
+                          WHERE QualifiedApiName LIKE '%__mdt'
+                          AND (NOT QualifiedApiName LIKE 'sdfs__FormulaShare%')
+        WITH SECURITY_ENFORCED
+        ORDER BY Label];
+        return entities;
+    }
+
 }

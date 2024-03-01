@@ -100,6 +100,27 @@ public with sharing class FormulaShareRuleDetailController {
         return FormulaShareUtilities.getParentRelationships(childObjectAPIName);
     }
 
+    @AuraEnabled(cacheable=true)
+    public static Map<String,String> getAllCustomMetadataTypes() {
+        List<EntityDefinition> eds = FormulaShareEntityDefinitionSelector.construct().getAllCustomMetadataTypes();
+        Map<String,String> edsMap = new Map<String,String>();
+        for(EntityDefinition ed : eds) {
+            edsMap.put(ed.QualifiedApiName, ed.Label);
+        }
+        return edsMap;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Map<String,String> getTextFields(String cmdtApiName) {
+        List<Schema.SObjectField> fields = FormulaShareUtilities.getTextFields(cmdtApiName);
+        Map<String,String> fieldsMap = new Map<String,String>();
+        for(Schema.SObjectField field : fields) {
+            Schema.DescribeFieldResult dfr = field.getDescribe();
+            fieldsMap.put(dfr.getName(), dfr.getLabel());
+        }
+        return fieldsMap;
+    }
+
 
     @AuraEnabled(cacheable=true)
     public static List<ShareFieldOption> getShareFieldOptions(String objectApiName){

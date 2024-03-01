@@ -28,7 +28,6 @@ import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailControl
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import isAccountTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isAccountTeamSharingSupported';
 import isOpportunityTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isOpportunityTeamSharingSupported';
-import getSampleData from '@salesforce/apex/FormulaShareRuleDetailController.getSampleData';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
@@ -42,7 +41,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     set objectWithShareField(value) {
         // Clear shareField and shareFieldType if object with share field is changed
-        if(this._objectWithShareField && this._objectWithShareField != value) {
+        if(this._objectWithShareField && this._objectWithShareField !== value) {
             this.updateShareField(null);
             this.updateShareFieldType(null);
 
@@ -59,7 +58,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     set shareWith(value) {
         // Update options for field type if necessary
-        if(this._shareWith != value) {
+        if(this._shareWith !== value) {
             //console.log('setting share with: ',value);
             this._shareWith = value;
             this.updateShareFieldTypeOptions();
@@ -98,8 +97,16 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     _shareField;
 
+    @api
+    get shareFieldType() {
+        return this._shareFieldType;
+    }
+    set shareFieldType(value) {
+        this._shareFieldType = value;
+    }
+    _shareFieldType;
 
-    @api shareFieldType;
+
     fullFieldList = [];
     namesOnlyFieldList = [];
 
@@ -161,6 +168,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.managerSharingSupported = data;
             this.updateShareWithOptions();
         }
+        else if(error) {
+            console.log('Error with wire service: '+error);
+        }
     }
 
     atmSharingSupported;
@@ -171,6 +181,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.atmSharingSupported = data;
             this.updateShareWithOptions();
         }
+        else if(error) {
+            console.log('Error with wire service: '+error);
+        }
     }
 
     otmSharingSupported;
@@ -180,6 +193,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         if(data) {
             this.otmSharingSupported = data;
             this.updateShareWithOptions();
+        }
+        else if(error) {
+            console.log('Error with wire service: '+error);
         }
     }
 
@@ -237,7 +253,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         if(['Users'
             , 'Managers of Users'
             , 'Users and Manager Subordinates'
-            , 'Default Account Teams of Users',
+            , 'Default Account Teams of Users'
             , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
             //console.log('setting to full list ',this.fullFieldList);
             this.fieldOptions = this.fullFieldList;
@@ -283,6 +299,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     { label: 'Id of role', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
+                break;
+            default:
         }
     }
 
@@ -318,6 +336,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Default Opportunity Teams of Users':
                 this.shareWithFlags.defaultOpportunityTeamsOfUsers = true;
                 break;
+            default:
         }
     }
 
@@ -377,7 +396,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
     updateShareField(value) {
         this._shareField = value;
-        this.loadingSample = true;  // Show spinner until field contents loaded
         this.updateFieldDetails();
         const evt = new CustomEvent('sharefieldchange', {
             detail: this._shareField
@@ -400,7 +418,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
         // Otherwise, if field details map is built then set details for this field
         else if(this.fieldsMap.get(this._shareField)) {
-            var fieldOption = this.fieldsMap.get(this._shareField);
+            const fieldOption = this.fieldsMap.get(this._shareField);
             //console.log('fieldOption: '+JSON.stringify(fieldOption));
             this.fieldType = fieldOption.type;
             this.fieldFormula = fieldOption.formula;
@@ -426,22 +444,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         );
     }
     
-    @track fieldSample;
-    @track loadingSample = true;
-    @track fieldErrorMessage;
-    @wire(getSampleData, {objectApiName : '$_objectWithShareField', fieldApiName : '$_shareField'})
-    wiredSampleData(value) {
-        const { data, error } = value;
-        if(data) {
-            this.fieldSample = data;
-        }
-        else if(error) {
-            this.fieldSample = error.body.message;   // Show warning message inside box - consider using a warning popover box in future
-            //console.log(JSON.stringify(error));
-        }
-        this.loadingSample = false;
-    }
-
     handleShareFieldTypeChange(event) {
         this.updateShareFieldType(event.detail.value);
     }
@@ -453,14 +455,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             ['Users'
             , 'Managers of Users'
             , 'Users and Manager Subordinates'
-            , 'Default Account Teams of Users',
+            , 'Default Account Teams of Users'
             , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
-            this.shareFieldType = 'Id';
+            this._shareFieldType = 'Id';
         }
 
         // Otherwise set to provided value (either 'Id' 'Name' or null)
         else {
-            this.shareFieldType = value;
+            this._shareFieldType = value;
         }
  
         const evt = new CustomEvent('sharefieldtypechange', {

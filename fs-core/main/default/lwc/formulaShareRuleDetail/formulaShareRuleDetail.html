@@ -51,12 +51,13 @@
                     <h3 class="slds-section__title slds-theme_shade">
                         <span 
                             class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
-                            title="Location of field with user, role or group">
-                            Location of field with user, role or group
+                            title="Location of field controlling sharing">
+                            Location of field controlling sharing
                         </span>
                     </h3>
                     <div aria-hidden="false" class="slds-section__content">
-                        <c-formula-share-rule-detail-location 
+                        <lwc:component
+                            lwc:is={ruleDetailLocationConstructor}
                             relationship={rule.relationship}
                             controlling-object-api-name={rule.controllingObjectApiName}
                             shared-object-label={rule.objectSharedLabel}
@@ -65,7 +66,7 @@
                             onruletypechange={handleRuleTypeChange}
                             onrelationshipchange={handleRelationshipChange}
                             onpreventsave={handlePreventSave}>
-                        </c-formula-share-rule-detail-location>
+                        </lwc:component>
                     </div>
                 </div>
 
@@ -86,13 +87,13 @@
                 </span>
             </h3>
             <div aria-hidden="false" class="slds-section__content">
-                <c-formula-share-rule-detail-field 
+                <c-formula-share-rule-detail-field
                     disable-share-field={disableShareField}
-                    object-with-share-field={rule.controllingObjectApiName}
+                    object-with-share-field={objectWithShareField}
                     share-with={rule.shareWith}
                     internal-sharing-model={sharedObjectDetail.internalSharingModel}
                     external-sharing-model={sharedObjectDetail.externalSharingModel}
-                    share-field={rule.controllingObjectSharedToFieldAPIName}
+                    share-field={shareField}
                     share-field-type={rule.controllingObjectSharedToFieldType}
                     onsharewithchange={handleShareWithChange}
                     onsharefieldchange={handleShareFieldChange}
@@ -116,14 +117,12 @@
 
             <!-- Show default team sharing configurtion if this option selected -->
             <template if:true={shareWithDefaultTeam}>
-
-                <c-formula-share-rule-detail-team-access
+                <lwc:component
+                    lwc:is={ruleDetailTeamAccessConstructor}
                     rule={rule}
                     share-with={rule.shareWith}
-                    onteamaccessupdate={handleTeamAccessUpdate}
-                >
-                </c-formula-share-rule-detail-team-access> 
-                
+                    onteamaccessupdate={handleTeamAccessUpdate}>
+                </lwc:component>
             </template>
 
             <div aria-hidden="false" class="slds-section__content">

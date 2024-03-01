@@ -97,7 +97,6 @@ public with sharing class FormulaShareRulesListViewController {
             rw.tableLabel = rule.label;
             rw.label = rule.label;
             rw.objectLabel = rule.objectSharedLabel;
-            rw.controllingObject = rule.controllingObjectLabel;
             rw.shareWith = rule.shareWith;
             rw.sharingReason = rule.sharingReason;
             rw.accessLevel = rule.accessLevel;
@@ -125,7 +124,8 @@ public with sharing class FormulaShareRulesListViewController {
 
             // Set URL for shared to field if populated
 //            System.debug('this field detail. Label: '+rule.controllingObjectSharedToFieldLabel+' | token: '+rule.controllingObjectSharedToFieldToken);
-            if(!String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
+            if(!rule.isMappedToMetadata && !String.isBlank(rule.controllingObjectSharedToFieldToken) && rule.controllingObjectSharedToFieldToken.contains('.')) {
+                rw.controllingObject = rule.controllingObjectLabel;
                 
                 // Build URL to field from token (includes object and field id, separated by full stop)
                 Integer sharedToPoint = rule.controllingObjectSharedToFieldToken.indexOf('.');
@@ -138,6 +138,19 @@ public with sharing class FormulaShareRulesListViewController {
                     + fieldId 
                     + '/view';
                 rw.sharedToLinkLabel = rule.controllingObjectSharedToFieldLabel;
+            }
+
+            else if(rule.isMappedToMetadata) {
+                try {
+                    Schema.SObjectType mdMappingType = FormulaShareUtilities.getSObjectTypeFromName(rule.mdMappingType);
+                    rw.controllingObject = mdMappingType.getDescribe().getLabel();
+                    Schema.SObjectField mdMappingSharedToFieldType = FormulaShareUtilities.getSObjectFieldFromName(rule.mdMappingSharedToField, mdMappingType);
+                    rw.sharedToLinkLabel = mdMappingSharedToFieldType.getDescribe().getLabel();
+                    rw.sharedToLink = FormulaShareLWCUtilities.getLightningDomain() + '/lightning/setup/CustomMetadata/home';
+                }
+                catch(Exception e) {
+                    System.debug('Unable to resolve metadata type or field name');
+                }
             }
 
             // Set calculation status depending on most recent logs
