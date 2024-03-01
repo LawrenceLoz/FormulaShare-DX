@@ -416,7 +416,7 @@ public inherited sharing class FormulaShareService {
 					recRule.rule 					  = rule;
 
 					try {
-						valueMapper.getSharedToValue(rule, controllingObj);
+						recRule.sharedToString = valueMapper.getSharedToValue(rule, controllingObj);
 					}
 					// FormulaShareException suggests share value can't be found for this record
 					catch(FormulaShareException e) {
