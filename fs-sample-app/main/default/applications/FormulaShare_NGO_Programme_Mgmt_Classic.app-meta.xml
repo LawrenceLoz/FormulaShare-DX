@@ -6,6 +6,7 @@
     <label>FormulaShare NGO Programme Management</label>
     <tabs>FormulaShare_Rules_VF</tabs>
     <tabs>Donation__c</tabs>
+    <tabs>Donation_Payment__c</tabs>
     <tabs>Programme__c</tabs>
     <tabs>Country__c</tabs>
     <tabs>Theme__c</tabs>
