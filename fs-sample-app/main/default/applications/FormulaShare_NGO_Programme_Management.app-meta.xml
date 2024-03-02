@@ -19,7 +19,6 @@
     <tabs>FormulaShare_Record_Log__c</tabs>
     <tabs>FormulaShare_Log__c</tabs>
     <tabs>FormulaShare_Dashboard</tabs>
-    <tabs>FormulaShare_Setup</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>FormulaShare_NGO_Programme_Management_UtilityBar</utilityBar>
 </CustomApplication>
