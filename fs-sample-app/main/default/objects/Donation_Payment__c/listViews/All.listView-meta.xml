@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Donation__c</columns>
+    <columns>Payment_Method__c</columns>
+    <columns>Amount__c</columns>
+    <columns>Share_With_Bank_Transfer_Team_RO__c</columns>
+    <columns>Share_With_Credit_Card_Team_RO__c</columns>
+    <columns>Share_with_Bank_Transfer_Team_RW__c</columns>
+    <columns>Share_with_Credit_Card_Team_RW__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

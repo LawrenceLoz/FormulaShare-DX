@@ -24,6 +24,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Donation_Payment__c.Payment_Method__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Donation_Payment__c.Share_With_Bank_Transfer_Team_RO__c</field>
         <readable>true</readable>
@@ -31,6 +36,16 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Donation_Payment__c.Share_With_Credit_Card_Team_RO__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Donation_Payment__c.Share_with_Bank_Transfer_Team_RW__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Donation_Payment__c.Share_with_Credit_Card_Team_RW__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -275,6 +290,10 @@
     </objectPermissions>
     <tabSettings>
         <tab>Country__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Donation_Payment__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
