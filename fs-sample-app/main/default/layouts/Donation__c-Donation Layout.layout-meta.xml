@@ -100,13 +100,23 @@
         <layoutColumns/>
         <style>CustomLinks</style>
     </layoutSections>
+    <relatedLists>
+        <fields>NAME</fields>
+        <fields>Payment_Method__c</fields>
+        <fields>Amount__c</fields>
+        <fields>Share_With_Bank_Transfer_Team_RO__c</fields>
+        <fields>Share_With_Credit_Card_Team_RO__c</fields>
+        <fields>Share_with_Bank_Transfer_Team_RW__c</fields>
+        <fields>Share_with_Credit_Card_Team_RW__c</fields>
+        <relatedList>Donation_Payment__c.Donation__c</relatedList>
+    </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>false</showHighlightsPanel>
     <showInteractionLogPanel>false</showInteractionLogPanel>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h26000000MKFr</masterLabel>
+        <masterLabel>00h7z000005PrMR</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

@@ -43,6 +43,7 @@ public with sharing class FSSampleAppDataGenerationService {
         for(FS_Sample_App_Country__mdt countryMeta : [SELECT DeveloperName, Finance_Manager_Role__c FROM FS_Sample_App_Country__mdt]) {
             Country__c c = new Country__c();
             c.Name = countryMeta.DeveloperName;
+            c.Name_of_Country_CMDT_Record__c = countryMeta.DeveloperName;
             c.Finance_Manager_Role__c = countryMeta.Finance_Manager_Role__c;
             countries.add(c);
         }
@@ -111,6 +112,7 @@ public with sharing class FSSampleAppDataGenerationService {
                 Integer randIndex = Math.Round(Math.Random() * 2);
                 
                 Donation_Payment__c payment = new Donation_Payment__c();
+                payment.Donation__c = don.Id;
                 payment.Amount__c = don.Amount__c;
                 payment.Payment_Method__c = paymentMethods[randIndex];
                 payments.add(payment);
