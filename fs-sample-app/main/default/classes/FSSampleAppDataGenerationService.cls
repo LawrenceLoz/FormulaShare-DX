@@ -108,7 +108,7 @@ public with sharing class FSSampleAppDataGenerationService {
                 List<String> paymentMethods = new List<String>{
                     'Credit Card', 'Bank Transfer', 'Cash'
                 };
-                Integer randIndex = Math.Round(Math.Random() * 3);
+                Integer randIndex = Math.Round(Math.Random() * 2);
                 
                 Donation_Payment__c payment = new Donation_Payment__c();
                 payment.Amount__c = don.Amount__c;
