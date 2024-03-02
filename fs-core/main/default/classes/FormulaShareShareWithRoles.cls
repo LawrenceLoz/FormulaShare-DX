@@ -100,21 +100,26 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
                             roleGroupId = roleGroupIds.get(shortSharedToId + 'Role');
                         }
 
+                        // When Digital Experiences not enabled, Role, RoleAndSubordinatesInternal exist
+                        // When Digital Experiences are enabled, Role, RoleAndSubordinatesInternal and RoleAndSubordinates exist
                         when 'Roles and Internal Subordinates' {
-                            // If role and subordinates internal group exists, use this
+                            // Logic below kept as legacy, but appears that RoleAndSubordinatesInternal should always exist
                             if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
                                 roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
                             }
-            
-                            // If no role and subordinates internal group exists, use the role and subordinates group
-                            // This will be the case when communities are not enabled
                             else {
                                 roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
                             }
                         }
 
                         when 'Roles, Internal and Portal Subordinates' {
-                            roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+                            // Previously failing when Digital Experiences not enabled (didn't fall back to checking for RoleAndSubordinatesInternal)
+                            if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinates')) {
+                                roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
+                            }
+                            else {
+                                roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
+                            }
                         }
                     }
                     
