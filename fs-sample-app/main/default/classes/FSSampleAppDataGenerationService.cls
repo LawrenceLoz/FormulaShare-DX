@@ -35,6 +35,7 @@ public with sharing class FSSampleAppDataGenerationService {
         List<Programme__c> progs = new List<Programme__c>();
         List<Donation__c> donations = new List<Donation__c>();
         List<Programme_Support_Officer__c> progSuppOfficers = new List<Programme_Support_Officer__c>();
+        List<Donation_Payment__c> payments = new List<Donation_Payment__c>();
 
         List<User> users = [SELECT Id, Username FROM User WHERE Profile.Name IN :userProfiles];
 
@@ -99,6 +100,23 @@ public with sharing class FSSampleAppDataGenerationService {
             }
         }
         insert donations;
+
+        // Insert random number of payments between 1 and 3
+        for(Donation__c don : donations) {
+            Integer noPayments = Math.Round(Math.Random() * 3);
+            for(Integer i=0; i < noPayments; i++) {
+                List<String> paymentMethods = new List<String>{
+                    'Credit Card', 'Bank Transfer', 'Cash'
+                };
+                Integer randIndex = Math.Round(Math.Random() * 2);
+                
+                Donation_Payment__c payment = new Donation_Payment__c();
+                payment.Amount__c = don.Amount__c;
+                payment.Payment_Method__c = paymentMethods[randIndex];
+                payments.add(payment);
+            }
+        }
+        insert payments;
 
         // Insert two programme support officers for each programme
         for(Programme__c prog : progs) {

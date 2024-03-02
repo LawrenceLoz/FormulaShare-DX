@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Share_With_Credit_Card_Team_RO__c</fullName>
+    <externalId>false</externalId>
+    <formula>if(!ISPICKVAL( Payment_Method__c, &apos;Credit Card&apos; ),  Donation__r.Programme_to_Support__r.Country__r.Name_of_Country_CMDT_Record__c,
+&apos;&apos;)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Share With Credit Card Team RO</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
