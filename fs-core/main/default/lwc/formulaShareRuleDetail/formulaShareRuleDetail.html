@@ -116,11 +116,11 @@
 
             <!-- Show default team sharing configurtion if this option selected -->
             <template if:true={shareWithDefaultTeam}>
-                <c-rule-detail-team-access-constructor
+                <c-formula-share-rule-detail-team-access-constructor
                     rule={rule}
                     share-with={rule.shareWith}
                     onteamaccessupdate={handleTeamAccessUpdate}>
-                </c-rule-detail-team-access-constructor>
+                </c-formula-share-rule-detail-team-access-constructor>
             </template>
 
             <div aria-hidden="false" class="slds-section__content">
