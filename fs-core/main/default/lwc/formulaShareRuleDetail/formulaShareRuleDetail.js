@@ -94,7 +94,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
         .then((data) => {
             //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
-            this.savedRuleType = this.rule.type;
+            if(this.rule.type === 'standard' && !this.rule.mdMappingType) {
+                this.savedRuleType = 'standard';
+            }
+            else {
+                this.savedRuleType = 'related';
+            }
             this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
             this.fireEventWithRule();
         });
@@ -216,7 +221,6 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
         this.rule.controllingObjectApiName = event.detail.controllingObjectApiName;
         const lastRel = this.getLastRelationship(event.detail.relationship);
-        //console.log('Last rel: '+JSON.stringify(lastRel));
 
         // If CMDT relationship, set shared to field to the selected match field on the last custom object
         if(lastRel.isCmdtRelationship === true) {
@@ -226,11 +230,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
             this.rule.mdMappingSharedToField = null;
         }
 
-        // If not CMDT, clear all CMDT-specific fields
+        // If not CMDT, clear all CMDT-specific fields and controllingObjectSharedToFieldAPIName
         else {
             this.rule.mdMappingType = null;
             this.rule.mdMappingMatchField = null;
             this.rule.mdMappingSharedToField = null;
+            this.rule.controllingObjectSharedToFieldAPIName = null;
         }
 
         this.selectedLocation = event.detail.selectedLocation;
