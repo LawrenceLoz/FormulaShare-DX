@@ -35,7 +35,7 @@ public with sharing class FormulaShareLWCUtilities {
 
 	@AuraEnabled(cacheable=true)
 	public static String getClassicDomain(){
-        return URL.getSalesforceBaseUrl().toExternalForm();
+        return URL.getOrgDomainURL().toExternalForm();
     }
 
     private static String getMyDomain(){
