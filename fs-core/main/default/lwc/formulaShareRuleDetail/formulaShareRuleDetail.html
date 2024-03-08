@@ -56,8 +56,7 @@
                         </span>
                     </h3>
                     <div aria-hidden="false" class="slds-section__content">
-                        <lwc:component
-                            lwc:is={ruleDetailLocationConstructor}
+                        <c-formula-share-rule-detail-location
                             relationship={rule.relationship}
                             controlling-object-api-name={rule.controllingObjectApiName}
                             shared-object-label={rule.objectSharedLabel}
@@ -66,7 +65,7 @@
                             onruletypechange={handleRuleTypeChange}
                             onrelationshipchange={handleRelationshipChange}
                             onpreventsave={handlePreventSave}>
-                        </lwc:component>
+                        </c-formula-share-rule-detail-location>
                     </div>
                 </div>
 
@@ -117,12 +116,11 @@
 
             <!-- Show default team sharing configurtion if this option selected -->
             <template if:true={shareWithDefaultTeam}>
-                <lwc:component
-                    lwc:is={ruleDetailTeamAccessConstructor}
+                <c-rule-detail-team-access-constructor
                     rule={rule}
                     share-with={rule.shareWith}
                     onteamaccessupdate={handleTeamAccessUpdate}>
-                </lwc:component>
+                </c-rule-detail-team-access-constructor>
             </template>
 
             <div aria-hidden="false" class="slds-section__content">

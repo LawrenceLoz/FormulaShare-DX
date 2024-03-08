@@ -21,30 +21,10 @@
 
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { ruleDetailLocation, ruleDetailTeamAccess } from 'c/formulaShareLWCInjectionService';
 import getSpecificRule from '@salesforce/apex/FormulaShareRulesQueriesController.getSpecificRule';
 import versionSupportsRelatedRules from '@salesforce/apex/FormulaShareInjectionService.versionSupportsRelatedRules';
 
 export default class FormulaShareRuleDetail extends LightningElement {
-
-    // Components allowing overrides initialised dynamically
-    ruleDetailLocationConstructor;
-    ruleDetailTeamAccessConstructor;
-    connectedCallback() {
-        const concreteRuleDetailLocation = ruleDetailLocation();
-        if(concreteRuleDetailLocation) {
-            import(concreteRuleDetailLocation)
-                .then(({ default: ctor }) => (this.ruleDetailLocationConstructor = ctor))
-                .catch((err) => console.log("Error importing ruleDetailLocation component"));
-        }
-
-        const concreteRuleDetailTeamAccess = ruleDetailTeamAccess();
-        if(concreteRuleDetailTeamAccess) {
-            import(concreteRuleDetailTeamAccess)
-                .then(({ default: ctor }) => (this.ruleDetailTeamAccessConstructor = ctor))
-                .catch((err) => console.log("Error importing ruleDetailTeamAccess component"));
-        }
-    }
     
     @api
     get ruleId() {
