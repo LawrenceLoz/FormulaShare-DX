@@ -88,7 +88,7 @@
         <field>FormulaShare_Processed_Record_Share__c.FormulaShare_Rule_Name__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Dashboard- New Sharing by Date (Batch)</name>
+    <name>Dashboard- Applied by Batch Jobs</name>
     <params>
         <name>co</name>
         <value>1</value>

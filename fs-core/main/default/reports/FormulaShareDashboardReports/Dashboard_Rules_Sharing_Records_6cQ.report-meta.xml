@@ -36,7 +36,7 @@
         <field>FormulaShare_Metrics__c.FormulaShare_Rule_Name__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Dashboard- Rules Sharing Records</name>
+    <name>Dashboard- Rules Applied</name>
     <params>
         <name>co</name>
         <value>1</value>
