@@ -113,6 +113,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                 pr.Processed_Date_Time__c = pse.Processed_Date_Time__c;
                 pr.Context_Detail__c = pse.Context_Detail__c;
                 pr.Assessment_Type_Override__c = pse.Assessment_Type_Override__c;
+                pr.Running_User__c = pse.Running_User__c;
             }
             else {
                 pr = processedRecords.get(pse.Record_Id__c);
