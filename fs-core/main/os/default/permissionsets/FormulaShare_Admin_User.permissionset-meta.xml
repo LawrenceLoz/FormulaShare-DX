@@ -575,8 +575,23 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.Assessment_Type_Override__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>FormulaShare_Record_Log__c.Assessment_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>FormulaShare_Record_Log__c.Batch_Log_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.Context_Detail__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -637,6 +652,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>FormulaShare_Record_Log__c.Record__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.Running_User__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

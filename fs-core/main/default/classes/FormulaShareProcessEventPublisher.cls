@@ -23,10 +23,12 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
     String contextDetail;
     String assessmentType;
+    String runningUser;
 
     public FormulaShareProcessEventPublisher(String contextDetail, String assessmentType) {
         this.contextDetail = contextDetail;
         this.assessmentType = assessmentType;
+        this.runningUser = UserInfo.getUserId();
     }
 
     List<FormulaShare_Processed_Share_Event__e> pseList = new List<FormulaShare_Processed_Share_Event__e>();
@@ -120,6 +122,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
             pse.Context_Detail__c = this.contextDetail;
             pse.Assessment_Type_Override__c = this.assessmentType;
+            pse.Running_User__c = this.runningUser;
 
             SObject share = sd.shareRecord;
             pse.Shared_to_Id__c = String.valueOf(share.get('UserOrGroupId'));
