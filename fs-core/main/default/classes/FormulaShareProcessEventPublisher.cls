@@ -63,17 +63,17 @@ public inherited sharing class FormulaShareProcessEventPublisher {
     // Log when service class processed a non-blank field but didn't find an entity
     public void addEventsForEntitiesNotFound(List<FormulaShareService.EntityNotFound> entitiesNotFound) {
         for(FormulaShareService.EntityNotFound enf : entitiesNotFound) {
-            FormulaShare_Processed_Share_Event__e pse = new FormulaShare_Processed_Share_Event__e();
-            pse.Record_Id__c = enf.recordId;
-            pse.Object__c = enf.type.getDescribe().getName();
-            pse.Processed_Date_Time__c = System.now();
+            FormulaShare_Processed_Share_Event__e pse = getBasicShareEvent();
             pse.Status__c = 'Error';
+            pse.Operation__c = 'Insert';
+            pse.Object__c = enf.type.getDescribe().getName();
+            System.debug('Mapping PSE for sharing not detected on '+ pse.Object__c);
+            pse.Record_Id__c = enf.recordId;
             pse.Failed_Status_Reason__c = enf.failedStatusReason;
             pse.Access_Level__c = (String) enf.rule.accessLevel;
             pse.Sharing_Reason__c = (String) enf.rule.sharingReason;
             pse.Share_With__c = (String) enf.rule.shareWith;
             pse.FormulaShare_Rule_Name__c = enf.rule.developerName;
-            pse.Operation__c = 'Insert';
             pseList.add(pse);
         }
     }
@@ -115,20 +115,15 @@ public inherited sharing class FormulaShareProcessEventPublisher {
         for(String key : shareDetails.keySet()) {
             FormulaShareService.ShareDetail sd = shareDetails.get(key);
 
-            FormulaShare_Processed_Share_Event__e pse = new FormulaShare_Processed_Share_Event__e();
-            String objectName = sd.type.getDescribe().getName();
-            system.debug('obj name *** '+objectName);
-            pse.Object__c = objectName;
-
-            pse.Context_Detail__c = this.contextDetail;
-            pse.Assessment_Type_Override__c = this.assessmentType;
-            pse.Running_User__c = this.runningUser;
+            FormulaShare_Processed_Share_Event__e pse = getBasicShareEvent();
+            
+            pse.Object__c = sd.type.getDescribe().getName();
+            System.debug('Mapping PSE for detected sharing on '+ pse.Object__c);
 
             SObject share = sd.shareRecord;
             pse.Shared_to_Id__c = String.valueOf(share.get('UserOrGroupId'));
             pse.Share_Id__c = share.Id;
             pse.Share_Key__c = key;
-            pse.Processed_Date_Time__c = System.now();
             pse.Existing_Sharing_On_Record__c = sd.existingSharingOnRecord;
 
             // Set statuses if provided (if left blank, shares will be queried as part of processing for logs)
@@ -145,5 +140,14 @@ public inherited sharing class FormulaShareProcessEventPublisher {
         }
 
         return pseMap;
+    }
+
+    private FormulaShare_Processed_Share_Event__e getBasicShareEvent() {
+        FormulaShare_Processed_Share_Event__e pse =new FormulaShare_Processed_Share_Event__e();
+        pse.Context_Detail__c = this.contextDetail;
+        pse.Assessment_Type_Override__c = this.assessmentType;
+        pse.Running_User__c = this.runningUser;
+        pse.Processed_Date_Time__c = System.now();
+        return pse;
     }
 }
