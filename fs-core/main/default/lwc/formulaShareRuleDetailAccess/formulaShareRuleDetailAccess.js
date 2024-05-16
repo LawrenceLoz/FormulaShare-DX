@@ -36,7 +36,9 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
 
     @api sharedObjectLabel;
     @api
-    get sharedObjectApiName() {}
+    get sharedObjectApiName() {
+        return this._sharedObjectApiName;
+    }
     set sharedObjectApiName(value) {
 
         // Clear fields if shared object is updated
@@ -63,7 +65,9 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     _sharedObjectApiName;
 
     @api
-    get sharedObjectId() {}
+    get sharedObjectId() {
+        return this._sharedObjectId;
+    }
     set sharedObjectId(value) {
         this._sharedObjectId = value;
         this.buildSharingReasonsSetupLink();
@@ -71,7 +75,9 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     _sharedObjectId;
 
     @api
-    get accountRelatedOwd() {}
+    get accountRelatedOwd() {
+        return this._accountRelatedOwd;
+    }
     set accountRelatedOwd(value) {
         this._accountRelatedOwd = value;
         //console.log('accountrelated OWD: ' +JSON.stringify(this._accountRelatedOwd));
@@ -82,8 +88,8 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     assessAccountRelatedAccess() {
 
         // Proceed only if all required attributes are set and shared object is Account
-        if(this._accountRelatedOwd
-            && this.sharedObjectLabel === 'Account') {
+        if(this.accountRelatedOwd
+            && this.sharedObjectApiName === 'Account') {
 
             // Set options for case and opportunity
             this.updateAccessLevelOption('case', this._accountRelatedOwd.caseAccess);
