@@ -27,20 +27,41 @@ public inherited sharing class FormulaShareRetrievedRecordDetails {
         controllingRecordsForRulesMap = new Map<String,List<SObject>>();
     }
 
-    public List<SObject> getControllingObjectsForRule(String ruleDeveloperName) {
+    public List<SObject> getControllingObjectsForRule(FormulaShareRule rule) {
         List<SObject> controllingObjectsForRule;
 
-        // If controlling records map doesn't include this rule (e.g. standard rule)
-        // then controlling records are the shared records
-        if(!controllingRecordsForRulesMap.containsKey(ruleDeveloperName)) {
-            controllingObjectsForRule = new List<SObject>{sharedRecord};
+        System.debug('** getControllingObjectsForRule| Rule requested: '+rule.developerName);
+        for(String ruleNAme: controllingRecordsForRulesMap.keySet()) {
+            System.debug('** getControllingObjectsForRule| Rule in map: '+ruleNAme);
         }
 
-        // Otherwise, controlling records should be set in map
+        // When we KNOW related records are always required, we should never pass back records from the shared
+        // object (fix in Aug 2024 to ensure multiple bottom object rules are processed correctly)
+        if(rule.requiresRelatedRecords()) {
+            if(controllingRecordsForRulesMap.containsKey(rule.developerName)) {
+                controllingObjectsForRule = controllingRecordsForRulesMap.get(rule.developerName);
+            }
+
+            // If we don't have the rule represented in this controllingRecordsForRulesMap, pass back an empty list
+            // This rule may be represented in another map processed at a different point
+            else {
+                controllingObjectsForRule = new List<SObject>();
+            }
+        }
+
         else {
-            controllingObjectsForRule = controllingRecordsForRulesMap.get(ruleDeveloperName);
-        }
+            // If controlling records map doesn't include this rule (e.g. standard rule)
+            // then controlling records are the shared records
+            if(!controllingRecordsForRulesMap.containsKey(rule.developerName)) {
+                controllingObjectsForRule = new List<SObject>{sharedRecord};
+            }
 
+            // Otherwise, controlling records should be set in map
+            else {
+                controllingObjectsForRule = controllingRecordsForRulesMap.get(rule.developerName);
+            }
+        }
+        
         return controllingObjectsForRule;
     }
 }

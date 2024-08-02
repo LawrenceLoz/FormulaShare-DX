@@ -177,6 +177,11 @@ public virtual inherited sharing class FormulaShareRule {
         return new List<String>();
     }
 
+    // Indicates wheter related records are needed in all circumstances to assess sharing
+    public virtual Boolean requiresRelatedRecords() {
+        return false;
+    }
+
     // Used to create a share at the access levels of the rule, and appropriate values for the record and shared to entity
     public SObject getShareWithRuleDefaults(Schema.SObjectType type, Id recordId, Id sharedTo, String targetAccessLevel, Boolean contactIsControlledByAccount) {
 
