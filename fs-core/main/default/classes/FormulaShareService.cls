@@ -405,7 +405,7 @@ public inherited sharing class FormulaShareService {
 
 			for(FormulaShareRetrievedRecordDetails details : recordDetails) {
 
-				List<SObject> controllingObjectsForRule = details.getControllingObjectsForRule(rule.developerName);
+				List<SObject> controllingObjectsForRule = details.getControllingObjectsForRule(rule);
 
 				for(SObject controllingObj : controllingObjectsForRule) {
 					System.debug('controllingObj: '+controllingObj);
