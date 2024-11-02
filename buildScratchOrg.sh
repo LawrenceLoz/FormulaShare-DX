@@ -18,16 +18,16 @@ day=$(date +%d)
 orgName="${day}${nameOfMonth}FS"
 echo Username for default org: ${orgName}
 
-sfdx force:org:create -f config/project-scratch-def.json -a ${orgName} --setdefaultusername
+sf force org create --definitionfile config/project-scratch-def.json --setalias ${orgName} --setdefaultusername
 echo Created org with default username ${orgName}
 node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required
-sfdx force:source:push
+sf project deploy start
 echo Pushed source
-sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
-sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
+sf org assign permset --perm-set-name FormulaShare_Admin_User
+sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
 echo Assigned permissions
-sfdx force:apex:execute -f config/setDebugModeForUser.apex
+sf apex run --file config/setDebugModeForUser.apex
 echo Set up user for debug mode
-sfdx force:apex:execute -f config/runApexOnInstallation.apex
+sf apex run --file config/runApexOnInstallation.apex
 echo Created test data

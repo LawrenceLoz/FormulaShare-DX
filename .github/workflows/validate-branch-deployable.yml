@@ -30,11 +30,13 @@ jobs:
 
     - name: Install Jest
       run: |
-        sfdx force:lightning:lwc:test:setup
+        sf force:lightning:lwc:test:setup # ERROR: Unable to convert this command; you must convert it manually.
+
 
     - name: Run all Jest tests
       run: |
-        sfdx force:lightning:lwc:test:run
+        sf force:lightning:lwc:test:run # ERROR: Unable to convert this command; you must convert it manually.
+
 
 
   deploy-and-test-without-namespace:
@@ -49,26 +51,26 @@ jobs:
     - name: Authenticate and set default DevHub
       run: |
         echo "$JWT_SIGNING_KEY" > server.key
-        sfdx force:auth:jwt:grant --clientid $CONSUMER_KEY --jwtkeyfile server.key --username $DEV_HUB_USERNAME --setdefaultdevhubusername -a devhub
+        sf org login jwt --client-id $CONSUMER_KEY --jwt-key-file server.key --username $DEV_HUB_USERNAME --set-default-dev-hub --alias devhub
       shell: bash
 
     - name: Create scratch org
       run: |
-        sfdx force:org:create -f config/project-scratch-def.json --setdefaultusername -d 1
+        sf force org create --definitionfile config/project-scratch-def.json --setdefaultusername --durationdays 1
 
     - name: Push source
       run: |
-        sfdx force:source:push
+        sf project deploy start
 
     - name: Assign permission sets
       run: |
-        sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User
-        sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions
+        sf org assign permset --perm-set-name FormulaShare_Admin_User
+        sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
 
     - name: Run all apex tests
       run: |
-        sfdx force:apex:test:run --synchronous
+        sf apex run test --synchronous
 
     - name: Delete scratch org
       run: |
-        sfdx force:org:delete -p
+        sf force org delete --no-prompt
