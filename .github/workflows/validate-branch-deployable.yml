@@ -64,8 +64,8 @@ jobs:
 
     - name: Assign permission sets
       run: |
-        sf org assign permset --perm-set-name FormulaShare_Admin_User
-        sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
+        sf org assign permset --name FormulaShare_Admin_User
+        sf org assign permset --name FormulaShare_Sample_App_Permissions
 
     - name: Run all apex tests
       run: |

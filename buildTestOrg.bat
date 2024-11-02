@@ -23,8 +23,8 @@ call node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required
 call sf project deploy start --target-org %orgName%
 echo Pushed source
-call sf org assign permset --perm-set-name FormulaShare_Admin_User --target-org %orgName%
-call sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions --target-org %orgName%
+call sf org assign permset --name FormulaShare_Admin_User --target-org %orgName%
+call sf org assign permset --name FormulaShare_Sample_App_Permissions --target-org %orgName%
 echo Assigned permissions
 call sf apex run --file config/setDebugModeForUser.apex --target-org %orgName%
 echo Set up user for debug mode

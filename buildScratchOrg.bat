@@ -35,8 +35,8 @@ call sf force org create --definitionfile config/project-scratch-def.json --seta
 echo Created org with default username %orgName%
 call sf project deploy start
 echo Pushed source
-call sf org assign permset --perm-set-name FormulaShare_Admin_User
-call sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
+call sf org assign permset --name FormulaShare_Admin_User
+call sf org assign permset --name FormulaShare_Sample_App_Permissions
 echo Assigned permissions
 call sf apex run --file config/setDebugModeForUser.apex
 echo Set up user for debug mode

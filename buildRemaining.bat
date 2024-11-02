@@ -1,5 +1,5 @@
-call sf org assign permset --perm-set-name FormulaShare_Admin_User
-call sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
+call sf org assign permset --name FormulaShare_Admin_User
+call sf org assign permset --name FormulaShare_Sample_App_Permissions
 echo Assigned permissions
 call sf apex run --file config/setDebugModeForUser.apex
 echo Set up user for debug mode

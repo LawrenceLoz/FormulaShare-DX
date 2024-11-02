@@ -24,8 +24,8 @@ node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required
 sf project deploy start
 echo Pushed source
-sf org assign permset --perm-set-name FormulaShare_Admin_User
-sf org assign permset --perm-set-name FormulaShare_Sample_App_Permissions
+sf org assign permset --name FormulaShare_Admin_User
+sf org assign permset --name FormulaShare_Sample_App_Permissions
 echo Assigned permissions
 sf apex run --file config/setDebugModeForUser.apex
 echo Set up user for debug mode
