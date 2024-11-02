@@ -10,16 +10,16 @@
 orgName=TestData
 echo Username for org: ${orgName}
 
-call sfdx force:org:create -f config/project-scratch-def.json -a ${orgName} --durationdays 30
+call sf force org create --definitionfile config/project-scratch-def.json --setalias ${orgName} --durationdays 30
 echo Created org with username ${orgName}
 node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required
-call sfdx force:source:push -u ${orgName}
+call sf project deploy start --target-org ${orgName}
 echo Pushed source
-call sfdx force:user:permset:assign --permsetname FormulaShare_Admin_User -u ${orgName}
-call sfdx force:user:permset:assign --permsetname FormulaShare_Sample_App_Permissions -u ${orgName}
+call sf org assign permset --name FormulaShare_Admin_User --target-org ${orgName}
+call sf org assign permset --name FormulaShare_Sample_App_Permissions --target-org ${orgName}
 echo Assigned permissions
-call sfdx force:apex:execute -f config/setDebugModeForUser.apex -u ${orgName}
+call sf apex run --file config/setDebugModeForUser.apex --target-org ${orgName}
 echo Set up user for debug mode
-call sfdx force:apex:execute -f config/runApexFullTestDataset.apex -u ${orgName}
+call sf apex run --file config/runApexFullTestDataset.apex --target-org ${orgName}
 echo Created test data
