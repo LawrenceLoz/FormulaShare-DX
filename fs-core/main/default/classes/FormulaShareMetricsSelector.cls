@@ -49,7 +49,10 @@ public inherited sharing class FormulaShareMetricsSelector extends fflib_SObject
             FormulaShare_Metrics__c.Successful_Inserts__c,
             FormulaShare_Metrics__c.Context__c,
             FormulaShare_Metrics__c.FormulaShare_Rule_Name__c,
-            FormulaShare_Metrics__c.Last_Batch_Run__c
+            FormulaShare_Metrics__c.Last_Batch_Run__c,
+            FormulaShare_Metrics__c.Processing_Started__c,
+            FormulaShare_Metrics__c.Processing_Finished__c,
+            FormulaShare_Metrics__c.LastModifiedDate
         };
     }
 

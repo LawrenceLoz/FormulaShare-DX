@@ -90,11 +90,9 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             log.Processing_Started_Milliseconds__c = DateTime.now().getTime();
             insert log;
 
-            FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
-            rib.FormulaShare_Log__c = log.Id;
-            rib.FormulaShare_Rule_Name__c = fsRules[0].developerName;
-            rib.Rule_Active_for_Batch_Run__c = true;
-            insert rib;
+            FormulaShare_Metrics__c m1 = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(fsRules[0].developerName, log.Id);
+            m1.Processing_Started__c = DateTime.now().addMinutes(-5);
+            insert m1;
 
             // Run core method
             List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
@@ -135,7 +133,6 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             setMocks();
 
             List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
-            
             // Insert two logs and RIB records for the first rule indicating processing not yet complete
             DateTime now = DateTime.now();
             FormulaShare_Log__c log = new FormulaShare_Log__c();
@@ -149,16 +146,14 @@ public with sharing class FormulaShareRulesListViewControllerTest {
             insert log;
             insert log2;
 
-            FormulaShare_Rule_in_Batch__c rib = new FormulaShare_Rule_in_Batch__c();
-            FormulaShare_Rule_in_Batch__c rib2 = new FormulaShare_Rule_in_Batch__c();
-            rib.FormulaShare_Log__c = log.Id;
-            rib.FormulaShare_Rule_Name__c = fsRules[0].developerName;
-            rib.Rule_Active_for_Batch_Run__c = true;
-            rib2.FormulaShare_Log__c = log2.Id;
-            rib2.FormulaShare_Rule_Name__c = fsRules[0].developerName;
-            rib2.Rule_Active_for_Batch_Run__c = true;
-            insert rib;
-            insert rib2;
+            FormulaShare_Metrics__c m1 = FormulaShareTestDataFactory.getBatchMetricsForRuleAndBatch(fsRules[0].developerName, log.Id);
+            FormulaShare_Metrics__c m2 = FormulaShareTestDataFactory.getTargetedJobMetricsForRuleAndBatch(fsRules[0].developerName, log2.Id);
+            m1.Processing_Started__c = now.addDays(-1);
+            m1.Processing_Finished__c = now;
+            m2.Processing_Started__c = now.addDays(-2);
+            m2.Processing_Finished__c = now.addDays(-1);
+            insert m1;
+            insert m2;
 
             // Run core method
             List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();

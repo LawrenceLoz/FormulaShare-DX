@@ -83,6 +83,9 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 
 			this.batchService.createBatchAndRibLogs('n/a', this.batchSize);
 			this.batchService.logBatchStartError(this.batchStartError);
+
+			// Update list to clear "Processing..." label
+			EventBus.publish(new FormulaShare_List_Update__e());
 		}
 
 		return ql;

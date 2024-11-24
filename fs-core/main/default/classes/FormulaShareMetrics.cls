@@ -29,6 +29,7 @@ public inherited sharing class FormulaShareMetrics extends fflib_SObjectDomain {
         public DateTime lastFailedOperation;
         public DateTime LastSuccessfulBatch;
         public DateTime lastFailedBatch;
+        public DateTime processingFinished;
     }
 
     public FormulaShareMetrics(List<FormulaShare_Metrics__c> sObjectList) {
@@ -109,6 +110,11 @@ public inherited sharing class FormulaShareMetrics extends fflib_SObjectDomain {
         metrics.Last_Failed_Operation__c = inc.lastFailedOperation;
         metrics.Last_Successful_Batch__c = inc.LastSuccessfulBatch;
         metrics.Last_Failed_Batch__c = inc.lastFailedBatch;
+
+        // Override Processing Finished if explicitly provided
+        if(inc.processingFinished != null) {
+            metrics.Processing_Finished__c = inc.processingFinished;
+        }
 
         if(metrics.Id == null) {
             uow.registerNew(metrics);

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Processing_Finished__c</fullName>
+    <description>Only set for batch and targeted job metrics (not batch finish metrics) - drives indication of most recent processing on list view</description>
+    <externalId>false</externalId>
+    <label>Processing Finished</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

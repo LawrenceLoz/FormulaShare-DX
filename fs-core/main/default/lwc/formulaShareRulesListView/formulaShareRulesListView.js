@@ -50,7 +50,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         this.columns.push(
             {type: 'text'
                 , fieldName: 'lastCalcStatus'
-                , label: 'Last Full Assessment'
+                , label: 'Last Batch Assessment'
                 , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
             },
             {type: 'number'
@@ -142,6 +142,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
+//            console.log('Refresh During: '+JSON.stringify(this.treeItems, null, 2));
 
             versionSupportsRelatedRules()
                 .then((supportsRelated) => {
@@ -225,7 +226,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                 // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
-                    //console.log('Received Refresh Event');
+                    console.log('Received Refresh Event');
                     this.refreshView();
                 };
                 subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
@@ -278,7 +279,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if(isParentRow) {
             actions.push({
                 'label': 'Recalculate Sharing',
-                'name': 'recalculate'
+                'name': 'recalculate',
+                disabled: row['recalculateNotSupported']
             });
         }
         else {
@@ -420,7 +422,12 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     // Refreshes provisioned list of rules
     refreshView() {
-        refreshApex(this.provisionedValue);
+//        console.log('Refresh Before: '+JSON.stringify(this.provisionedValue, null, 2));
+        refreshApex(this.provisionedValue)
+        .then(() => {
+//            console.log('Refresh After: '+JSON.stringify(this.provisionedValue, null, 2));
+        });
+        
         const evt = new CustomEvent('refreshview');
         this.dispatchEvent(evt);
     }
