@@ -76,8 +76,10 @@ public virtual inherited sharing class FormulaShareBatchService {
         }
 
         // Create metrics for the execute context for any rules which don't have them already
-        List<FormulaShare_Metrics__c> metrics = createMetricsForNewRules();
-        uow.registerNew(metrics);
+		// Note that 'n/a' indicates a query wasn't run and a batch start error was encountered (logBatchStartError will be run)
+		if(query != 'n/a') {
+			setProcessingStartedAndCreateMetricsForNewRules(uow);
+		}
 
         uow.commitWork();
     }
@@ -396,7 +398,8 @@ public virtual inherited sharing class FormulaShareBatchService {
 	}
 
 
-	private List<FormulaShare_Metrics__c> createMetricsForNewRules() {
+	private void setProcessingStartedAndCreateMetricsForNewRules(fflib_ISObjectUnitOfWork uow) {
+		Datetime timeNow = Datetime.now();
 
 		// Make a set of rules which haven't had metrics records created already
 		Set<String> ruleNames = new Set<String>();
@@ -406,13 +409,18 @@ public virtual inherited sharing class FormulaShareBatchService {
 		FormulaShareMetricsSelector fsmSelector = new FormulaShareMetricsSelector();
 		List<FormulaShare_Metrics__c> existingMetrics = fsmSelector.getMetricsForRulesAndContext(ruleNames, executeContext);
 		for(FormulaShare_Metrics__c m : existingMetrics) {
+			m.Processing_Started__c = timeNow;
+			m.Processing_Finished__c = null;	// Clear previous finish time
 			ruleNames.remove(m.FormulaShare_Rule_Name__c);	// Take rules with metrics out of the set
 		}
+		uow.registerDirty(existingMetrics);
 
 		// Get list of blank metrics records for all rules which don't yet have batch metrics
-		List<FormulaShare_Metrics__c> allMetrics = FormulaShareMetrics.getBlankMetrics(ruleNames, executeContext);
-
-		return allMetrics;
+		List<FormulaShare_Metrics__c> newMetrics = FormulaShareMetrics.getBlankMetrics(ruleNames, executeContext);
+		for(FormulaShare_Metrics__c metrics : newMetrics) {
+			metrics.Processing_Started__c = timeNow;
+		}
+        uow.registerNew(newMetrics);
 	}
 
 }

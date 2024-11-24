@@ -21,11 +21,6 @@
 
 public inherited sharing class FormulaShareProcessedShareEventService {
 
-    static String context;    // "Batch" and "Trigger" supported
-    static FormulaShare_Log__c batchLog;
-    static FormulaShare_Settings__mdt settings;
-    static fflib_ISObjectUnitOfWork uow;
-
     // Metrics type names defined below.
     // Typically we would expect each rule to have at most one metrics record for the following:
     // 
@@ -42,6 +37,11 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     public static final String targetedJobContext = 'Targeted Job Operations Since Last Batch';
     public static final String triggerContext = 'Trigger Operations Since Last Batch';
     public static final String batchFinishContext = 'Last Batch';
+
+    static String context;
+    static FormulaShare_Log__c batchLog;
+    static FormulaShare_Settings__mdt settings;
+    static fflib_ISObjectUnitOfWork uow;
 
     private static Integer noRecordsSharingAppliedFirstTime;
     private static Integer noRecordsAllSharingRemoved;
@@ -225,10 +225,12 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
         // Create a zero metric for each rule
         Map<String,FormulaShareMetrics.Increment> metricsIncrements = new Map<String,FormulaShareMetrics.Increment>();
+        Datetime timeNow = Datetime.now();
         for(String ruleName : ruleNamesSet) {
             FormulaShareMetrics.Increment inc = new FormulaShareMetrics.Increment();
             inc.noSuccessfulInserts = 0;
             inc.noFailedInserts = 0;
+            inc.processingFinished = timeNow;
             metricsIncrements.put(ruleName, inc);
         }
         

@@ -37,33 +37,6 @@ public with sharing class FormulaShareRulesListViewController {
             ruleNames.add(rule.developerName);
         }
 
-        // Assess when last sharing calculation happened
-        FormulaShareRuleInBatchSelector ribSelector = new FormulaShareRuleInBatchSelector(true);
-        List<FormulaShareRuleInBatchSelector.RuleRunDetail> runDetails = ribSelector.getRuleRuns(ruleNames);
-        Map<String,FormulaShareRuleInBatchSelector.RuleRunDetail> ruleRunDetailMap = new Map<String,FormulaShareRuleInBatchSelector.RuleRunDetail>();
-
-        // Iterate through logs and build map of latest calculations
-        for(FormulaShareRuleInBatchSelector.RuleRunDetail runDetail : runDetails) {
-
-            // Consider only if rule was active when batch ran
-            if(runDetail.ruleActive) {
-
-                if(ruleRunDetailMap.containsKey(runDetail.developerName)) {
-                    FormulaShareRuleInBatchSelector.RuleRunDetail thisDetail = ruleRunDetailMap.get(runDetail.developerName);
-                    
-                    // If log is later than current latest, replace this (otherwise we'll keep the later log in the map)
-                    if(thisDetail.processingStarted < runDetail.processingStarted) {
-                        ruleRunDetailMap.put(runDetail.developerName, runDetail);
-                    }
-                }
-                
-                // If there wasn't already times in the map, record the details from this log
-                else {
-                    ruleRunDetailMap.put(runDetail.developerName, runDetail);
-                }
-            }
-        }
-
         // Build map of all metrics for rules
         List<FormulaShare_Metrics__c> metricsList = FormulaShareMetricsSelector.construct().getAllMetricsForRules(new Set<String>(ruleNames));
         Map<String,FormulaShare_Metrics__c> metricsMap = new Map<String,FormulaShare_Metrics__c>();
@@ -154,16 +127,32 @@ public with sharing class FormulaShareRulesListViewController {
             }
 
             // Set calculation status depending on most recent logs
-            if(!ruleRunDetailMap.containsKey(rw.developerName)) {
+            FormulaShare_Metrics__c batchMetrics = metricsMap.get(rw.developerName + FormulaShareProcessedShareEventService.batchContext);
+            FormulaShare_Metrics__c targetedJobMetrics = metricsMap.get(rw.developerName + FormulaShareProcessedShareEventService.targetedJobContext);
+
+            if(batchMetrics == null && targetedJobMetrics == null) {
                 rw.lastCalcStatus = 'Pending';
                 rw.iconName = 'standard:today';
                 rw.iconAlt = 'Pending';
-        }
+            }
 
             else {
-                FormulaShareRuleInBatchSelector.RuleRunDetail runDetail = ruleRunDetailMap.get(rw.developerName);
-                if(runDetail.batchFinishComplete) {
-                    rw.lastCalcStatus = runDetail.processingFinished.format();
+                FormulaShare_Metrics__c latestMetrics;
+                if(batchMetrics == null) {
+                    latestMetrics = targetedJobMetrics;
+                }
+                else if(targetedJobMetrics == null) {
+                    latestMetrics = batchMetrics;
+                }
+                else if(targetedJobMetrics.LastModifiedDate > batchMetrics.LastModifiedDate) {
+                    latestMetrics = targetedJobMetrics;
+                }
+                else {
+                    latestMetrics = batchMetrics;
+                }
+
+                if(latestMetrics.Processing_Finished__c != null) {
+                    rw.lastCalcStatus = latestMetrics.Processing_Finished__c.format();
                 }
 
                 // If currently processing, indicate this against the field
@@ -184,8 +173,17 @@ public with sharing class FormulaShareRulesListViewController {
 
         // Construct list of object wrappers with rules to return
         List<ObjectRulesWrapper> orwList = new List<ObjectRulesWrapper>();
+
+        Datetime timeNow = DateTime.now();
+
+        // Get object which can only be calculated by targeted jobs (these don't allow Recalculate Sharing option)
+        FormulaShareRemoveSharesSelector selector = new FormulaShareInjectionService().getRemoveSharesSelector();
+        Set<String> objectsNotSupportingRecalculate = selector.getObjectsWhereFullBatchUnsupported();
+
         for(String objectName : objectsWithRulesMap.keySet()) {
             ObjectRulesWrapper orw = new ObjectRulesWrapper();
+            orw.refreshTime = timeNow;
+            orw.recalculateNotSupported = objectsNotSupportingRecalculate.contains(objectName);
             List<RuleWrapper> rwList = objectsWithRulesMap.get(objectName);
             rwList.sort();
             for(RuleWrapper rw : rwList) {
@@ -242,6 +240,10 @@ public with sharing class FormulaShareRulesListViewController {
         public List<RuleWrapper> items {get;set;}
         @AuraEnabled
         public String sharedObjectClass {get;set;}
+        @AuraEnabled
+        public Datetime refreshTime {get;set;}
+        @AuraEnabled
+        public Boolean recalculateNotSupported {get;set;}
 
 		// Comparable interface allows us to call sort
         public Integer compareTo(Object compareTo) {

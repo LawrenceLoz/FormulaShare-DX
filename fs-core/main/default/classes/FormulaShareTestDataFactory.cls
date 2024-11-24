@@ -3,6 +3,7 @@ public inherited sharing class FormulaShareTestDataFactory {
 
     static String batchContext = FormulaShareProcessedShareEventService.batchContext;
     static String triggerContext = FormulaShareProcessedShareEventService.triggerContext;
+    static String targetedJobContext = FormulaShareProcessedShareEventService.targetedJobContext;
     static String batchFinishContext = FormulaShareProcessedShareEventService.batchFinishContext;
 
     static String userRuleName = FormulaShareRuleFactory.userRuleName;
@@ -164,6 +165,7 @@ public inherited sharing class FormulaShareTestDataFactory {
         metrics.Failed_Inserts__c = 2;
         metrics.Last_Successful_Operation__c = DateTime.now();
         metrics.Last_Failed_Operation__c = DateTime.now();
+        metrics.Processing_Started__c = DateTime.now();
         metrics.Last_Batch_Run__c = batchLogId;
         return metrics;
     }
@@ -176,6 +178,20 @@ public inherited sharing class FormulaShareTestDataFactory {
         metrics.Failed_Inserts__c = 3;
         metrics.Last_Successful_Operation__c = DateTime.now();
         metrics.Last_Failed_Operation__c = DateTime.now();
+        metrics.Processing_Started__c = DateTime.now();
+        metrics.Last_Batch_Run__c = batchLogId;
+        return metrics;
+    }
+
+    public static FormulaShare_Metrics__c getTargetedJobMetricsForRuleAndBatch(String ruleName, Id batchLogId) {
+        FormulaShare_Metrics__c metrics = new FormulaShare_Metrics__c();
+        metrics.FormulaShare_Rule_Name__c = ruleName;
+        metrics.Context__c = targetedJobContext;
+        metrics.Successful_Inserts__c = 104;
+        metrics.Failed_Inserts__c = 4;
+        metrics.Last_Successful_Operation__c = DateTime.now();
+        metrics.Last_Failed_Operation__c = DateTime.now();
+        metrics.Processing_Started__c = DateTime.now();
         metrics.Last_Batch_Run__c = batchLogId;
         return metrics;
     }

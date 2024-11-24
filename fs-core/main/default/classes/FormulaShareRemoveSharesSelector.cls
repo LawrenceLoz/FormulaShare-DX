@@ -60,4 +60,8 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
             LIMIT 1];
     }
 
+    public virtual Set<String> getObjectsWhereFullBatchUnsupported() {
+        return new Set<String>();
+    }
+
 }

@@ -21,6 +21,8 @@
 
 public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SObjectSelector {
 
+    private final Integer QUERY_LIMIT = 10000;
+
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
 
     public FormulaShareRuleInBatchSelector(Boolean enforceObjectAndFieldSecurity) {
@@ -50,6 +52,7 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
             selectField('FormulaShare_Log__r.Processing_Finished__c').
             selectField('FormulaShare_Log__r.Batch_Finish_Complete__c').
             setCondition('FormulaShare_Rule_Name__c IN :ruleNames').
+            setLimit(QUERY_LIMIT).
             toSOQL());
     }
 

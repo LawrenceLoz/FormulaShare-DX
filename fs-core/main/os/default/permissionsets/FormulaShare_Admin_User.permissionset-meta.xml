@@ -511,6 +511,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>FormulaShare_Metrics__c.Processing_Finished__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FormulaShare_Metrics__c.Processing_Started__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>FormulaShare_Metrics__c.Successful_Inserts__c</field>
         <readable>true</readable>
     </fieldPermissions>
