@@ -154,8 +154,11 @@ public with sharing class FormulaShareRulesListViewController {
                 if(latestMetrics.Processing_Finished__c != null) {
                     rw.lastCalcStatus = latestMetrics.Processing_Finished__c.format();
                 }
-
-                // If currently processing, indicate this against the field
+                else if(latestMetrics.Processing_Started__c == null) {
+                    rw.lastCalcStatus = 'Pending';
+                    rw.iconName = 'standard:today';
+                    rw.iconAlt = 'Pending';
+                }
                 else {
                     rw.lastCalcStatus = 'Processing...';
                     rw.iconName = 'standard:product_transfer';
