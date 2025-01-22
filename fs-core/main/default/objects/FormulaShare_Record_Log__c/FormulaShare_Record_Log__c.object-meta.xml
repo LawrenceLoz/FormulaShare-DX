@@ -167,8 +167,10 @@
     </nameField>
     <pluralLabel>FormulaShare Record Logs</pluralLabel>
     <searchLayouts>
+        <searchResultsAdditionalFields>Context__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Object__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Record__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Running_User__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Processed_Date_Time__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>All_Deleted_Sharing_Successful__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>All_Inserted_Sharing_Successful__c</searchResultsAdditionalFields>
