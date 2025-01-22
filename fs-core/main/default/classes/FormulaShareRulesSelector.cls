@@ -83,7 +83,12 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
             'Access_For_Team__c',
             'Access_For_Owner_Of_Teams_User_Is_On__c',
-            'Access_For_Team_Comembers__c'
+            'Access_For_Team_Comembers__c',
+
+            'Behaviour_Md_Match_Field_Mismatch__c',
+            'Behaviour_Share_To_Field_Mismatch__c',
+            'Fallback_Md_Match_Field_Mismatch__c',
+            'Fallback_Share_To_Field_Mismatch__c'
         };
         return fieldNames;
     }

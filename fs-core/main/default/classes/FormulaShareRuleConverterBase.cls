@@ -30,6 +30,11 @@ public abstract inherited sharing class FormulaShareRuleConverterBase {
         mdRule.Access_For_Owner_Of_Teams_User_Is_On__c = rule.accessForOwnerOfTeamsUserIsOn;
         mdRule.Access_For_Team_Comembers__c = rule.accessForTeamComembers;
 
+        mdRule.Behaviour_Md_Match_Field_Mismatch__c = rule.behaviourMdMatchFieldMismatch;
+        mdRule.Behaviour_Share_To_Field_Mismatch__c = rule.behaviourShareToFieldMismatch;
+        mdRule.Fallback_Md_Match_Field_Mismatch__c = rule.fallbackMdMatchFieldMismatch;
+        mdRule.Fallback_Share_To_Field_Mismatch__c = rule.fallbackShareToFieldMismatch;
+
         return mdRule;
     }
 

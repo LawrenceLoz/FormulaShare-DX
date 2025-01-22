@@ -69,6 +69,12 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String accessForOwnerOfTeamsUserIsOn;
     @AuraEnabled public String accessForTeamComembers;
 
+    // Behaviours are 'Log Error' (default) 'Share With Default' and 'Do Not Share'
+    @AuraEnabled public String behaviourMdMatchFieldMismatch;
+    @AuraEnabled public String behaviourShareToFieldMismatch;
+    @AuraEnabled public String fallbackMdMatchFieldMismatch;
+    @AuraEnabled public String fallbackShareToFieldMismatch;
+
     // **************** Variables to support trigger assessment ************** //
 
     // Populates with the field which might be relevant to a sharing change for a trigger
@@ -135,6 +141,12 @@ public virtual inherited sharing class FormulaShareRule {
         // Object to share
         objectSharedAPIName = rule.Object_Shared__r.QualifiedApiName;
         objectSharedLabel = rule.Object_Shared__r.MasterLabel;
+
+        // Behaviour and defaulting for nulls and missing values
+        behaviourMdMatchFieldMismatch = rule.Behaviour_Md_Match_Field_Mismatch__c ?? 'Log Error';
+        behaviourShareToFieldMismatch = rule.Behaviour_Share_To_Field_Mismatch__c ?? 'Log Error';
+        fallbackMdMatchFieldMismatch = rule.Fallback_Md_Match_Field_Mismatch__c;
+        fallbackShareToFieldMismatch = rule.Fallback_Share_To_Field_Mismatch__c;
     }
 
     

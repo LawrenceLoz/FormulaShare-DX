@@ -18,7 +18,11 @@ public inherited sharing virtual class FormulaShareMetadataDMLRules extends Form
             namespacePrefix + 'Object_Shared__c',
             namespacePrefix + 'Share_With__c',
             namespacePrefix + 'Access_Level__c',
-            namespacePrefix + 'Sharing_Reason__c'
+            namespacePrefix + 'Sharing_Reason__c',
+            namespacePrefix + 'Behaviour_Md_Match_Field_Mismatch__c',
+            namespacePrefix + 'Behaviour_Share_To_Field_Mismatch__c',
+            namespacePrefix + 'Fallback_Md_Match_Field_Mismatch__c',
+            namespacePrefix + 'Fallback_Share_To_Field_Mismatch__c'
         };
 
         // Clear account related object sharing in case rule is modified from one sharing accounts

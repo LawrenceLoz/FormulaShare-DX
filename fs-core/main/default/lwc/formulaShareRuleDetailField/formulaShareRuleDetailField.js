@@ -46,6 +46,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.updateShareFieldType(null);
 
             this.fieldDetailsToggleText = this.viewFieldDetailsClosed;
+            this.viewAdvancedSettings = false;
+            this.advancedSettingsToggleText = 'Show advanced settings';
         }
         this._objectWithShareField = value;
         //console.log('Set object with share field: '+this._objectWithShareField);
@@ -106,6 +108,50 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
     _shareFieldType;
 
+    @api
+    get mdMappingType() {
+        return this._mdMappingType;
+    }
+    set mdMappingType(value) {
+        this._mdMappingType = value;
+    }
+    _mdMappingType;
+
+    @api mdMappingMatchField;
+//    @api controllingObjectApiName;    // Would be used in help text, but doesn't seem to be set after setting CMDT relationship for first time
+    @api controllingObjectSharedToFieldApiName;
+
+    // Set default if values are currently null
+    @api
+    get behaviourMdMatchFieldMismatch() {
+        return this._behaviourMdMatchFieldMismatch;
+    }
+    set behaviourMdMatchFieldMismatch(value) {
+        if(value) {
+            this._behaviourMdMatchFieldMismatch = value;
+        }
+        else {
+            this._behaviourMdMatchFieldMismatch = 'Log Error';
+        }
+    }
+    _behaviourMdMatchFieldMismatch;
+    @api
+    get behaviourShareToFieldMismatch() {
+        return this._behaviourShareToFieldMismatch;
+    }
+    set behaviourShareToFieldMismatch(value) {
+        if(value) {
+            this._behaviourShareToFieldMismatch = value;
+        }
+        else {
+            this._behaviourShareToFieldMismatch = 'Log Error';
+//            this.updateMismatchField('behaviourShareToFieldMismatch', this._behaviourShareToFieldMismatch);
+        }
+    }
+    _behaviourShareToFieldMismatch;
+
+    @api fallbackMdMatchFieldMismatch;
+    @api fallbackShareToFieldMismatch;
 
     fullFieldList = [];
     namesOnlyFieldList = [];
@@ -285,8 +331,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Public Groups':
                 //console.log('updated to public groups');
                 this.shareFieldTypeOptions = [
-                    { label: 'Name of public group or queue', value: 'Name' },
-                    { label: 'Id of public group or queue', value: 'Id' },
+                    { label: 'Name of Public Group or Queue', value: 'Name' },
+                    { label: 'Id of Public Group or Queue', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
                 break;
@@ -377,6 +423,81 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
     }
 
+    // Toggle display and labels for advanced settings
+    get showAdvancedSettingsToggle() {
+        return this.shareWith && this.shareField && this.shareFieldType;
+    }
+
+    viewAdvancedSettings;
+    advancedSettingsToggleText = 'Show advanced settings';
+    toggleAdvancedSettings() {
+        if(this.viewAdvancedSettings) {
+            this.viewAdvancedSettings = false;
+            this.advancedSettingsToggleText = 'Show advanced settings';
+        }
+        else {
+            this.setNoMatchBehaviourOptions();
+            this.viewAdvancedSettings = true;
+            this.advancedSettingsToggleText = 'Hide advanced settings';
+        }
+    }
+
+    userRoleOrGroup;
+    noMatchBehaviourOptions;
+    setNoMatchBehaviourOptions() {
+        switch (this._shareWith) {
+            case 'Users':
+            case 'Managers of Users':
+            case 'Users and Manager Subordinates':
+            case 'Default Account Teams of Users':
+            case 'Default Opportunity Teams of Users':
+                this.userRoleOrGroup = 'User';
+                break;
+            case 'Public Groups':
+                this.userRoleOrGroup = 'Public Group or Queue';
+                break;
+            case 'Roles':
+            case 'Roles and Internal Subordinates':
+            case 'Roles, Internal and Portal Subordinates':
+                this.userRoleOrGroup = 'Role'
+                break;
+            default:
+        }
+
+        this.noMatchBehaviourOptions = [
+            {
+                value: 'Log Error', 
+                label: 'Log an Error', 
+                description: 'Create a FormulaShare Record Log indicating that a match was expected but couldn\'t be found'
+            },
+            {
+                value: 'Share With Default',
+                label: 'Share to a Default '+this.userRoleOrGroup,
+                description: 'Add the '+this.shareFieldType+' of the '+this.userRoleOrGroup+' to receive access instead'
+            },
+            {
+                value: 'Do Not Share',
+                label: 'Take No Action',
+                description: 'Do not share this record but don\'t log this as an error',
+            }
+        ];
+    }
+
+    // Getters for UI display of advanced settings fields
+    get behaviourShareToFieldMismatchHelpText() {
+        return 'Action to be taken when \"'+this.shareField+'\" contains a value that does not match the '+this.shareFieldType+' of an active '+this.userRoleOrGroup;
+    }
+    get behaviourMdMatchFieldMismatchHelpText() {
+        return 'Action to be taken when \"'+this.controllingObjectSharedToFieldApiName+'\" contains a value, but there is no \"'+this.mdMappingType+'\" record with \"'+this.mdMappingMatchField+'\" matching this value';
+    }
+    get behaviourShareToFieldMismatchDefault() {
+        return this.behaviourShareToFieldMismatch === 'Share With Default';
+    }
+    get behaviourMdMatchFieldMismatchDefault() {
+        return this.behaviourMdMatchFieldMismatch === 'Share With Default';
+    }
+
+
     handleShareWithChange(event) {
         this._shareWith = event.detail.value;
         //console.log('share with changed: ',this._shareWith);
@@ -388,6 +509,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.updateshareWithFlags();
         this.setDefaultFieldType();
         this.setFieldOptions();
+        this.setNoMatchBehaviourOptions();
     }
 
     handleShareFieldChange(event) {
@@ -469,7 +591,33 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             detail: this.shareFieldType
         });
         this.dispatchEvent(evt);
+        this.setNoMatchBehaviourOptions();
     }
+
+    // Handlers for advanced settings changes
+    handleBehaviourShareToFieldMismatchUpdate(event) {
+        this.updateMismatchField('behaviourShareToFieldMismatch', event.detail.value);
+    }
+    handleFallbackShareToFieldMismatchUpdate(event) {
+        this.updateMismatchField('fallbackShareToFieldMismatch', event.detail.value);
+    }
+    handleBehaviourMdMatchFieldMismatchUpdate(event) {
+        this.updateMismatchField('behaviourMdMatchFieldMismatch', event.detail.value);
+    }
+    handleFallbackMdMatchFieldMismatchUpdate(event) {
+        this.updateMismatchField('fallbackMdMatchFieldMismatch', event.detail.value);
+    }
+    updateMismatchField(fieldName, value) {
+        //console.log('Updating mismatch: '+fieldName+' to '+value);
+        const evt = new CustomEvent('mismatchfieldchange', {
+            detail: {
+                fieldName: fieldName,
+                value: value
+            }
+        });
+        this.dispatchEvent(evt);
+    }
+
 
     @api
     checkValidity() {

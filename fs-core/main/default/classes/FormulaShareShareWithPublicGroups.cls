@@ -4,6 +4,10 @@ public inherited sharing class FormulaShareShareWithPublicGroups extends Formula
         this.service = service;
     }
 
+    public override Schema.SObjectType getSharedToType() {
+        return Schema.Group.getSObjectType();
+    }
+
     Set<String> groupNames = new Set<String>();
 
 
@@ -11,17 +15,34 @@ public inherited sharing class FormulaShareShareWithPublicGroups extends Formula
         if(recRule.rule.shareWith == 'Public Groups') {
 
             if(recRule.rule.controllingObjectSharedToFieldType == 'Id') {
-                if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, Schema.Group.getSObjectType())) {
+
+                if(FormulaShareIdUtilities.construct().isValidIdType(sharedToString, sharedToType)) {
                     service.updateShareMaps(recRule.recordToShare.Id, (Id) sharedToString, recRule.rule.accessLevel, recRule.rule);
                 }
                 else {
-                    String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
-                    service.captureEntityNotFound(recRule, logMessage);
+                    if(recRule.rule.behaviourShareToFieldMismatch == 'Share With Default') {
+                        
+                        if(FormulaShareIdUtilities.construct().isValidIdType(recRule.rule.fallbackShareToFieldMismatch, sharedToType)) {
+                            service.updateShareMaps(recRule.recordToShare.Id, (Id) recRule.rule.fallbackShareToFieldMismatch, recRule.rule.accessLevel, recRule.rule);
+                        }
+                        else {
+                            String logMessage = 'Expected default provided in rule to contain valid group id. Instead found: ' + recRule.rule.fallbackShareToFieldMismatch;
+                            service.captureEntityNotFound(recRule, logMessage);
+                        }
+                    }
+                    else if(recRule.rule.behaviourShareToFieldMismatch == 'Log Error') {
+                        String logMessage = 'Expected field to contain valid group id. Instead found: ' + sharedToString;
+                        service.captureEntityNotFound(recRule, logMessage);
+                    }
                 }
             }
+
+            // If not an ID we won't update share maps now - this is done later with assess()
+            // For now just collect all the names we'll need to query
             else if(recRule.rule.controllingObjectSharedToFieldType == 'Name') {
                 groupNames.add(sharedToString);
                 recordRules.add(recRule);
+                addShareToFallbackNameToCollection(groupNames, recRule);
             }
         }
     }
@@ -34,16 +55,27 @@ public inherited sharing class FormulaShareShareWithPublicGroups extends Formula
 
             for(FormulaShareService.RecordRule recRule : recordRules) {
     
-                // Update share maps or log only if group is set on record
-                if(recRule.sharedToString != null) {
-                    String sharedToName = (String) recRule.sharedToString;
-                    Id groupId = groupsMap.get(sharedToName);
-        
-                    if(groupId != null) {
-                        service.updateShareMaps(recRule.recordToShare.Id, groupId, recRule.rule.accessLevel, recRule.rule);
+                // Update share maps if a group is set on record
+                String sharedToName = (String) recRule.sharedToString;
+                Id groupId = groupsMap.get(sharedToName);
+    
+                if(groupId != null) {
+                    service.updateShareMaps(recRule.recordToShare.Id, groupId, recRule.rule.accessLevel, recRule.rule);
+                }
+    
+                // If no matching public group for this value. Log as exception (default), fallback or do nothing
+                else {
+                    if(recRule.rule.behaviourShareToFieldMismatch == 'Share With Default') {
+                        Id fallbackGroupId = groupsMap.get(recRule.rule.fallbackShareToFieldMismatch);
+                        if(fallbackGroupId != null) {
+                            service.updateShareMaps(recRule.recordToShare.Id, fallbackGroupId, recRule.rule.accessLevel, recRule.rule);                        
+                        }
+                        else {
+                            String logMessage = 'Rule default \''+recRule.rule.fallbackShareToFieldMismatch+'\' should correspond to an active public group, but no group was found with this name';
+                            service.captureEntityNotFound(recRule, logMessage);
+                        }
                     }
-        
-                    else {
+                    else if(recRule.rule.behaviourShareToFieldMismatch == 'Log Error') {
                         String logMessage = 'Field value \''+sharedToName+'\' should correspond to an active public group, but no group was found with this name';
                         service.captureEntityNotFound(recRule, logMessage);
                     }

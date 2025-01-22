@@ -142,6 +142,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.dispatchEvent(evt);
 
         this.rule.objectSharedAPIName = this.sharedObjectDetail.objectApiName;
+
         this.fireEventWithRule();
     }
 
@@ -216,6 +217,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
             this.rule.mdMappingMatchField = null;
             this.rule.mdMappingSharedToField = null;
             this.rule.controllingObjectSharedToFieldAPIName = null;
+            this.rule.behaviourMdMatchFieldMismatch = null;
+            this.rule.fallbackMdMatchFieldMismatch = null;            
         }
 
         this.selectedLocation = event.detail.selectedLocation;
@@ -286,6 +289,13 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
             return lastRel;
         }
+    }
+
+    handleMismatchFieldChange(event) {
+        this.rule[event.detail.fieldName] = event.detail.value;
+        //console.log('***Set property: '+event.detail.fieldName+' to: '+event.detail.value);
+        
+        this.fireEventWithRule();
     }
 
 

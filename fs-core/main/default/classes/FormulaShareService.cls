@@ -352,7 +352,12 @@ public inherited sharing class FormulaShareService {
 				System.debug('rule.controllingObjectSharedToFieldType: '+rule.controllingObjectSharedToFieldType);
 
 				for(FormulaShareShareWithBase shareWithClass: shareWithClasses) {
-					shareWithClass.checkAndAdd(sharedToString, recRule);
+					if(sharedToString != null) {
+						shareWithClass.checkAndAdd(sharedToString, recRule);
+					}
+					else {
+						System.debug('Null value in shared to field, no sharing applied');
+					}
 				}
 			}
 
@@ -420,7 +425,12 @@ public inherited sharing class FormulaShareService {
 					}
 					// FormulaShareException suggests share value can't be found for this record
 					catch(FormulaShareException e) {
-						captureEntityNotFound(recRule.recordToShare, recRule.rule, e.getMessage());
+						if(rule.behaviourShareToFieldMismatch == 'Share With Default') {
+							recRule.sharedToString = rule.fallbackShareToFieldMismatch;						
+						}
+						else if(rule.behaviourShareToFieldMismatch == 'Log Error') {
+							captureEntityNotFound(recRule.recordToShare, recRule.rule, e.getMessage());
+						}
 					}
 					// Other exceptions are likely to be query exceptions, so log and don't add this record rule
 					catch(Exception e) {
@@ -446,7 +456,6 @@ public inherited sharing class FormulaShareService {
 		system.debug('*** searching with this Id: ' + shareKey);
 		system.debug('*** full map keys: ' + mapToDelete.keySet() );
 		system.debug('*** full keyset: ' + existingShareKeys );
-		system.debug('result of search: ' + mapToDelete.get(shareKey));
 
 		// If we have a share already for this record, entity and reason...
 		if(mapToDelete.containsKey(shareKey)) {

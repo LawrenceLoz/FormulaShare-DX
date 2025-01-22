@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Behaviour_Share_To_Field_Mismatch__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Behaviour Share To Field Mismatch</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Log Error</fullName>
+                <default>true</default>
+                <label>Log Error</label>
+            </value>
+            <value>
+                <fullName>Share With Default</fullName>
+                <default>false</default>
+                <label>Share With Default</label>
+            </value>
+            <value>
+                <fullName>Do Not Share</fullName>
+                <default>false</default>
+                <label>Do Not Share</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

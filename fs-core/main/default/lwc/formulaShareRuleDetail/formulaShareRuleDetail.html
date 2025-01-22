@@ -72,7 +72,7 @@
             </div>
         </template>
         <!-- Line below can be added to monitor full JSON -->
-    <!-- Relationship detail: {ruleDetail} -->
+    <!-- Relationship detail: {ruleDetail}   -->
     </template>
 
     <template if:true={sharedObjectDetail}>
@@ -94,6 +94,14 @@
                     external-sharing-model={sharedObjectDetail.externalSharingModel}
                     share-field={shareField}
                     share-field-type={rule.controllingObjectSharedToFieldType}
+                    md-mapping-type={rule.mdMappingType}
+                    md-mapping-match-field={rule.mdMappingMatchField}
+                    controlling-object-shared-to-field-api-name={rule.controllingObjectSharedToFieldAPIName}
+                    behaviour-md-match-field-mismatch={rule.behaviourMdMatchFieldMismatch}
+                    behaviour-share-to-field-mismatch={rule.behaviourShareToFieldMismatch}
+                    fallback-md-match-field-mismatch={rule.fallbackMdMatchFieldMismatch}
+                    fallback-share-to-field-mismatch={rule.fallbackShareToFieldMismatch}
+                    onmismatchfieldchange={handleMismatchFieldChange}
                     onsharewithchange={handleShareWithChange}
                     onsharefieldchange={handleShareFieldChange}
                     onsharefieldtypechange={handleShareFieldTypeChange}>
