@@ -245,6 +245,104 @@
                 </c-formula-share-browse-field-contents>
             </div>
         </template>
+
+        <template lwc:if={showAdvancedSettingsToggle}>
+            <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium" 
+                style="text-align: right"
+                onclick={toggleAdvancedSettings}>
+                {advancedSettingsToggleText}
+            </div>
+        </template>
+
+        <template lwc:if={viewAdvancedSettings}>
+            <div class="slds-m-horizontal_medium slds-form-element slds-box">
+                <lightning-card  title="Action for non-matching records">
+
+                    <template lwc:if={mdMappingType}>
+                        <div class="slds-m-top_small">
+                            <label class="slds-form-element__label" for="behaviourMdMatchFieldMismatch">
+                                <abbr class="slds-required" title="required">*</abbr>
+                                If no matching Custom Metadata record
+                            </label>
+                            <lightning-helptext content={behaviourMdMatchFieldMismatchHelpText}></lightning-helptext>
+                        </div>
+        
+                        <div style="display: flex; justify-content: space-between; margin-left: auto;">
+        
+                            <div style="flex-grow: 1; flex-basis: 0; min-width: 0;">
+                                <lightning-combobox
+                                    id="behaviourMdMatchFieldMismatch"
+                                    name="behaviourMdMatchFieldMismatch"
+                                    variant="label-hidden"
+                                    options={noMatchBehaviourOptions}
+                                    value={behaviourMdMatchFieldMismatch}
+                                    onchange={handleBehaviourMdMatchFieldMismatchUpdate}
+                                    required>
+                                </lightning-combobox>
+                            </div>
+        
+                            <template lwc:if={behaviourMdMatchFieldMismatchDefault}>
+                                <div class="slds-p-top_xx-small slds-p-horizontal_small" style="text-align: center">
+                                    With {shareFieldType}
+                                </div>
+        
+                                <div style="flex-grow: 1; flex-basis: 0; min-width: 0;">
+                                    <lightning-input 
+                                        type="text" 
+                                        variant="label-hidden"
+                                        value={fallbackMdMatchFieldMismatch}
+                                        max-length="40"
+                                        onchange={handleFallbackMdMatchFieldMismatchUpdate}
+                                        required>
+                                    </lightning-input>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+
+                    <div class="slds-m-top_small">
+                        <label class="slds-form-element__label" for="behaviourShareToFieldMismatch">
+                            <abbr class="slds-required" title="required">*</abbr>
+                            If no matching {userRoleOrGroup}
+                        </label>
+                        <lightning-helptext content={behaviourShareToFieldMismatchHelpText}></lightning-helptext>
+                    </div>
+    
+                    <div style="display: flex; justify-content: space-between; margin-left: auto;">
+        
+                        <div style="flex-grow: 1; flex-basis: 0; min-width: 0;">
+                            <lightning-combobox
+                                id="behaviourShareToFieldMismatch"
+                                name="behaviourShareToFieldMismatch"
+                                variant="label-hidden"
+                                options={noMatchBehaviourOptions}
+                                value={behaviourShareToFieldMismatch}
+                                onchange={handleBehaviourShareToFieldMismatchUpdate}
+                                required>
+                            </lightning-combobox>
+                        </div>
+    
+                        <template lwc:if={behaviourShareToFieldMismatchDefault}>
+                            <div class="slds-p-top_xx-small slds-p-horizontal_small" style="text-align: center">
+                                With {shareFieldType}
+                            </div>
+    
+                            <div style="flex-grow: 1; flex-basis: 0; min-width: 0;">
+                                <lightning-input 
+                                    type="text" 
+                                    variant="label-hidden"
+                                    value={fallbackShareToFieldMismatch}
+                                    max-length="40"
+                                    onchange={handleFallbackShareToFieldMismatchUpdate}
+                                    required>
+                                </lightning-input>
+                            </div>
+                        </template>
+                    </div>                    
+                </lightning-card>
+            </div>
+        </template>
     
     </div>
 

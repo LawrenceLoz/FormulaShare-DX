@@ -40,6 +40,10 @@ public inherited sharing class FormulaShareMetadataDMLRulesAccount extends Formu
             namespacePrefix + 'Share_With__c',
             namespacePrefix + 'Access_Level__c',
             namespacePrefix + 'Sharing_Reason__c',
+            namespacePrefix + 'Behaviour_Md_Match_Field_Mismatch__c',
+            namespacePrefix + 'Behaviour_Share_To_Field_Mismatch__c',
+            namespacePrefix + 'Fallback_Md_Match_Field_Mismatch__c',
+            namespacePrefix + 'Fallback_Share_To_Field_Mismatch__c',
 
             // Only difference to FormulaShareMetadataDMLRules is that Contact, Case 
             // and Opp Access are set rather than cleared
@@ -53,6 +57,9 @@ public inherited sharing class FormulaShareMetadataDMLRulesAccount extends Formu
         this.fieldsToSetOrClear = new Set<String> {
             namespacePrefix + 'Shared_To_Field_Type__c',
             namespacePrefix + 'Shared_To__c',
+            namespacePrefix + 'Access_For_Team__c',
+            namespacePrefix + 'Access_For_Owner_Of_Teams_User_Is_On__c',
+            namespacePrefix + 'Access_For_Team_Comembers__c',
             namespacePrefix + 'Metadata_Mapping_Type__c',
             namespacePrefix + 'Metadata_Mapping_Match_Field__c',
             namespacePrefix + 'Metadata_Mapping_Shared_To_Field__c'
