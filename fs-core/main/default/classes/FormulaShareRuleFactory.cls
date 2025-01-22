@@ -185,6 +185,8 @@ public with sharing class FormulaShareRuleFactory {
 //        rule.pathToSharedToField = sharedToFieldApiName;
 //        rule.firstQueryStepApiName = sharedToFieldApiName;
         rule.active = true;
+        rule.behaviourMdMatchFieldMismatch = 'Log Error';
+        rule.behaviourShareToFieldMismatch = 'Log Error';
         return rule;
     }
     
