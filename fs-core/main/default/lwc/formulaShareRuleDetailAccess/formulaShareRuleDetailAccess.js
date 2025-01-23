@@ -3,6 +3,7 @@ import { refreshApex } from '@salesforce/apex';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getClassicDomain from '@salesforce/apex/FormulaShareLWCUtilities.getClassicDomain';
 import getSharingReasons from '@salesforce/apex/FormulaShareLWCUtilities.getSharingReasons';
+import getExistingRuleNameUsingSharingReasonName from '@salesforce/apex/FormulaShareLWCUtilities.getExistingRuleNameUsingSharingReasonName';
 
 export default class FormulaShareRuleDetailAccess extends LightningElement {
 
@@ -102,6 +103,7 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
     }
 
     @api isCustom;
+    @api ruleName;
     @api accessLevel;
     @api contactAccess;
     @api caseAccess;
@@ -277,8 +279,23 @@ export default class FormulaShareRuleDetailAccess extends LightningElement {
         }
     }
 
+    existingRuleNameUsingSharingReasonName;
     handleSharingReasonChange(event) {
-        this.updateSharingReason(event.detail.value);
+        let reasonsCmp = this.template.querySelector('lightning-combobox[id*="sharingReason"]'); // selects on id (name is not exposed in DOM)
+
+        getExistingRuleNameUsingSharingReasonName({ reasonName : event.detail.value, thisRulename : this.ruleName })
+        .then((otherRuleName) => {
+            if(otherRuleName) {
+                this.existingRuleNameUsingSharingReasonName = otherRuleName;
+                reasonsCmp.setCustomValidity("A sharing reason with this name is already used on the rule "+otherRuleName);
+            }
+            else {
+                this.existingRuleNameUsingSharingReasonName = null;
+                this.updateSharingReason(event.detail.value);
+                reasonsCmp.setCustomValidity("");
+            }
+            reasonsCmp.reportValidity();
+        });
     }
 
     updateSharingReason(value) {

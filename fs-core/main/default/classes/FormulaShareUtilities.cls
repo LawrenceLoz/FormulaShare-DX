@@ -546,6 +546,19 @@ public inherited sharing class FormulaShareUtilities {
 		return reasons;
 	}
 
+	public static String getExistingRuleNameUsingSharingReasonName(String reasonName, String thisRulename) {
+		Map<String,Object> bindParams = new Map<String,Object> {
+			'reasonName' => reasonName,
+			'thisRulename' => thisRulename
+		};
+		FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+		List<FormulaShare_Rule__mdt> rules = selector.getRulesWithSharingReason(bindParams);
+		if(!rules.isEmpty()) {
+			return rules[0].DeveloperName;
+		}
+		else return null;
+	}
+
 
 	private static Boolean contactSharingControlledByAccount;
 	public static Boolean isContactSharingControlledByAccount() {

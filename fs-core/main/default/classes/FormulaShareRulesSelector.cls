@@ -222,6 +222,15 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 		return ruleToReturn;
     }
 
+    public List<FormulaShare_Rule__mdt> getRulesWithSharingReason(Map<String,Object> bindParams) {
+        String query = 'SELECT DeveloperName FROM FormulaShare_Rule__mdt WHERE Sharing_Reason__c = :reasonName AND DeveloperName != :thisRuleName';
+        return Database.queryWithBinds(
+            query,
+            bindParams,
+            AccessLevel.SYSTEM_MODE
+        );
+    }
+
 
     protected List<FormulaShareRule> mapMetadataRulesToWrapper(List<FormulaShare_Rule__mdt> mdRules) {
         List<FormulaShareRule> rulesToReturn = new List<FormulaShareRule>();

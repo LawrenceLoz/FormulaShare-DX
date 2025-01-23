@@ -48,6 +48,11 @@ public with sharing class FormulaShareLWCUtilities {
     }
 
 	@AuraEnabled(cacheable=true)
+	public static String getExistingRuleNameUsingSharingReasonName(String reasonName, String thisRulename) {
+        return FormulaShareUtilities.getExistingRuleNameUsingSharingReasonName(reasonName, thisRulename);
+    }
+
+	@AuraEnabled(cacheable=true)
 	public static Boolean isContactSharingControlledByAccount() {
         return FormulaShareUtilities.isContactSharingControlledByAccount();
     }
