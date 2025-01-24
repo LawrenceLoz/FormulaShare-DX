@@ -100,6 +100,18 @@
 
                             </div>
 
+                            <template if:true={existingRuleNameUsingSharingReasonName}>
+                                <div class="slds-box slds-theme_shade slds-m-right_xx-large slds-m-vertical_x-small slds-float_right">
+                                    <div style="display:flex; align-items:center;">
+                                        <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                                        <div class="slds-m-left_medium">
+                                            Rules must use sharing reasons with unique names. Consider using a different sharing reason here,
+                                            or rename to make sure reason names are unique across all objects.
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
                             <template if:true={oneOrMoreReasons}>
                                 <div id="sharingReasonsHelp"
                                     class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small"
