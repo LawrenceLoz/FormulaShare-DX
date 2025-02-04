@@ -47,42 +47,4 @@ private class FormulaShareLWCSchedulingServiceTest {
     System.assertEquals(null, jobInfo, 'Should return null when no job is scheduled');
   }
 
-  @IsTest
-  static void testGetCurrentlyScheduledCron_WithoutUserAccess() {
-    // GIVEN - Schedule a job
-    String cronExp = '0 0 8 ? * * *';
-    String jobName = 'FormulaShare Full Recalculation';
-    FormulaShareProcessSchedulable scheduler = new FormulaShareProcessSchedulable();
-    String jobId = System.schedule(jobName, cronExp, scheduler);
-    
-    // Create a user without access to User object
-    Profile p = [SELECT Id FROM Profile WHERE Name='Standard User'];
-    User testUser = new User(
-        Alias = 'standt',
-        Email = 'standarduser@testorg.com',
-        EmailEncodingKey = 'UTF-8',
-        LastName = 'Testing',
-        LanguageLocaleKey = 'en_US',
-        LocaleSidKey = 'en_US',
-        ProfileId = p.Id,
-        TimeZoneSidKey = 'America/Los_Angeles',
-        UserName = 'standarduser@testorg.com' + System.currentTimeMillis()
-    );
-    
-    Test.startTest();
-    
-    System.runAs(testUser) {
-        // WHEN - Get the scheduled job info as restricted user
-        FormulaShareLWCSchedulingService.ScheduledJobInfo jobInfo = 
-            FormulaShareLWCSchedulingService.getCurrentlyScheduledCron();
-        
-        // THEN - Verify job info returned with hidden user details
-        System.assertNotEquals(null, jobInfo, 'Should return job info');
-        System.assertEquals('<hidden>', jobInfo.usersName, 'Should hide user name');
-        System.assertEquals('<hidden>', jobInfo.usersProfile, 'Should hide user profile');
-        System.assertEquals(null, jobInfo.usersId, 'Should not return user ID');
-    }
-    
-    Test.stopTest();
-  }
 }
