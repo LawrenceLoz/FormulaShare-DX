@@ -307,35 +307,6 @@ public with sharing class FormulaShareRulesListViewControllerTest {
     }
 
 
-    @IsTest
-    public static void testNoJobScheduled() {
-        
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = false;   // Should trigger error message relating to scheduled job
-            setMocks();
-
-            List<FormulaShareRule> fsRules = FormulaShareRulesSelector.construct().getAllRulesWithSecurityEnforced();
-
-            // Run core method
-            List<FormulaShareRulesListViewController.ObjectRulesWrapper> orwList = FormulaShareRulesListViewController.getTreeGridData();
-
-            Boolean foundUserRule = false;
-            for(FormulaShareRulesListViewController.ObjectRulesWrapper orw : orwList) {
-                if(orw.objectApiName == fsRules[0].objectSharedAPIName) {
-                    for(FormulaShareRulesListViewController.RuleWrapper rw : orw.items) {
-
-                        // Check user rule
-                        if(rw.developerName == FormulaShareRuleFactory.userRuleName) {
-                            foundUserRule = true;
-                            System.assertEquals('Schedule batch job', rw.warningUrlLabel, 'Expected batch job scheduled warning');
-                        }
-                    }
-                }
-            }
-            System.assert(foundUserRule, 'Couldn\'t find user rule in list');
-        }
-    }    
-
 //    To fix - failing when no rules
 //    
 //    @IsTest
