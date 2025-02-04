@@ -1,13 +1,11 @@
 import { LightningElement, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import flowTemplate from '@salesforce/resourceUrl/FlowTemplate';
 import getFlowVersionId from '@salesforce/apex/FormulaShareFlowController.getFlowVersionId';
 import getLicenseAllowance from '@salesforce/apex/FormulaSharePackageVerifier.getLicenseAllowance';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class FormulaShareRealTimeInfo extends NavigationMixin(LightningElement) {
     activeTab = 'trigger';
-    flowTemplateImage = flowTemplate;
     appExchangeUrl = 'https://appexchange.salesforce.com/appxListingDetail?listingId=a0N3A00000FR5TCUA1';
 
     @wire(getLicenseAllowance) 
