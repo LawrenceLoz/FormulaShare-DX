@@ -1,0 +1,122 @@
+<template>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    class="slds-modal__close"
+                    title="Close"
+                    icon-name="utility:close"
+                    icon-class="slds-button_icon-inverse"
+                    onclick={handleClose}>
+                </lightning-button-icon>
+                <h2 class="slds-text-heading_medium">Real-Time Sharing Options</h2>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-grid slds-gutters">
+                    <template if:true={isOpenSource}>
+                        <div class="slds-text-body_regular slds-p-left_x-small slds-align_absolute-center">
+                            <p>
+                                Calling FormulaShare from Record-Triggered Flows or triggers is supported in the free and subscription versions of the managed package version of FormulaShare. This is available to install from the <a href={appExchangeUrl} target="_blank">AppExchange</a>.
+                            </p>
+                        </div>
+                    </template>
+
+                    <template if:false={isOpenSource}>
+                        <div class="slds-col slds-size_1-of-2 slds-p-right_medium">
+                            <div class="slds-text-body_regular slds-p-left_x-small">
+                                <h3 class="slds-text-heading_small slds-p-bottom_small">Using Record-Triggered Flow</h3>
+                                <p class="slds-p-bottom_small">
+                                    The fastest way to implement real-time sharing is using a Record-Triggered Flow:
+                                </p>
+                                <ul class="slds-list_dotted slds-p-left_medium slds-p-bottom_medium">
+                                    <li>Click below to open the flow template</li>
+                                    <li>Update the Start element to process the shared object, or a child object</li>
+                                    <li>Open <i>Call FormulaShare</i> action and select the shared object</li>
+                                    <li>Save as a new flow and activate!</li>
+                                </ul>
+
+                                <p class="slds-p-bottom_small">
+                                    Rules will be applied for new and updated records.
+                                     Repeat steps for each of the triggering and shared objects in your rule.
+                                </p>
+                                <p>
+                                     For more info, see the <a href="https://cloudsundial.com/formulashare-assess-from-record-triggered-flow" target="_blank">Record-Triggered Flows Overview</a>.
+                                </p>
+                                <div class="slds-align_absolute-center slds-p-top_large">
+                                    <lightning-button 
+                                        label="Open Flow Template" 
+                                        variant="brand"
+                                        onclick={navigateToFlows}>
+                                    </lightning-button>
+                                </div>
+                                <p class="slds-text-body_small slds-p-top_large">
+                                    Note: Real-time sharing complements scheduled batch jobs - don't forget to maintain your scheduled 
+                                    jobs to handle edge cases and clean up sharing records.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="slds-border_left"></div>
+
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="slds-text-body_regular slds-p-left_small slds-p-right_xx-small">
+                                <h3 class="slds-text-heading_small slds-p-bottom_small">Using Apex</h3>
+                                <p class="slds-p-bottom_small">
+                                    For more control or complex scenarios, you can use an Apex trigger:
+                                </p>
+                                <ul class="slds-list_dotted slds-p-left_medium slds-p-bottom_medium">
+                                    <li>Full programmatic control over when sharing is evaluated</li>
+                                    <li>Can be combined with existing triggers</li>
+                                    <li>Supports after insert, update, delete and undelete trigger contexts</li>
+                                </ul>
+
+                                <p class="slds-text-heading_small slds-p-bottom_small">Sample Code</p>
+                                <lightning-tabset variant="scoped">
+                                    <lightning-tab label="Trigger" value="trigger" onactive={handleTabChange}>
+                                        <div class="slds-m-bottom_medium">
+                                            <div class="slds-grid slds-grid_align-end">
+                                                <lightning-button-icon
+                                                    icon-name="utility:copy_to_clipboard"
+                                                    variant="bare"
+                                                    alternative-text="Copy code"
+                                                    title="Copy code"
+                                                    class="slds-p-around_xx-small"
+                                                    data-code="trigger"
+                                                    onclick={handleCopyCode}>
+                                                </lightning-button-icon>
+                                            </div>
+                                            <pre><code class="slds-text-font_monospace slds-p-horizontal_small">{sampleTriggerCode}</code></pre>
+                                        </div>
+                                    </lightning-tab>
+                                    <lightning-tab label="Test Class" value="test" onactive={handleTabChange}>
+                                        <div class="slds-m-bottom_medium">
+                                            <div class="slds-grid slds-grid_align-end">
+                                                <lightning-button-icon
+                                                    icon-name="utility:copy_to_clipboard"
+                                                    variant="bare"
+                                                    alternative-text="Copy code"
+                                                    title="Copy code"
+                                                    class="slds-p-around_xx-small"
+                                                    data-code="test"
+                                                    onclick={handleCopyCode}>
+                                                </lightning-button-icon>
+                                            </div>
+                                            <pre><code class="slds-text-font_monospace slds-text-body_small">{sampleTestCode}</code></pre>
+                                        </div>
+                                    </lightning-tab>
+                                </lightning-tabset>
+                                <p class="slds-text-body_small slds-p-top_small">
+                                    For even more control, specific records can be passed to FormulaShare for reassessment.
+                                    Check <a href="https://cloudsundial.com/formulashare-via-flow-or-apex" target="_blank">Request via Flow or Apex</a> to find out more.
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template> 

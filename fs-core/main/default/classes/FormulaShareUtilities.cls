@@ -25,37 +25,25 @@ public inherited sharing class FormulaShareUtilities {
 	// and if so then assume we're operating within a NS, otherwise assume we're not in a namespace.
 	// Approach allows same version of FormulaShare to be run within a namespace and outside of
 	// a namespace (e.g. metadata deployment to sandbox for testing)
-    static String namespacePrefix = '';
-	static Boolean namespaceSet = false;
     public static String getNamespacePrefix() {
+		String namespaceNoUnderscores = getNamespaceNoUnderscores();
+		return namespaceNoUnderscores == '' ? '' : namespaceNoUnderscores + '__';
+    }
+
+    static String namespaceNoUnderscores = '';
+	static Boolean namespaceSet = false;
+	public static String getNamespaceNoUnderscores() {
         if(!namespaceSet) {
 
 			// Refactored to avoid query
 			String uowClassName = FormulaShareUnitOfWorkDML.class.getName();
 			if(uowClassName.contains('.')) {
-				namespacePrefix = uowClassName.split('\\.')[0] + '__';	// Escape required
+				namespaceNoUnderscores = uowClassName.split('\\.')[0];	// Escape required
 			}
-
-			// Previous approach (replaced to avoid need to query system object)
-			// This approach would have allowed for separate installed packages with the same class names
-			// However this isn't required with new Lite/Enterprise/Unlimited approach
-			//
-//			String expectedNamespace = FormulaShareNamespaceInfo.getExpectedNamespace();
-//			if(expectedNamespace != null) {
-//				List<ApexClass> nsClassList = [
-//					SELECT Id from ApexClass 
-//					WHERE Name = :classInPackage 
-//					AND NamespacePrefix = :expectedNamespace
-//					WITH SECURITY_ENFORCED];
-//				if(!nsClassList.isEmpty()) {
-//					namespacePrefix = expectedNamespace + '__';
-//				}
-//			}
-
             namespaceSet = true;
         }
-        return namespacePrefix;
-    }
+        return namespaceNoUnderscores;
+	}
 
 	// Cache global describe for performance
 	public static Map<String, Schema.SObjectType> globalDescribe {

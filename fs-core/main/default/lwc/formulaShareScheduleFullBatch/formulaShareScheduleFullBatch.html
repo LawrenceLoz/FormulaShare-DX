@@ -1,0 +1,66 @@
+<template>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    class="slds-modal__close"
+                    title="Close"
+                    icon-name="utility:close"
+                    icon-class="slds-button_icon-inverse"
+                    onclick={handleClose}>
+                </lightning-button-icon>
+                <h2 class="slds-text-heading_medium">Schedule Full Recalculation</h2>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-grid slds-gutters">
+                    <!-- Left Column - Info -->
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-p-right_medium">
+                            <div class="slds-align_absolute-center slds-p-bottom_medium">
+                                <img src={aboutCloudLogo} alt="FormulaShare" class="logo"/>
+                            </div>
+
+                            <div class="slds-text-body_regular">
+                                <p class="slds-p-bottom_small">
+                                    The Full Recalculation batch checks every record in each shared object against your rules, and updates sharing if needed:
+                                </p>
+                                <ul class="slds-list_dotted slds-p-left_medium slds-p-bottom_medium">
+                                    <li>Running once per day is recommended for most orgs</li>
+                                    <li>For shared objects with hundreds of thousands of records or more, use <a href="https://cloudsundial.com/targeted-calculation-jobs" target="_blank">Targeted Calculation Jobs</a> 
+                                        <template if:true={licence.data}>
+                                            <template if:false={licence.data.enableTargetedCalculationJobs}>
+                                                &nbsp;(available in <a href="https://cloudsundial.com/formulashare-versions" target="_blank">FormulaShare Enterprise</a>)
+                                            </template>
+                                        </template>
+                                        &nbsp;to assess a subset of records with each run</li>
+                                    <li>Need faster sharing too? Apply your rules in real time!
+                                        Review <a href="https://cloudsundial.com/formulashare-sharing-in-real-time" target="_blank">available options</a> or
+                                        go ahead and create a <a href={flowsUrl} target="_blank">Record-Triggered Flow</a> from the FormulaShare flow template.</li>
+                                </ul>
+                                <p class="slds-p-bottom_small">
+                                    Even with real time sharing, batch jobs are still needed 
+                                    to <a href="https://cloudsundial.com/formulashare-transaction-safe-full-assessment" target="_blank">cover some edge cases</a> and 
+                                    remove older log records. Jobs should be scheduled by a user with Modify All on shared objects, permissions to 
+                                    fields involved in rules, and the FormulaShareAdmin permission set assigned.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vertical Separator -->
+                    <div class="slds-border_left"></div>
+
+                    <!-- Right Column - Scheduler -->
+                    <div class="slds-col slds-size_1-of-2">
+                        <c-formula-share-lwc-scheduler
+                            onrefreshview={handleRefreshView}>
+                        </c-formula-share-lwc-scheduler>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template> 
