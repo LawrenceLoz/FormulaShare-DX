@@ -430,19 +430,8 @@ public with sharing class FormulaShareRulesListViewController {
                 recordFailure = true;
             }
 
-            // If job isn't scheduled, set icon and link
-            warningUrlLabel = '';
-            if(!FormulaShareAsyncApexJobSelector.isFullBatchScheduled()) {
-                warningIcon = warningTriangle;
-                warningUrlLabel = 'Schedule batch job';
-                warningTooltip = 'The batch job must be scheduled for rules to apply correctly. Click for more details';
-                String domainName = FormulaShareLWCUtilities.getLightningDomain();
-                String apexClassesSetup = domainName + '/lightning/setup/ApexClasses/home';
-                warningUrl = apexClassesSetup;
-            }
-
             // If either trigger or batch failure, provide link to filtered report
-            else if(recordFailure || batchFailure) {
+            if(recordFailure || batchFailure) {
 
                 // Set text depending on what's failed
 

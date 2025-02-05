@@ -1,0 +1,86 @@
+<template>
+  <div class="slds-p-around_medium">
+    <template if:true={loading}>
+      <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+
+    <div class="slds-p-bottom_small">
+      <h2 class="slds-text-heading_small slds-p-bottom_small">Currently Scheduled Job</h2>
+      <template if:true={currentCronAsTime}>
+        <lightning-layout vertical-align="start" class="slds-p-bottom_small">
+          <lightning-layout-item>
+            <lightning-layout multiple-rows>
+              <lightning-layout-item size="12">
+                {scheduleDescPrefix}
+                <template if:true={scheduleDescDetail}>
+                  &nbsp;<b>{scheduleDescDetail}</b>
+                </template>
+              </lightning-layout-item>
+              <template if:true={nextRunTime}>
+                <lightning-layout-item size="12" class="slds-p-top_xx-small">
+                  Next run: <b>{nextRunTime}</b>
+                </lightning-layout-item>
+              </template>
+              <template if:true={currentCronTrigger.usersName}>
+                <lightning-layout-item size="12" class="slds-p-top_xx-small">
+                  Runs as: <b>{currentCronTrigger.usersName}</b> ({currentCronTrigger.usersProfile})
+                </lightning-layout-item>
+              </template>
+            </lightning-layout>
+          </lightning-layout-item>
+        </lightning-layout>
+        <lightning-button label="Cancel Job" name="Delete Job" onclick={deleteJob}></lightning-button>
+      </template>
+      <template if:false={currentCronAsTime}>
+        <p>No job is currently scheduled.</p>
+      </template>
+    </div>
+
+    <div class="slds-border_top slds-m-vertical_medium"></div>
+
+    <div class="slds-p-top_x-small">
+      <h2 class="slds-text-heading_small slds-p-bottom_small">{scheduleLabel}</h2>
+
+      <lightning-radio-group 
+        name="scheduleType"
+        label="Schedule Type"
+        options={scheduleOptions}
+        value={scheduleType}
+        type="button"
+        variant="label-hidden"
+        onchange={handleScheduleTypeChange}
+        required
+        class="slds-p-bottom_small">
+      </lightning-radio-group>
+      
+      <template if:true={showDaySelection}>
+        <div class="slds-form-element slds-p-bottom_small">
+          <div class="slds-form-element__control">
+            <div class="slds-grid slds-grid_vertical">
+              <lightning-input type="checkbox" label="Monday" name="monday" checked={mondaySelected} data-day="1" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Tuesday" name="tuesday" checked={tuesdaySelected} data-day="2" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Wednesday" name="wednesday" checked={wednesdaySelected} data-day="3" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Thursday" name="thursday" checked={thursdaySelected} data-day="4" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Friday" name="friday" checked={fridaySelected} data-day="5" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Saturday" name="saturday" checked={saturdaySelected} data-day="6" onchange={handleDayChange}></lightning-input>
+              <lightning-input type="checkbox" label="Sunday" name="sunday" checked={sundaySelected} data-day="0" onchange={handleDayChange}></lightning-input>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <lightning-input 
+        class="slds-p-bottom_medium" 
+        type="time" 
+        name="time" 
+        label="Full Recalculation Starts At" 
+        required
+        onchange={handleTimeChange} 
+        value={currentCronAsTime}>
+      </lightning-input>
+
+      <lightning-button label={scheduleLabel} name="Reschedule Job" onclick={rescheduleApexJob}></lightning-button>
+    </div>
+    
+  </div>
+</template>

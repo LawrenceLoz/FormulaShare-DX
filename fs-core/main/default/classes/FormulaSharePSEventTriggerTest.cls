@@ -12,7 +12,7 @@ public with sharing class FormulaSharePSEventTriggerTest {
 
         System.runAs(FormulaShareTestUtils.getAdmin()) {
             // Simulate a batch being scheduled
-            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
+            FormulaShareAsyncApexJobSelector.isFullOrTargetedBatchScheduled = true;
 
             // Simulate share being inserted by rule
             FormulaShare_Log__c log = FormulaShareTestDataFactory.getBatchLog();
@@ -79,7 +79,7 @@ public with sharing class FormulaSharePSEventTriggerTest {
             String ruleName = 'Test_rule';
 
             // Simulate a batch being scheduled
-            FormulaShareAsyncApexJobSelector.isFullBatchScheduled = true;
+            FormulaShareAsyncApexJobSelector.isFullOrTargetedBatchScheduled = true;
 
             // Insert existing trigger log so we can check this is updated
             FormulaShare_Metrics__c triggerMetrics = FormulaShareTestDataFactory.getTriggerMetricsForRuleAndBatch(ruleName, null);

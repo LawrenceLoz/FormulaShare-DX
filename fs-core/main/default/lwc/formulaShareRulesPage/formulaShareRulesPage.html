@@ -1,7 +1,9 @@
 <template>
 
-  <div class="slds-page-header">
-    <div class="slds-page-header__row">
+  <div class="slds-page-header"
+    data-element-id="pageHeader">
+    <div class="slds-page-header__row"
+    data-element-id="pageHeaderRow">
       <div class="slds-page-header__col-title">
         <div class="slds-media">
           <span class="highlights-icon-container slds-avatar slds-m-right_small icon">
@@ -23,29 +25,42 @@
           </div>
         </div>
       </div>
-      <div class="slds-page-header__col-actions">
-        <div class="slds-page-header__controls">
+      <div class="slds-page-header__col-actions"
+      data-element-id="pageHeaderColActions">
+        <div class="slds-page-header__controls"
+        data-element-id="pageHeaderControls">
           <div class="slds-page-header__control">
             <ul class="slds-button-group">
-
               <lightning-button
-                data-name="helpAndAbout"
-                variant="base" 
-                label="Help & About" 
-                onclick={handleAbout}>
+                  variant="base"
+                  label="About"
+                  onclick={handleAbout}
+                  class="slds-p-left_x-small">
               </lightning-button>
-
+              
               <template if:false={rulesNotSetUp}>
-                <lightning-button
-                  data-name="newRule"
-                  class="slds-p-left_x-small" 
-                  variant="neutral" 
-                  label="New Rule"
-                  onclick={handleNewRule}
-                  disabled={disableNewRule}>
-                </lightning-button>
-              </template>
+                <lightning-button-group class="slds-p-left_x-small">
+                  <lightning-button
+                      variant="neutral"
+                      label="New Rule"
+                      onclick={handleNewRule}
+                      disabled={disableNewRule}>
+                  </lightning-button>
 
+                  <template if:true={showBatchAndFlowButtons}>
+                    <lightning-button
+                        variant="neutral"
+                        label="Manage Batch"
+                        onclick={handleOpenScheduleBatch}>
+                    </lightning-button>
+                    <lightning-button
+                        variant="neutral"
+                        label="Share in Real Time"
+                        onclick={handleOpenRealTimeInfo}>
+                    </lightning-button>
+                  </template>
+                </lightning-button-group>
+              </template>
             </ul>
           </div>
         </div>
@@ -55,8 +70,17 @@
   </div>
 
   <c-formula-share-rules-page-subheader
+    no-rules={noRules}
     onenabledisablenewrule={handleEnableDisableNewRule}>
   </c-formula-share-rules-page-subheader>
+
+
+  <template if:true={oneRuleAndNoBatch}>
+    <c-formula-share-schedule-batch-illustration
+        onopenschedulebatch={handleOpenScheduleBatch}
+        onopenrealtimeinfo={handleOpenRealTimeInfo}>
+    </c-formula-share-schedule-batch-illustration>
+  </template>
 
   <c-formula-share-rules-list-view 
     onruleload={handleRulesLoad}
@@ -79,5 +103,18 @@
   <template if:true={openNewRuleModal}>
     <c-formula-share-rule-create onclose={closeNewRuleModal}>
     </c-formula-share-rule-create>
+  </template>
+
+  <template if:true={showScheduleBatchModal}>
+    <c-formula-share-schedule-full-batch
+      onrefreshview={handleRefreshView}
+      onclose={handleCloseScheduleBatch}>
+    </c-formula-share-schedule-full-batch>
+  </template>
+
+  <template if:true={showRealTimeInfo}>
+    <c-formula-share-real-time-info
+        onclose={handleCloseRealTimeInfo}>
+    </c-formula-share-real-time-info>
   </template>
 </template>

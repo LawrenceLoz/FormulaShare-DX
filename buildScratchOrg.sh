@@ -18,7 +18,7 @@ day=$(date +%d)
 orgName="${day}${nameOfMonth}FS"
 echo Username for default org: ${orgName}
 
-sf force org create --definitionfile config/project-scratch-def.json --setalias ${orgName} --setdefaultusername
+sf org create scratch -f config/project-scratch-def.json -a ${orgName} --set-default
 echo Created org with default username ${orgName}
 node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required
