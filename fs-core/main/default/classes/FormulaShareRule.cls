@@ -184,9 +184,9 @@ public virtual inherited sharing class FormulaShareRule {
         }
     }
 
-    // Returns list of all objects where trigger assessment could result in changes to shared object sharing
-    public virtual List<String> getTriggeringObectNames() {
-        return new List<String>();
+    // Overriden in FormulaShareRuleAncestor, FormulaShareRuleDescendant and FormulaShareRuleStandard
+    public virtual Map<String,String> getTriggeringObjects() {
+        return new Map<String,String>();
     }
 
     // Indicates wheter related records are needed in all circumstances to assess sharing
