@@ -34,7 +34,7 @@ public virtual inherited sharing class FormulaShareRuleStandard extends FormulaS
         pathFromSharedObject = controllingObjectSharedToFieldAPIName;
     }
 
-    public virtual override List<String> getTriggeringObectNames() {
-        return new List<String> {objectSharedAPIName};
+    public virtual override Map<String,String> getTriggeringObjects() {
+        return new Map<String,String> {objectSharedAPIName => objectSharedLabel};
     }
 }
