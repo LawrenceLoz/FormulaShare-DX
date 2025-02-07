@@ -394,7 +394,7 @@ public inherited sharing class FormulaShareUtilities {
 					}
 				}
 			}
-			when 'Contact', 'Lead', 'Individual' {
+			when 'Contact', 'Lead', 'Individual', 'Asset' {
 				switch on fieldName.left(5) {
 					// Exclude compound address fields
 					when 'Maili', 'Other' {
