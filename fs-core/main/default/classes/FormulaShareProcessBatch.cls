@@ -52,7 +52,7 @@ public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Da
 			this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, contextDetail, rulesForType);
 			
 			// Continue only if object settings allow processing for full batch
-			if(batchService.processingAllowed()) {
+			if(batchService.processingAllowed() || contextDetail == 'Manually Initiated Batch') {
 				
 				// Get query locator
 				ql = FormulaShareService.getAllSharedObjectsLocator(typeInThisBatch);

@@ -141,6 +141,30 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 		return rulesToReturn;
     }
 
+    // Restricted selectors - used when only a subset of rules have been requested in apex/flow or triggers
+    public List<FormulaShareRule> getSpecificRulesSharingObject(Map<String,Object> bindParams) {
+        String condition = 'Object_Shared__r.QualifiedApiName = :objectName AND DeveloperName IN :ruleNames';
+        String query = getQueryWithCondition(condition);
+        List<FormulaShare_Rule__mdt> rules = Database.queryWithBinds(
+            query,
+            bindParams,
+            AccessLevel.SYSTEM_MODE
+        );
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+		return rulesToReturn;
+    }
+    public List<FormulaShareRule> getRulesExceptSpecificRulesSharingObject(Map<String,Object> bindParams) {
+        String condition = 'Object_Shared__r.QualifiedApiName = :objectName AND DeveloperName NOT IN :ruleNames';
+        String query = getQueryWithCondition(condition);
+        List<FormulaShare_Rule__mdt> rules = Database.queryWithBinds(
+            query,
+            bindParams,
+            AccessLevel.SYSTEM_MODE
+        );
+		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
+		return rulesToReturn;        
+    }
+
 
     // Implementation is simple in the base class and overriden for related object sharing
     public virtual List<FormulaShareRule> getStandardAndAncestorRulesSharingObject(String objectName) {
