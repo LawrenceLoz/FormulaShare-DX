@@ -47,7 +47,7 @@ public abstract inherited sharing class FormulaShareSObjectsRetrievalServiceBase
         List<SObject> sharedRecords = new List<SObject>(); // Augmented with related fields if needed
 
         // If needed, requery shared records to get extra lookups
-        if(requery) {
+        if(requery && !rawSharedRecords.isEmpty()) {
 
             Set<Id> sharedObjIdSet = new Set<Id> (new Map<Id,SObject>(rawSharedRecords).keySet());
     
