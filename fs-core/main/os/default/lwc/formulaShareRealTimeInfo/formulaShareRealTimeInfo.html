@@ -1,0 +1,29 @@
+<template>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    class="slds-modal__close"
+                    title="Close"
+                    icon-name="utility:close"
+                    icon-class="slds-button_icon-inverse"
+                    onclick={handleClose}>
+                </lightning-button-icon>
+                <h2 class="slds-text-heading_medium">Real-Time Sharing Options</h2>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-text-body_regular slds-p-left_x-small slds-align_absolute-center">
+                        <p>
+                            Calling FormulaShare from Record-Triggered Flows or triggers is supported in the free 
+                            and subscription versions of the managed package version of FormulaShare. 
+                            This is available to install from the <a href={appExchangeUrl} target="_blank">AppExchange</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

@@ -13,8 +13,19 @@ public with sharing class FormulaShareShareWithRolesTest {
         return recRule;
     }
 
+    @TestSetup
+    static void createTestData() {
+        UserRole testRole = new UserRole(
+            Name = 'Test Role',
+            DeveloperName = 'Test_Role'
+        );
+        insert testRole;
+    }
+
+
     private static UserRole getValidRole() {
-        return [SELECT Id, DeveloperName FROM UserRole LIMIT 1];
+        UserRole existingRole = [SELECT Id, DeveloperName FROM UserRole WHERE DeveloperName = 'Test_Role' LIMIT 1][0];
+        return existingRole;
     }
     
     private static Id getSharedToArgumentFromUpdateShareMaps(FormulaShareService serviceMock) {

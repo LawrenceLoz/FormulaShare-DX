@@ -431,7 +431,7 @@ public with sharing class FormulaShareRulesListViewController {
             }
 
             // If either trigger or batch failure, provide link to filtered report
-            else if(recordFailure || batchFailure) {
+            if(recordFailure || batchFailure) {
 
                 // Set text depending on what's failed
 
