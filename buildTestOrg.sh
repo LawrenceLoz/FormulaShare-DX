@@ -10,7 +10,7 @@
 orgName=TestData
 echo Username for org: ${orgName}
 
-call sf force org create --definitionfile config/project-scratch-def.json --setalias ${orgName} --durationdays 30
+call sf org create scratch -f config/project-scratch-def.json -a ${orgName} --duration-days 30
 echo Created org with username ${orgName}
 node scripts/appendNamespaceToSampleMD.js
 echo Checked for namespace and appended to custom metadata if required

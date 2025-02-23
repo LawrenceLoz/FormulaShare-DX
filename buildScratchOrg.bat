@@ -31,7 +31,7 @@ if not "%namespace%" == "" (
     echo Appended namespace to custom metadata if required
 )
 
-call sf force org create --definitionfile config/project-scratch-def.json --setalias %orgName% --setdefaultusername
+call sf org create scratch -f config/project-scratch-def.json -a %orgName% --set-default
 echo Created org with default username %orgName%
 call sf project deploy start
 echo Pushed source
