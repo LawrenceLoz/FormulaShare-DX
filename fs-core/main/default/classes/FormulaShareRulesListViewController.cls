@@ -132,9 +132,16 @@ public with sharing class FormulaShareRulesListViewController {
             FormulaShare_Metrics__c targetedJobMetrics = metricsMap.get(rw.developerName + FormulaShareProcessedShareEventService.targetedJobContext);
 
             if(batchMetrics == null && targetedJobMetrics == null) {
-                rw.lastCalcStatus = 'Pending';
-                rw.iconName = 'standard:today';
-                rw.iconAlt = 'Pending';
+                if(rw.active) {
+                    rw.lastCalcStatus = 'Pending';
+                    rw.iconName = 'standard:today';
+                    rw.iconAlt = 'Pending';
+                }
+                else {
+                    rw.lastCalcStatus = 'Inactive';
+                    rw.iconName = 'standard:first_non_empty';
+                    rw.iconAlt = 'Inactive';
+                }
             }
 
             else {
@@ -156,9 +163,16 @@ public with sharing class FormulaShareRulesListViewController {
                     rw.lastCalcStatus = latestMetrics.Processing_Finished__c.format();
                 }
                 else if(latestMetrics.Processing_Started__c == null) {
-                    rw.lastCalcStatus = 'Pending';
-                    rw.iconName = 'standard:today';
-                    rw.iconAlt = 'Pending';
+                    if(rw.active) {
+                        rw.lastCalcStatus = 'Pending';
+                        rw.iconName = 'standard:today';
+                        rw.iconAlt = 'Pending';
+                    }
+                    else {
+                        rw.lastCalcStatus = 'Inactive';
+                        rw.iconName = 'standard:first_non_empty';
+                        rw.iconAlt = 'Inactive';
+                    }
                 }
                 else {
                     rw.lastCalcStatus = 'Processing...';
