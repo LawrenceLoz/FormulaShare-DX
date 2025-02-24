@@ -19,9 +19,24 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
         // Add shared object, shares wtih and shared to field
         this.columns = [
-            {type: 'text'
-                , fieldName: 'tableLabel'
+            {
+                type: 'treeGridName',
+                fieldName: 'sectionLabel',
+                initialWidth: 1,
+                typeAttributes: {
+                    isParent: { fieldName: 'isParentRow' }
+                }
+            },
+            {   type: 'button'
+                , fieldName: 'detailLabel'
                 , label: 'Object and Rule'
+                , initialWidth: 330
+                , typeAttributes: {
+                    name: 'ruleName'
+                    , title: {fieldName: 'detailLabel'}
+                    , label: {fieldName: 'detailLabel'}
+                    , variant: 'base'
+                }
                 , cellAttributes: {class: {fieldName: 'sharedObjectClass'} }
             },
             {type: 'text'
@@ -51,11 +66,13 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             {type: 'text'
                 , fieldName: 'lastCalcStatus'
                 , label: 'Last Batch Assessment'
+                , initialWidth: 180
                 , cellAttributes: {iconName: {fieldName: 'iconName'}, iconAlternativeText: {fieldName: 'iconAlt'} }
             },
             {type: 'number'
                 , fieldName: 'noSharesApplied'
                 , label:'Records Shared'
+                , initialWidth: 140
             }
         );
 
@@ -119,6 +136,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             {type: 'boolean'
                 , fieldName: 'active'
                 , label: 'Active'
+                , initialWidth: 60
             },
             {type: 'action'
                 , typeAttributes: {rowActions: this.getRowActions} 
@@ -163,6 +181,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                     }
 
                     this.processingLoad = false;
+                    
                 })
                 .catch(error => {
                     this.showError(error, 'Error checking for related object support');
@@ -338,9 +357,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             });
 
         // If click is on a schedule warning button, toggle the modal
-        if(event.detail.action.name === 'scheduleWarning') {
-            this.doOpenScheduleModal();
-        }
+//        if(event.detail.action.name === 'scheduleWarning') {
+//            this.doOpenScheduleModal();
+//        }
 
         const actionName = event.detail.action.name;
         const row = event.detail.row;
@@ -352,6 +371,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.submitForRecalc(row);
                 break;
             case 'edit':
+                this.editRule(row);
+                break;
+            case 'ruleName':
                 this.editRule(row);
                 break;
             case 'activate':
