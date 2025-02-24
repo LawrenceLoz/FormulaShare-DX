@@ -68,6 +68,7 @@ public with sharing class FormulaShareRulesListViewController {
             rw.developerName = rule.developerName;
             rw.key = 'rule|' + rule.developerName;
             rw.tableLabel = rule.label;
+            rw.detailLabel = rw.tableLabel;
             rw.label = rule.label;
             rw.objectLabel = rule.objectSharedLabel;
             rw.shareWith = rule.shareWith;
@@ -198,11 +199,12 @@ public with sharing class FormulaShareRulesListViewController {
 
             String objectLabel = objectNameToLabelMap.get(objectName);
             orw.tableLabel = objectLabel + ' (' + rwList.size() + ')';
+            orw.sectionLabel = orw.tableLabel;
             orw.key = 'object|'+objectName;
             orw.items = rwList;
             system.debug('rwList'+ rwList);
             orw.objectApiName = objectName;
-            orw.sharedObjectClass = 'slds-tree__item slds-text-title_caps';
+//            orw.sharedObjectClass = 'slds-border_top slds-hidden';
             orwList.add(orw);
         }
 
@@ -234,6 +236,8 @@ public with sharing class FormulaShareRulesListViewController {
         @AuraEnabled
         public String tableLabel {get;set;}
         @AuraEnabled
+        public String sectionLabel {get;set;}
+        @AuraEnabled
         public Boolean isParentRow = true;
         @AuraEnabled
         public String objectApiName {get;set;}
@@ -241,8 +245,6 @@ public with sharing class FormulaShareRulesListViewController {
         public Boolean batchIsProcessing {get;set;}
         @AuraEnabled
         public List<RuleWrapper> items {get;set;}
-        @AuraEnabled
-        public String sharedObjectClass {get;set;}
         @AuraEnabled
         public Datetime refreshTime {get;set;}
         @AuraEnabled
@@ -267,6 +269,8 @@ public with sharing class FormulaShareRulesListViewController {
         public String key {get;set;}
         @AuraEnabled
         public String tableLabel {get;set;}
+        @AuraEnabled
+        public String detailLabel {get;set;}
         @AuraEnabled
         public Id ruleId {get;set;}
         @AuraEnabled

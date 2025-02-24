@@ -1,14 +1,14 @@
 <template>
 
     <template if:false={rulesNotSetUp}>
-        <lightning-tree-grid 
-            data={treeItems} 
+        <c-formula-share-tree-grid 
+            rows={treeItems}
             columns={columns} 
             key-field="key" 
             hide-checkbox-column="true" 
             onrowaction={handleRowAction}
             expanded-rows={currentExpanded}>
-        </lightning-tree-grid>
+        </c-formula-share-tree-grid>
         <template if:true={processingLoad}>
             <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="medium"></lightning-spinner>
         </template>

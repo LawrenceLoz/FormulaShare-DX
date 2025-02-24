@@ -1,0 +1,26 @@
+<template>
+
+  <template if:true={typeAttributes.isParent}>
+    <div class="slds-grid slds-grid_vertical-align-center slds-tree__item slds-p-vertical_small">
+      <lightning-button-icon
+        icon-name="utility:chevrondown"
+        variant="bare"
+        alternative-text="Toggle"
+        class="slds-m-right_x-small"
+      ></lightning-button-icon>
+
+      <div 
+        class="slds-truncate slds-text-title_caps slds-grid slds-grid_vertical-align-center"
+        style="overflow: visible;">
+        <!-- Absolute position to allow to spread across the row without truncation. 
+          High z-index to avoid being hidden by other cells when hovering -->
+        <span
+          style="white-space: nowrap; overflow: visible; position: absolute; z-index: 1000"
+          title={value}>
+          {value}
+        </span>
+      </div>
+    </div>
+  </template>
+
+</template> 
