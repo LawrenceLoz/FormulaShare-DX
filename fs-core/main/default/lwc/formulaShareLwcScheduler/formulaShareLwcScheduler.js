@@ -72,7 +72,6 @@ export default class LwcScheduler extends LightningElement {
     getCurrentlyScheduledCron()
       .then(result => {
         if (!result) {
-          console.log("No job currently scheduled");
           this.state = "schedule";
           this.scheduleDescPrefix = "Multiple times per day";
           this.scheduleDescDetail = null;
@@ -207,7 +206,6 @@ export default class LwcScheduler extends LightningElement {
       deleteScheduledJob({ cronTriggerId: this.currentCronTrigger.cronTriggerId })
         .then(deleteResult => {
           if (deleteResult) {
-            console.log("Deleted Job");
             // Only schedule new job if delete was successful
             return scheduleJob({
               cronString: this.selectedCronString,
@@ -219,7 +217,6 @@ export default class LwcScheduler extends LightningElement {
         })
         .then(scheduleResult => {
           if (scheduleResult) {
-            console.log("Job Scheduled Successfully");
             this.getScheduledCron(); // Refresh the current schedule
           } else {
             throw new Error('Failed to schedule new job');
@@ -234,14 +231,12 @@ export default class LwcScheduler extends LightningElement {
         });
     }
     else {
-      console.log("Scheduling Job");
       scheduleJob({
         cronString: this.selectedCronString,
         cronJobName: this.cronJobName
       })
         .then(result => {
           if (result) {
-            console.log("Job Scheduled Successfully");
             this.getScheduledCron(); // Refresh the current schedule
             this.dispatchEvent(new CustomEvent('refreshview'));   // Refresh parent components to clear warning
           } else {
@@ -262,7 +257,6 @@ export default class LwcScheduler extends LightningElement {
     this.loading = true;
     deleteScheduledJob({ cronTriggerId: this.currentCronTrigger.cronTriggerId })
       .then(data => {
-        console.log(data);
         if (data) {
           this.state = "schedule";
           this.currentCronAsTime = "";
@@ -271,7 +265,6 @@ export default class LwcScheduler extends LightningElement {
           this.scheduleDescDetail = null;
           this.currentCronTrigger = null;
           this.stopLoading(500);
-          console.log("Job Deleted");
         } else {
           this.stopLoading(100);
           console.log("we were unable to delete this job");
@@ -294,7 +287,6 @@ export default class LwcScheduler extends LightningElement {
   handleScheduleTypeChange(event) {
     const value = event.target.value;
     this.scheduleType = value;
-    console.log(this.scheduleType);
     if (this.selectedTime) {
       const [hour, minute] = this.selectedTime.split(':');
       this.updateCronString(hour, minute);

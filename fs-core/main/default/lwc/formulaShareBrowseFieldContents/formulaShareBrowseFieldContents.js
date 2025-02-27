@@ -26,7 +26,6 @@ export default class FormulaShareBrowseFieldContents extends LightningElement {
     loadingSample = true;
     @wire(getSampleData, {objectApiName : '$objectApiName', fieldApiName : '$fieldApiName'})
     wiredSampleData(value) {
-        console.log('looking for object');
         const { data, error } = value;
         if(data) {
             this.fieldSample = data;
