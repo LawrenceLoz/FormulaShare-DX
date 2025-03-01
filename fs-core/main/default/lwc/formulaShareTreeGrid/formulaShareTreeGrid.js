@@ -9,11 +9,8 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
             typeAttributes: ['isParent']
         }
     };
-
-    @api expandedRows = [];
     
     _treeData = [];
-    _expandedState = new Set();
 
     @api
     get rows() {
@@ -26,7 +23,6 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
 
     connectedCallback() {
         super.connectedCallback();
-        this._expandedState = new Set(this.expandedRows);
         this.processData();
     }
 
@@ -47,12 +43,11 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
             // Add parent row
             const parentRow = { ...item };
             parentRow.isParent = true;
-            parentRow.expanded = this._expandedState.has(item[this.keyField]);
             parentRow._children = item._children || [];
             processedData.push(parentRow);
 
-            // Add child rows if parent is expanded
-            if (parentRow.expanded && parentRow._children) {
+            // Add child rows if parent is has children
+            if (parentRow._children) {
                 parentRow._children.forEach(child => {
                     const childRow = { ...child };
                     childRow.isParent = false;

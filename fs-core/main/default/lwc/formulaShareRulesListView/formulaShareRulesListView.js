@@ -33,7 +33,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 , initialWidth: 330
                 , typeAttributes: {
                     name: 'ruleName'
-                    , title: {fieldName: 'detailLabel'}
+                    , title: 'Open rule'
                     , label: {fieldName: 'detailLabel'}
                     , variant: 'base'
                 }
@@ -82,42 +82,16 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
             for(var ruleRowNo in this.treeItems[rowNo]._children) {
                 var thisRow = this.treeItems[rowNo]._children[ruleRowNo];
 
-                // If we have a warning, push column with relevant type for the warning
+                // If we have a warning, push column which allows link to be set by row
                 if(thisRow.warningUrlLabel && thisRow.active) {
-
-                    // If we have schedule warnings (included for all rowx)
-                    // we'll need to push a column with a button to open modal
-                    if(thisRow.warningUrlLabel === 'Schedule batch job') {
-                        showWarnings = 'scheduleWarning';                            
-                        this.scheduleWarningsUrl = thisRow.warningUrl;
-                        break;
-                    }
-
-                    // Otherwise, we'll push a column which allows link to be set by row
-                    else {
-                        showWarnings = 'rowSpecificWarnings';
-                        break;                        
-                    }
+                    showWarnings = 'rowSpecificWarnings';
+                    break;                        
                 }
             }
         }
 
         // Add approriate warning column if any warnings found
-        if(showWarnings === 'scheduleWarning') {
-            this.columns.push(
-                {   type: 'button'
-                    , fieldName: 'warningUrl'
-                    , label: 'Warnings'
-                    , typeAttributes: {
-                        name: 'scheduleWarning'
-                        , title: {fieldName: 'warningTooltip'}
-                        , label: {fieldName: 'warningUrlLabel'}
-                        , variant: 'base'
-                    }
-                }
-            );
-        }
-        else if(showWarnings === 'rowSpecificWarnings') {
+        if(showWarnings === 'rowSpecificWarnings') {
             this.columns.push(
                 {type: 'url'
                     , fieldName: 'warningUrl'
@@ -149,7 +123,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     provisionedValue;
     firstLoad = true;
     @track treeItems;
-    @track currentExpanded;
     @track processingLoad = true;
 
     @wire(getTreeGridData)
@@ -160,26 +133,18 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
-//            console.log('Refresh During: '+JSON.stringify(this.treeItems, null, 2));
 
             versionSupportsRelatedRules()
                 .then((supportsRelated) => {
                     this.setColumns(supportsRelated);
                     this.countRows(tempjson);
         
-                    // Expand all rows when table first loaded, and subscribe to events
+                    // Subscribe to events when table first loaded
                     if(this.firstLoad) {
-                        this.expandAllRows(tempjson);
                         this.manageRefreshEvents();     // Subscribe to event channel
                         this.firstLoad = false;
                     }
         
-                    // Expand all rows if a rule was just set up or modified
-                    if(this.createOrUpdate) {
-                        this.expandAllRows(tempjson);
-                        this.createOrUpdate = false;
-                    }
-
                     this.processingLoad = false;
                     
                 })
@@ -189,7 +154,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
 
         else if(error) {
-            //console.log('Error fetching data from Salesforce');
             this.showError(error, 'Error fetching data from Salesforce');
         }
     }
@@ -216,22 +180,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         const evt = new CustomEvent('ruleload', {
             detail: noRules
         });
-        //console.log('noRules '+noRules);
         this.dispatchEvent(evt);
-    }
-
-
-    // Populate keys into currentExpanded to expand all
-    expandAllRows(tempjson) {
-        this.currentExpanded = [];
-        for(var i = 0; i < tempjson.length; i++) {
-            this.currentExpanded.push(tempjson[i].key);
-
-            var children = tempjson[i]._children;
-            for(var j = 0; j < children.length; j++) {
-                this.currentExpanded.push(children[j].key);
-            }
-        }
     }
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
@@ -241,11 +190,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         // Get namespace prefix
         getNamespacePrefix()
             .then((prefix) => {
-                //console.log('Got namespace: '+prefix);
-
                 // Subscribe to list update events (raised by batch job and on rule activate/deactivate)
                 const listUpdateCallback = (response) => {
-                    console.log('Received Refresh Event');
                     this.refreshView();
                 };
                 subscribe('/event/'+prefix+'FormulaShare_List_Update__e', -1, listUpdateCallback).then(response => {
@@ -270,7 +216,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
                     // Refresh list if successful event recieved
                     if(payload[successPropName]) {
-                        //console.log('Received FormulaShare_Rule_DML__e');
                         this.createOrUpdate = true;
                         this.refreshView();
                     }
@@ -281,7 +226,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
             })
             .catch(error => {
-                //console.log('Error getting namespace prefix');
                 this.showError(error, 'Error getting namespace prefix');
             });
     }
@@ -289,9 +233,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     // Set available drop-down actions for each grid row
     getRowActions(row, doneCallback) {
-        // Check the retention days before populating (this is used in an action label)
-        //console.log('loading actions');
-
         const actions =[];
         const isActive = row['active'];
         const isParentRow = row['isParentRow'];
@@ -337,8 +278,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         setTimeout(() => {
             doneCallback(actions);
         }, 200);
-
-        //console.log('loaded actions');
     }
 
     baseURL;
@@ -356,15 +295,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 // console.log('Error processing apex on action click: ',error);
             });
 
-        // If click is on a schedule warning button, toggle the modal
-//        if(event.detail.action.name === 'scheduleWarning') {
-//            this.doOpenScheduleModal();
-//        }
-
         const actionName = event.detail.action.name;
         const row = event.detail.row;
-
-        //console.log('action: '+actionName);
 
         switch (actionName) {
             case 'recalculate':
@@ -384,16 +316,6 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
                 this.openLogsReport(row);
                 break;
         }
-    }
-
-    scheduleWarningsUrl;
-    openScheduleModal = false;
-    doOpenScheduleModal() {
-        //console.log('opening schedule modal');
-        this.openScheduleModal = true;
-    }
-    closeScheduleModal() {
-        this.openScheduleModal = false;
     }
 
     // Action method to trigger FormulaShareBatch for the specified object
@@ -430,26 +352,17 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         }
         this.treeItems = newTreeItems;
 
-        //console.log('last calc: ' + row['batchIsProcessing']);
-        //console.log('key: ' + row['key']);
-
         // Submit object for processing
         const rowApiName = row['objectApiName'];
         recalculateSharing({ objectApiName : rowApiName })
             .catch(error => {
-                //console.log('Error submitting for recalculation');
                 this.showError(error, 'Error submitting for recalculation')
             });
     }
 
     // Refreshes provisioned list of rules
     refreshView() {
-//        console.log('Refresh Before: '+JSON.stringify(this.provisionedValue, null, 2));
         refreshApex(this.provisionedValue)
-        .then(() => {
-//            console.log('Refresh After: '+JSON.stringify(this.provisionedValue, null, 2));
-        });
-        
         const evt = new CustomEvent('refreshview');
         this.dispatchEvent(evt);
     }
@@ -538,5 +451,4 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     closeModal() {
         this.openModal = false;
     }
-
 }

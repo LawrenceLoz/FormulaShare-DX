@@ -444,37 +444,4 @@ describe('c-formula-share-rules-list-view', () => {
         });
     });
 
-    it('Test open schedule modal (Positive).', () => {
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
-
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
-        
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'scheduleWarning' },
-                    }
-            });
-            
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Verify c-formula-share-schedule-job-description is present in DOM.
-            const formulaShareSchedulaJobDescription = element.shadowRoot.querySelector('c-formula-share-schedule-job-description');
-            expect(formulaShareSchedulaJobDescription).not.toBeNull();
-        });
-    });
 });
