@@ -134,7 +134,7 @@ public with sharing class FormulaShareRulesListViewController {
             if(batchMetrics == null && targetedJobMetrics == null) {
                 if(rw.active) {
                     rw.lastCalcStatus = 'Pending';
-                    rw.iconName = 'standard:today';
+                    rw.iconName = 'standard:recent';
                     rw.iconAlt = 'Pending';
                 }
                 else {
@@ -165,7 +165,7 @@ public with sharing class FormulaShareRulesListViewController {
                 else if(latestMetrics.Processing_Started__c == null) {
                     if(rw.active) {
                         rw.lastCalcStatus = 'Pending';
-                        rw.iconName = 'standard:today';
+                        rw.iconName = 'standard:recent';
                         rw.iconAlt = 'Pending';
                     }
                     else {
