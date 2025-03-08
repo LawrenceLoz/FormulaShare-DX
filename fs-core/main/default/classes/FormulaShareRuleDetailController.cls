@@ -22,7 +22,7 @@
 
 public with sharing class FormulaShareRuleDetailController {
 
-    public class FSRuleException extends Exception {}
+    public inherited sharing class FSRuleException extends Exception {}
 
     public static List<ShareableObject> shareableObjects = new List<ShareableObject>();
 
@@ -233,7 +233,7 @@ public with sharing class FormulaShareRuleDetailController {
         return concatString;
     }
 
-    public class ShareableObject {
+    public inherited sharing class ShareableObject {
         @AuraEnabled
         public String objectApiName {get;set;}
         @AuraEnabled
@@ -253,7 +253,7 @@ public with sharing class FormulaShareRuleDetailController {
     }
 
 
-    public class ShareFieldOption implements Comparable {
+    public inherited sharing class ShareFieldOption implements Comparable {
 
         @AuraEnabled
         public String fieldApiName {get;set;}

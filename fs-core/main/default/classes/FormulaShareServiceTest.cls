@@ -20,7 +20,7 @@
 **/
 
 @IsTest
-public class FormulaShareServiceTest {
+public with sharing class FormulaShareServiceTest {
 
     static String reason = FormulaShareTestUtils.getNamespacePrefix() + 'FormulaShare_Log_Share__c';
 

@@ -244,7 +244,7 @@ public with sharing class FormulaShareRulesListViewController {
     }
 
     
-    public class ObjectRulesWrapper implements Comparable {
+    public with sharing class ObjectRulesWrapper implements Comparable {
         @AuraEnabled
         public String key {get;set;}
         @AuraEnabled
@@ -278,7 +278,7 @@ public with sharing class FormulaShareRulesListViewController {
         }
     }
 
-    public class RuleWrapper implements Comparable {
+    public with sharing class RuleWrapper implements Comparable {
         @AuraEnabled
         public String key {get;set;}
         @AuraEnabled

@@ -182,7 +182,7 @@ public abstract inherited sharing class FormulaShareMetadataDMLBase {
 
     
     // Manage post-callback logic and call methods (overridable in subclasses) on success and failure
-    public class DeployCallback implements Metadata.DeployCallback {
+    public inherited sharing class DeployCallback implements Metadata.DeployCallback {
 
         private FormulaShareMetadataDMLBase instance;
 

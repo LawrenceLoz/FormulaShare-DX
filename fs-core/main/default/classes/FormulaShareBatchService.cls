@@ -84,7 +84,7 @@ public virtual inherited sharing class FormulaShareBatchService {
         uow.commitWork();
     }
 
-	public class FormulaShareBatchException extends Exception {}
+	public inherited sharing class FormulaShareBatchException extends Exception {}
 
     // If we detected an error during batch start, no records to process so just log and process this error
 	public void logBatchStartError(String batchStartError) {

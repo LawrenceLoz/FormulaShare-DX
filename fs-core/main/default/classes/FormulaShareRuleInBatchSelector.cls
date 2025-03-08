@@ -65,7 +65,7 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
         return rrDetails;
     }
 
-    public class RuleRunDetail {
+    public inherited sharing class RuleRunDetail {
         public FormulaShare_Rule_in_Batch__c rib;
         public RuleRunDetail(FormulaShare_Rule_in_Batch__c rib) { this.rib = rib; }
         public String developerName { get { return rib.FormulaShare_Rule_Name__c; } }

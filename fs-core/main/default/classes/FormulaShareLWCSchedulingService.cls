@@ -22,7 +22,7 @@
 // Adapted from https://github.com/schandlergarcia/lwc-scheduler-service
 public with sharing class FormulaShareLWCSchedulingService {
 
-  public class ScheduledJobInfo {
+  public inherited sharing class ScheduledJobInfo {
     @AuraEnabled public Id id;
     @AuraEnabled public Id cronTriggerId;
     @AuraEnabled public String cronExpression;

@@ -24,7 +24,7 @@ public virtual inherited sharing class FormulaShareRecursionService {
     private FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
 	private static Set<Id> processedIds = new Set<Id>();
 
-    public class RecordsToProcess {
+    public inherited sharing class RecordsToProcess {
         public RecordsToProcess(Map<Id,SObject> oldMap, Map<Id,SObject> newMap) {
             this.oldMap = oldMap;
             this.newMap = newMap;

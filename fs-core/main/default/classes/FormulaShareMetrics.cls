@@ -22,7 +22,7 @@
 public inherited sharing class FormulaShareMetrics extends fflib_SObjectDomain {
 
     // Values to augment onto metrics
-    public class Increment {
+    public inherited sharing class Increment {
         public Integer noSuccessfulInserts = 0;
         public Integer noFailedInserts = 0;
         public DateTime LastSuccessfulOperation;
@@ -36,7 +36,7 @@ public inherited sharing class FormulaShareMetrics extends fflib_SObjectDomain {
         super(sObjectList);
     }
 
-    public class Constructor implements fflib_SObjectDomain.IConstructable {
+    public inherited sharing class Constructor implements fflib_SObjectDomain.IConstructable {
         public fflib_SObjectDomain construct(List<SObject> sObjectList) {
             return new FormulaShareMetrics(sObjectList);
         }

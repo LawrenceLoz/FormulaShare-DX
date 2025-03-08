@@ -31,7 +31,7 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
     protected Set<Id> recordsWithFailedDeletes = new Set<Id>();
 
     // Record ids kept in wrapper so we can count unique records shared
-    public class PRSWrapper {
+    public inherited sharing class PRSWrapper {
         public PRSWrapper(FormulaShare_Processed_Record_Share__c processedRecordShare, Id recordId) {
             this.processedRecordShare = processedRecordShare;
             this.recordId = recordId;

@@ -1,5 +1,5 @@
 @isTest
-private class FormulaShareLWCSchedulingServiceTest {
+public with sharing class FormulaShareLWCSchedulingServiceTest {
 
   @IsTest
   static void testGetCurrentlyScheduledCron() {
