@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public class FormulaShareProcessBatch implements Database.Batchable<sObject>, Database.Stateful, Database.RaisesPlatformEvents {
+public inherited sharing class FormulaShareProcessBatch implements Database.Batchable<sObject>, Database.Stateful, Database.RaisesPlatformEvents {
 	
 	List<Schema.SObjectType> types;
 	Integer batchSize;

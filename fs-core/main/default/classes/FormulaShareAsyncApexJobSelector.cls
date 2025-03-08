@@ -27,7 +27,6 @@ public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SO
     }
 
     @TestVisible static Boolean isFullOrTargetedBatchScheduled;
-    @AuraEnabled(cacheable=true)
     public static Boolean isFullOrTargetedBatchScheduled() {
         if(isFullOrTargetedBatchScheduled == null) {
             FormulaShareAsyncApexJobSelector jobSelector = new FormulaShareAsyncApexJobSelector();
