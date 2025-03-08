@@ -1,5 +1,5 @@
 @IsTest
-private class FormulaShareFlowControllerTest {
+public with sharing class FormulaShareFlowControllerTest {
     
     @IsTest
     static void testGetFlowVersionId() {

@@ -1,8 +1,8 @@
 // Implements approach suggested by sfdcfox: https://salesforce.stackexchange.com/a/149360
 
-public class FormulaSharePackageVerifier {
+public with sharing class FormulaSharePackageVerifier {
 
-    public class LicenseAllowance {
+    public with sharing class LicenseAllowance {
         @AuraEnabled public String Name;
         @AuraEnabled public Boolean unlimitedStandardRules;
         @AuraEnabled public Boolean unlimitedCrossObjectRules;

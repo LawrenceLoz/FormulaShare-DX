@@ -21,7 +21,7 @@
 
 public inherited sharing class FormulaShareSettingsSelector {
 
-	public class FormulaShareSettingsSelectorException extends Exception{}
+	public inherited sharing class FormulaShareSettingsSelectorException extends Exception{}
 
     public static FormulaShareSettingsSelector mock;
     public static FormulaShareSettingsSelector thisSelector;

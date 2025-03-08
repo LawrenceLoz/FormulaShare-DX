@@ -572,7 +572,7 @@ public inherited sharing class FormulaShareUtilities {
     }
 
 
-    public class RelationshipDetails implements Comparable {
+    public inherited sharing class RelationshipDetails implements Comparable {
 		
 		private Schema.DescribeFieldResult relatedObjFieldDesc;
 		private Schema.DescribeSObjectResult relatedObjDesc;

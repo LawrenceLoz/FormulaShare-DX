@@ -27,7 +27,7 @@
 // (via JSON.deserialize() in FormulaShareMetadataControllerRules.ruleStringToRule)
 public virtual inherited sharing class FormulaShareRule {
 
-	public class FormulaShareException extends Exception{}
+	public inherited sharing class FormulaShareException extends Exception{}
 
     // Basic rule details
     @AuraEnabled public Id ruleId;

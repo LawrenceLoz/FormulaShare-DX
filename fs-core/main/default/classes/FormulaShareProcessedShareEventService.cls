@@ -322,7 +322,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
     }
 
 
-    public class IncrementsWithUow {
+    public inherited sharing class IncrementsWithUow {
         public Map<String,FormulaShareMetrics.Increment> incrementsMap;
         public fflib_ISObjectUnitOfWork uow;
         public Integer noRecordsSharingAppliedFirstTime;

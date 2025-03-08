@@ -23,7 +23,7 @@
 public virtual inherited sharing class FormulaShareSObjectShares {
     
     private Schema.SObjectType type;
-    public class FormulaShareException extends Exception {}    
+    public inherited sharing class FormulaShareException extends Exception {}    
 
     public static FormulaShareSObjectShares mock;
     public static FormulaShareSObjectShares construct(Schema.SObjectType type) {

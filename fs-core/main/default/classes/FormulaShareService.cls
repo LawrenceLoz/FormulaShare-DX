@@ -44,7 +44,7 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	public class FormulaShareException extends Exception{}
+	public inherited sharing class FormulaShareException extends Exception{}
 
 	static FormulaShare_Settings__mdt settings;
 	public Map<String,Id> sharingReasonsIdMap = new Map<String,Id>();
@@ -643,7 +643,7 @@ public inherited sharing class FormulaShareService {
 	}
 
 
-	public class ShareDetail {
+	public inherited sharing class ShareDetail {
 		public SObject shareRecord;
 		public Schema.SObjectType type;
 		public FormulaShareRule rule;
@@ -652,14 +652,14 @@ public inherited sharing class FormulaShareService {
 	}
 
 	// Holds details of a record and a rule sharing this record
-	public class RecordRule {
+	public inherited sharing class RecordRule {
 		public SObject recordToShare;
 		public SObject recordWithSharedToDetails;
 		public String sharedToString;
 		public FormulaShareRule rule;
 	}
 
-	public class EntityNotFound {
+	public inherited sharing class EntityNotFound {
 		public String recordId;
 		public Schema.SObjectType type;
 		public FormulaShareRule rule;
