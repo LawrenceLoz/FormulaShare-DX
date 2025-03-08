@@ -1,6 +1,6 @@
 import { LightningElement, wire } from 'lwc';
 import rulesPageIcon from '@salesforce/resourceUrl/RulesPageIcon';
-import isFullOrTargetedBatchScheduled from '@salesforce/apex/FormulaShareAsyncApexJobSelector.isFullOrTargetedBatchScheduled';
+import isFullOrTargetedBatchScheduled from '@salesforce/apex/FormulaShareRulesPageController.isFullOrTargetedBatchScheduled';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class FormulaShareRulesPage extends LightningElement {
