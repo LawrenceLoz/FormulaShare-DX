@@ -101,7 +101,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
 
         Map<String,FormulaShare_Record_Log__c> processedRecords = new Map<String,FormulaShare_Record_Log__c>();
         Map<String,List<FormulaShare_Processed_Share_Event__e>> eventsByType = new Map<String,List<FormulaShare_Processed_Share_Event__e>>();
-    
+
         for(FormulaShare_Processed_Share_Event__e pse : pseList) {
 
             // Contruct processed record logs
@@ -113,6 +113,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                 pr.Processed_Date_Time__c = pse.Processed_Date_Time__c;
                 pr.Context_Detail__c = pse.Context_Detail__c;
                 pr.Assessment_Type_Override__c = pse.Assessment_Type_Override__c;
+                pr.Rules_Assessed__c = pse.Rules_Assessed__c;
                 pr.Running_User__c = pse.Running_User__c;
             }
             else {
@@ -131,7 +132,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
             pseForObjectList.add(pse);
             eventsByType.put(pse.Object__c, pseForObjectList);
         }
-    
+
         // Get processed record objects and register for insert if allowed
         List<FormulaShare_Record_Log__c> recordLogs = processedRecords.values();
         Boolean createRecordLogs = createRecordLogs();
@@ -256,7 +257,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                     inc.noSuccessfulInserts = 0;
                     inc.noFailedInserts = 0;
                 }
-    
+
                 // Increment and set date/times depending on status and context
                 if(prs.Status__c == 'Success') {
                     inc.noSuccessfulInserts++;
@@ -266,7 +267,7 @@ public inherited sharing class FormulaShareProcessedShareEventService {
                     inc.noFailedInserts++;
                     inc.lastFailedOperation = DateTime.now();
                 }
-    
+
                 metricsIncrements.put(prs.FormulaShare_Rule_Name__c, inc);
             }
         }

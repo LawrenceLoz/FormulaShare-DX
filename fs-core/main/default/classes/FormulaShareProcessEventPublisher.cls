@@ -33,6 +33,11 @@ public inherited sharing class FormulaShareProcessEventPublisher {
 
     List<FormulaShare_Processed_Share_Event__e> pseList = new List<FormulaShare_Processed_Share_Event__e>();
 
+    List<String> rulesDeveloperNames;
+    public void setRulesDeveloperNames(List<String> rulesDeveloperNames) {
+        this.rulesDeveloperNames = rulesDeveloperNames;
+    }
+
     // Log when service class has identified insert is needed
     public void addInsertEvents(Map<String,FormulaShareService.ShareDetail> shareDetails, String status, String statusReason) {
 
@@ -74,6 +79,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             pse.Sharing_Reason__c = (String) enf.rule.sharingReason;
             pse.Share_With__c = (String) enf.rule.shareWith;
             pse.FormulaShare_Rule_Name__c = enf.rule.developerName;
+            pse.Rules_Assessed__c = enf.rulesAssessed;
             pseList.add(pse);
         }
     }
@@ -125,6 +131,7 @@ public inherited sharing class FormulaShareProcessEventPublisher {
             pse.Share_Id__c = share.Id;
             pse.Share_Key__c = key;
             pse.Existing_Sharing_On_Record__c = sd.existingSharingOnRecord;
+            pse.Rules_Assessed__c = sd.rulesAssessed;
 
             // Set statuses if provided (if left blank, shares will be queried as part of processing for logs)
             pse.Status__c = status;
@@ -150,4 +157,5 @@ public inherited sharing class FormulaShareProcessEventPublisher {
         pse.Processed_Date_Time__c = System.now();
         return pse;
     }
+
 }

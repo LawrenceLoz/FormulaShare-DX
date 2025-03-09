@@ -666,6 +666,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>FormulaShare_Record_Log__c.Rules_Assessed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>FormulaShare_Record_Log__c.Running_User__c</field>
         <readable>true</readable>
     </fieldPermissions>
