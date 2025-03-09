@@ -70,6 +70,17 @@ public inherited sharing class FormulaShareService {
 	@TestVisible private List<FormulaShareRule> rules = new List<FormulaShareRule>();
 	Boolean removeExistingShares = true;
 	
+	private String allRulesDeveloperNames;
+	private String getRulesDeveloperNames() {
+		if(allRulesDeveloperNames == null) {
+			List<String> allRulesDeveloperNamesList = new List<String>();
+			for(FormulaShareRule rule : rules) {
+				allRulesDeveloperNamesList.add(rule.developerName);
+			}
+			allRulesDeveloperNames = String.join(allRulesDeveloperNamesList, '<br>');
+		}
+		return allRulesDeveloperNames;
+	}
 
 	// Getter methods to access variables needed by calling classes. Methods are mocked for test classes
 
@@ -233,6 +244,7 @@ public inherited sharing class FormulaShareService {
 				sd.shareRecord = share;
 				sd.type = type;
 				sd.recordId = objectUtils.getParentIdFromShare(share);
+				sd.rulesAssessed = getRulesDeveloperNames();
 				String shareKey = objectUtils.getShareKey(share, sd.recordId);
 				mapToDelete.put(shareKey, sd);
 			}
@@ -393,6 +405,7 @@ public inherited sharing class FormulaShareService {
 		enf.rule = rule;
 		enf.type = type;
 		enf.failedStatusReason = logMessage.abbreviate(255);
+		enf.rulesAssessed = getRulesDeveloperNames();
 		entitiesNotFound.add(enf);
 
 		System.debug('Entity not found: '+enf);
@@ -601,6 +614,7 @@ public inherited sharing class FormulaShareService {
 			sd.shareRecord = newShare;
 			sd.type = type;
 			sd.recordId = recordId;
+			sd.rulesAssessed = getRulesDeveloperNames();
 			mapToInsert.put(shareKey, sd);
 			newSharesValidSet.add(recordId);
 
@@ -648,6 +662,7 @@ public inherited sharing class FormulaShareService {
 		public Schema.SObjectType type;
 		public FormulaShareRule rule;
 		public Id recordId;
+		public String rulesAssessed;
 		public Boolean existingSharingOnRecord = false;	// True if sharing identified matching rules which will be kept
 	}
 
@@ -665,6 +680,7 @@ public inherited sharing class FormulaShareService {
 		public FormulaShareRule rule;
 		public String targetAccessLevel;
 		public String failedStatusReason;
+		public String rulesAssessed;
 	}
 
 }
