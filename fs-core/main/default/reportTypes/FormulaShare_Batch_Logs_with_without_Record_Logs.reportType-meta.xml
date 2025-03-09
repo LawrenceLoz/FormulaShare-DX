@@ -289,7 +289,7 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Rules_Processed__c</field>
+            <field>Rules_Assessed__c</field>
             <table>FormulaShare_Log__c.FormulaShare_Processed_Records__r</table>
         </columns>
         <masterLabel>FormulaShare Record Logs</masterLabel>
