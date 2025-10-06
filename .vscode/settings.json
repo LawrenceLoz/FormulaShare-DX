@@ -11,5 +11,6 @@
     "salesforcedx-vscode-core.show-cli-success-msg": false,
     "salesforcedx-vscode-core.retrieve-test-code-coverage": true,
     "html.suggest.angular1": false,
-    "html.suggest.ionic": false
+    "html.suggest.ionic": false,
+    "xml.preferences.showSchemaDocumentationType": "none"
 }

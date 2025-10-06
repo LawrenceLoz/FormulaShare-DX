@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DedupKey__c</fullName>
+    <description>Composite key to prevent duplicate events (RequestId + JobId + Phase)</description>
+    <externalId>true</externalId>
+    <label>Dedup Key</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>
+

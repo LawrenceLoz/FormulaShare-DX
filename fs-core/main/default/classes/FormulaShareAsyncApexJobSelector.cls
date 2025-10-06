@@ -82,6 +82,17 @@ public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SO
         return jobs.size();
     }
 
+    public Id getParentIdForAsyncId(Id asyncJobId) {
+        String query = newQueryFactory()
+            .selectField('ParentJobId')
+            .setCondition('Id = :asyncJobId')
+            .toSOQL();
+
+            AsyncApexJob job = (AsyncApexJob) Database.query(query)[0];
+            system.debug('job.ParentJobId: '+job.ParentJobId);
+            return job.ParentJobId;
+    }
+
 
 
 }
