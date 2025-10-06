@@ -31,7 +31,7 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
         // Resolve allowed class Ids in our namespace via selector
         Set<Id> allowedClassIds = new Set<Id>();
         if(!classIdsOfEvents.isEmpty()) {
-            String namespace = FormulaShareUtilities.getNamespaceNoUnderscores();
+            String namespace = String.valueOf(FormulaShareUtilities.getNamespaceNoUnderscores());
             FormulaShareApexClassSelector classSel = new FormulaShareApexClassSelector();
             allowedClassIds = classSel.getIdsByNamesAndNamespace(allowedClassNames, namespace);
         }
@@ -80,23 +80,29 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
                     rec.DoesExceedJobScopeMaxLength__c = e.DoesExceedJobScopeMaxLength;
                     rec.ExceptionType__c = e.ExceptionType;
                     rec.JobScope__c = e.JobScope;
-                    rec.Message__c = e.Message;
+                    rec.Message__c = e.Message != null ? e.Message.left(131072) : null;
                     rec.Phase__c = e.Phase;
                     rec.RequestId__c = e.RequestId;
-                    rec.StackTrace__c = e.StackTrace;
-                    rec.DedupKey__c = String.valueOf(e.EventUuid);  // Theoretically platform events could be received more than once
+                    rec.StackTrace__c = e.StackTrace != null ? e.StackTrace.left(131072) : null;
+                    rec.DedupKey__c = String.valueOf(e.EventUuid);  // Platform events could be received more than once
 
                     detailsForInsert.add(rec);
                 }
             }
         }
 
-        // Upsert using external id to dedupe
-        try {
-            upsert detailsForInsert FormulaShare_Batch_Error_Details__c.DedupKey__c;
-        } catch (Exception ex) {
-            System.debug('Error upserting Batch Error Event records: ' + ex.getMessage());
+        if(detailsForInsert.isEmpty()) {
+            return;
         }
 
+        // Upsert using external id to dedupe; run in user mode to respect FLS/CRUD, with safe logging
+        try {
+            Database.upsert(detailsForInsert, FormulaShare_Batch_Error_Details__c.DedupKey__c, true, AccessLevel.USER_MODE);
+        } catch (DmlException dmlEx) {
+            // Avoid exposing sensitive info in logs; log minimal diagnostic
+            System.debug(LoggingLevel.WARN, 'Batch Error Event upsert failed. Size=' + detailsForInsert.size());
+        } catch (Exception ex) {
+            System.debug(LoggingLevel.WARN, 'Unexpected failure upserting batch error events.');
+        }
     }
 }
