@@ -93,6 +93,46 @@ public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SO
             return job.ParentJobId;
     }
 
+    /**
+     * Returns a map of AsyncApexJob.Id -> ApexClassId for the provided job Ids.
+     */
+    public Map<Id, Id> getClassIdsByJobIds(Set<Id> jobIds) {
+        Map<Id, Id> result = new Map<Id, Id>();
+        if (jobIds == null || jobIds.isEmpty()) {
+            return result;
+        }
+        String query = newQueryFactory()
+            .selectField(AsyncApexJob.Id)
+            .selectField('ApexClassId')
+            .setCondition('Id IN :jobIds')
+            .toSOQL();
+        List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
+        for (AsyncApexJob j : jobs) {
+            if (j.ApexClassId != null) {
+                result.put(j.Id, j.ApexClassId);
+            }
+        }
+        return result;
+    }
 
+    /**
+     * Returns a map of AsyncApexJob.Id -> ParentJobId for the provided job Ids.
+     */
+    public Map<Id, Id> getParentIdsByJobIds(Set<Id> jobIds) {
+        Map<Id, Id> result = new Map<Id, Id>();
+        if (jobIds == null || jobIds.isEmpty()) {
+            return result;
+        }
+        String query = newQueryFactory()
+            .selectField(AsyncApexJob.Id)
+            .selectField('ParentJobId')
+            .setCondition('Id IN :jobIds')
+            .toSOQL();
+        List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
+        for (AsyncApexJob j : jobs) {
+            result.put(j.Id, j.ParentJobId);
+        }
+        return result;
+    }
 
 }

@@ -60,7 +60,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>No_Batch_Failures_Detected_in_Events__c</field>
+                <field>No_Batch_Failures_Total__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>

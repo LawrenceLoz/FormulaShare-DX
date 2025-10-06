@@ -166,7 +166,7 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>No_Batch_Failures_Detected_in_Events__c</field>
+            <field>No_Batch_Failures_Total__c</field>
             <table>FormulaShare_Log__c</table>
         </columns>
         <masterLabel>FormulaShare Batch Logs</masterLabel>

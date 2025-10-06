@@ -11,8 +11,7 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
             return;
         }
 
-        // Map ApexClassId -> ApexClass
-        // BatchApexErrorEvent does not have ApexClassId, so we must get it via AsyncApexJob
+        // Collect AsyncApexJob Ids from events
         Set<Id> jobIds = new Set<Id>();
         for(BatchApexErrorEvent e : events) {
             if(e.AsyncApexJobId != null) {
@@ -20,28 +19,24 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
             }
         }
 
-        // Map AsyncApexJobId to ApexClassId
+        // Map AsyncApexJobId -> ApexClassId using selector
         Map<Id, Id> jobIdToClassId = new Map<Id, Id>();
         Set<Id> classIdsOfEvents = new Set<Id>();
         if(!jobIds.isEmpty()) {
-            for(AsyncApexJob job : [
-                SELECT Id, ApexClassId FROM AsyncApexJob WHERE Id IN :jobIds
-            ]) {
-                if(job.ApexClassId != null) {
-                    jobIdToClassId.put(job.Id, job.ApexClassId);
-                    classIdsOfEvents.add(job.ApexClassId);
-                }
-            }
+            FormulaShareAsyncApexJobSelector jobSel = new FormulaShareAsyncApexJobSelector();
+            jobIdToClassId = jobSel.getClassIdsByJobIds(jobIds);
+            classIdsOfEvents.addAll(jobIdToClassId.values());
         }
 
-        Map<Id, ApexClass> classById = new Map<Id, ApexClass>();
+        // Resolve allowed class Ids in our namespace via selector
         Set<Id> allowedClassIds = new Set<Id>();
         if(!classIdsOfEvents.isEmpty()) {
             String namespace = FormulaShareUtilities.getNamespaceNoUnderscores();
-            allowedClassIds = new Map<Id,ApexClass>([SELECT Id FROM ApexClass WHERE Name IN :allowedClassNames AND NamespacePrefix = :namespace]).keySet();
+            FormulaShareApexClassSelector classSel = new FormulaShareApexClassSelector();
+            allowedClassIds = classSel.getIdsByNamesAndNamespace(allowedClassNames, namespace);
         }
 
-        // Filter relevant events by allowed class prefixes and our namespace (or empty during unmanaged)
+        // Filter relevant events by allowed class Ids
         List<BatchApexErrorEvent> relevantEvents = new List<BatchApexErrorEvent>();
         List<Id> relevantAsyncJobs = new List<Id>();
         for(BatchApexErrorEvent e : events) {
@@ -52,28 +47,25 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
             }
         }
 
-        // If no relevant events, suggests none of the classes of the are FormulaShare batches
         if(relevantEvents.isEmpty()) {
             return;
         }
 
-        // Build a map of async job ids to their parent (start method) job id
+        // Build a map of async job ids -> parent job id using selector
         Map<Id, Id> jobIdToParentId = new Map<Id, Id>();
-        for(AsyncApexJob job : [
-            SELECT Id, ParentJobId FROM AsyncApexJob WHERE Id IN :relevantAsyncJobs
-        ]) {
-            jobIdToParentId.put(job.Id, job.ParentJobId);
+        if(!relevantAsyncJobs.isEmpty()) {
+            FormulaShareAsyncApexJobSelector jobSel2 = new FormulaShareAsyncApexJobSelector();
+            jobIdToParentId = jobSel2.getParentIdsByJobIds(new Set<Id>(relevantAsyncJobs));
         }
 
+        // Map ParentJobId -> FormulaShare_Log__c via logs selector
         Map<String, FormulaShare_Log__c> logByJobId = new Map<String, FormulaShare_Log__c>();
         if(!jobIdToParentId.isEmpty()) {
-            for(FormulaShare_Log__c log : [
-                SELECT Id, AsyncApexJobParentId__c FROM FormulaShare_Log__c WHERE AsyncApexJobParentId__c IN :jobIdToParentId.values()
-            ]) {
-                logByJobId.put(log.AsyncApexJobParentId__c, log);
-            }
+            FormulaShareBatchLogsSelector logsSel = new FormulaShareBatchLogsSelector();
+            logByJobId = logsSel.getByParentJobIds(new Set<Id>(jobIdToParentId.values()));
         }
 
+        // Prepare error detail records
         List<FormulaShare_Batch_Error_Details__c> detailsForInsert = new List<FormulaShare_Batch_Error_Details__c>();
         for(BatchApexErrorEvent e : relevantEvents) {
             Id parentJobId = jobIdToParentId.get(e.AsyncApexJobId);
@@ -99,7 +91,7 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
             }
         }
 
-        // Insert, letting unique ext id dedupe
+        // Upsert using external id to dedupe
         try {
             upsert detailsForInsert FormulaShare_Batch_Error_Details__c.DedupKey__c;
         } catch (Exception ex) {
@@ -108,4 +100,3 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
 
     }
 }
-
