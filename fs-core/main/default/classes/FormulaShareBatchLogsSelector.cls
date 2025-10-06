@@ -41,4 +41,25 @@ public inherited sharing class FormulaShareBatchLogsSelector extends fflib_SObje
             .toSOQL();
         return Database.getQueryLocator(query);
     }
+
+    /**
+     * Returns a map keyed by AsyncApexJobParentId__c (String) to FormulaShare_Log__c
+     * for the provided set of Parent Job Ids.
+     */
+    public Map<String, FormulaShare_Log__c> getByParentJobIds(Set<Id> parentJobIds) {
+        Map<String, FormulaShare_Log__c> result = new Map<String, FormulaShare_Log__c>();
+        if (parentJobIds == null || parentJobIds.isEmpty()) {
+            return result;
+        }
+        String soql = newQueryFactory()
+            .selectField(FormulaShare_Log__c.Id)
+            .selectField('AsyncApexJobParentId__c')
+            .setCondition('AsyncApexJobParentId__c IN :parentJobIds')
+            .toSOQL();
+        List<FormulaShare_Log__c> rows = (List<FormulaShare_Log__c>) Database.query(soql);
+        for (FormulaShare_Log__c row : rows) {
+            result.put(row.AsyncApexJobParentId__c, row);
+        }
+        return result;
+    }
 }

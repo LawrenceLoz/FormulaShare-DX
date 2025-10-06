@@ -41,7 +41,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 
     // Call from start()
-    public void createBatchAndRibLogs(String query, Integer batchSize) {
+    public void createBatchAndRibLogs(String query, Integer batchSize, Id asyncJobId) {
 
         // Establish maps for finish metrics (set to zero here - will be updated if any records in batch execute)
         for(FormulaShareRule rule : rulesForType) {
@@ -54,6 +54,10 @@ public virtual inherited sharing class FormulaShareBatchService {
 
         // Create FormulaShareLogs wrapper from placeholder log for batch
         FormulaShare_Log__c log = new FormulaShare_Log__c();
+
+		// Persist Async Apex Job Id for event correlation
+        log.AsyncApexJobParentId__c = asyncJobId;
+
         this.logsList = new List<FormulaShare_Log__c>();
         this.logsList.add(log);
         FormulaShareLogs fsLogs = new FormulaShareLogs(logsList);

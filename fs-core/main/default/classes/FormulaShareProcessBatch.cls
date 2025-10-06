@@ -29,7 +29,6 @@ public inherited sharing class FormulaShareProcessBatch implements Database.Batc
 
 	FormulaShareBatchService batchService;
 
-
 	// Accepts a list of types. Chained batches will be submitted if more than one type is provided
 	public FormulaShareProcessBatch(List<Schema.SObjectType> types, String contextDetail, Integer batchSize) {
 		this.types = types;
@@ -59,7 +58,7 @@ public inherited sharing class FormulaShareProcessBatch implements Database.Batc
 				system.debug('query locator: ' + ql);
 	
 				// Save initial batch and RIB logs
-				this.batchService.createBatchAndRibLogs(ql.getQuery(), this.batchSize);
+            this.batchService.createBatchAndRibLogs(ql.getQuery(), this.batchSize, context.getJobId());
 			}
 
 			// If processing isn't allowed, process the batch but log this as an error in FormulaShare batch logs
@@ -81,7 +80,7 @@ public inherited sharing class FormulaShareProcessBatch implements Database.Batc
 			FormulaShareSObjectsSelector selector = new FormulaShareInjectionService().getSObjectsSelector(true, typeInThisBatch);
 			ql = selector.selectNoneLocator();
 
-			this.batchService.createBatchAndRibLogs('n/a', this.batchSize);
+            this.batchService.createBatchAndRibLogs('n/a', this.batchSize, context.getJobId());
 			this.batchService.logBatchStartError(this.batchStartError);
 
 			// Update list to clear "Processing..." label

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Batch_Failures_Total__c</fullName>
+    <inlineHelpText>Total number of failed batches detected in BatchApexErrorEvents. Information relating to each failure is in the Batch Error related list.</inlineHelpText>
+    <label>No Batch Failures (Total)</label>
+    <summaryForeignKey>FormulaShare_Batch_Error_Details__c.FormulaShare_Log__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

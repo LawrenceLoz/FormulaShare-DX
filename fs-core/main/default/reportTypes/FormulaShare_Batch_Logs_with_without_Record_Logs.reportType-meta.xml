@@ -164,6 +164,11 @@
             <field>Records_Not_Shared_by_FormulaShare__c</field>
             <table>FormulaShare_Log__c</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>No_Batch_Failures_Total__c</field>
+            <table>FormulaShare_Log__c</table>
+        </columns>
         <masterLabel>FormulaShare Batch Logs</masterLabel>
     </sections>
     <sections>
