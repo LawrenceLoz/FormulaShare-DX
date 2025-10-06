@@ -6,7 +6,11 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
         'FormulaShareTargetedJobsBatch'
     };
 
+    @TestVisible static Boolean wasCalled = false;
+
     public static void handle(List<BatchApexErrorEvent> events) {
+        wasCalled = true;
+
         if(events == null || events.isEmpty()) {
             return;
         }
