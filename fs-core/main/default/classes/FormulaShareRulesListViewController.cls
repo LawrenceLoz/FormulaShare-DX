@@ -231,16 +231,15 @@ public with sharing class FormulaShareRulesListViewController {
     public static void recalculateSharing(String objectApiName) {
         system.debug(objectApiName);
 
-        // Set batch size according to settings
-        FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-        Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
-
         Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(objectApiName);
         List<Schema.SObjectType> typesList = new List<Schema.SObjectType>();
         typesList.add(type);
 
+        // Use centralized utility to resolve effective batch size with object override
+        Integer effectiveBatchSize = FormulaShareSettingsUtilities.getEffectiveBatchSizeForFullBatch(type);
+
         // Submit batch
-        Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(typesList, 'Manually Initiated Batch', batchSize), batchSize);
+        Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(typesList, 'Manually Initiated Batch', effectiveBatchSize), effectiveBatchSize);
     }
 
     

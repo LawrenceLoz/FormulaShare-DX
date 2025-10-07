@@ -110,7 +110,9 @@ public inherited sharing class FormulaShareProcessBatch implements Database.Batc
 		// If there are more types to process, submit another batch
 		if(types.size() > 1) {
 			types.remove(0);
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, contextDetail, batchSize), batchSize);
+			// Recalculate batch size for the next type, using the object-level override when present
+			Integer nextBatchSize = FormulaShareSettingsUtilities.getEffectiveBatchSizeForFullBatch(types[0]);
+			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, contextDetail, nextBatchSize), nextBatchSize);
 			system.debug('Submitted next batch, Id = ' + batchJobId);
 		}
 	}
