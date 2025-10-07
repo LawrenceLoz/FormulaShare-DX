@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Override_Batch_Size__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Override Batch Size</label>
+    <description>Optional per-object batch size override. If set to a value greater than 0, this batch size will be used for this object. If 0 or blank, the org default Recalculation Batch Size is used.</description>
+    <precision>6</precision>
+    <scale>0</scale>
+    <required>false</required>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>
