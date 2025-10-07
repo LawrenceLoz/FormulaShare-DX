@@ -3,8 +3,8 @@
     <fullName>Status__c</fullName>
     <externalId>false</externalId>
     <formula>IF(Batches_Processed__c = 0 &amp;&amp; Exception_Type__c != NULL, &apos;Skipped&apos;, 
-    IF((Failed_Batches__c = &apos;None&apos; || ISBLANK(Failed_Batches__c)), &apos;Success&apos;,
-        IF((Batches_Failed__c &gt; 0 &amp;&amp; Batches_Failed__c &lt; Batches_Processed__c), &apos;Partial Success&apos;,&apos;Failed&apos;)
+    IF( No_Batch_Failures_Total__c = 0, &apos;Success&apos;,
+        IF( No_Batch_Failures_Total__c &lt; Batches_Processed__c, &apos;Partial Success&apos;,&apos;Failed&apos;)
     )
 )</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
