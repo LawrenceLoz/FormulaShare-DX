@@ -12,7 +12,7 @@ public inherited sharing class FormulaShareSettingsUtilities {
 
         // Attempt to resolve object override
         try {
-            FormulaShareObjectSettingsSelector objSelector = new FormulaShareObjectSettingsSelector();
+            FormulaShareRemoveSharesSelector objSelector = new FormulaShareRemoveSharesSelector();
             FormulaShare_Std_Object_to_Remove_Shares__mdt objSettings = objSelector.getSettingsForType(type);
             if (objSettings != null
                 && objSettings.Override_Batch_Size__c != null
