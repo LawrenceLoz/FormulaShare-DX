@@ -99,9 +99,9 @@ public inherited sharing class FormulaShareBatchApexErrorEventHandler {
             return;
         }
 
-        // Upsert using external id to dedupe; run in user mode to respect FLS/CRUD, with safe logging
+        // Upsert using external id to dedupe
         try {
-            Database.upsert(detailsForInsert, FormulaShare_Batch_Error_Details__c.DedupKey__c, true, AccessLevel.USER_MODE);
+            upsert detailsForInsert FormulaShare_Batch_Error_Details__c.DedupKey__c;    // NOPMD - Automated Process user (who doesn't automatically have field access)
         } catch (DmlException dmlEx) {
             // Avoid exposing sensitive info in logs; log minimal diagnostic
             System.debug(LoggingLevel.WARN, 'Batch Error Event upsert failed. Size=' + detailsForInsert.size());
