@@ -26,17 +26,4 @@ public inherited sharing class FormulaShareSettingsUtilities {
         return orgDefault;
     }
 
-    // Returns the effective batch size for targeted jobs
-    // Precedence: job.Override_Batch_Size > Object Override_Batch_Size__c > Org Recalculation_Batch_Size__c
-    public static Integer getEffectiveBatchSizeForTargetedJob(FormulaShareTargetedJob job) {
-        // Job-level override takes precedence if valid
-        if (job != null && job.Override_Batch_Size != null && job.Override_Batch_Size > 0) {
-            return job.Override_Batch_Size;
-        }
-
-        Schema.SObjectType type = FormulaShareUtilities.getSObjectTypeFromName(job.Object_QualifiedApiName);
-
-        Integer effectiveBatchSizeForObject = getEffectiveBatchSizeForFullBatch(type);
-        return effectiveBatchSizeForObject;
-    }
 }
