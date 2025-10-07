@@ -22,20 +22,8 @@
                 <behavior>Edit</behavior>
                 <field>Retain_Sharing_After_Record_Changes__c</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Sharing_Calculation_Schedule__c</field>
-            </layoutItems>
         </layoutColumns>
         <layoutColumns>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Allow_Recursive_Reassessment__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Maximum_Recursive_Reassessments__c</field>
-            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Override_Batch_Size__c</field>
