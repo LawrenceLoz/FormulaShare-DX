@@ -30,7 +30,7 @@ jobs:
     
     # Update SF CLI to fix missing translation files
     - name: Update Salesforce CLI
-      run: npm update --global @salesforce/cli
+      run: sf update
       shell: bash
     
     - name: Install Jest
