@@ -28,6 +28,9 @@ jobs:
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
+    - name: Install npm dependencies
+      run: npm install
+    
     - name: Run all Jest tests
       run: npm run test:unit
 
@@ -57,7 +60,8 @@ jobs:
 
     - name: Assign permission sets
       run: |
-        sf org assign permset --name FormulaShare_Admin_User FormulaShare_Sample_App_Permissions"
+        sf org assign permset --name FormulaShare_Admin_User
+        sf org assign permset --name FormulaShare_Sample_App_Permissions
 
     - name: Run all apex tests
       run: |
