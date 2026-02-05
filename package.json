@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/LawrenceLoz/FormulaShare-DX#readme",
   "devDependencies": {
-    "@salesforce/sfdx-lwc-jest": "^1.4.1",
+    "@salesforce/sfdx-lwc-jest": "^5.1.0",
     "jest-canvas-mock": "latest"
   },
   "dependencies": {
