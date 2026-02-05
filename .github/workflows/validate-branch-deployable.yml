@@ -22,7 +22,7 @@ jobs:
   run-jest-tests:
     name: Run Jest Tests
     runs-on: ubuntu-latest
-    container: salesforce/cli:latest-slim
+    container: salesforce/cli:latest-full
     steps:
 
     - name: 'Checkout source code'
