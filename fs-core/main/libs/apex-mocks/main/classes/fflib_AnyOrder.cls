@@ -7,6 +7,7 @@
  *	The order of method calls is not important.
  *	@group Core
  */
+@NamespaceAccessible
 public class fflib_AnyOrder extends fflib_MethodVerifier
 {
 	/*

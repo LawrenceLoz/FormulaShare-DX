@@ -31,6 +31,7 @@
  *	To be consistent with Mockito, the capturer does not perform any checks on the type of the argument.
  * 	@group Core
  */
+@NamespaceAccessible
 public with sharing class fflib_ArgumentCaptor
 {
 	protected List<Object> argumentsCaptured = new List<Object>();
@@ -44,6 +45,7 @@ public with sharing class fflib_ArgumentCaptor
 	 * 	@param 	ignoredCaptureType Type (class) of the captured argument
 	 * 	@return A new fflib_ArgumentCaptor.
 	 */
+	@NamespaceAccessible
 	public static fflib_ArgumentCaptor forClass(Type ignoredCaptureType)
 	{
 		return new fflib_ArgumentCaptor();
@@ -56,6 +58,7 @@ public with sharing class fflib_ArgumentCaptor
 	 *
 	 * 	@return a special matcher that matches any argument and remembers the value.
 	 */
+	@NamespaceAccessible
 	public Object capture()
 	{
 		AnyObject myMatcher = new AnyObject(this);
@@ -69,6 +72,7 @@ public with sharing class fflib_ArgumentCaptor
 	 *
 	 * 	@return	captured argument value.
 	 */
+	@NamespaceAccessible
 	public Object getValue()
 	{
 		if( argumentsCaptured == null ||
@@ -87,11 +91,13 @@ public with sharing class fflib_ArgumentCaptor
 	 *
 	 * 	@return	Returns all captured values. Use it when capturing multiple arguments on the same call or when the verified method was called multiple times.
 	 */
+	@NamespaceAccessible
 	public List<Object> getAllValues()
 	{
 		return argumentsCaptured;
 	}
 
+	@NamespaceAccessible
 	public class AnyObject implements fflib_IMatcher
 	{
 		private fflib_ArgumentCaptor captor;

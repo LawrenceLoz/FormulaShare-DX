@@ -23,6 +23,7 @@
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+@NamespaceAccessible
 public class fflib_ApexMocksUtils
 {
 	/**
@@ -76,6 +77,7 @@ public class fflib_ApexMocksUtils
 	 * Generic overload to makeRelationship. Enables creation of
 	 * relationships in a loosely-coupled manner. 
 	 */
+	@NamespaceAccessible
 	public static Object makeRelationship(
 			String parentTypeName,
 			String childTypeName,
@@ -95,6 +97,7 @@ public class fflib_ApexMocksUtils
 	 * Gives the ability to set test values on formula
 	 * and other read-only fields of mock SObjects
 	 */
+	@NamespaceAccessible
 	public static Object setReadOnlyFields(SObject objInstance, Type deserializeType, Map<SObjectField, Object> properties) {
 
 		Map<String, Object> fieldNameMap = new Map<String, Object>();
@@ -109,6 +112,7 @@ public class fflib_ApexMocksUtils
 	 * Generic overload to setReadOnlyFields. Enables setting test
 	 * values on read-only fields by their name
 	 */
+	@NamespaceAccessible
 	public static Object setReadOnlyFields(SObject objInstance, Type deserializeType, Map<String, Object> properties) {
 
 		Map<String, Object> mergedMap = new Map<String, Object>(objInstance.getPopulatedFieldsAsMap());
