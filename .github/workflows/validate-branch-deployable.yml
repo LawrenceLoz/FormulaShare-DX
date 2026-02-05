@@ -28,6 +28,10 @@ jobs:
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
+    - name: Setup Jest
+      run: |
+        sf force lightning lwc test setup
+    
     - name: Run all Jest tests
       run: |
         sf force lightning lwc test run
@@ -50,7 +54,7 @@ jobs:
 
     - name: Create scratch org
       run: |
-        sf org create --definitionfile config/project-scratch-def.json --setdefaultusername --durationdays 1
+        sf org create scratch --definition-file config/project-scratch-def.json --set-default --duration-days 1
 
     - name: Push source
       run: |
@@ -58,8 +62,8 @@ jobs:
 
     - name: Assign permission sets
       run: |
-        sf org assign permset --name FormulaShare_Admin_User
-        sf org assign permset --name FormulaShare_Sample_App_Permissions
+        sf org assign permission-set --name FormulaShare_Admin_User
+        sf org assign permission-set --name FormulaShare_Sample_App_Permissions
 
     - name: Run all apex tests
       run: |
@@ -67,4 +71,4 @@ jobs:
 
     - name: Delete scratch org
       run: |
-        sf org delete --no-prompt
+        sf org delete scratch --no-prompt
