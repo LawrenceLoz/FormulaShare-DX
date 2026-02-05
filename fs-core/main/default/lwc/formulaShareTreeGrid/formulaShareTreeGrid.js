@@ -22,7 +22,10 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
     }
 
     connectedCallback() {
-        super.connectedCallback();
+        // Reuired for jest tests to avoid error
+        if (super.connectedCallback) {
+            super.connectedCallback();
+        }
         this.processData();
     }
 

@@ -1,5 +1,6 @@
 <template>
 
+    <template if:true={rule}>
     <div class="slds-section slds-is-open">
         <h3 class="slds-section__title slds-theme_shade">
             <span 
@@ -43,11 +44,12 @@
 
 
     <!-- Show section only if related object details -->
-    <template if:true={supportsRelated.data}>
-        <template if:true={rule.objectSharedLabel}>
-            <div class="slds-p-top_xx-small stackOrderTop">
+    <template if:true={supportsRelated}>
+        <template if:true={supportsRelated.data}>
+            <template if:true={rule.objectSharedLabel}>
+                <div class="slds-p-top_xx-small stackOrderTop">
 
-                <div class="slds-section slds-is-open">
+                    <div class="slds-section slds-is-open">
                     <h3 class="slds-section__title slds-theme_shade">
                         <span 
                             class="slds-truncate slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps"
@@ -73,6 +75,7 @@
         </template>
         <!-- Line below can be added to monitor full JSON -->
         <!-- Rule detail: {ruleDetail} -->
+        </template>
     </template>
 
 
@@ -158,6 +161,7 @@
             </div>
         </div>        
 
+    </template>
     </template>
 
 </template>

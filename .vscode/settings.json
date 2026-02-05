@@ -12,5 +12,8 @@
     "salesforcedx-vscode-core.retrieve-test-code-coverage": true,
     "html.suggest.angular1": false,
     "html.suggest.ionic": false,
-    "xml.preferences.showSchemaDocumentationType": "none"
+    "xml.preferences.showSchemaDocumentationType": "none",
+    "chat.tools.terminal.autoApprove": {
+        "Set-Content": true
+    }
 }

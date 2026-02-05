@@ -45,7 +45,7 @@ describe('c-formula-share-rules-list-view', () => {
         jest.clearAllMocks();
     });
 
-    it('Test lightning-tree-grid with no data (Positive).', () => {
+    it('Test c-formula-share-tree-grid with no data (Positive).', () => {
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -56,12 +56,12 @@ describe('c-formula-share-rules-list-view', () => {
 
         // Resolve a promise to wait for a rerender of the new content.
         return Promise.resolve().then(() => {
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+            const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
             expect(treeGrid).toBeNull();
         });
     });
 
-    it('Test row with example data + columns in lightning-tree-grid (Positive).', async () => {
+    it('Test row with example data + columns in c-formula-share-tree-grid (Positive).', async () => {
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -73,7 +73,7 @@ describe('c-formula-share-rules-list-view', () => {
         // Resolve a promise to wait for a rerender of the new content.
         await flushPromises();
 
-        const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
         const parents = treeGrid.data;
         const firstChild = parents[0]._children;
         const secondChild = parents[1]._children;
@@ -93,7 +93,7 @@ describe('c-formula-share-rules-list-view', () => {
         expect(populatedCols.has("sharedToLink"));
     });
 
-    it('Test row with example data + columns in lightning-tree-grid (Negative).', () => {
+    it('Test row with example data + columns in c-formula-share-tree-grid (Negative).', () => {
         // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/apexImperativeMethod/__tests__/apexImperativeMethod.test.js
 
         const TOAST_TITLE = 'Error fetching data from Salesforce';

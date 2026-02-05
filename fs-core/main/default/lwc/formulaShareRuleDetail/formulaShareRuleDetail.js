@@ -74,13 +74,15 @@ export default class FormulaShareRuleDetail extends LightningElement {
         .then((data) => {
             //console.log('retrieved rule: '+JSON.stringify(data));
             this.rule = data;
-            if(this.rule.type === 'standard' && !this.rule.mdMappingType) {
+            if(this.rule && this.rule.type === 'standard' && !this.rule.mdMappingType) {
                 this.savedRuleType = 'standard';
             }
             else {
                 this.savedRuleType = 'related';
             }
-            this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
+            if(this.rule) {
+                this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
+            }
             this.fireEventWithRule();
         });
     }
@@ -94,6 +96,9 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     // Getters for ruleDetailField component - return CMDT type and field if set, otherwise SObject type and field
     get objectWithShareField() {
+        if(!this.rule) {
+            return null;
+        }
         if(this.rule.mdMappingType) {
             return this.rule.mdMappingType;
         }
@@ -102,6 +107,9 @@ export default class FormulaShareRuleDetail extends LightningElement {
         }
     }
     get shareField() {
+        if(!this.rule) {
+            return null;
+        }
         if(this.rule.mdMappingType) {
             return this.rule.mdMappingSharedToField;
         }

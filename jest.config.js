@@ -3,7 +3,12 @@ const setupFilesAfterEnv = jestConfig.setupFilesAfterEnv || [];
 //setupFilesAfterEnv.push('<rootDir>/jest-sa11y-setup.js');
 module.exports = {
     ...jestConfig,
+    modulePaths: ['<rootDir>'],
     moduleNameMapper: {
+        '^c/(.+)$': [
+            '<rootDir>/fs-core/main/default/lwc/$1/$1',
+            '<rootDir>/fs-core/main/os/default/lwc/$1/$1'
+        ],
         //'^@salesforce/apex$': '<rootDir>/fs-core/main/test/jest-mocks/apex',
         //'^@salesforce/schema$': '<rootDir>/fs-app/test/jest-mocks/schema',
         '^lightning/navigation$':

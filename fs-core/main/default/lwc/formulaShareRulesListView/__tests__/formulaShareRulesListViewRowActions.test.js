@@ -72,7 +72,7 @@ describe('c-formula-share-rules-list-view', () => {
 //    function flushPromises() {
 //        return new Promise((resolve) => setImmediate(resolve));
 //    }
-    it('Test activate/deactivate rule (Negative).', () => {
+    it('Test activate/deactivate rule (Negative).', async () => {
         // Assign mock value for resolved Apex promise
         activateDeactivate.mockRejectedValue(ERROR_JSON);
 
@@ -91,52 +91,47 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(mockExampleTreeGridData);
         
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(async () => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
-
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'activate' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Add event listener to catch toast event.
-            //element.addEventListener(ShowToastEventName, handler);
-
-            // Emit error from @wire.
-            //getActivateDeactivateAdapter.error();
-
-            
-
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
+        // Wait for component to render
+        await flushPromises();
         
-            // Return an immediate flushed promise (after the LDS call) to then
-            // wait for any asynchronous DOM updates. Jest will automatically wait
-            // for the Promise chain to complete before ending the test and fail
-            // the test if the promise ends in the rejected state.
-            await flushPromises().then(() => {
-                // Check if toast event has been fired.
-                expect(handler).toHaveBeenCalled();
-                /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-                expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
-                expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
-            });
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        // Get first child of first parent.
+        const firstChild = parents[0]._children;
+        const firstRowOfFirstChild = firstChild[0];
+
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'activate' },
+                    row: firstRowOfFirstChild
+                }
         });
+        
+        // Add event listener to catch toast event.
+        //element.addEventListener(ShowToastEventName, handler);
+
+        // Emit error from @wire.
+        //getActivateDeactivateAdapter.error();
+
+        
+
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+    
+        // Wait for any asynchronous DOM updates
+        await flushPromises();
+        
+        // Check if toast event has been fired.
+        expect(handler).toHaveBeenCalled();
+        /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+        expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
+        expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
     })
 
-    it('Test submit for recalculation (Toast) (Positive).', () => {
+    it('Test submit for recalculation (Toast) (Positive).', async () => {
         // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
         const TOAST_TITLE = 'Calculation currently in progress';
         const TOAST_MESSAGE = 'Cannot re-submit until current calculation completes';
@@ -156,38 +151,36 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(batchIsProcessingTrue);
 
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            const firstParent = parents[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        const firstParent = parents[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'recalculate' },
-                        row: firstParent
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Check if toast event has been fired
-            expect(handler).toHaveBeenCalled();
-            expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-            expect(handler.mock.calls[0][0].detail.message).toBe(TOAST_MESSAGE);
-            expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);
-
-        })
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'recalculate' },
+                    row: firstParent
+                }
+        });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Check if toast event has been fired
+        expect(handler).toHaveBeenCalled();
+        expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+        expect(handler.mock.calls[0][0].detail.message).toBe(TOAST_MESSAGE);
+        expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);
     });
 
-    it('Test submit for recalculation check update processing (Positive).', () => {
+    it('Test submit for recalculation check update processing (Positive).', async () => {
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -197,46 +190,43 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(batchIsProcessingFalse);
 
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            const firstParent = parents[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        const firstParent = parents[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'recalculate' },
-                        row: firstParent
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;         
-            // Get first child of first parent.
-            const allChildren = parents[0]._children;
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'recalculate' },
+                    row: firstParent
+                }
+        });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Extract parents again after update.
+        const updatedParents = treeGrid.data;         
+        // Get first child of first parent.
+        const allChildren = updatedParents[0]._children;
 
-            // Assert if records are updated with current started processing.
-            allChildren.forEach(row => {
-                // @todo: Query lightning-tree-grid again and extract data to get changed row.
-                expect(row.lastCalcStatus).toBe('Processing...');
-                expect(row.iconName).toBe('standard:product_transfer');
-                expect(row.iconAlt).toBe('Currently Processing');
-            });
-        })
+        // Assert if records are updated with current started processing.
+        allChildren.forEach(row => {
+            // @todo: Query lightning-tree-grid again and extract data to get changed row.
+            expect(row.lastCalcStatus).toBe('Processing...');
+            expect(row.iconName).toBe('standard:product_transfer');
+            expect(row.iconAlt).toBe('Currently Processing');
+        });
     });
 
-    it('Test submit for recalculation (Toast) (Negative).', () => {
+    it('Test submit for recalculation (Toast) (Negative).', async () => {
         // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
 
         // Create initial lwc element and attach to virtual DOM.
@@ -253,12 +243,11 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(batchIsProcessingFalse);
 
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
             // Extract parents.
             const parents = treeGrid.data;
             const firstParent = parents[0];
@@ -271,16 +260,16 @@ describe('c-formula-share-rules-list-view', () => {
                     }
             });
             
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Check if toast event does NOT fired.
-            expect(handler).not.toHaveBeenCalled();
-        });
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Check if toast event does NOT fired.
+        expect(handler).not.toHaveBeenCalled();
     });
 
-    it('Test navigate to report (Positive).', () => {
+    it('Test navigate to report (Positive).', async () => {
         // https://salesforce.stackexchange.com/questions/285021/lightning-web-component-unit-testing-issue-with-testing-row-action-event
         jest.spyOn(window, 'open').mockReturnValue();
 
@@ -293,36 +282,35 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(mockExampleTreeGridData);
 
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        // Get first child of first parent.
+        const firstChild = parents[0]._children;
+        const firstRowOfFirstChild = firstChild[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'viewlogs' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Verify window.open was executed.
-            expect(window.open).toHaveBeenCalledTimes(1);
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'viewlogs' },
+                    row: firstRowOfFirstChild
+                }
         });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Verify window.open was executed.
+        expect(window.open).toHaveBeenCalledTimes(1);
     });
 
-    it('Test edit rule (Positive).', () => {
+    it('Test edit rule (Positive).', async () => {
         // Create initial lwc element and attach to virtual DOM.
         const element = createElement('c-formula-share-rules-list-view', {
             is: FormulaShareRulesListView
@@ -332,37 +320,36 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(mockExampleTreeGridData);
 
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        // Get first child of first parent.
+        const firstChild = parents[0]._children;
+        const firstRowOfFirstChild = firstChild[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'edit' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Verify c-formula-share-rule-edit is present in DOM.
-            const formulaShareRuleEdit = element.shadowRoot.querySelector('c-formula-share-rule-edit');
-            expect(formulaShareRuleEdit).not.toBeNull();
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'edit' },
+                    row: firstRowOfFirstChild
+                }
         });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Verify c-formula-share-rule-edit is present in DOM.
+        const formulaShareRuleEdit = element.shadowRoot.querySelector('c-formula-share-rule-edit');
+        expect(formulaShareRuleEdit).not.toBeNull();
     });
 
-    it('Test activate rule (Positive).', () => {
+    it('Test activate rule (Positive).', async () => {
         // Assign mock value for resolved Apex promise
         activateDeactivate.mockRejectedValue(SUCCESS_JSON);
 
@@ -375,35 +362,34 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(mockExampleTreeGridData);
         
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        // Get first child of first parent.
+        const firstChild = parents[0]._children;
+        const firstRowOfFirstChild = firstChild[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'activate' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Missing assertions. Don't know how to check if spinner appears.
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'activate' },
+                    row: firstRowOfFirstChild
+                }
         });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Missing assertions. Don't know how to check if spinner appears.
     });
 
-    it('Test deactivate rule (Positive).', () => {
+    it('Test deactivate rule (Positive).', async () => {
         // Assign mock value for resolved Apex promise
         activateDeactivate.mockRejectedValue(SUCCESS_JSON);
 
@@ -416,32 +402,31 @@ describe('c-formula-share-rules-list-view', () => {
         // Mock data.
         getTreeGridData.emit(mockExampleTreeGridData);
         
-        // Return a promise to wait for any asynchronous DOM updates. Jest
-        // will automatically wait for the Promise chain to complete before
-        // ending the test and fail the test if the promise rejects.
-        return Promise.resolve().then(() => {
-            // Select ligthning-tree-grid.
-            const treeGrid = element.shadowRoot.querySelector('lightning-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            // Get first child of first parent.
-            const firstChild = parents[0]._children;
-            const firstRowOfFirstChild = firstChild[0];
+        // Wait for component to render
+        await flushPromises();
+        
+        // Select ligthning-tree-grid.
+        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
+        // Extract parents.
+        const parents = treeGrid.data;
+        // Get first child of first parent.
+        const firstChild = parents[0]._children;
+        const firstRowOfFirstChild = firstChild[0];
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'deactivate' },
-                        row: firstRowOfFirstChild
-                    }
-            });
-            
-            // Trigger row action in lightning-tree-grid.
-            treeGrid.dispatchEvent(rowActionEvent);
-        })
-        .then(() => {
-            // Missing assertions. Don't know how to check if spinner appears.
+        const rowActionEvent = new CustomEvent(
+            'rowaction', {
+                detail: {
+                    action: { name: 'deactivate' },
+                    row: firstRowOfFirstChild
+                }
         });
+        
+        // Trigger row action in lightning-tree-grid.
+        treeGrid.dispatchEvent(rowActionEvent);
+        
+        await flushPromises();
+        
+        // Missing assertions. Don't know how to check if spinner appears.
     });
 
 });

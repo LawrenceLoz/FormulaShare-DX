@@ -28,13 +28,8 @@ jobs:
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
-    - name: Setup Jest
-      run: |
-        sf force lightning lwc test setup
-    
     - name: Run all Jest tests
-      run: |
-        sf force lightning lwc test run
+      run: npm run test:unit
 
 
   deploy-and-test-without-namespace:
@@ -62,7 +57,7 @@ jobs:
 
     - name: Assign permission sets
       run: |
-        sf org assign permset --name "FormulaShare_Admin_User FormulaShare_Sample_App_Permissions"
+        sf org assign permset --name FormulaShare_Admin_User FormulaShare_Sample_App_Permissions"
 
     - name: Run all apex tests
       run: |
