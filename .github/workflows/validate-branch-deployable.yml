@@ -27,7 +27,12 @@ jobs:
 
     - name: 'Checkout source code'
       uses: actions/checkout@v2
-
+    
+    # Update SF CLI to fix missing translation files
+    - name: Update Salesforce CLI
+      run: npm install --global @salesforce/cli@latest
+      shell: bash
+    
     - name: Install Jest
       run: |
         sf force:lightning:lwc:test:setup # ERROR: Unable to convert this command; you must convert it manually.
@@ -48,6 +53,11 @@ jobs:
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
+    # Update SF CLI to fix missing translation files
+    - name: Update Salesforce CLI
+      run: npm install --global @salesforce/cli@latest
+      shell: bash
+        
     - name: Authenticate and set default DevHub
       run: |
         echo "$JWT_SIGNING_KEY" > server.key
