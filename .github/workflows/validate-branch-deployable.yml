@@ -22,7 +22,7 @@ jobs:
   run-jest-tests:
     name: Run Jest Tests
     runs-on: ubuntu-latest
-    container: salesforce/salesforce/cli:latest-full
+    container: salesforce/cli:latest-slim
     steps:
 
     - name: 'Checkout source code'
@@ -41,7 +41,7 @@ jobs:
   deploy-and-test-without-namespace:
     name: Deploy and Test No Namespace
     runs-on: ubuntu-latest
-    container: salesforce/salesforcedx:latest-full
+    container: salesforce/cli:latest-slim
     steps:
 
     - name: 'Checkout source code'
