@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:unit": "sfdx-lwc-jest",
-    "test:unit:debug": "sfdx-lwc-jest --debug",
-    "test:unit:watch": "sfdx-lwc-jest --watch",
-    "test:unit:coverage": "sfdx-lwc-jest --coverage"
+    "test:unit": "npx sfdx-lwc-jest",
+    "test:unit:debug": "npx sfdx-lwc-jest --debug",
+    "test:unit:watch": "npx sfdx-lwc-jest --watch",
+    "test:unit:coverage": "npx sfdx-lwc-jest --coverage"
   },
   "repository": {
     "type": "git",
