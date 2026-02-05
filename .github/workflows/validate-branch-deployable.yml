@@ -28,14 +28,9 @@ jobs:
     - name: 'Checkout source code'
       uses: actions/checkout@v2
     
-    - name: Install Jest
-      run: |
-        sf force:lightning:lwc:test:setup # ERROR: Unable to convert this command; you must convert it manually.
-
     - name: Run all Jest tests
       run: |
-        sf force:lightning:lwc:test:run # ERROR: Unable to convert this command; you must convert it manually.
-
+        sf force lightning lwc test run
 
 
   deploy-and-test-without-namespace:
@@ -55,7 +50,7 @@ jobs:
 
     - name: Create scratch org
       run: |
-        sf force org create --definitionfile config/project-scratch-def.json --setdefaultusername --durationdays 1
+        sf org create --definitionfile config/project-scratch-def.json --setdefaultusername --durationdays 1
 
     - name: Push source
       run: |
@@ -72,4 +67,4 @@ jobs:
 
     - name: Delete scratch org
       run: |
-        sf force org delete --no-prompt
+        sf org delete --no-prompt
