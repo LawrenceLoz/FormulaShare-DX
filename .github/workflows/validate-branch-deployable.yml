@@ -22,7 +22,7 @@ jobs:
   run-jest-tests:
     name: Run Jest Tests
     runs-on: ubuntu-latest
-    container: salesforce/cli:latest-slim
+    container: salesforce/cli:latest-full
     steps:
 
     - name: 'Checkout source code'
@@ -62,8 +62,7 @@ jobs:
 
     - name: Assign permission sets
       run: |
-        sf org assign permission-set --name FormulaShare_Admin_User
-        sf org assign permission-set --name FormulaShare_Sample_App_Permissions
+        sf org assign permset --name "FormulaShare_Admin_User FormulaShare_Sample_App_Permissions"
 
     - name: Run all apex tests
       run: |
