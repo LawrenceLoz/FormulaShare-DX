@@ -6,6 +6,7 @@
  *	This class implements the actual verification.
  *	@group Core
  */
+@NamespaceAccessible
 public abstract class fflib_MethodVerifier
 {
 	/**

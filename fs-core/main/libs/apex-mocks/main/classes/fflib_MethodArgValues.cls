@@ -23,6 +23,7 @@
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+@NamespaceAccessible
 public with sharing class fflib_MethodArgValues
 {
 	public List<Object> argValues;
@@ -33,6 +34,7 @@ public with sharing class fflib_MethodArgValues
 	 * @param argValues The
 	 * @return fflib_MethodArgValues The method argument wrapper object
 	 */
+	@NamespaceAccessible
 	public fflib_MethodArgValues(List<Object> argValues)
 	{
 		this.argValues = argValues;
