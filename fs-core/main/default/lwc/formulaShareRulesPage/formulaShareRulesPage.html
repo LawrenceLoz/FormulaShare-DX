@@ -35,7 +35,8 @@
                   variant="base"
                   label="About"
                   onclick={handleAbout}
-                  class="slds-p-right_xxx-small">
+                  class="slds-p-right_xxx-small"
+                  data-name="helpAndAbout">  <!-- required for jest -->
               </lightning-button>
               
               <template if:false={rulesNotSetUp}>
@@ -44,7 +45,8 @@
                       variant="neutral"
                       label="New Rule"
                       onclick={handleNewRule}
-                      disabled={disableNewRule}>
+                      disabled={disableNewRule}
+                      data-name="newRule">  <!-- required for jest -->
                   </lightning-button>
 
                   <template if:true={showBatchAndFlowButtons}>
