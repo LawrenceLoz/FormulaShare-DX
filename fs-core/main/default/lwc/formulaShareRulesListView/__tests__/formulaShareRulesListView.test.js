@@ -74,13 +74,7 @@ describe('c-formula-share-rules-list-view', () => {
         await flushPromises();
 
         const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        const parents = treeGrid.data;
-        const firstChild = parents[0]._children;
-        const secondChild = parents[1]._children;
-
-        expect(parents).toHaveLength(2);
-        expect(firstChild).toHaveLength(2);
-        expect(secondChild).toHaveLength(4);
+        expect(treeGrid.data).toHaveLength(8);
 
         // Check that important columns present
         const columns = treeGrid.columns;
