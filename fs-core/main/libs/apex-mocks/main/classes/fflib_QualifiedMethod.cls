@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2016-2017 FinancialForce.com, inc.  All rights reserved.
  */
+@NamespaceAccessible
 public with sharing class fflib_QualifiedMethod
 {
 	public final Object mockInstance;
@@ -8,11 +9,13 @@ public with sharing class fflib_QualifiedMethod
 	public final String methodName;
 	public final List<Type> methodArgTypes;
 	
+	@NamespaceAccessible
 	public fflib_QualifiedMethod(String typeName, String methodName, List<Type> methodArgTypes)
 	{
 		this(typeName, methodName, methodArgTypes, null);
 	}
 
+	@NamespaceAccessible
 	public fflib_QualifiedMethod(String typeName, String methodName, List<Type> methodArgTypes, Object mockInstance)
 	{
 		this.mockInstance = mockInstance;

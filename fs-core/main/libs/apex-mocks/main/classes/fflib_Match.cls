@@ -23,6 +23,7 @@
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+@NamespaceAccessible
 public class fflib_Match
 {
 	private static List<fflib_IMatcher> matchers = new List<fflib_IMatcher>();
@@ -39,6 +40,7 @@ public class fflib_Match
 	 * @param expectedSize The expected number of matchers to be returned. If this does not match the actual value an expection is thrown.
 	 * @return List<fflib_IMatcher> The registered matchers, collected while in matching mode.
 	 */
+	@NamespaceAccessible
 	public static List<fflib_IMatcher> getAndClearMatchers(Integer expectedSize)
 	{
 		Matching = false;
@@ -65,6 +67,7 @@ public class fflib_Match
 	 * @throws fflib_ApexMocks.ApexMocksException Thrown when methodArgValues is null/empty, targetMatchers is null, or their sizes don't match
 	 * @return Boolean True if all arg values satisfy all of the supplied matchers.
 	 */
+	@NamespaceAccessible
 	public static Boolean matchesAllArgs(fflib_MethodArgValues methodArg, List<fflib_IMatcher> targetMatchers)
 	{
 		validateArgs(methodArg, targetMatchers);
@@ -115,6 +118,7 @@ public class fflib_Match
 	 * @return Object Always returns null. This can then be cast into the correct arg type
 	 * so that the right method is called on the mock objects.
 	 */
+	@NamespaceAccessible
 	public static Object matches(fflib_IMatcher matcher)
 	{
 		Matching = true;
