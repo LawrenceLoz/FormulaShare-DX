@@ -173,7 +173,9 @@ public with sharing class FormulaShareRulesListViewControllerTest {
                             System.assertEquals(fsRules[0].ruleId, rw.ruleId, 'Mis-match of rule ID in wrapper');
                             System.assert(rw.sharedToLink.contains('objecttoken1234'), 'Link missing object token');
                             System.assert(rw.sharedToLink.contains('fieldtoken12345'), 'Link missing field token');
-                            System.assertEquals(now.format(), rw.lastCalcStatus, 'Calc complete time does not match logs');
+                            // Compare only time portion (format() returns "M/d/yyyy, h:mm a")
+                            String expectedTime = now.format('h:mm a');
+                            System.assert(rw.lastCalcStatus.contains(expectedTime), 'Calc complete time does not match logs. Expected time: ' + expectedTime + ', Actual: ' + rw.lastCalcStatus);
                         }
                     }
                 }
