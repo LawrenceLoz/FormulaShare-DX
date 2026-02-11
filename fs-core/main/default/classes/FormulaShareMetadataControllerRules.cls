@@ -41,10 +41,20 @@ public with sharing class FormulaShareMetadataControllerRules {
     @AuraEnabled
     public static Id submitForCreate(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
+        
+        // Extract syncGroupsOnSave flag before converting to metadata
+        FormulaShareRule ruleObj = (FormulaShareRule) JSON.deserialize(fsRuleString, FormulaShareRule.class);
+        Boolean syncGroups = ruleObj.syncGroupsOnSave == true;
+        
         rule.Active__c = true;      // Create all new rules as active
         Map<String,SObject> ruleMap = FormulaShareUtilities.cmdtToCmdtMap(rule);
 
         FormulaShareMetadataDMLBase dmlService = getRulesDml(rule);
+        
+        // Set flag if this is a Rules DML service
+        if(dmlService instanceof FormulaShareMetadataDMLRules) {
+            ((FormulaShareMetadataDMLRules) dmlService).setSyncGroupsOnSave(syncGroups);
+        }
 
         Id jobId = dmlService.submitCreate(ruleMap);
         return jobId;
@@ -53,9 +63,19 @@ public with sharing class FormulaShareMetadataControllerRules {
     @AuraEnabled
     public static Id submitForEdit(String fsRuleString) {
         FormulaShare_Rule__mdt rule = ruleStringToRule(fsRuleString);
+        
+        // Extract syncGroupsOnSave flag before converting to metadata
+        FormulaShareRule ruleObj = (FormulaShareRule) JSON.deserialize(fsRuleString, FormulaShareRule.class);
+        Boolean syncGroups = ruleObj.syncGroupsOnSave == true;
+        
         Map<String,SObject> ruleMap = FormulaShareUtilities.cmdtToCmdtMap(rule);
 
         FormulaShareMetadataDMLBase dmlService = getRulesDml(rule);
+        
+        // Set flag if this is a Rules DML service
+        if(dmlService instanceof FormulaShareMetadataDMLRules) {
+            ((FormulaShareMetadataDMLRules) dmlService).setSyncGroupsOnSave(syncGroups);
+        }
         
         Id jobId = dmlService.submitEdit(ruleMap);
         return jobId;

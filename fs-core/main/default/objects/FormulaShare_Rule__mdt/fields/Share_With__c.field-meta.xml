@@ -16,6 +16,11 @@
                 <label>Users</label>
             </value>
             <value>
+                <fullName>Users with Matching Field Value</fullName>
+                <default>false</default>
+                <label>Users with Matching Field Value</label>
+            </value>
+            <value>
                 <fullName>Roles</fullName>
                 <default>false</default>
                 <label>Roles</label>

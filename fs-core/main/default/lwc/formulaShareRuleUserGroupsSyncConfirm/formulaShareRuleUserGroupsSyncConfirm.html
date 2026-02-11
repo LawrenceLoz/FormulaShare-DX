@@ -1,0 +1,37 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open" style="z-index: 9002;">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{title}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <p class="slds-m-bottom_small">{message}</p>
+                <p class="slds-m-bottom_small">{recommendation}</p>
+                <p class="slds-text-body_small slds-text-color_weak">
+                    <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
+                    This can take some time if there are a large number of active users. After clicking Synchronise Now this window will stay open until the job is finished, but you can close it to keep this running in the background.
+                </p>
+            </div>
+            <footer class="slds-modal__footer">
+                <lightning-button 
+                    variant="neutral" 
+                    label="Cancel" 
+                    onclick={handleCancel}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    variant="neutral" 
+                    label="Wait for Batch" 
+                    onclick={handleWaitForBatch}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    variant="brand" 
+                    label="Synchronise Now" 
+                    onclick={handleSyncNow}>
+                </lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" style="z-index: 9001; opacity: 0.7;"></div>
+</template>

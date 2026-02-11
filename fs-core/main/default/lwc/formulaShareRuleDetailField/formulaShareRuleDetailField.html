@@ -30,6 +30,23 @@
             <div class="slds-col slds-size_7-of-12">
                 <span>
                     <div class="slds-form slds-form_stacked">
+                        
+                        <template if:true={showUserSharingModeToggle}>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <lightning-radio-group
+                                        name="userSharingMode"
+                                        options={userSharingModeOptions}
+                                        value={userSharingMode}
+                                        onchange={handleUserSharingModeChange}
+                                        type="radio"
+                                        variant="label-hidden"
+                                        required>
+                                    </lightning-radio-group>
+                                </div>
+                            </div>
+                        </template>
+                        
                         <div class="slds-form-element">
                             <div class="slds-form-element__control">
                                 <template if:true={fieldOptions}>
@@ -37,7 +54,7 @@
                                     <div style="display:flex; align-items:flex-end;">
                                         <lightning-combobox
                                             name="_shareField"
-                                            label="Specified in Field"
+                                            label={shareFieldLabel}
                                             value={_shareField}
                                             placeholder="Select Field"
                                             options={fieldOptions}
@@ -66,24 +83,59 @@
                         <div class="slds-form-element">
                             <div class="slds-form-element__control">
 
-                                <lightning-combobox
-                                    class="slds-m-top_x-small"
-                                    name="shareFieldType"
-                                    label="Containing Type"
-                                    value={shareFieldType}
-                                    placeholder="Select"
-                                    options={shareFieldTypeOptions}
-                                    onchange={handleShareFieldTypeChange}
-                                    read-only={fieldTypeIsReadOnly}
-                                    disabled={disableShareField}
-                                    message-when-value-missing="Complete this field (depends on Share With option selected)"
-                                    required >
-                                </lightning-combobox>
+                                <template if:false={shareWithFlags.usersWithFieldMatch}>
+                                    <lightning-combobox
+                                        class="slds-m-top_x-small"
+                                        name="shareFieldType"
+                                        label="Containing Type"
+                                        value={shareFieldType}
+                                        placeholder="Select"
+                                        options={shareFieldTypeOptions}
+                                        onchange={handleShareFieldTypeChange}
+                                        read-only={fieldTypeIsReadOnly}
+                                        disabled={disableShareField}
+                                        message-when-value-missing="Complete this field (depends on Share With option selected)"
+                                        required >
+                                    </lightning-combobox>
+                                </template>
 
                                 <template if:true={fieldType}>
                                     <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewFieldDetails}>
                                         {fieldDetailsToggleText}
                                     </div>
+                                </template>
+
+                                <template if:true={shareWithFlags.usersWithFieldMatch}>
+                                    <div style="display:flex; align-items:flex-end;">
+                                        <lightning-combobox
+                                            class="slds-m-top_x-small"
+                                            name="userFieldForMatching"
+                                            label="User Field"
+                                            value={selectedUserFieldForMatching}
+                                            placeholder="Select User field"
+                                            options={userFieldMatchOptions}
+                                            onchange={handleUserFieldForMatchingChange}
+                                            required >
+                                        </lightning-combobox>
+
+                                        <div class="slds-m-left_x-small" onclick={refreshUserFields}>
+                                            <lightning-icon 
+                                                icon-name="action:refresh" 
+                                                alternative-text="Refresh" 
+                                                title="Refresh user fields" 
+                                                size="x-small">
+                                            </lightning-icon>
+                                            <template if:true={loadingUserFields}>
+                                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={selectedUserFieldForMatching}>
+                                        <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewUserFieldDetails}>
+                                            {userFieldDetailsToggleText}
+                                        </div>
+                                    </template>
                                 </template>
 
                             </div>
@@ -101,15 +153,13 @@
                     <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
                     <div class="slds-m-left_medium">
 
-                        <template if:true={shareWithFlags.users}>
-                            When <b>Users</b> is selected, rules will share to the&nbsp;
-                            <lightning-formatted-url 
-                            value={usersLink} 
-                            label="Users" 
-                            target="_blank"></lightning-formatted-url>
-                            &nbsp;referenced in the field selected as "Specified in Field".
-                            This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
-                            id of the user to receive access.
+                        <!-- It would have been nice to use a template expresssion here but they don't seem to work within template tags -->
+                        <template if:true={shareWithFlags.usersOrUsersWithFieldMatch}>
+                            There are two ways of sharing based on associated users.
+                            <br/><br/>
+                            Choose <b>"Specified in record field"</b> to share to users indicated in a field on the record. This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character id of the user to receive access.
+                            <br/><br/>
+                            Choose <b>"With a User field matching the record field"</b> to share to all users which have a value set in a field on their user record which matches a selected field on the record. Both fields can be either text, picklists, lookups, or formulas returning text. When this option is selected, public groups will be created and maintained by FormulaShare for each unique value in the field selected as "User Field".
                         </template>
 
                         <template if:true={shareWithFlags.roles}>
@@ -231,6 +281,7 @@
                             id of the user whose team should have access.
                             Default Opportunity Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
                         </template>
+
                     </div>
                 </div>
             </div>
@@ -242,6 +293,15 @@
                     object-api-name={objectWithShareField}
                     field-api-name={shareField}
                     field-formula={fieldFormula}>
+                </c-formula-share-browse-field-contents>
+            </div>
+        </template>
+
+        <template if:true={viewUserFieldDetails}>
+            <div class="slds-m-horizontal_medium slds-m-bottom_medium">
+                <c-formula-share-browse-field-contents
+                    object-api-name="User"
+                    field-api-name={selectedUserFieldForMatching}>
                 </c-formula-share-browse-field-contents>
             </div>
         </template>

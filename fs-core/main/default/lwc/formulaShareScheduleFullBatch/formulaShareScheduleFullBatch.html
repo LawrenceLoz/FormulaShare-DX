@@ -3,11 +3,12 @@
         <div class="slds-modal__container">
             <header class="slds-modal__header">
                 <lightning-button-icon
-                    class="slds-modal__close"
-                    title="Close"
-                    icon-name="utility:close"
-                    icon-class="slds-button_icon-inverse"
-                    onclick={handleClose}>
+                  class="slds-modal__close slds-button slds-button_icon slds-button_icon-inverse"
+                  variant="bare"
+                  title="Cancel and close"
+                  icon-name="utility:close"
+                  icon-class="slds-button__icon slds-button__icon_large"
+                  onclick={handleClose}>
                 </lightning-button-icon>
                 <h2 class="slds-text-heading_medium">Schedule Full Recalculation</h2>
             </header>

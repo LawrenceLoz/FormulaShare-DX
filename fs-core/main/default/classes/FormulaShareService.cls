@@ -191,12 +191,7 @@ public inherited sharing class FormulaShareService {
 
 	// Submits batch recalculation of all sharing
 	public static void recalculateAll() {
-		List<Schema.SObjectType> types = getSharedObjectTypes();
-		if(!types.isEmpty()) {
-			FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
-			Integer batchSize = settings.Recalculation_Batch_Size__c.intValue();
-			Id batchJobId = Database.executeBatch(new FormulaShareProcessBatch(types, 'Full Recalculation Batch', batchSize), batchSize);
-		}
+		FormulaShareFullRecalculationService.recalculateAll();
 	}
 	
 
@@ -624,26 +619,6 @@ public inherited sharing class FormulaShareService {
 
 	}
 	
-
-	private static List<SObjectType> getSharedObjectTypes() {
-
-		List<SObjectType> typesList = new List<SObjectType>();
-		Set<SObjectType> typesSet = new Set<SObjectType>();
-
-		// Loop through all rules and populate set of shared objects
-        FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
-
-		for(String objName : rulesSelector.selectObjectsWithRules(false).keySet()) {
-			SObjectType type = FormulaShareUtilities.globalDescribe.get(objName);
-			typesSet.add(type);
-		}
-
-		for(SObjectType type : typesSet) {
-			typesList.add(type);
-		}
-
-		return typesList;
-	}
 
 	// Called by trigger method when we can't guarantee all record sharing is in scope of processing
 	public void disableShareRemoval() {
