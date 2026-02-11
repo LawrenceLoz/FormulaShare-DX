@@ -1,0 +1,9 @@
+.slds-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slds-modal__container {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5);
+}

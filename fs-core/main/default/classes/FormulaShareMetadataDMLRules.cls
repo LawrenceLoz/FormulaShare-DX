@@ -1,5 +1,7 @@
 public inherited sharing virtual class FormulaShareMetadataDMLRules extends FormulaShareMetadataDMLBase {
 
+    private Boolean syncGroupsOnSave = false;
+
     public FormulaShareMetadataDMLRules() {
         super();
         configureBase();
@@ -8,6 +10,10 @@ public inherited sharing virtual class FormulaShareMetadataDMLRules extends Form
     protected FormulaShareMetadataDMLRules(FormulaShareMetadataBroker broker) {
         super(broker);
         configureBase();
+    }
+    
+    public void setSyncGroupsOnSave(Boolean syncGroups) {
+        this.syncGroupsOnSave = syncGroups;
     }
 
     private void configureBase() {
@@ -41,7 +47,8 @@ public inherited sharing virtual class FormulaShareMetadataDMLRules extends Form
             namespacePrefix + 'Access_For_Team_Comembers__c',
             namespacePrefix + 'Metadata_Mapping_Type__c',
             namespacePrefix + 'Metadata_Mapping_Match_Field__c',
-            namespacePrefix + 'Metadata_Mapping_Shared_To_Field__c'
+            namespacePrefix + 'Metadata_Mapping_Shared_To_Field__c',
+            namespacePrefix + 'User_Field_For_Matching__c'
         };
         this.fieldsToSetOrClear.addAll(new FormulaShareInjectionService().getExtraRelationshipFields());
 
@@ -50,7 +57,11 @@ public inherited sharing virtual class FormulaShareMetadataDMLRules extends Form
 
     public override void handleDeploySuccess(Metadata.DeployResult result) {
         publishRuleEvents(result, true);
-        system.debug('Published edit/create');
+        
+        // Invoke groups batch if requested
+        if(this.syncGroupsOnSave) {
+            new FormulaShareInjectionService().getPostMetadataDMLService().handle();
+        }
     }
 
     public override void handleDeployError(Metadata.DeployResult result) {

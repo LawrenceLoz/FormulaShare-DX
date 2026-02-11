@@ -64,6 +64,10 @@ public virtual inherited sharing class FormulaShareRule {
     @AuraEnabled public String mdMappingType;
     @AuraEnabled public String mdMappingMatchField;
     @AuraEnabled public String mdMappingSharedToField;
+    @AuraEnabled public String userFieldForMatching;
+
+    // Flag to indicate whether to sync groups on save (not persisted to metadata, but needs to be deserialized)
+    @AuraEnabled public Boolean syncGroupsOnSave;
 
     @AuraEnabled public String accessForTeam;
     @AuraEnabled public String accessForOwnerOfTeamsUserIsOn;
@@ -137,6 +141,8 @@ public virtual inherited sharing class FormulaShareRule {
         accessForTeam = rule.Access_For_Team__c;
         accessForOwnerOfTeamsUserIsOn = rule.Access_For_Owner_Of_Teams_User_Is_On__c;
         accessForTeamComembers = rule.Access_For_Team_Comembers__c;
+
+        userFieldForMatching = rule.User_Field_For_Matching__c;
 
         // Object to share
         objectSharedAPIName = rule.Object_Shared__r.QualifiedApiName;

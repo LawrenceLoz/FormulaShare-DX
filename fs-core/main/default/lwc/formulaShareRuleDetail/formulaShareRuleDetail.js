@@ -262,6 +262,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
         //console.log('sharewith change');
         this.rule.shareWith = event.detail;
         this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
+        
+        // Clear userFieldForMatching when switching away from Users or from matching mode
+        if(this.rule.shareWith !== 'Users' && this.rule.shareWith !== 'Users with Matching Field Value') {
+            this.rule.userFieldForMatching = null;
+        }
+        
         this.fireEventWithRule();
     }
     handleShareFieldTypeChange(event) {
@@ -301,8 +307,23 @@ export default class FormulaShareRuleDetail extends LightningElement {
 
     handleMismatchFieldChange(event) {
         this.rule[event.detail.fieldName] = event.detail.value;
-        //console.log('***Set property: '+event.detail.fieldName+' to: '+event.detail.value);
+//        console.log('***Set property: '+event.detail.fieldName+' to: '+event.detail.value);
         
+        this.fireEventWithRule();
+    }
+
+    handleUserFieldForMatchingChange(event) {
+        this.rule.userFieldForMatching = event.detail;
+        console.log('***Set userFieldForMatching: '+event.detail);
+        this.fireEventWithRule();
+    }
+
+    handleUserSharingModeChange(event) {
+        // When switching from matching to specified mode, clear userFieldForMatching
+        if(event.detail !== 'matching') {
+            this.rule.userFieldForMatching = null;
+        }
+        // Note: shareWith will be updated via handleShareWithChange event
         this.fireEventWithRule();
     }
 

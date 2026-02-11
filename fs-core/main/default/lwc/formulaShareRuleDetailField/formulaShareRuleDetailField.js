@@ -28,6 +28,8 @@ import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailControl
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import isAccountTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isAccountTeamSharingSupported';
 import isOpportunityTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isOpportunityTeamSharingSupported';
+import supportsUsersWithFieldMatch from '@salesforce/apex/FormulaShareLwcAvailabilityController.supportsUsersWithFieldMatch';
+import getUserFieldMatchOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getUserFieldMatchOptions';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
@@ -56,13 +58,31 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
     @api
     get shareWith() {
+        // When getting the value, return legacy "Users with Matching Field Value" if in matching mode
+        if (this._shareWith === 'Users' && this.userSharingMode === 'matching') {
+            return 'Users with Matching Field Value';
+        }
         return this._shareWith;
     }
     set shareWith(value) {
-        // Update options for field type if necessary
-        if(this._shareWith !== value) {
+        // Handle legacy "Users with Matching Field Value" value
+        if (value === 'Users with Matching Field Value') {
+            const wasChanged = this._shareWith !== 'Users' || this.userSharingMode !== 'matching';
+            this._shareWith = 'Users';
+            this.userSharingMode = 'matching';
+            if (wasChanged) {
+                this.updateShareFieldTypeOptions();
+                this.updateshareWithFlags();
+            }
+        } 
+        // Update if shareWith value is different
+        else if(this._shareWith !== value) {
             //console.log('setting share with: ',value);
             this._shareWith = value;
+            // Reset to default mode if switching to Users from another option
+            if (value === 'Users' && this.userSharingMode !== 'specified') {
+                this.userSharingMode = 'specified';
+            }
             this.updateShareFieldTypeOptions();
             this.updateshareWithFlags();            
         }
@@ -98,6 +118,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.updateFieldDetails();
     }
     _shareField;
+
+    // Dynamic label for the record-side field depending on Share With option and user sharing mode
+    get shareFieldLabel() {
+        if (this._shareWith === 'Users' && this.userSharingMode === 'matching') {
+            return 'Record Field';
+        }
+        return 'Specified in Field';
+    }
 
     @api
     get shareFieldType() {
@@ -171,8 +199,46 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
 
-    @track shareWithOptions;
-    updateShareWithOptions() {
+    supportsUsersWithFieldMatchFlag = false;
+    @track userFieldMatchOptions = [];
+    @track loadingUserFields = false;
+    @api
+    get selectedUserFieldForMatching() {
+        return this._selectedUserFieldForMatching;
+    }
+    set selectedUserFieldForMatching(value) {
+        this._selectedUserFieldForMatching = value;
+    }
+    _selectedUserFieldForMatching; // stores API name to persist to CMDT User_Field_For_Matching__c
+    shareWithFlags = {}; // Initialize to empty object to prevent undefined errors
+    
+    // Track the user sharing mode: 'specified' or 'matching'
+    userSharingMode = 'specified';
+    
+    // Getter for user sharing mode options
+    get userSharingModeOptions() {
+        const options = [
+            { label: 'Specified in a record field', value: 'specified' }
+        ];
+        
+        // Only show the matching option if the feature is supported
+        if (this.supportsUsersWithFieldMatchFlag) {
+            options.push({ 
+                label: 'With a User field matching the record field', 
+                value: 'matching' 
+            });
+        }
+        
+        return options;
+    }
+    
+    // Show user sharing mode toggle when Users is selected
+    get showUserSharingModeToggle() {
+        return this._shareWith === 'Users';
+    }
+
+    get shareWithOptions() {
+        console.log('shareWithOptions getter called - supportsUsersWithFieldMatchFlag:', this.supportsUsersWithFieldMatchFlag);
         var optionsList = [
             { label: 'Users', value: 'Users' },
             { label: 'Roles', value: 'Roles' },
@@ -203,7 +269,16 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             optionsList.push( { label: 'Default Opportunity Teams of Users', value: 'Default Opportunity Teams of Users' } );
         }
 
-        this.shareWithOptions = optionsList;
+        // Note: "Users with Matching Field Value" is now handled via toggle when Users is selected
+        // No longer added as a separate option in the list
+
+        return optionsList;
+    }
+
+    updateShareWithOptions() {
+        // This method is now a no-op since shareWithOptions is a getter
+        // Kept for backwards compatibility with calls from wire adapters
+        console.log('updateShareWithOptions called (now using getter)');
     }
 
     managerSharingSupported;
@@ -242,6 +317,37 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
         else if(error) {
             console.log('Error with wire service: '+error);
+        }
+    }
+
+    // Detect availability of managed-only option and fetch user field options
+    @wire(supportsUsersWithFieldMatch)
+    wiredSupportsUsersWithFieldMatch(value) {
+        const { data, error } = value;
+        console.log('Wire adapter called - data:', data, 'error:', error);
+        if(data !== undefined) {
+            this.supportsUsersWithFieldMatchFlag = data === true;
+            this.updateShareWithOptions();
+            if(this.supportsUsersWithFieldMatchFlag) {
+                // Fetch user field options for matching picklist
+                getUserFieldMatchOptions()
+                    .then((opts) => {
+                        this.userFieldMatchOptions = (opts || []).map(o => {
+                            return {
+                                label: o.fieldLabel + ' (' + o.fieldApiName + ')',
+                                value: o.fieldApiName
+                            };
+                        });
+                        console.log('User field match options loaded:', this.userFieldMatchOptions.length);
+                    })
+                    .catch((e) => {
+                        // eslint-disable-next-line no-console
+                        console.log('Error getting user match fields ', e);
+                    });
+            }
+        } else if(error) {
+            // eslint-disable-next-line no-console
+            console.log('Error detecting supportsUsersWithFieldMatch ', error);
         }
     }
 
@@ -293,6 +399,27 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             this.loadingFields = false;
         })
     }
+
+    refreshUserFields() {
+        console.log('refreshing user fields');
+        this.loadingUserFields = true;
+        getUserFieldMatchOptions()
+            .then((opts) => {
+                this.userFieldMatchOptions = (opts || []).map(o => {
+                    return {
+                        label: o.fieldLabel + ' (' + o.fieldApiName + ')',
+                        value: o.fieldApiName
+                    };
+                });
+                this.loadingUserFields = false;
+                console.log('User field match options refreshed:', this.userFieldMatchOptions.length);
+            })
+            .catch((e) => {
+                this.loadingUserFields = false;
+                // eslint-disable-next-line no-console
+                console.log('Error refreshing user match fields ', e);
+            });
+    }
     
     // Set options to include id fields (user lookups) only if Users or a Manager Groups option selected
     setFieldOptions() {
@@ -318,6 +445,19 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         //console.log('this._shareWith ',this._shareWith);
         switch (this._shareWith) {
             case 'Users':
+                // For Users with Matching Field Value, use Name type for text field matching
+                if (this.userSharingMode === 'matching') {
+                    this.shareFieldTypeOptions = [
+                        { label: 'Name/text field to match', value: 'Name' }
+                    ];
+                    this.fieldTypeIsReadOnly = true;
+                } else {
+                    this.shareFieldTypeOptions = [
+                        { label: 'Id of user', value: 'Id' }
+                    ];
+                    this.fieldTypeIsReadOnly = true;
+                }
+                break;
             case 'Managers of Users':
             case 'Users and Manager Subordinates':
             case 'Default Account Teams of Users':
@@ -351,13 +491,21 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
 
-    shareWithFlags;
     updateshareWithFlags() {
         this.shareWithFlags = {};
-        switch (this._shareWith) {
-            case 'Users':
+        
+        // Handle Users option - check the mode to determine if it's matching
+        if (this._shareWith === 'Users') {
+            if (this.userSharingMode === 'matching') {
+                this.shareWithFlags.usersWithFieldMatch = true;
+                this.shareWithFlags.usersOrUsersWithFieldMatch = true;
+            } else {
                 this.shareWithFlags.users = true;
-                break;
+                this.shareWithFlags.usersOrUsersWithFieldMatch = true;
+            }
+        }
+        
+        switch (this._shareWith) {
             case 'Roles':
                 this.shareWithFlags.roles = true;
                 break;
@@ -420,6 +568,21 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         else {
             this.viewFieldDetails = true;
             this.fieldDetailsToggleText = this.viewFieldDetailsOpen;
+        }
+    }
+
+    @track viewUserFieldDetails;
+    userFieldDetailsClosed = 'Browse field contents';
+    userFieldDetailsOpen = 'Hide field contents';
+    @track userFieldDetailsToggleText = this.userFieldDetailsClosed;
+    toggleViewUserFieldDetails() {
+        if(this.viewUserFieldDetails) {
+            this.viewUserFieldDetails = false;
+            this.userFieldDetailsToggleText = this.userFieldDetailsClosed;
+        }
+        else {
+            this.viewUserFieldDetails = true;
+            this.userFieldDetailsToggleText = this.userFieldDetailsOpen;
         }
     }
 
@@ -501,6 +664,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     handleShareWithChange(event) {
         this._shareWith = event.detail.value;
         //console.log('share with changed: ',this._shareWith);
+        
+        // Reset user sharing mode when Users is selected
+        if (this._shareWith === 'Users') {
+            this.userSharingMode = 'specified';
+        }
+        
         const evt = new CustomEvent('sharewithchange', {
             detail: this._shareWith
         });
@@ -510,6 +679,31 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         this.setDefaultFieldType();
         this.setFieldOptions();
         this.setNoMatchBehaviourOptions();
+    }
+    
+    handleUserSharingModeChange(event) {
+        this.userSharingMode = event.detail.value;
+        
+        // Update field type options based on the new mode (Name for matching, Id for specified)
+        this.updateShareFieldTypeOptions();
+        
+        // Update the actual field type value (must be done after updating options)
+        this.updateShareFieldType(this.userSharingMode === 'matching' ? 'Name' : 'Id');
+        
+        // Update the flags based on the new mode
+        this.updateshareWithFlags();
+        
+        // Dispatch sharewithchange event so parent gets updated shareWith value
+        const shareWithEvt = new CustomEvent('sharewithchange', {
+            detail: this.shareWith  // This getter will return the appropriate value
+        });
+        this.dispatchEvent(shareWithEvt);
+        
+        // Also dispatch specific mode change event
+        const modeEvt = new CustomEvent('usersharingmodechange', {
+            detail: this.userSharingMode
+        });
+        this.dispatchEvent(modeEvt);
     }
 
     handleShareFieldChange(event) {
@@ -572,8 +766,12 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
     updateShareFieldType(value) {
 
-        // If sharing to users or manager groups, type should always be Id
-        if(this.shareWith && 
+        // For Users with Matching Field Value, type should be Name (for text field matching)
+        if(this.shareWith === 'Users' && this.userSharingMode === 'matching') {
+            this._shareFieldType = 'Name';
+        }
+        // For other user-related sharing, type should always be Id
+        else if(this.shareWith && 
             ['Users'
             , 'Managers of Users'
             , 'Users and Manager Subordinates'
@@ -614,6 +812,16 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 fieldName: fieldName,
                 value: value
             }
+        });
+        this.dispatchEvent(evt);
+    }
+
+    // Event to persist the selected user field for matching back to parent
+    handleUserFieldForMatchingChange(event) {
+        this.selectedUserFieldForMatching = event.detail.value;
+        console.log('***Set userFieldForMatching: '+this.selectedUserFieldForMatching);
+        const evt = new CustomEvent('userfieldformatchingchange', {
+            detail: this.selectedUserFieldForMatching
         });
         this.dispatchEvent(evt);
     }
