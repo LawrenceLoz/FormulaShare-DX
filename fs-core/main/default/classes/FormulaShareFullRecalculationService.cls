@@ -45,7 +45,7 @@ public inherited sharing class FormulaShareFullRecalculationService {
 		}
 
 		// Get object settings to determine sequence ordering
-		FormulaShareObjectSettingsSelector settingsSelector = new FormulaShareObjectSettingsSelector();
+		FormulaShareRemoveSharesSelector settingsSelector = new FormulaShareInjectionService().getRemoveSharesSelector();
 		List<FormulaShare_Std_Object_to_Remove_Shares__mdt> allSettings = settingsSelector.getAllSettings();
 		
 		// Build map of object name to sequence for objects with settings

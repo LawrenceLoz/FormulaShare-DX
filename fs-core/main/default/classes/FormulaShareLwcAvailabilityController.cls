@@ -7,18 +7,23 @@ public with sharing class FormulaShareLwcAvailabilityController {
     @AuraEnabled(cacheable=true)
     public static Boolean supportsUsersWithFieldMatch() {
         try {
-            // If Injection Service can instantiate the class list and it contains our handler,
-            // then the feature is available in this org (managed app present).
-            FormulaShareInjectionService inj = new FormulaShareInjectionService();
-            List<FormulaShareShareWithBase> handlers = inj.getShareWithClasses(null);
-            for (FormulaShareShareWithBase h : handlers) {
-                if (h instanceof FormulaShareShareWithUsersWithFieldMatch) {
-                    return true;
+            // Check if the class exists in this org (managed app present)
+            // Using Type.forName to avoid compile-time dependency on managed-only class
+            Type fieldMatchType = Type.forName('FormulaShareShareWithUsersWithFieldMatch');
+            if (fieldMatchType != null) {
+                // If we can get the type, the managed feature is available
+                FormulaShareInjectionService inj = new FormulaShareInjectionService();
+                List<FormulaShareShareWithBase> handlers = inj.getShareWithClasses(null);
+                for (FormulaShareShareWithBase h : handlers) {
+                    // Check if handler is an instance of the field match class using type comparison
+                    if (String.valueOf(h).startsWith('FormulaShareShareWithUsersWithFieldMatch')) {
+                        return true;
+                    }
                 }
             }
             return false;
         } catch (Exception e) {
-            // If class not present, constructor or instanceof will fail in OSS => return false.
+            // If class not present or any error occurs in OSS => return false.
             return false;
         }
     }
