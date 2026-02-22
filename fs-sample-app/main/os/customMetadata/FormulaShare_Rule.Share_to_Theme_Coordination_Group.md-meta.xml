@@ -208,6 +208,6 @@
   </values>
   <values>
     <field>Sharing_Reason__c</field>
-    <value xsi:type="xsd:string">sdfs__Thematic_Area_Coordination_Group__c</value>
+    <value xsi:type="xsd:string">Thematic_Area_Coordination_Group__c</value>
   </values>
 </CustomMetadata>

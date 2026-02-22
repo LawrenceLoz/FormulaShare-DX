@@ -208,6 +208,6 @@
   </values>
   <values>
     <field>Sharing_Reason__c</field>
-    <value xsi:type="xsd:string">sdfs__External_roles__c</value>
+    <value xsi:type="xsd:string">External_roles__c</value>
   </values>
 </CustomMetadata>
