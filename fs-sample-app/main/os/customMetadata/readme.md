@@ -1,0 +1,1 @@
+Note that rule files are added here when they would include a namespace reference in the packaged version
