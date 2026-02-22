@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Recalculate After Parent Update</label>
+    <protected>false</protected>
+    <values>
+        <field>Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Allow_Processing_in_Parallel__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Recalculate Donations which have had their parent Programme or grandparent Country record updated since the last job run</value>
+    </values>
+    <values>
+        <field>Filter_Condition__c</field>
+        <value xsi:type="xsd:string">True</value>
+    </values>
+    <values>
+        <field>Filter_Field__c</field>
+        <value xsi:type="xsd:string">Programme_or_Country_Updated_Today__c</value>
+    </values>
+    <values>
+        <field>Object__c</field>
+        <value xsi:type="xsd:string">Donation__c</value>
+    </values>
+    <values>
+        <field>Schedule_Base__c</field>
+        <value xsi:type="xsd:string">Minutes</value>
+    </values>
+    <values>
+        <field>Schedule_Frequency__c</field>
+        <value xsi:type="xsd:double">15.0</value>
+    </values>
+</CustomMetadata>

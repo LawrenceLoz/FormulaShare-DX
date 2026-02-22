@@ -15,6 +15,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Country__c.Name_of_Country_CMDT_Record__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Donation_Payment__c.Amount__c</field>
         <readable>true</readable>
     </fieldPermissions>
