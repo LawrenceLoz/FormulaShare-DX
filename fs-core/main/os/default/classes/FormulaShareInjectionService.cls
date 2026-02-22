@@ -84,6 +84,10 @@ public with sharing class FormulaShareInjectionService {
         return new FormulaShareSharedValueMapper();
     }
 
+    public FormulaShareMetadataPostDMLService getPostMetadataDMLService() {
+        return new FormulaShareMetadataPostDMLService();
+    }
+
 
     public Set<String> getExtraRelationshipFields() {
         return new Set<String>();

@@ -103,7 +103,7 @@ public with sharing class FormulaShareShareWithPublicGroupsTest {
         Test.stopTest();
 
         String message = getLogMessageArgumentFromCaptureEntityNotFound(serviceMock);
-        System.assertEquals('Rule default \''+recRule.rule.fallbackShareToFieldMismatch+'\' should correspond to an active public group, but no group was found with this name', message, 'Error should be logged for invalid fallback name');
+        System.assertEquals('Rule default \''+recRule.rule.fallbackShareToFieldMismatch+'\' should correspond to an active public group with name \''+recRule.rule.fallbackShareToFieldMismatch+'\', but no group was found with this name', message, 'Error should be logged for invalid fallback name');
     }
 
     @IsTest
@@ -121,7 +121,7 @@ public with sharing class FormulaShareShareWithPublicGroupsTest {
         Test.stopTest();
 
         String message = getLogMessageArgumentFromCaptureEntityNotFound(serviceMock);
-        System.assertEquals('Field value \''+'NotARealGroupName'+'\' should correspond to an active public group, but no group was found with this name', message, 'Error should be logged for invalid sharedTo name');
+        System.assertEquals('Field value \'NotARealGroupName\' should correspond to an active public group with name \'NotARealGroupName\', but no group was found with this name', message, 'Error should be logged for invalid sharedTo name');
     }
 
 

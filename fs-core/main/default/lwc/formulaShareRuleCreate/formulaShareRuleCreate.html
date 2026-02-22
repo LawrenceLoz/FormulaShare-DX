@@ -12,7 +12,7 @@
                         onpreventsave={handlePreventSave}>
                     </c-formula-share-rule-detail>
                     <template if:true={processing}>
-                        <lightning-spinner class={spinnerClasses} alternative-text="Loading" size="x-large"></lightning-spinner>
+                        <lightning-spinner class={spinnerClasses} alternative-text={spinnerMessage} size="x-large"></lightning-spinner>
                     </template>
                 </div>
                 <footer class="slds-modal__footer">
@@ -30,6 +30,18 @@
                 </footer>
             </div>
         </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>    
+        <div class="slds-backdrop slds-backdrop_open"></div>
+        
+        <!-- Groups Sync Confirmation Dialog -->
+        <template if:true={showGroupsSyncDialog}>
+            <div style="z-index: 9001;">
+                <c-formula-share-rule-user-groups-sync-confirm
+                    is-edit={isEdit}
+                    onsyncnow={handleGroupsSyncNow}
+                    onwaitforbatch={handleGroupsWaitForBatch}
+                    oncancel={handleGroupsSyncCancel}>
+                </c-formula-share-rule-user-groups-sync-confirm>
+            </div>
+        </template>
     </div>
 </template>
