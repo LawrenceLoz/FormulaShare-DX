@@ -14,7 +14,7 @@ public inherited sharing class FormulaShareApexClassSelector extends fflib_SObje
 
     /**
      * Returns the Ids of ApexClass records that match the provided names and namespace.
-     * If namespace is null or empty, it will look for classes with a null NamespacePrefix.
+     * If namespace is null or empty, it will look for classes with a null NamespacePrefix. 
      */
     public Set<Id> getIdsByNamesAndNamespace(Set<String> names, String namespace) {
         if (names == null || names.isEmpty()) {
