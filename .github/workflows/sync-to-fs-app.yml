@@ -3,12 +3,15 @@
 
 name: Sync to FS-App repo
 
-# Run for all commits to main
+# This would previously run for all commits to main
+# Revised workflow is that changes are synced from the app repo to this repo, so we only 
+# need to trigger the sync manually on open source contributions. 
+# Workflow call retained for these cases
 on:
   workflow_dispatch:
-  push:
-    branches:
-       - main
+#  push:
+#    branches:
+#       - main
 
 env:
   PAT_FOR_REPO_INTEGRATION:  ${{ secrets.PAT_FOR_REPO_INTEGRATION }}
