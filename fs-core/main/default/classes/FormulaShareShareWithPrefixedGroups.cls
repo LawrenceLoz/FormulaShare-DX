@@ -28,7 +28,7 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
         return Schema.Group.getSObjectType();
     }
 
-    public override void checkAndAdd(String sharedToString, 
+    public virtual override void checkAndAdd(String sharedToString,
         FormulaShareService.RecordRule recRule) {
         
         if (recRule.rule.shareWith == getShareWithLabel()) {
@@ -53,7 +53,7 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
         }
     }
 
-    public override void assess() {
+    public virtual override void assess() {
         if (recordRules.isEmpty()) {
             return;
         }
@@ -64,7 +64,7 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
 
             String sharedToName = (String) recRule.sharedToString;
             String fullDevName = getFullDeveloperName(sharedToName, recRule);
-            Id groupId = groupsMap.get(fullDevName);
+            Id groupId = groupsMap.get(fullDevName.toLowerCase());
 
             if (groupId != null) {
                 service.updateShareMaps(recRule.recordToShare.Id, groupId, 
@@ -118,9 +118,9 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
         FormulaShareService.RecordRule recRule, Map<String, Id> groupsMap) {
         
         if (recRule.rule.behaviourShareToFieldMismatch == 'Share With Default') {
-            String fallbackPrefixedName = getPrefix() + 
+            String fallbackPrefixedName = getPrefix() +
                 recRule.rule.fallbackShareToFieldMismatch;
-            Id fallbackGroupId = groupsMap.get(fallbackPrefixedName);
+            Id fallbackGroupId = groupsMap.get(fallbackPrefixedName.toLowerCase());
             
             if (fallbackGroupId != null) {
                 service.updateShareMaps(recRule.recordToShare.Id, fallbackGroupId, 
@@ -142,18 +142,20 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
     }
 
     /**
-     * Queries for groups matching the collected names
+     * Queries for groups matching the collected names.
+     * Keys are stored lowercased so map lookups are case-insensitive – SOQL
+     * DeveloperName comparisons are case-insensitive but Apex Map.get() is not.
      */
     private static Map<String, Id> getGroupsFromNames(Set<String> groupNames) {
         Map<String, Id> groups = new Map<String, Id>();
 
         for (Group grp : [
-            SELECT Id, DeveloperName FROM Group 
+            SELECT Id, DeveloperName FROM Group
             WHERE DeveloperName IN :groupNames
             AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')
             WITH SECURITY_ENFORCED]) {
-            
-            groups.put(grp.DeveloperName, grp.Id);
+
+            groups.put(grp.DeveloperName.toLowerCase(), grp.Id);
         }
         return groups;
     }

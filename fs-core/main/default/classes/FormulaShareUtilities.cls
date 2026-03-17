@@ -60,7 +60,9 @@ public inherited sharing class FormulaShareUtilities {
 	public static Map<String,Map<String, Schema.SObjectField>> cachedFieldMaps = new Map<String,Map<String, Schema.SObjectField>>();
 
 	// Get describe result and maintain cache
-	public static Schema.DescribeSObjectResult describe(String objectAPIName) {
+	public static Schema.DescribeSObjectResult describe(String objectAPINameMixedCase) {
+        String objectAPIName = objectAPINameMixedCase.toLowerCase();
+
 		if(cachedDescribes.containsKey(objectAPIName)) {
 			System.debug('Describe: Returning from cache: '+cachedDescribes.get(objectAPIName));
 			return cachedDescribes.get(objectAPIName);
@@ -74,7 +76,10 @@ public inherited sharing class FormulaShareUtilities {
 				return describe;
 			}
 			else {
-				System.debug('Describe: Couldnt find');
+				System.debug('Describe: Couldnt find '+objectAPIName);
+				for(String objectName : globalDescribe.keySet()) {
+					System.debug('In global describe: '+objectName);
+				}
 				return null;
 			}
 		}

@@ -63,7 +63,8 @@ public inherited sharing class FormulaShareMetadataDMLRulesAccount extends Formu
             namespacePrefix + 'Metadata_Mapping_Type__c',
             namespacePrefix + 'Metadata_Mapping_Match_Field__c',
             namespacePrefix + 'Metadata_Mapping_Shared_To_Field__c',
-            namespacePrefix + 'User_Field_For_Matching__c'
+            namespacePrefix + 'User_Field_For_Matching__c',
+            namespacePrefix + 'Team_Mapping__c'
         };
         this.fieldsToSetOrClear.addAll(new FormulaShareInjectionService().getExtraRelationshipFields());
 

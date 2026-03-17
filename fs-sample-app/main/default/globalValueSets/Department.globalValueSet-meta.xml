@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Sales EMEA</fullName>
+        <default>false</default>
+        <label>Sales EMEA</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales APAC</fullName>
+        <default>false</default>
+        <label>Sales APAC</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales AMER</fullName>
+        <default>false</default>
+        <label>Sales AMER</label>
+    </customValue>
+    <customValue>
+        <fullName>Service EMEA</fullName>
+        <default>false</default>
+        <label>Service EMEA</label>
+    </customValue>
+    <customValue>
+        <fullName>Service APAC</fullName>
+        <default>false</default>
+        <label>Service APAC</label>
+    </customValue>
+    <customValue>
+        <fullName>Service AMER</fullName>
+        <default>false</default>
+        <label>Service AMER</label>
+    </customValue>
+    <customValue>
+        <fullName>Finance</fullName>
+        <default>false</default>
+        <label>Finance</label>
+    </customValue>
+    <masterLabel>Department</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

@@ -43,13 +43,11 @@ public inherited sharing class FormulaShareProcessBatch implements Database.Batc
 		FormulaShareRulesSelector rulesSelector = new FormulaShareInjectionService().getRulesSelector();
 		List<FormulaShareRule> rulesForType = rulesSelector.getRulesSharingObject(this.typeInThisBatch);
 		system.debug('Rules for this object: '+rulesForType);
+		this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, contextDetail, rulesForType);
 		
 		Database.QueryLocator ql;
 
 		if(!rulesForType.isEmpty()) {
-			
-			this.batchService = new FormulaShareInjectionService().getBatchService(typeInThisBatch, contextDetail, rulesForType);
-			
 			// Continue only if object settings allow processing for full batch
 			if(batchService.processingAllowed() || contextDetail == 'Manually Initiated Batch') {
 				

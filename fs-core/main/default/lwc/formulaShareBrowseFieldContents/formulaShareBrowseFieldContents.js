@@ -27,12 +27,18 @@ export default class FormulaShareBrowseFieldContents extends LightningElement {
     @wire(getSampleData, {objectApiName : '$objectApiName', fieldApiName : '$fieldApiName'})
     wiredSampleData(value) {
         const { data, error } = value;
+        // Ignore provisional state (data and error both undefined) - keep spinner showing
+        if(data === undefined && error === undefined) {
+            return;
+        }
         if(data) {
             this.fieldSample = data;
         }
         else if(error) {
-            this.fieldSample = error.body.message;   // Show warning message inside box - consider using a warning popover box in future
-            //console.log(JSON.stringify(error));
+            // Safely access error message, guarding against non-standard error shapes
+            this.fieldSample = (error.body && error.body.message)
+                ? error.body.message
+                : 'Unable to retrieve sample data';
         }
         this.loadingSample = false;
     }

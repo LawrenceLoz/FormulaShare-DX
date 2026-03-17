@@ -150,6 +150,9 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
                             if(roleGroupIds.containsKey(shortSharedToId + 'RoleAndSubordinatesInternal')) {
                                 roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinatesInternal');
                             }
+
+                            // Keeping as this could be high risk to remove, but this statement should never be called
+                            // See documented behaviour in Winter '26 change: https://help.salesforce.com/s/articleView?id=002628970&type=1'
                             else {
                                 roleGroupId = roleGroupIds.get(shortSharedToId + 'RoleAndSubordinates');
                             }

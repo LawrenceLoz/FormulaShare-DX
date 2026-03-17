@@ -30,17 +30,18 @@ public with sharing class FormulaShareLWCUtilities {
 	// Used by controller to build links to setup menu items
 	@AuraEnabled(cacheable=true)
 	public static String getLightningDomain(){
-        return getMyDomain() + '.lightning.force.com';
+        // Replace the salesforce.com host suffix with lightning.force.com, preserving
+        // any subdomains (e.g. .scratch) that appear between the org name and salesforce.com
+        String host = URL.getOrgDomainUrl().getHost().toLowerCase();
+        String lightningHost = host.replace('.my.salesforce.com', '.lightning.force.com')
+                                   .replace('.salesforce.com', '.lightning.force.com');
+        return lightningHost;
     }
 
 	@AuraEnabled(cacheable=true)
 	public static String getClassicDomain(){
         return URL.getOrgDomainURL().toExternalForm();
     }
-
-    private static String getMyDomain(){
-        return URL.getOrgDomainUrl().getHost().split('\\.')[0].toLowerCase();
-	}
 
 	@AuraEnabled(cacheable=true)
 	public static Map<String,String> getSharingReasons(String objectApiName) {

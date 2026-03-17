@@ -106,12 +106,18 @@
                     fallback-md-match-field-mismatch={rule.fallbackMdMatchFieldMismatch}
                     fallback-share-to-field-mismatch={rule.fallbackShareToFieldMismatch}
                     selected-user-field-for-matching={rule.userFieldForMatching}
+                    shared-object-api-name={rule.objectSharedAPIName}
+                    selected-team-mapping={rule.teamMappingDeveloperName}
+                    selected-team-field={rule.controllingObjectSharedToFieldAPIName}
+                    selected-team-field-type={rule.controllingObjectSharedToFieldType}
                     onmismatchfieldchange={handleMismatchFieldChange}
                     onsharewithchange={handleShareWithChange}
                     onsharefieldchange={handleShareFieldChange}
                     onsharefieldtypechange={handleShareFieldTypeChange}
                     onuserfieldformatchingchange={handleUserFieldForMatchingChange}
-                    onusersharingmodechange={handleUserSharingModeChange}>
+                    onusersharingmodechange={handleUserSharingModeChange}
+                    onteammappingchange={handleTeamMappingChange}
+                    onteamfieldchange={handleTeamFieldChange}>
                 </c-formula-share-rule-detail-field>
             </div>
         </div>

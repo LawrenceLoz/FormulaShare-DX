@@ -90,6 +90,10 @@
                 <behavior>Edit</behavior>
                 <field>Shared_To_Field_Type__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Team_Mapping__c</field>
+            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
     </layoutSections>

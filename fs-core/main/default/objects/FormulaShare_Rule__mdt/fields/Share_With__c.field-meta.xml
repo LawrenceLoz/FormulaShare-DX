@@ -60,6 +60,11 @@
                 <default>false</default>
                 <label>Default Opportunity Teams of Users</label>
             </value>
+            <value>
+                <fullName>Teams</fullName>
+                <default>false</default>
+                <label>Teams</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

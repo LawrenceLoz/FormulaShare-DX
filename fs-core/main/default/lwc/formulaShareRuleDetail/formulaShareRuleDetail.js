@@ -82,6 +82,7 @@ export default class FormulaShareRuleDetail extends LightningElement {
             }
             if(this.rule) {
                 this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
+                this.shareWithTeams = this.rule.shareWith === 'Teams';
             }
             this.fireEventWithRule();
         });
@@ -258,14 +259,21 @@ export default class FormulaShareRuleDetail extends LightningElement {
     }
 
     shareWithDefaultTeam = false;
+    shareWithTeams = false;
     handleShareWithChange(event) {
         //console.log('sharewith change');
         this.rule.shareWith = event.detail;
         this.shareWithDefaultTeam = this.rule.shareWith === 'Default Account Teams of Users' || this.rule.shareWith === 'Default Opportunity Teams of Users';
+        this.shareWithTeams = this.rule.shareWith === 'Teams';
         
         // Clear userFieldForMatching when switching away from Users or from matching mode
         if(this.rule.shareWith !== 'Users' && this.rule.shareWith !== 'Users with Matching Field Value') {
             this.rule.userFieldForMatching = null;
+        }
+
+        // Clear team mapping fields when switching away from Teams
+        if(!this.shareWithTeams) {
+            this.rule.teamMappingDeveloperName = null;
         }
         
         this.fireEventWithRule();
@@ -342,6 +350,23 @@ export default class FormulaShareRuleDetail extends LightningElement {
                 break;
             case 'accessForTeamComembers':
                 this.rule.accessForTeamComembers = event.detail.setting;
+        }
+        this.fireEventWithRule();
+    }
+
+
+    //-------- Event handlers for Team Mapping component --------// 
+
+    handleTeamMappingChange(event) {
+        this.rule.teamMappingDeveloperName = event.detail;
+        this.fireEventWithRule();
+    }
+
+    handleTeamFieldChange(event) {
+        // When the team mapping component changes the field, update the controlling object field
+        if(event.detail.fieldApiName) {
+            this.rule.controllingObjectSharedToFieldAPIName = event.detail.fieldApiName;
+            this.rule.controllingObjectSharedToFieldType = event.detail.fieldType;
         }
         this.fireEventWithRule();
     }

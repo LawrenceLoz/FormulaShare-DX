@@ -24,7 +24,8 @@ public with sharing class FormulaShareProcessSchedulableTest {
 
     @TestSetup
     public static void setup() {
-        FormulaShareTestUtils.setupAdmin();
+        // Admin profile required: batch executes WITH USER_MODE queries on standard objects (e.g. Account)
+        FormulaShareTestUtils.setupAdmin(true);
     }
 
 

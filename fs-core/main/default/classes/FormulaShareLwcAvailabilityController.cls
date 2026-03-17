@@ -29,6 +29,20 @@ public with sharing class FormulaShareLwcAvailabilityController {
     }
 
     /**
+     * Checks whether the Teams share-with option is available.
+     * Returns true if the managed FormulaShareShareWithTeams class exists
+     * and is registered in the injection service's handler list.
+     */
+    @AuraEnabled(cacheable=true)
+    public static Boolean supportsTeamSharing() {
+        try {
+            return new FormulaShareInjectionService().versionSupportsTeamSharing();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Describe the User object and return fields suitable for matching:
      * - Text-like (String, Email, Phone, Url, EncryptedString, TextArea, Combobox)
      * - Id/Reference/Lookup/MasterDetail (match using Id)
@@ -58,12 +72,13 @@ public with sharing class FormulaShareLwcAvailabilityController {
                 t == Schema.DisplayType.Reference ||
                 t == Schema.DisplayType.Address ||
                 t == Schema.DisplayType.Location ||
-                t == Schema.DisplayType.Combobox;
+                t == Schema.DisplayType.Combobox ||
+                t == Schema.DisplayType.Picklist;
 
             if (!allowed) continue;
 
             FieldOption opt = new FieldOption();
-            opt.fieldApiName = api;
+            opt.fieldApiName = f.getName(); // Use getName() for proper-cased API name, not the lowercase keySet() key
             opt.fieldLabel = f.getLabel();
             opt.displayType = String.valueOf(t);
             results.add(opt);
@@ -100,5 +115,39 @@ public with sharing class FormulaShareLwcAvailabilityController {
         private String getSafeString(String value) {
             return value == null ? '' : value;
         }
+    }
+
+    // ---- Team mapping methods delegated via InjectionService ---- //
+
+    /**
+     * Returns active team mapping options for the combobox.
+     * Delegates to FormulaShareTeamMappingService via InjectionService so that
+     * this core controller carries no compile-time dependency on the main project.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<FormulaShareTeamMappingService.TeamMappingOption> getActiveTeamMappings() {
+        return new FormulaShareInjectionService().getTeamMappingService().getActiveTeamMappings();
+    }
+
+    /**
+     * Returns fields eligible for the "Specified in Field" dropdown for a given
+     * team mapping and controlling/shared object.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<FormulaShareTeamMappingService.TeamFieldOption> getTeamFieldOptions(
+            String objectApiName,
+            String teamObjectApiName,
+            String sharedObjectApiName) {
+        return new FormulaShareInjectionService().getTeamMappingService()
+            .getTeamFieldOptions(objectApiName, teamObjectApiName, sharedObjectApiName);
+    }
+
+    /**
+     * Returns the label of the team object for a given team object API name.
+     */
+    @AuraEnabled(cacheable=true)
+    public static String getTeamObjectLabel(String teamObjectApiName) {
+        return new FormulaShareInjectionService().getTeamMappingService()
+            .getTeamObjectLabel(teamObjectApiName);
     }
 }

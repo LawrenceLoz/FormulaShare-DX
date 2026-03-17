@@ -101,6 +101,12 @@ public with sharing class FormulaShareInjectionService {
         return false;
     }
 
+    public FormulaShareTeamMappingService getTeamMappingService() {
+        return new FormulaShareTeamMappingService();
+    }
+
+
+
     public List<FormulaShareShareWithBase> getShareWithClasses(FormulaShareService service) {
         return new List<FormulaShareShareWithBase> {
             new FormulaShareShareWithUsers(service),

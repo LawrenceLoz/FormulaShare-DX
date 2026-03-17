@@ -24,12 +24,18 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import infoCloud from '@salesforce/resourceUrl/InfoCloud';
 import getLightningDomain from '@salesforce/apex/FormulaShareLWCUtilities.getLightningDomain';
+import getNamespacePrefix from '@salesforce/apex/FormulaShareLWCUtilities.getNamespacePrefix';
 import getShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getShareFieldOptions';
 import isManagerSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isManagerSharingSupported';
 import isAccountTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isAccountTeamSharingSupported';
 import isOpportunityTeamSharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isOpportunityTeamSharingSupported';
+import isDefaultTeamShareWithEnabled from '@salesforce/apex/FormulaShareRuleDetailController.isDefaultTeamShareWithEnabled';
 import supportsUsersWithFieldMatch from '@salesforce/apex/FormulaShareLwcAvailabilityController.supportsUsersWithFieldMatch';
 import getUserFieldMatchOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getUserFieldMatchOptions';
+import supportsTeamSharing from '@salesforce/apex/FormulaShareLwcAvailabilityController.supportsTeamSharing';
+import getActiveTeamMappings from '@salesforce/apex/FormulaShareLwcAvailabilityController.getActiveTeamMappings';
+import getTeamFieldOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamFieldOptions';
+import getTeamObjectLabel from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamObjectLabel';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
@@ -181,6 +187,76 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     @api fallbackMdMatchFieldMismatch;
     @api fallbackShareToFieldMismatch;
 
+    // ---- Team mapping API properties (passed from ruleDetail) ---- //
+    @api sharedObjectApiName;
+
+    @api
+    get selectedTeamMapping() {
+        return this._selectedTeamMapping;
+    }
+    set selectedTeamMapping(value) {
+        if (this._selectedTeamMapping !== value) {
+            this._selectedTeamMapping = value;
+            this.onTeamMappingChanged();
+        }
+    }
+    _selectedTeamMapping;
+
+    @api
+    get selectedTeamField() {
+        return this._selectedTeamField;
+    }
+    set selectedTeamField(value) {
+        this._selectedTeamField = value;
+    }
+    _selectedTeamField;
+
+    @api
+    get selectedTeamFieldType() {
+        return this._selectedTeamFieldType;
+    }
+    set selectedTeamFieldType(value) {
+        this._selectedTeamFieldType = value;
+    }
+    _selectedTeamFieldType;
+
+    // ---- Team mapping internal state ---- //
+    @track teamMappingOptions = [];
+    @track teamFieldOptions = [];
+    @track teamContainingTypeOptions = [];
+    _allTeamContainingTypeOptions = []; // full options set by mapping; preserved for non-Id fields
+    teamContainingTypeValue = 'Id';
+
+    // Disable when there's only one option (no name field on mapping) or field is a lookup (Id type)
+    get teamContainingTypeDisabled() {
+        return this.teamContainingTypeOptions.length <= 1;
+    }
+    loadingTeamFields = false;
+    loadingTeamMappings = false;
+    teamMappingsByDevName = {};
+    teamConfigSetupLink;
+    teamsHelpBox = false;
+
+    // Browse field contents for team field
+    @track viewTeamFieldDetails = false;
+    teamFieldDetailsClosed = 'Browse Field Contents';
+    teamFieldDetailsOpen = 'Hide Field Contents';
+    @track teamFieldDetailsToggleText = 'Browse Field Contents';
+
+    toggleTeamsHelpBox() {
+        this.teamsHelpBox = !this.teamsHelpBox;
+    }
+
+    toggleViewTeamFieldDetails() {
+        if (this.viewTeamFieldDetails) {
+            this.viewTeamFieldDetails = false;
+            this.teamFieldDetailsToggleText = this.teamFieldDetailsClosed;
+        } else {
+            this.viewTeamFieldDetails = true;
+            this.teamFieldDetailsToggleText = this.teamFieldDetailsOpen;
+        }
+    }
+
     fullFieldList = [];
     namesOnlyFieldList = [];
 
@@ -189,12 +265,13 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     publicGroupsLink;
     queuesLink;
     connectedCallback() {
-        getLightningDomain()
-            .then((domainName) => {
+        Promise.all([getLightningDomain(), getNamespacePrefix()])
+            .then(([domainName, nsPrefix]) => {
                 this.usersLink = domainName + '/lightning/setup/ManageUsers/home';
                 this.rolesLink = domainName + '/lightning/setup/Roles/home';
                 this.publicGroupsLink = domainName + '/lightning/setup/PublicGroups/home';
                 this.queuesLink = domainName + '/lightning/setup/Queues/home';
+                this.teamConfigSetupLink = domainName + '/lightning/n/' + nsPrefix + 'FormulaShare_Setup?c__page=team-and-user-groups';
             });
     }
 
@@ -261,12 +338,16 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             optionsList.push( { label: 'Users and Manager Subordinates', value: 'Users and Manager Subordinates' } );
         }
 
-        if(this.atmSharingSupported) {
+        if(this.atmSharingSupported && this.defaultTeamShareWithEnabled) {
             optionsList.push( { label: 'Default Account Teams of Users', value: 'Default Account Teams of Users' } );
         }
 
-        if(this.otmSharingSupported) {
+        if(this.otmSharingSupported && this.defaultTeamShareWithEnabled) {
             optionsList.push( { label: 'Default Opportunity Teams of Users', value: 'Default Opportunity Teams of Users' } );
+        }
+
+        if(this.teamSharingSupported) {
+            optionsList.push( { label: 'Teams', value: 'Teams' } );
         }
 
         // Note: "Users with Matching Field Value" is now handled via toggle when Users is selected
@@ -320,6 +401,17 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
     }
 
+    defaultTeamShareWithEnabled = false;
+    @wire(isDefaultTeamShareWithEnabled)
+    wiredIsDefaultTeamShareWithEnabled({ data, error }) {
+        if(data !== undefined) {
+            this.defaultTeamShareWithEnabled = data === true;
+            this.updateShareWithOptions();
+        } else if(error) {
+            console.log('Error with wire service: '+error);
+        }
+    }
+
     // Detect availability of managed-only option and fetch user field options
     @wire(supportsUsersWithFieldMatch)
     wiredSupportsUsersWithFieldMatch(value) {
@@ -351,6 +443,189 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
     }
 
+    // Detect availability of Teams share-with option
+    teamSharingSupported = false;
+    @wire(supportsTeamSharing)
+    wiredSupportsTeamSharing({ data, error }) {
+        if(data !== undefined) {
+            this.teamSharingSupported = data === true;
+            this.updateShareWithOptions();
+        } else if(error) {
+            console.log('Error detecting supportsTeamSharing ', error);
+        }
+    }
+
+    // ---- Wire: Active Team Mappings for embedded team mapping selector ---- //
+    @wire(getActiveTeamMappings)
+    wiredTeamMappings({ data, error }) {
+        if (data) {
+            this.teamMappingOptions = data.map(m => ({
+                label: m.label,
+                value: m.developerName
+            }));
+            data.forEach(m => {
+                this.teamMappingsByDevName[m.developerName] = m;
+            });
+            // If a mapping was already set (edit mode), load dependent data
+            if (this._selectedTeamMapping) {
+                this.onTeamMappingChanged();
+            }
+        } else if (error) {
+            console.error('Error loading team mappings:', error);
+        }
+    }
+
+    // ---- Team mapping reactive methods ---- //
+
+    onTeamMappingChanged() {
+        const mapping = this.teamMappingsByDevName[this._selectedTeamMapping];
+        if (mapping) {
+            this.loadTeamObjectLabel(mapping.teamObjectApiName);
+            this.loadTeamFields();
+        }
+    }
+
+    loadTeamFields() {
+        const mapping = this.teamMappingsByDevName[this._selectedTeamMapping];
+        if (!mapping || !this._objectWithShareField) return;
+
+        this.loadingTeamFields = true;
+        getTeamFieldOptions({
+            objectApiName: this._objectWithShareField,
+            teamObjectApiName: mapping.teamObjectApiName,
+            sharedObjectApiName: this.sharedObjectApiName || this._objectWithShareField
+        })
+            .then(result => {
+                this.teamFieldOptions = result.map(f => ({
+                    label: f.fieldLabel + ' (' + f.fieldApiName + ')',
+                    value: f.fieldApiName,
+                    isIdType: f.isIdType
+                }));
+                // If a lookup field is already selected (edit mode), collapse options to Id-only
+                const currentField = this.teamFieldOptions.find(f => f.value === this._selectedTeamField);
+                if (currentField && currentField.isIdType) {
+                    this.teamContainingTypeOptions = this._allTeamContainingTypeOptions.filter(o => o.value === 'Id');
+                    this.teamContainingTypeValue = 'Id';
+                }
+                this.loadingTeamFields = false;
+            })
+            .catch(err => {
+                console.error('Error loading team field options:', err);
+                this.loadingTeamFields = false;
+            });
+    }
+
+    loadTeamObjectLabel(teamObjectApiName) {
+        const mapping = this.teamMappingsByDevName[this._selectedTeamMapping];
+        getTeamObjectLabel({ teamObjectApiName })
+            .then(label => {
+                const idOption = { label: 'Id of ' + label + ' record', value: 'Id' };
+                const options = [idOption];
+                if (mapping && mapping.teamNameFieldApiName) {
+                    const nameOption = {
+                        label: 'Text matching the ' + mapping.teamNameFieldApiName + ' field on ' + label + ' record',
+                        value: 'Name'
+                    };
+                    options.push(nameOption);
+                }
+                this._allTeamContainingTypeOptions = options;
+                this.teamContainingTypeOptions = options;
+                // Restore from saved value if available, otherwise default to Id
+                if (this._selectedTeamFieldType && options.some(o => o.value === this._selectedTeamFieldType)) {
+                    this.teamContainingTypeValue = this._selectedTeamFieldType;
+                } else {
+                    this.teamContainingTypeValue = 'Id';
+                }
+            })
+            .catch(err => {
+                console.error('Error loading team object label:', err);
+                this.teamContainingTypeOptions = [
+                    { label: 'Record Id', value: 'Id' }
+                ];
+                this.teamContainingTypeValue = 'Id';
+            });
+    }
+
+    refreshTeamMappings() {
+        if (this.loadingTeamMappings) return;
+        this.loadingTeamMappings = true;
+        getActiveTeamMappings()
+            .then(data => {
+                this.teamMappingOptions = data.map(m => ({
+                    label: m.label,
+                    value: m.developerName
+                }));
+                data.forEach(m => {
+                    this.teamMappingsByDevName[m.developerName] = m;
+                });
+                this.loadingTeamMappings = false;
+                // Reload fields with fresh mapping data if one is selected
+                if (this._selectedTeamMapping) {
+                    this.onTeamMappingChanged();
+                }
+            })
+            .catch(err => {
+                console.error('Error refreshing team mappings:', err);
+                this.loadingTeamMappings = false;
+            });
+    }
+
+    refreshTeamFields() {
+        if (this.loadingTeamFields) return;
+        this.loadTeamFields();
+    }
+
+    handleTeamMappingChange(event) {
+        this._selectedTeamMapping = event.detail.value;
+        this.onTeamMappingChanged();
+
+        // Clear the field selection and containing type when mapping changes
+        this._selectedTeamField = null;
+        this._selectedTeamFieldType = null;
+        this.teamContainingTypeValue = 'Id';
+
+        this.dispatchEvent(new CustomEvent('teammappingchange', {
+            detail: this._selectedTeamMapping
+        }));
+
+        // Also fire field change to clear it in parent
+        this.dispatchEvent(new CustomEvent('teamfieldchange', {
+            detail: { fieldApiName: null, fieldType: null }
+        }));
+    }
+
+    handleTeamContainingTypeChange(event) {
+        this.teamContainingTypeValue = event.detail.value;
+        this._selectedTeamFieldType = this.teamContainingTypeValue;
+
+        this.dispatchEvent(new CustomEvent('teamfieldchange', {
+            detail: {
+                fieldApiName: this._selectedTeamField,
+                fieldType: this._selectedTeamFieldType
+            }
+        }));
+    }
+
+    handleTeamFieldChangeInternal(event) {
+        this._selectedTeamField = event.detail.value;
+
+        // If the selected field is a lookup (Id type), force Containing Type to Id and disable
+        const selectedOption = this.teamFieldOptions.find(f => f.value === this._selectedTeamField);
+        if (selectedOption && selectedOption.isIdType) {
+            this.teamContainingTypeOptions = this._allTeamContainingTypeOptions.filter(o => o.value === 'Id');
+            this.teamContainingTypeValue = 'Id';
+        } else {
+            this.teamContainingTypeOptions = this._allTeamContainingTypeOptions;
+        }
+        this._selectedTeamFieldType = this.teamContainingTypeValue;
+
+        this.dispatchEvent(new CustomEvent('teamfieldchange', {
+            detail: {
+                fieldApiName: this._selectedTeamField,
+                fieldType: this._selectedTeamFieldType
+            }
+        }));
+    }
 
 
     @track fieldOptions;
@@ -453,7 +728,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     this.fieldTypeIsReadOnly = true;
                 } else {
                     this.shareFieldTypeOptions = [
-                        { label: 'Id of user', value: 'Id' }
+                        { label: 'Id of User', value: 'Id' }
                     ];
                     this.fieldTypeIsReadOnly = true;
                 }
@@ -464,15 +739,15 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Default Opportunity Teams of Users':
 
                 this.shareFieldTypeOptions = [
-                    { label: 'Id of user', value: 'Id' }
+                    { label: 'Id of User', value: 'Id' }
                 ];
                 this.fieldTypeIsReadOnly = true;
                 break;
             case 'Public Groups':
                 //console.log('updated to public groups');
                 this.shareFieldTypeOptions = [
-                    { label: 'Name of Public Group or Queue', value: 'Name' },
-                    { label: 'Id of Public Group or Queue', value: 'Id' },
+                    { label: 'Group or Queue Name (DeveloperName)', value: 'Name' },
+                    { label: 'Group or Queue Id', value: 'Id' },
                 ];
                 this.fieldTypeIsReadOnly = false;
                 break;
@@ -529,6 +804,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 break;
             case 'Default Opportunity Teams of Users':
                 this.shareWithFlags.defaultOpportunityTeamsOfUsers = true;
+                break;
+            case 'Teams':
+                this.shareWithFlags.teams = true;
                 break;
             default:
         }
@@ -741,7 +1019,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
 
         // Or if field and fields map populated but no match, show error
-        else if(this._shareField && this.fieldsMap && this.fieldsMap.size > 0) {
+        // Skip this check when Teams is selected - the team mapping component manages its own field list
+        else if(this._shareField && this.fieldsMap && this.fieldsMap.size > 0 && !this.shareWithFlags.teams) {
             this.fieldNotAvailableForSharingError(this._shareField);
         }
     }

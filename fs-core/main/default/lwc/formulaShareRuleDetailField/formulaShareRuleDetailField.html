@@ -30,6 +30,124 @@
             <div class="slds-col slds-size_7-of-12">
                 <span>
                     <div class="slds-form slds-form_stacked">
+
+                        <!-- Show team mapping fields when Teams is selected -->
+                        <template if:true={shareWithFlags.teams}>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div style="display:flex; align-items:flex-end;">
+                                        <lightning-combobox
+                                            class="slds-grow"
+                                            name="teamMapping"
+                                            label="Team Type"
+                                            value={selectedTeamMapping}
+                                            placeholder="Select Team Type"
+                                            options={teamMappingOptions}
+                                            onchange={handleTeamMappingChange}
+                                            message-when-value-missing="Select a Team Type"
+                                            required>
+                                        </lightning-combobox>
+
+                                        <div class="slds-m-left_x-small" onclick={refreshTeamMappings}>
+                                            <lightning-icon 
+                                                icon-name="action:refresh" 
+                                                alternative-text="Refresh" 
+                                                title="Refresh team types" 
+                                                size="x-small">
+                                            </lightning-icon>
+                                            <template if:true={loadingTeamMappings}>
+                                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleTeamsHelpBox}>
+                                        Teams Configuration
+                                    </div>
+                                </div>
+                            </div>
+
+                            <template if:true={teamsHelpBox}>
+                                <div class="slds-box slds-theme_shade slds-m-horizontal_medium slds-m-top_xx-small">
+                                    <div style="display:flex; align-items:center;">
+                                        <img src={infoCloudLogo} alt="infoCloudLogo" width="80">
+                                        <div class="slds-m-left_medium">
+                                            Teams can be defined by any objects in your org which have related records specifying team members.
+                                            <lightning-formatted-url 
+                                                value={teamConfigSetupLink} 
+                                                label=" Click Teams Configuration " 
+                                                target="_blank">
+                                            </lightning-formatted-url>
+                                            to configure a new Team Mapping based on your data model.
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={selectedTeamMapping}>
+                                <div class="slds-form-element">
+                                    <div class="slds-form-element__control">
+                                        <div style="display:flex; align-items:flex-end;">
+                                            <lightning-combobox
+                                                class="slds-grow"
+                                                name="teamShareField"
+                                                label="Specified in Field"
+                                                value={selectedTeamField}
+                                                placeholder="Select field"
+                                                options={teamFieldOptions}
+                                                onchange={handleTeamFieldChangeInternal}
+                                                message-when-value-missing="Select a field containing the team identifier"
+                                                required>
+                                            </lightning-combobox>
+
+                                            <div class="slds-m-left_x-small" onclick={refreshTeamFields}>
+                                                <lightning-icon 
+                                                    icon-name="action:refresh" 
+                                                    alternative-text="Refresh" 
+                                                    title="Refresh fields" 
+                                                    size="x-small">
+                                                </lightning-icon>
+                                                <template if:true={loadingTeamFields}>
+                                                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slds-form-element">
+                                    <div class="slds-form-element__control">
+                                        <lightning-combobox
+                                            class="slds-m-top_x-small"
+                                            name="containingType"
+                                            label="Containing Type"
+                                            value={teamContainingTypeValue}
+                                            options={teamContainingTypeOptions}
+                                            onchange={handleTeamContainingTypeChange}
+                                            disabled={teamContainingTypeDisabled}
+                                            message-when-value-missing="Select containing type"
+                                            required>
+                                        </lightning-combobox>
+
+                                        <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewTeamFieldDetails}>
+                                            {teamFieldDetailsToggleText}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <template if:true={viewTeamFieldDetails}>
+                                    <div class="slds-m-horizontal_medium slds-m-bottom_medium">
+                                        <c-formula-share-browse-field-contents
+                                            object-api-name={_objectWithShareField}
+                                            field-api-name={_selectedTeamField}>
+                                        </c-formula-share-browse-field-contents>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+
+                        <!-- Show standard field selection when Teams is NOT selected -->
+                        <template if:false={shareWithFlags.teams}>
                         
                         <template if:true={showUserSharingModeToggle}>
                             <div class="slds-form-element">
@@ -140,6 +258,8 @@
 
                             </div>
                         </div>
+
+                        </template><!-- end if:false teams -->
                     </div>
                 </span>
             </div>
@@ -159,7 +279,12 @@
                             <br/><br/>
                             Choose <b>"Specified in record field"</b> to share to users indicated in a field on the record. This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character id of the user to receive access.
                             <br/><br/>
-                            Choose <b>"With a User field matching the record field"</b> to share to all users which have a value set in a field on their user record which matches a selected field on the record. Both fields can be either text, picklists, lookups, or formulas returning text. When this option is selected, public groups will be created and maintained by FormulaShare for each unique value in the field selected as "User Field".
+                            Choose <b>"With a User field matching the record field"</b> to share to all users which have a value set in a field on their user record which matches a selected field on the record. Both fields can be either text, picklists, lookups, or formulas returning text. When this option is selected
+                            , public groups will be created and maintained by FormulaShare for each unique value in the field selected as "User Field".
+                            Groups can be monitored in the&nbsp;<lightning-formatted-url
+                                value={teamConfigSetupLink}
+                                label="Team and User Groups"
+                                target="_blank"></lightning-formatted-url>&nbsp;page of FormulaShare Setup.
                         </template>
 
                         <template if:true={shareWithFlags.roles}>
@@ -280,6 +405,20 @@
                             This field can be either a lookup to the user object, or a text or formula field populated with the 15 or 18 character 
                             id of the user whose team should have access.
                             Default Opportunity Team members are set up in the related list on the user record - the rule will share directly to all team members associated in this way, and update after team members change.
+                        </template>
+
+                        <template if:true={shareWithFlags.teams}>
+                            When <b>Teams</b> is selected, rules will share to public groups managed by FormulaShare based on team configurations defined in <lightning-formatted-url
+                                value={teamConfigSetupLink}
+                                label="Team Mappings"
+                                target="_blank"></lightning-formatted-url>.
+                            <br/><br/>
+                            Select a <b>Team Mapping</b> to define which team structure to use, then choose the field on the record that identifies which team should receive access.
+                            FormulaShare will automatically create and maintain public groups for each team, including group nesting for team hierarchies and affiliations.
+                            Team Mappings and groups can be configured and monitored in the&nbsp;<lightning-formatted-url
+                                value={teamConfigSetupLink}
+                                label="Team and User Groups"
+                                target="_blank"></lightning-formatted-url>&nbsp;page of FormulaShare Setup.
                         </template>
 
                     </div>

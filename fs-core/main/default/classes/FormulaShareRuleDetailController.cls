@@ -160,6 +160,28 @@ public with sharing class FormulaShareRuleDetailController {
     }
 
 
+    // Returns true if Default Acc/Opp Team share-with options should be shown:
+    // either the active settings has the "Default Acc and Opp Teams as Share With" checkbox enabled,
+    // or at least one rule in the org already uses one of these options
+    @AuraEnabled(cacheable=true)
+    public static Boolean isDefaultTeamShareWithEnabled() {
+        try {
+            FormulaShare_Settings__mdt settings = FormulaShareSettingsSelector.construct().selectActiveSettings();
+            Boolean settingEnabled = (Boolean) settings.get('Default_Acc_Opp_Teams_as_Share_With__c');
+            if(settingEnabled == true) {
+                return true;
+            }
+        } catch(Exception e) {
+            // If settings can't be loaded, fall through to rule check
+        }
+        List<FormulaShare_Rule__mdt> existingRules = [
+            SELECT Id FROM FormulaShare_Rule__mdt
+            WHERE Share_With__c = 'Default Account Teams of Users'
+               OR Share_With__c = 'Default Opportunity Teams of Users'
+            LIMIT 1];
+        return !existingRules.isEmpty();
+    }
+
     // If Manager sharing is enabled in Sharing Settings then groups for Manager (ManagerUp__userid)
     // and ManagerAndSubordinatesInternal (ManagerDown_userid) will exist
     // Note there is no external manager group type

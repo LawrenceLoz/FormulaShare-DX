@@ -73,6 +73,9 @@ public with sharing class FSSampleAppDataGenerationService {
             p.Major_Donor_Relationship_Manager__c = users[0].Id;
             progs.add(p);
         }
+
+        runMainDataGeneratorIfAvailable(progs, users);
+
         insert progs;
 
         // insert donations
@@ -130,5 +133,21 @@ public with sharing class FSSampleAppDataGenerationService {
             }
         }
         insert progSuppOfficers;        
+    }
+
+    private static void runMainDataGeneratorIfAvailable(List<Programme__c> progs, List<User> users) {
+        Type mainDataGeneratorType = Type.forName('FSSampleAppMainDataGenerationService');
+        if(mainDataGeneratorType == null) {
+            return;
+        }
+
+        Callable mainDataGenerator = (Callable) mainDataGeneratorType.newInstance();
+        mainDataGenerator.call(
+            'populateTeamData',
+            new Map<String, Object>{
+                'progs' => progs,
+                'users' => users
+            }
+        );
     }
 }
