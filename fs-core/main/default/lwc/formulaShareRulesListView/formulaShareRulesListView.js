@@ -2,7 +2,7 @@ import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import { subscribe, unsubscribe, onError, setDebugFlag, isEmpEnabled } from 'lightning/empApi';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getTreeGridData from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
 import recalculateSharing from '@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing';
 import activateDeactivate from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
@@ -14,6 +14,31 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
     @track data = [];
     @track columns = [];
+
+    // Read c__rule URL param on load and open matching rule modal
+    _initialRuleApplied = false;
+    @wire(CurrentPageReference)
+    handlePageRef(pageRef) {
+        const ruleName = pageRef?.state?.c__rule;
+        if(ruleName && !this._initialRuleApplied && this.treeItems) {
+            this._applyRuleFromUrlParam(ruleName);
+        }
+        this._pendingRuleName = ruleName;
+    }
+
+    _pendingRuleName;
+    _applyRuleFromUrlParam(ruleName) {
+        for(const parentRow of this.treeItems) {
+            for(const childRow of (parentRow._children || [])) {
+                if(childRow.developerName === ruleName) {
+                    this._initialRuleApplied = true;
+                    this.rowRuleId = childRow.ruleId;
+                    this.openModal = true;
+                    return;
+                }
+            }
+        }
+    }
 
     setColumns(supportsRelated) {
 
@@ -133,6 +158,11 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         if (data) {
             let tempjson = JSON.parse(JSON.stringify(data).split('items').join('_children'));
             this.treeItems = tempjson;
+
+            // Apply pending URL param rule once data is available
+            if(this._pendingRuleName && !this._initialRuleApplied) {
+                this._applyRuleFromUrlParam(this._pendingRuleName);
+            }
 
             versionSupportsRelatedRules()
                 .then((supportsRelated) => {
@@ -446,9 +476,19 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     editRule(row) {
         this.rowRuleId = row['ruleId'];
         this.openModal = true;
+
+        // Update URL with rule developer name so the link can be shared
+        const url = new URL(window.location.href);
+        url.searchParams.set('c__rule', row['developerName']);
+        window.history.replaceState(null, '', url.toString());
     }
 
     closeModal() {
         this.openModal = false;
+
+        // Remove rule URL param when modal is closed
+        const url = new URL(window.location.href);
+        url.searchParams.delete('c__rule');
+        window.history.replaceState(null, '', url.toString());
     }
 }

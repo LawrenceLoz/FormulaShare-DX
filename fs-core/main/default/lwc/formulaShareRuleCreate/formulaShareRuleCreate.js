@@ -19,8 +19,8 @@ export default class FormulaShareRuleCreate extends LightningElement {
 
     // Subcribes to list platform event, and refresh treegrid each time event is received
     connectedCallback() {
-        // Get namespace prefix for platform events
-        getNamespacePrefix()
+        // Get namespace prefix and set up subscriptions; store promise so submitRule can await readiness
+        this._subscriptionReady = getNamespacePrefix()
             .then((prefix) => {
                 this.namespacePrefix = prefix;
                 this.subscribeToRuleDMLEvents(prefix);
@@ -200,9 +200,12 @@ export default class FormulaShareRuleCreate extends LightningElement {
             this.ruleDetails.accessLevel = 'Varies';
         }
 
-        submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) })
+        // Ensure EMP subscriptions are established before submitting, so the
+        // DML platform event can't fire before the callback is registered
+        (this._subscriptionReady || Promise.resolve())
+            .then(() => submitForCreate({ fsRuleString : JSON.stringify(this.ruleDetails) }))
             .then(() => {
-                // After submitting, wait 5 seconds and add class to display 
+                // After submitting, wait 5 seconds and add class to display
                 setTimeout(() => {
                     this.spinnerClasses = 'processingMessage afterProcessingMessage';
                 }, 5000);
