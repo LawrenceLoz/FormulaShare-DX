@@ -1,432 +1,448 @@
-import { createElement } from 'lwc';
-import FormulaShareRulesListView from 'c/formulaShareRulesListView';
-import { getTreeGridData } from '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData';
-import { activateDeactivate } from '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate';
+import { createElement } from "lwc";
+import FormulaShareRulesListView from "c/formulaShareRulesListView";
+import { getTreeGridData } from "@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData";
+import { activateDeactivate } from "@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate";
 
 // Use a mocked navigation plugin.
 // fs-core/test/jest-mocks/lightning/platformShowToastEvent.js for the mock
 // and see jest.config.js for jest config to use the mock
-import { ShowToastEventName } from 'lightning/platformShowToastEvent';
-
+import { ShowToastEventName } from "lightning/platformShowToastEvent";
 
 // Import mock data to send through the wire adapter.
-const mockExampleTreeGridData = require('./data/exampleTreeGridData.json');
-const batchIsProcessingTrue = require('./data/batchIsProcessingTrue.json');
-const batchIsProcessingFalse = require('./data/batchIsProcessingFalse.json');
+const mockExampleTreeGridData = require("./data/exampleTreeGridData.json");
+const batchIsProcessingTrue = require("./data/batchIsProcessingTrue.json");
+const batchIsProcessingFalse = require("./data/batchIsProcessingFalse.json");
 
 // Mock JSONs for activate/deactivate
 const ERROR_JSON = {
-    body: {
-        message: 'Error',
-    }
-}
+  body: {
+    message: "Error"
+  }
+};
 const SUCCESS_JSON = {
-    body: {
-        message: 'Success',
-    }
-}
+  body: {
+    message: "Success"
+  }
+};
 
-// Mock getTreeGridData Apex wire adapter
+// Mock getTreeGridData Apex wire adapter
 jest.mock(
-    '@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData',
-    () => {
-        const {
-            createApexTestWireAdapter
-        } = require('@salesforce/sfdx-lwc-jest');
-        return {
-            default: createApexTestWireAdapter(jest.fn())
-        };
-    },
-    { virtual: true } 
+  "@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData",
+  () => {
+    const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
+    return {
+      default: createApexTestWireAdapter(jest.fn())
+    };
+  },
+  { virtual: true }
 );
 // Mocking imperative Apex method call
 jest.mock(
-    '@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate',
-    () => {
-        return {
-            default: jest.fn()
-        };
-    },
-    { virtual: true }
+  "@salesforce/apex/FormulaShareMetadataControllerRules.activateDeactivate",
+  () => {
+    return {
+      default: jest.fn()
+    };
+  },
+  { virtual: true }
 );
 
 async function flushPromises() {
-    return Promise.resolve();
+  return Promise.resolve();
 }
 
-describe('c-formula-share-rules-list-view', () => {
-    afterEach(() => {
-        // The jsdom instance is shared across test cases in a single file so reset the DOM
-        while (document.body.firstChild) {
-            document.body.removeChild(document.body.firstChild);
-        }
+describe("c-formula-share-rules-list-view", () => {
+  afterEach(() => {
+    // The jsdom instance is shared across test cases in a single file so reset the DOM
+    while (document.body.firstChild) {
+      document.body.removeChild(document.body.firstChild);
+    }
 
-        // Prevent data saved on mocks from leaking between tests.
-        jest.clearAllMocks();
+    // Prevent data saved on mocks from leaking between tests.
+    jest.clearAllMocks();
+  });
+
+  // Helper function to wait until the microtask queue is empty. This is needed for promise
+  // timing when calling createRecord.
+  // eslint-disable-next-line no-undef
+  //    function flushPromises() {
+  //        return new Promise((resolve) => setImmediate(resolve));
+  //    }
+  it("Test activate/deactivate rule (Negative).", async () => {
+    // Assign mock value for resolved Apex promise
+    activateDeactivate.mockRejectedValue(ERROR_JSON);
+
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock handler for toast event.
+    const handler = jest.fn();
+
+    // Add event listener to catch toast event
+    element.addEventListener(ShowToastEventName, handler);
+
+    // Mock data.
+    getTreeGridData.emit(mockExampleTreeGridData);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    // Get first child of first parent.
+    const firstChild = parents[0]._children;
+    const firstRowOfFirstChild = firstChild[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "activate" },
+        row: firstRowOfFirstChild
+      }
     });
 
+    // Add event listener to catch toast event.
+    //element.addEventListener(ShowToastEventName, handler);
 
-    // Helper function to wait until the microtask queue is empty. This is needed for promise
-    // timing when calling createRecord.
-    // eslint-disable-next-line no-undef
-//    function flushPromises() {
-//        return new Promise((resolve) => setImmediate(resolve));
-//    }
-    it('Test activate/deactivate rule (Negative).', async () => {
-        // Assign mock value for resolved Apex promise
-        activateDeactivate.mockRejectedValue(ERROR_JSON);
+    // Emit error from @wire.
+    //getActivateDeactivateAdapter.error();
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
 
-        // Mock handler for toast event.
-        const handler = jest.fn();
+    // Wait for any asynchronous DOM updates
+    await flushPromises();
 
-        // Add event listener to catch toast event
-        element.addEventListener(ShowToastEventName, handler);
-
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
-        
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        // Get first child of first parent.
-        const firstChild = parents[0]._children;
-        const firstRowOfFirstChild = firstChild[0];
-
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'activate' },
-                    row: firstRowOfFirstChild
-                }
-        });
-        
-        // Add event listener to catch toast event.
-        //element.addEventListener(ShowToastEventName, handler);
-
-        // Emit error from @wire.
-        //getActivateDeactivateAdapter.error();
-
-        
-
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-    
-        // Wait for any asynchronous DOM updates
-        await flushPromises();
-        
-        // Check if toast event has been fired.
-        expect(handler).toHaveBeenCalled();
-        /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+    // Check if toast event has been fired.
+    expect(handler).toHaveBeenCalled();
+    /*expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
         expect(handler.mock.calls[0][0].detail.message).toEqual(expect.stringContaining(TOAST_MESSAGE));
         expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);*/
-    })
+  });
 
-    it('Test submit for recalculation (Toast) (Positive).', async () => {
-        // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
-        const TOAST_TITLE = 'Calculation currently in progress';
-        const TOAST_MESSAGE = 'Cannot re-submit until current calculation completes';
-        const TOAST_VARIANT = 'error';
+  it("Test submit for recalculation (Toast) (Positive).", async () => {
+    // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
+    const TOAST_TITLE = "Calculation currently in progress";
+    const TOAST_MESSAGE =
+      "Cannot re-submit until current calculation completes";
+    const TOAST_VARIANT = "error";
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
 
-        // Mock handler for toast event
-        const handler = jest.fn();
-        // Add event listener to catch toast event
-        element.addEventListener(ShowToastEventName, handler);
+    // Mock handler for toast event
+    const handler = jest.fn();
+    // Add event listener to catch toast event
+    element.addEventListener(ShowToastEventName, handler);
 
-        // Mock data.
-        getTreeGridData.emit(batchIsProcessingTrue);
+    // Mock data.
+    getTreeGridData.emit(batchIsProcessingTrue);
 
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        const firstParent = parents[0];
+    // Wait for component to render
+    await flushPromises();
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'recalculate' },
-                    row: firstParent
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Check if toast event has been fired
-        expect(handler).toHaveBeenCalled();
-        expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
-        expect(handler.mock.calls[0][0].detail.message).toBe(TOAST_MESSAGE);
-        expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    const firstParent = parents[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "recalculate" },
+        row: firstParent
+      }
     });
 
-    it('Test submit for recalculation check update processing (Positive).', async () => {
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    // Trigger row action in lightning-tree-grid - this opens the confirm modal
+    treeGrid.dispatchEvent(rowActionEvent);
+    await flushPromises();
 
-        // Mock data.
-        getTreeGridData.emit(batchIsProcessingFalse);
+    // Confirm the recalculation via the confirm modal
+    const recalcConfirm = element.shadowRoot.querySelector(
+      "c-formula-share-recalc-confirm"
+    );
+    recalcConfirm.dispatchEvent(new CustomEvent("confirm"));
+    await flushPromises();
 
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        const firstParent = parents[0];
+    // Check if toast event has been fired
+    expect(handler).toHaveBeenCalled();
+    expect(handler.mock.calls[0][0].detail.title).toBe(TOAST_TITLE);
+    expect(handler.mock.calls[0][0].detail.message).toBe(TOAST_MESSAGE);
+    expect(handler.mock.calls[0][0].detail.variant).toBe(TOAST_VARIANT);
+  });
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'recalculate' },
-                    row: firstParent
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Extract parents again after update.
-        const updatedParents = treeGrid.data;         
-        // Get first child of first parent.
-        const allChildren = updatedParents[0]._children;
+  it("Test submit for recalculation check update processing (Positive).", async () => {
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
 
-        // Assert if records are updated with current started processing.
-        allChildren.forEach(row => {
-            // @todo: Query lightning-tree-grid again and extract data to get changed row.
-            expect(row.lastCalcStatus).toBe('Processing...');
-            expect(row.iconName).toBe('standard:product_transfer');
-            expect(row.iconAlt).toBe('Currently Processing');
-        });
+    // Mock data.
+    getTreeGridData.emit(batchIsProcessingFalse);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    const firstParent = parents[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "recalculate" },
+        row: firstParent
+      }
     });
 
-    it('Test submit for recalculation (Toast) (Negative).', async () => {
-        // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
+    // Trigger row action in lightning-tree-grid - this opens the confirm modal
+    treeGrid.dispatchEvent(rowActionEvent);
+    await flushPromises();
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    // Confirm the recalculation via the confirm modal
+    const recalcConfirm = element.shadowRoot.querySelector(
+      "c-formula-share-recalc-confirm"
+    );
+    recalcConfirm.dispatchEvent(new CustomEvent("confirm"));
+    await flushPromises();
 
-        // Mock handler for toast event.
-        const handler = jest.fn();
-        // Add event listener to catch toast event.
-        element.addEventListener(ShowToastEventName, handler);
+    // Extract parents again after update.
+    const updatedParents = treeGrid.data;
+    // Get first child of first parent.
+    const allChildren = updatedParents[0]._children;
 
-        // Mock data.
-        getTreeGridData.emit(batchIsProcessingFalse);
+    // Assert if records are updated with current started processing.
+    allChildren.forEach((row) => {
+      // @todo: Query lightning-tree-grid again and extract data to get changed row.
+      expect(row.lastCalcStatus).toBe("Processing...");
+      expect(row.iconName).toBe("standard:product_transfer");
+      expect(row.iconAlt).toBe("Currently Processing");
+    });
+  });
 
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-            // Extract parents.
-            const parents = treeGrid.data;
-            const firstParent = parents[0];
+  it("Test submit for recalculation (Toast) (Negative).", async () => {
+    // https://github.com/trailheadapps/lwc-recipes/blob/master/force-app/main/default/lwc/miscNotification/__tests__/miscNotification.test.js
 
-            const rowActionEvent = new CustomEvent(
-                'rowaction', {
-                    detail: {
-                        action: { name: 'recalculate' },
-                        row: firstParent
-                    }
-            });
-            
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Check if toast event does NOT fired.
-        expect(handler).not.toHaveBeenCalled();
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock handler for toast event.
+    const handler = jest.fn();
+    // Add event listener to catch toast event.
+    element.addEventListener(ShowToastEventName, handler);
+
+    // Mock data.
+    getTreeGridData.emit(batchIsProcessingFalse);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    const firstParent = parents[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "recalculate" },
+        row: firstParent
+      }
     });
 
-    it('Test navigate to report (Positive).', async () => {
-        // https://salesforce.stackexchange.com/questions/285021/lightning-web-component-unit-testing-issue-with-testing-row-action-event
-        jest.spyOn(window, 'open').mockReturnValue();
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    await flushPromises();
 
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
+    // Check if toast event does NOT fired.
+    expect(handler).not.toHaveBeenCalled();
+  });
 
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        // Get first child of first parent.
-        const firstChild = parents[0]._children;
-        const firstRowOfFirstChild = firstChild[0];
+  it("Test navigate to report (Positive).", async () => {
+    // https://salesforce.stackexchange.com/questions/285021/lightning-web-component-unit-testing-issue-with-testing-row-action-event
+    jest.spyOn(window, "open").mockReturnValue();
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'viewlogs' },
-                    row: firstRowOfFirstChild
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Verify window.open was executed.
-        expect(window.open).toHaveBeenCalledTimes(1);
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock data.
+    getTreeGridData.emit(mockExampleTreeGridData);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    // Get first child of first parent.
+    const firstChild = parents[0]._children;
+    const firstRowOfFirstChild = firstChild[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "viewlogs" },
+        row: firstRowOfFirstChild
+      }
     });
 
-    it('Test edit rule (Positive).', async () => {
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
 
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
+    await flushPromises();
 
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        // Get first child of first parent.
-        const firstChild = parents[0]._children;
-        const firstRowOfFirstChild = firstChild[0];
+    // Verify window.open was executed.
+    expect(window.open).toHaveBeenCalledTimes(1);
+  });
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'edit' },
-                    row: firstRowOfFirstChild
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Verify c-formula-share-rule-edit is present in DOM.
-        const formulaShareRuleEdit = element.shadowRoot.querySelector('c-formula-share-rule-edit');
-        expect(formulaShareRuleEdit).not.toBeNull();
+  it("Test edit rule (Positive).", async () => {
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock data.
+    getTreeGridData.emit(mockExampleTreeGridData);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    // Get first child of first parent.
+    const firstChild = parents[0]._children;
+    const firstRowOfFirstChild = firstChild[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "edit" },
+        row: firstRowOfFirstChild
+      }
     });
 
-    it('Test activate rule (Positive).', async () => {
-        // Assign mock value for resolved Apex promise
-        activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    await flushPromises();
 
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
-        
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        // Get first child of first parent.
-        const firstChild = parents[0]._children;
-        const firstRowOfFirstChild = firstChild[0];
+    // Verify c-formula-share-rule-edit is present in DOM.
+    const formulaShareRuleEdit = element.shadowRoot.querySelector(
+      "c-formula-share-rule-edit"
+    );
+    expect(formulaShareRuleEdit).not.toBeNull();
+  });
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'activate' },
-                    row: firstRowOfFirstChild
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Missing assertions. Don't know how to check if spinner appears.
+  it("Test activate rule (Positive).", async () => {
+    // Assign mock value for resolved Apex promise
+    activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock data.
+    getTreeGridData.emit(mockExampleTreeGridData);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    // Get first child of first parent.
+    const firstChild = parents[0]._children;
+    const firstRowOfFirstChild = firstChild[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "activate" },
+        row: firstRowOfFirstChild
+      }
     });
 
-    it('Test deactivate rule (Positive).', async () => {
-        // Assign mock value for resolved Apex promise
-        activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
 
-        // Create initial lwc element and attach to virtual DOM.
-        const element = createElement('c-formula-share-rules-list-view', {
-            is: FormulaShareRulesListView
-        });
-        document.body.appendChild(element);
+    await flushPromises();
 
-        // Mock data.
-        getTreeGridData.emit(mockExampleTreeGridData);
-        
-        // Wait for component to render
-        await flushPromises();
-        
-        // Select ligthning-tree-grid.
-        const treeGrid = element.shadowRoot.querySelector('c-formula-share-tree-grid');
-        // Extract parents.
-        const parents = treeGrid.data;
-        // Get first child of first parent.
-        const firstChild = parents[0]._children;
-        const firstRowOfFirstChild = firstChild[0];
+    // Missing assertions. Don't know how to check if spinner appears.
+  });
 
-        const rowActionEvent = new CustomEvent(
-            'rowaction', {
-                detail: {
-                    action: { name: 'deactivate' },
-                    row: firstRowOfFirstChild
-                }
-        });
-        
-        // Trigger row action in lightning-tree-grid.
-        treeGrid.dispatchEvent(rowActionEvent);
-        
-        await flushPromises();
-        
-        // Missing assertions. Don't know how to check if spinner appears.
+  it("Test deactivate rule (Positive).", async () => {
+    // Assign mock value for resolved Apex promise
+    activateDeactivate.mockRejectedValue(SUCCESS_JSON);
+
+    // Create initial lwc element and attach to virtual DOM.
+    const element = createElement("c-formula-share-rules-list-view", {
+      is: FormulaShareRulesListView
+    });
+    document.body.appendChild(element);
+
+    // Mock data.
+    getTreeGridData.emit(mockExampleTreeGridData);
+
+    // Wait for component to render
+    await flushPromises();
+
+    // Select ligthning-tree-grid.
+    const treeGrid = element.shadowRoot.querySelector(
+      "c-formula-share-tree-grid"
+    );
+    // Extract parents.
+    const parents = treeGrid.data;
+    // Get first child of first parent.
+    const firstChild = parents[0]._children;
+    const firstRowOfFirstChild = firstChild[0];
+
+    const rowActionEvent = new CustomEvent("rowaction", {
+      detail: {
+        action: { name: "deactivate" },
+        row: firstRowOfFirstChild
+      }
     });
 
+    // Trigger row action in lightning-tree-grid.
+    treeGrid.dispatchEvent(rowActionEvent);
+
+    await flushPromises();
+
+    // Missing assertions. Don't know how to check if spinner appears.
+  });
 });

@@ -1,0 +1,62 @@
+<template>
+  <div
+    style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9000;
+    "
+  >
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      class="slds-modal slds-fade-in-open"
+    >
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <h2 class="slds-text-heading_medium">
+            Recalculate All Sharing on {objectLabel}
+          </h2>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium">
+          <p class="slds-m-bottom_small">
+            This will submit a batch job to recalculate sharing for
+            <strong>every record</strong> of this object type. If record volumes
+            are large, this could take some time to process. After submitting,
+            track progress of the recalculation in
+            <a href={batchLogsUrl} target="_blank">FormulaShare Batch Logs</a>.
+          </p>
+          <p class="slds-m-bottom_small">
+            To recalculate sharing for a single record only, use
+            <strong>Apply Rules to a Record</strong> from the same actions menu.
+          </p>
+          <p>
+            To submit multiple specific records via Flow or Apex, see
+            <a
+              href="https://cloudsundial.com/formulashare-via-flow-or-apex"
+              target="_blank"
+              >Request via Flow or Apex</a
+            >.
+          </p>
+        </div>
+        <footer class="slds-modal__footer">
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={handleCancel}
+          ></lightning-button>
+          &nbsp;&nbsp;
+          <lightning-button
+            label="Submit Batch Job"
+            variant="brand"
+            onclick={handleConfirm}
+          ></lightning-button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </div>
+</template>
