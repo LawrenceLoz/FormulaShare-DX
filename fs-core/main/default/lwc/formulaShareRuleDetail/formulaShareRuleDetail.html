@@ -106,6 +106,9 @@
                     fallback-md-match-field-mismatch={rule.fallbackMdMatchFieldMismatch}
                     fallback-share-to-field-mismatch={rule.fallbackShareToFieldMismatch}
                     selected-user-field-for-matching={rule.userFieldForMatching}
+                    filter-field-api-name={rule.filterFieldApiName}
+                    filter-operator={rule.filterOperator}
+                    filter-value={rule.filterValue}
                     shared-object-api-name={rule.objectSharedAPIName}
                     selected-team-mapping={rule.teamMappingDeveloperName}
                     selected-team-field={rule.controllingObjectSharedToFieldAPIName}
@@ -116,8 +119,29 @@
                     onsharefieldtypechange={handleShareFieldTypeChange}
                     onuserfieldformatchingchange={handleUserFieldForMatchingChange}
                     onusersharingmodechange={handleUserSharingModeChange}
+                    ontoggleconditions={handleToggleConditions}
+                    conditions-panel-open={showConditionsPanel}
+                    onfilterchange={handleFilterChange}
                     onteammappingchange={handleTeamMappingChange}
                     onteamfieldchange={handleTeamFieldChange}>
+
+                    <!-- Conditions panel: slotted above advanced settings -->
+                    <div slot="conditions">
+                        <template if:true={showConditionsPanel}>
+                            <template if:true={supportsRelated}>
+                                <template if:true={supportsRelated.data}>
+                                    <div class="slds-m-horizontal_medium slds-m-top_x-small">
+                                        <c-formula-share-rule-conditions
+                                            rule-objects={ruleObjectsForConditions}
+                                            conditions-map={conditionsMap}
+                                            onconditionschange={handleConditionsChange}
+                                            onconditionsclose={handleConditionsClose}>
+                                        </c-formula-share-rule-conditions>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
                 </c-formula-share-rule-detail-field>
             </div>
         </div>

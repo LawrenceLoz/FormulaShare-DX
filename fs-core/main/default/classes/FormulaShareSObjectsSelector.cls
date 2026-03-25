@@ -26,6 +26,11 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
     protected Set<Schema.SObjectField> fieldsSet = new Set<Schema.SObjectField>();
     protected Set<String> fieldStrings = new Set<String>();
 
+    // Fields added here are included in SELECT only — not in the != NULL sharing-field check.
+    // Use this for filter evaluation fields that must not affect the sharing-field presence check
+    // and that may not be filterable in SOQL (e.g. long text area fields).
+    protected Set<String> selectOnlyFieldStrings = new Set<String>();
+
     public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
         super(false // Do not include FieldSet fields
             , enforceObjectAndFieldSecurity // Enforce field security if requested
@@ -90,6 +95,11 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
 
     // Used to query for a set of records with specific ids
     public List<SObject> selectWithFields(Set<Id> recordIdSet) {
+        return selectWithFields(recordIdSet, new List<String>());
+    }
+
+    // Used to query for a set of records with specific ids and optional additional WHERE conditions
+    public List<SObject> selectWithFields(Set<Id> recordIdSet, List<String> additionalConditions) {
 
         // Set fields provided as tokens
         fields.addAll(fieldsSet);
@@ -108,7 +118,16 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
 
         System.debug('recordIdsString: '+ recordIdsString);
 
-        factory.setCondition('Id IN (' + recordIdsString + ')');
+        String condition = 'Id IN (' + recordIdsString + ')';
+        if(additionalConditions != null) {
+            for(String cond : additionalConditions) {
+                if(String.isNotBlank(cond)) {
+                    condition += ' AND (' + cond + ')';
+                }
+            }
+        }
+
+        factory.setCondition(condition);
         System.debug('SOQL with condition: '+factory.toSOQL());
 
         List<SObject> queriedRecords = Database.query(factory.toSOQL());

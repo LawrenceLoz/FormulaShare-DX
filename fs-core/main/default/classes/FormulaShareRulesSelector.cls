@@ -90,7 +90,9 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             'Behaviour_Md_Match_Field_Mismatch__c',
             'Behaviour_Share_To_Field_Mismatch__c',
             'Fallback_Md_Match_Field_Mismatch__c',
-            'Fallback_Share_To_Field_Mismatch__c'
+            'Fallback_Share_To_Field_Mismatch__c',
+
+            'Filter__c'
         };
         return fieldNames;
     }

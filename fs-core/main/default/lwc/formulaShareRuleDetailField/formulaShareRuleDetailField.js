@@ -187,6 +187,34 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     @api fallbackMdMatchFieldMismatch;
     @api fallbackShareToFieldMismatch;
 
+    // ─── Sharing conditions toggle (dispatches to parent) ───────────────────
+    @api
+    get filterFieldApiName() { return this._filterFieldApiName; }
+    set filterFieldApiName(value) { this._filterFieldApiName = value; }
+    _filterFieldApiName;
+
+    @api
+    get filterOperator() { return this._filterOperator; }
+    set filterOperator(value) { this._filterOperator = value; }
+    _filterOperator;
+
+    @api
+    get filterValue() { return this._filterValue; }
+    set filterValue(value) { this._filterValue = value; }
+    _filterValue;
+
+    // Passed from parent: true when the conditions panel is already open
+    @api conditionsPanelOpen = false;
+
+    // Hide the "Add conditions" link while the panel is open
+    get showConditionsToggle() {
+        return !this.conditionsPanelOpen;
+    }
+
+    handleToggleConditions() {
+        this.dispatchEvent(new CustomEvent('toggleconditions'));
+    }
+    // ─── End sharing conditions toggle ────────────────────────────────────────
     // ---- Team mapping API properties (passed from ruleDetail) ---- //
     @api sharedObjectApiName;
 

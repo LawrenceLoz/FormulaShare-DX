@@ -189,5 +189,27 @@ public with sharing class FormulaShareRuleFactory {
         rule.behaviourShareToFieldMismatch = 'Log Error';
         return rule;
     }
+
+    // Returns a standard rule with a sharing condition filter (Equals) on the given field
+    public static FormulaShareRuleStandard getUserRuleWithFilterEquals(String filterField, String filterValue) {
+        FormulaShareRuleStandard rule = getUserRule();
+        rule.filterFieldApiName = filterField;
+        rule.filterOperator     = FormulaShareFilterHelper.OPERATOR_EQUALS;
+        rule.filterValue        = filterValue;
+        rule.sharedObjectFilterFieldApiName = filterField;
+        rule.sharedObjectFilterOperator     = FormulaShareFilterHelper.OPERATOR_EQUALS;
+        rule.sharedObjectFilterValue        = filterValue;
+        return rule;
+    }
+
+    // Returns a standard rule with a sharing condition filter (Is Not Blank) on the given field
+    public static FormulaShareRuleStandard getUserRuleWithFilterIsNotBlank(String filterField) {
+        FormulaShareRuleStandard rule = getUserRule();
+        rule.filterFieldApiName = filterField;
+        rule.filterOperator     = FormulaShareFilterHelper.OPERATOR_IS_NOT_BLANK;
+        rule.sharedObjectFilterFieldApiName = filterField;
+        rule.sharedObjectFilterOperator     = FormulaShareFilterHelper.OPERATOR_IS_NOT_BLANK;
+        return rule;
+    }
     
 }

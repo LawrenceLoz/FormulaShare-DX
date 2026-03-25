@@ -1,83 +1,91 @@
 /**
-*Copyright 2019 Lawrence Newcombe
-*
-*Permission is hereby granted, free of charge, to any person obtaining a copy 
-*of this software and associated documentation files (the "Software"), to deal 
-*in the Software without restriction, including without limitation the rights 
-*to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-*of the Software, and to permit persons to whom the Software is furnished to do 
-*so, subject to the following conditions:
-*
-*The above copyright notice and this permission notice shall be included in all 
-*copies or substantial portions of the Software.
-*
-*THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-*IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
-*FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
-*COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
-*IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
-*CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-**/
+ *Copyright 2019 Lawrence Newcombe
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy
+ *of this software and associated documentation files (the "Software"), to deal
+ *in the Software without restriction, including without limitation the rights
+ *to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ *of the Software, and to permit persons to whom the Software is furnished to do
+ *so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all
+ *copies or substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ *FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ *COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ *IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **/
 
 // Domain class isn't used so we can pass to methods directly for mocking
 public virtual inherited sharing class FormulaShareSObjectShares {
-    
-    private Schema.SObjectType type;
-    public inherited sharing class FormulaShareException extends Exception {}    
+  private Schema.SObjectType type;
+  public inherited sharing class FormulaShareException extends Exception {
+  }
 
-    public static FormulaShareSObjectShares mock;
-    public static FormulaShareSObjectShares construct(Schema.SObjectType type) {
-        if(Test.isRunningTest() && mock != null ) {
-            return mock;
-        }
-        else {
-            return new FormulaShareSObjectShares(type);
-        }
+  public static FormulaShareSObjectShares mock;
+  public static FormulaShareSObjectShares construct(Schema.SObjectType type) {
+    if (Test.isRunningTest() && mock != null) {
+      return mock;
+    } else {
+      return new FormulaShareSObjectShares(type);
     }
+  }
 
-    public FormulaShareSObjectShares(Schema.SObjectType type) {
-        this.type = type;
-        System.debug('Type in scope: '+this.type.getDescribe().getLabel());
+  public FormulaShareSObjectShares(Schema.SObjectType type) {
+    this.type = type;
+    System.debug('Type in scope: ' + this.type.getDescribe().getLabel());
+  }
+
+  // To insert sharing records identified by FormulaShare as being required
+  public virtual void insertShares(List<SObject> shares) {
+    // Check that object can be created by current or requesting user (or bypass if this is a test run)
+    // Note there's no need to check field security as this can't be set on share records
+    if (type.getDescribe().isCreateable() == true) {
+      // Check that inserting these shares won't exceed the platform DML row limit
+      Integer rowsRemaining = Limits.getLimitDmlRows() - Limits.getDmlRows();
+      if (shares.size() > rowsRemaining) {
+        throw new FormulaShareException(
+          'Share insert skipped: attempting to insert ' +
+            shares.size() +
+            ' records would exceed the platform limit of ' +
+            Limits.getLimitDmlRows() +
+            ' DML rows in this transaction (' +
+            Limits.getDmlRows() +
+            ' already used).'
+        );
+      }
+
+      // Insert the sharing record
+      // NOTE - in the case where a share exists for this entity and reason at a lower level, this will
+      // update the existing share rather than create a new one. For this reason, assessment of sharing will only
+      // delete shares if there is no sharing of any level to be applied
+
+      // Batch operates on a single object and all shares will be of this type (access checked above)
+      insert shares; //NOPMD (false apexcrudviolation)
+
+      system.debug('DML inserted shares ' + shares);
+    } else {
+      throw new FormulaShareException(
+        'Share insert failed - share object not creatable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object'
+      );
     }
+  }
 
+  // To remove sharing identified by FormulaShareService as no longer being required
+  public virtual void deleteShares(List<SObject> shares) {
+    // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
+    if (type.getDescribe().isDeletable() == true) {
+      system.debug('DML shares to be deleted ' + shares);
 
-    // To insert sharing records identified by FormulaShare as being required
-    public virtual void insertShares(List<SObject> shares) {
-
-        // Check that object can be created by current or requesting user (or bypass if this is a test run)
-        // Note there's no need to check field security as this can't be set on share records
-        if(type.getDescribe().isCreateable() == true) {
-
-            // Insert the sharing record
-            // NOTE - in the case where a share exists for this entity and reason at a lower level, this will 
-            // update the existing share rather than create a new one. For this reason, assessment of sharing will only
-            // delete shares if there is no sharing of any level to be applied
-
-            // Batch operates on a single object and all shares will be of this type (access checked above)
-            insert shares;  //NOPMD (false apexcrudviolation)
-
-            system.debug('DML inserted shares '+ shares);
-        }
-
-        else {
-            throw new FormulaShareException('Share insert failed - share object not creatable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
-        }
+      // Batch operates on a single object and all shares will be of this type (access checked above)
+      delete shares; //NOPMD (false apexcrudviolation)
+    } else {
+      throw new FormulaShareException(
+        'Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object'
+      );
     }
-
-    // To remove sharing identified by FormulaShareService as no longer being required
-    public virtual void deleteShares(List<SObject> shares) {
-
-        // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
-        if(type.getDescribe().isDeletable() == true) {
-            system.debug('DML shares to be deleted '+ shares);
-
-            // Batch operates on a single object and all shares will be of this type (access checked above)
-            delete shares;  //NOPMD (false apexcrudviolation)
-        }
-
-        else {
-            throw new FormulaShareException('Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object');
-        }
-    }
-
+  }
 }

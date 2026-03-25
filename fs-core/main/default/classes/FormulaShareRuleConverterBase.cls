@@ -37,6 +37,13 @@ public abstract inherited sharing class FormulaShareRuleConverterBase {
         mdRule.Fallback_Md_Match_Field_Mismatch__c = rule.fallbackMdMatchFieldMismatch;
         mdRule.Fallback_Share_To_Field_Mismatch__c = rule.fallbackShareToFieldMismatch;
 
+        // Filter condition on the controlling / shared object (level 0 for standard rules)
+        // For cross-object rules, mapRelationshipToMetadataRule will overwrite Filter__c if needed
+        // Use filterContracted when available (supports multi-condition and SOQL), otherwise fall back to individual properties
+        mdRule.Filter__c = rule.filterContracted != null 
+            ? rule.filterContracted 
+            : FormulaShareFilterHelper.toContracted(rule.filterFieldApiName, rule.filterOperator, rule.filterValue);
+
         return mdRule;
     }
 

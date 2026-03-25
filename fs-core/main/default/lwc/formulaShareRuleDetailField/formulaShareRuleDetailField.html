@@ -117,21 +117,33 @@
 
                                 <div class="slds-form-element">
                                     <div class="slds-form-element__control">
-                                        <lightning-combobox
-                                            class="slds-m-top_x-small"
-                                            name="containingType"
-                                            label="Containing Type"
-                                            value={teamContainingTypeValue}
-                                            options={teamContainingTypeOptions}
-                                            onchange={handleTeamContainingTypeChange}
-                                            disabled={teamContainingTypeDisabled}
-                                            message-when-value-missing="Select containing type"
-                                            required>
-                                        </lightning-combobox>
-
-                                        <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewTeamFieldDetails}>
-                                            {teamFieldDetailsToggleText}
+                                        <div style="display:flex; align-items:flex-end; gap:0.75rem;">
+                                            <div style="flex:1;">
+                                                <lightning-combobox
+                                                    class="slds-m-top_x-small"
+                                                    name="containingType"
+                                                    label="Containing Type"
+                                                    value={teamContainingTypeValue}
+                                                    options={teamContainingTypeOptions}
+                                                    onchange={handleTeamContainingTypeChange}
+                                                    disabled={teamContainingTypeDisabled}
+                                                    message-when-value-missing="Select containing type"
+                                                    required>
+                                                </lightning-combobox>
+                                            </div>
+                                            <div style="display:flex; flex-direction:column; padding-bottom:0.25rem; white-space:nowrap;">
+                                                <template if:true={_selectedTeamField}>
+                                                    <div class="slds-text-link_reset slds-text-link" onclick={toggleViewTeamFieldDetails}>
+                                                        {teamFieldDetailsToggleText}
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
+                                        <template if:true={showConditionsToggle}>
+                                            <div class="slds-text-link_reset slds-text-link slds-m-top_medium" onclick={handleToggleConditions}>
+                                                Add conditions
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
 
@@ -202,56 +214,80 @@
                             <div class="slds-form-element__control">
 
                                 <template if:false={shareWithFlags.usersWithFieldMatch}>
-                                    <lightning-combobox
-                                        class="slds-m-top_x-small"
-                                        name="shareFieldType"
-                                        label="Containing Type"
-                                        value={shareFieldType}
-                                        placeholder="Select"
-                                        options={shareFieldTypeOptions}
-                                        onchange={handleShareFieldTypeChange}
-                                        read-only={fieldTypeIsReadOnly}
-                                        disabled={disableShareField}
-                                        message-when-value-missing="Complete this field (depends on Share With option selected)"
-                                        required >
-                                    </lightning-combobox>
-                                </template>
-
-                                <template if:true={fieldType}>
-                                    <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewFieldDetails}>
-                                        {fieldDetailsToggleText}
-                                    </div>
-                                </template>
-
-                                <template if:true={shareWithFlags.usersWithFieldMatch}>
-                                    <div style="display:flex; align-items:flex-end;">
-                                        <lightning-combobox
-                                            class="slds-m-top_x-small"
-                                            name="userFieldForMatching"
-                                            label="User Field"
-                                            value={selectedUserFieldForMatching}
-                                            placeholder="Select User field"
-                                            options={userFieldMatchOptions}
-                                            onchange={handleUserFieldForMatchingChange}
-                                            required >
-                                        </lightning-combobox>
-
-                                        <div class="slds-m-left_x-small" onclick={refreshUserFields}>
-                                            <lightning-icon 
-                                                icon-name="action:refresh" 
-                                                alternative-text="Refresh" 
-                                                title="Refresh user fields" 
-                                                size="x-small">
-                                            </lightning-icon>
-                                            <template if:true={loadingUserFields}>
-                                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                    <div style="display:flex; align-items:flex-end; gap:0.75rem;">
+                                        <div style="flex:1;">
+                                            <lightning-combobox
+                                                class="slds-m-top_x-small"
+                                                name="shareFieldType"
+                                                label="Containing Type"
+                                                value={shareFieldType}
+                                                placeholder="Select"
+                                                options={shareFieldTypeOptions}
+                                                onchange={handleShareFieldTypeChange}
+                                                read-only={fieldTypeIsReadOnly}
+                                                disabled={disableShareField}
+                                                message-when-value-missing="Complete this field (depends on Share With option selected)"
+                                                required >
+                                            </lightning-combobox>
+                                        </div>
+                                        <div style="display:flex; flex-direction:column; padding-bottom:0.25rem; white-space:nowrap;">
+                                            <template if:true={fieldType}>
+                                                <div class="slds-text-link_reset slds-text-link" onclick={toggleViewFieldDetails}>
+                                                    {fieldDetailsToggleText}
+                                                </div>
                                             </template>
                                         </div>
                                     </div>
+                                    <template if:true={showConditionsToggle}>
+                                        <div class="slds-text-link_reset slds-text-link slds-m-top_medium" onclick={handleToggleConditions}>
+                                            Add conditions
+                                        </div>
+                                    </template>
+                                </template>
 
-                                    <template if:true={selectedUserFieldForMatching}>
-                                        <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium slds-m-top_small" onclick={toggleViewUserFieldDetails}>
-                                            {userFieldDetailsToggleText}
+                                <!-- Sharing condition filter – Only When section -->
+                                <!-- REMOVED: Conditions are now managed by the conditions component below -->
+
+
+                                <template if:true={shareWithFlags.usersWithFieldMatch}>
+                                    <div style="display:flex; align-items:flex-end; gap:0.75rem;">
+                                        <div style="flex:1;">
+                                            <div style="display:flex; align-items:flex-end;">
+                                                <lightning-combobox
+                                                    class="slds-m-top_x-small slds-grow"
+                                                    name="userFieldForMatching"
+                                                    label="User Field"
+                                                    value={selectedUserFieldForMatching}
+                                                    placeholder="Select User field"
+                                                    options={userFieldMatchOptions}
+                                                    onchange={handleUserFieldForMatchingChange}
+                                                    required >
+                                                </lightning-combobox>
+
+                                                <div class="slds-m-left_x-small" onclick={refreshUserFields}>
+                                                    <lightning-icon
+                                                        icon-name="action:refresh"
+                                                        alternative-text="Refresh"
+                                                        title="Refresh user fields"
+                                                        size="x-small">
+                                                    </lightning-icon>
+                                                    <template if:true={loadingUserFields}>
+                                                        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex; flex-direction:column; padding-bottom:0.25rem; white-space:nowrap;">
+                                            <template if:true={selectedUserFieldForMatching}>
+                                                <div class="slds-text-link_reset slds-text-link" onclick={toggleViewUserFieldDetails}>
+                                                    {userFieldDetailsToggleText}
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <template if:true={showConditionsToggle}>
+                                        <div class="slds-text-link_reset slds-text-link slds-m-top_medium" onclick={handleToggleConditions}>
+                                            Add conditions
                                         </div>
                                     </template>
                                 </template>
@@ -445,11 +481,15 @@
             </div>
         </template>
 
+        <!-- Conditions panel injected here from parent via named slot -->
+        <slot name="conditions"></slot>
+
         <template lwc:if={showAdvancedSettingsToggle}>
-            <div class="slds-text-link_reset slds-text-link slds-m-horizontal_medium" 
-                style="text-align: right"
-                onclick={toggleAdvancedSettings}>
-                {advancedSettingsToggleText}
+            <div class="slds-grid slds-grid_align-end slds-m-horizontal_medium slds-m-top_x-small">
+                <div class="slds-text-link_reset slds-text-link"
+                    onclick={toggleAdvancedSettings}>
+                    {advancedSettingsToggleText}
+                </div>
             </div>
         </template>
 
