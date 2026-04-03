@@ -324,8 +324,8 @@ public virtual inherited sharing class FormulaShareBatchService {
 
 
     // Finalse methods called from finish()
-	FormulaShareLogs fsLogs;
-	fflib_ISObjectUnitOfWork finalUow;
+	protected FormulaShareLogs fsLogs;
+	protected fflib_ISObjectUnitOfWork finalUow;
     public void finaliseLogs() {
 
 		fsLogs = new FormulaShareLogs(this.logsList);

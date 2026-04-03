@@ -95,6 +95,24 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         return uow;
     }
 
+    public static fflib_ISObjectUnitOfWork processForTargetedJobFinish(fflib_ISObjectUnitOfWork batchUow, List<FormulaShareRule> rules) {
+        uow = batchUow;
+
+        Set<String> ruleNames = new Set<String>();
+        for(FormulaShareRule rule : rules) {
+            ruleNames.add(rule.developerName);
+        }
+
+        List<FormulaShare_Metrics__c> existingMetrics = new FormulaShareMetricsSelector().getMetricsForRulesAndContext(ruleNames, targetedJobContext);
+        Datetime timeNow = Datetime.now();
+        for(FormulaShare_Metrics__c metricsObj : existingMetrics) {
+            metricsObj.Processing_Finished__c = timeNow;
+            uow.registerDirty(metricsObj);
+        }
+
+        return uow;
+    }
+
 
     private static Map<String,FormulaShareMetrics.Increment> process(List<FormulaShare_Processed_Share_Event__e> pseList) {
         settings = FormulaShareSettingsSelector.construct().selectActiveSettings();

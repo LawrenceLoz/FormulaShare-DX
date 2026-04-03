@@ -7,6 +7,43 @@
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>
-        <valueSetName>Department</valueSetName>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sales EMEA</fullName>
+                <default>false</default>
+                <label>Sales EMEA</label>
+            </value>
+            <value>
+                <fullName>Sales APAC</fullName>
+                <default>false</default>
+                <label>Sales APAC</label>
+            </value>
+            <value>
+                <fullName>Sales AMER</fullName>
+                <default>false</default>
+                <label>Sales AMER</label>
+            </value>
+            <value>
+                <fullName>Service EMEA</fullName>
+                <default>false</default>
+                <label>Service EMEA</label>
+            </value>
+            <value>
+                <fullName>Service APAC</fullName>
+                <default>false</default>
+                <label>Service APAC</label>
+            </value>
+            <value>
+                <fullName>Service AMER</fullName>
+                <default>false</default>
+                <label>Service AMER</label>
+            </value>
+            <value>
+                <fullName>Finance</fullName>
+                <default>false</default>
+                <label>Finance</label>
+            </value>
+        </valueSetDefinition>
     </valueSet>
 </CustomField>

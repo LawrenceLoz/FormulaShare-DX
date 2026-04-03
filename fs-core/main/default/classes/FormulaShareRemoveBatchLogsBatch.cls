@@ -39,9 +39,7 @@ public inherited sharing class FormulaShareRemoveBatchLogsBatch implements Datab
         }
     }
 
-    // On completion, run job to delete batch logs
     public void finish(Database.BatchableContext context) {
-
     }
 
 }
