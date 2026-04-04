@@ -158,8 +158,45 @@
                             </template>
                         </template>
 
-                        <!-- Show standard field selection when Teams is NOT selected -->
-                        <template if:false={shareWithFlags.teams}>
+                        <!-- Show territories section when Territories of Account / Lead is selected -->
+                        <template if:true={shareWithFlags.territoriesOfAccountLead}>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <template if:true={territoryFieldOptions}>
+                                        <lightning-combobox
+                                            name="_shareField"
+                                            label="Specified in Field"
+                                            value={_shareField}
+                                            placeholder="Select Account or Lead field"
+                                            options={territoryFieldOptions}
+                                            onchange={handleShareFieldChange}
+                                            required>
+                                        </lightning-combobox>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <lightning-combobox
+                                        class="slds-m-top_x-small"
+                                        name="territoryGroupType"
+                                        label="Territory Type"
+                                        value={territoryGroupType}
+                                        options={territoryTypeOptions}
+                                        onchange={handleTerritoryTypeChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                            </div>
+                            <template if:true={showConditionsToggle}>
+                                <div class="slds-text-link_reset slds-text-link slds-m-top_medium" onclick={handleToggleConditions}>
+                                    Add conditions
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- Show standard field selection when Teams and Territories are NOT selected -->
+                        <template if:true={showStandardFieldSection}>
                         
                         <template if:true={showUserSharingModeToggle}>
                             <div class="slds-form-element">
@@ -295,7 +332,7 @@
                             </div>
                         </div>
 
-                        </template><!-- end if:false teams -->
+                        </template><!-- end showStandardFieldSection -->
                     </div>
                 </span>
             </div>
@@ -455,6 +492,14 @@
                                 value={teamConfigSetupLink}
                                 label="Team and User Groups"
                                 target="_blank"></lightning-formatted-url>&nbsp;page of FormulaShare Setup.
+                        </template>
+
+                        <template if:true={shareWithFlags.territoriesOfAccountLead}>
+                            When <b>Territories of Account / Lead</b> is selected, FormulaShare shares records with the Enterprise Territory Management territories associated with the Account or Lead referenced in the selected field.
+                            Users assigned to those territories receive the access level set on this rule, and sharing is updated automatically as territory assignments change.
+                            <br/><br/>
+                            Choose <b>Territory</b> to share with users directly assigned to the territory.
+                            Choose <b>Territory and Subordinates</b> to also share to all subordinate territories in the territory hierarchy.
                         </template>
 
                     </div>

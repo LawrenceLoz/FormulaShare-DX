@@ -341,6 +341,42 @@ public inherited sharing class FormulaShareUtilities {
 	}
 
 
+	// Returns text/picklist fields plus lookups to Account or Lead — used for ETM territory rule field selection.
+	// When the controlling object itself is Account or Lead, the record Id field is also included.
+	public static List<Schema.SObjectField> getAccountLeadShareFields(String objectApiName) {
+		List<Schema.SObjectField> shareFields = new List<Schema.SObjectField>();
+		Boolean objectIsAccountOrLead = (objectApiName == 'Account' || objectApiName == 'Lead');
+
+		Map<String,Schema.SObjectField> allFieldsMap = getFieldMap(objectAPIName);
+		for(Schema.SObjectField field : allFieldsMap.values()) {
+			Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+			Schema.DisplayType fieldType = fieldDesc.getType();
+
+			if(fieldType == Schema.DisplayType.STRING
+				|| fieldType == Schema.DisplayType.PICKLIST) {
+				if(isSupportedFieldForCustomMetadata(objectApiName, fieldDesc)) {
+					shareFields.add(field);
+				}
+			}
+			else if(fieldType == Schema.DisplayType.REFERENCE) {
+				for(SObjectType parentObjType : fieldDesc.getReferenceTo()) {
+					String parentObj = parentObjType.getDescribe().getName();
+					if(parentObj == 'Account' || parentObj == 'Lead') {
+						shareFields.add(field);
+						break;
+					}
+				}
+			}
+			// Include the record Id when the object itself is Account or Lead
+			else if(objectIsAccountOrLead && fieldType == Schema.DisplayType.ID) {
+				shareFields.add(field);
+			}
+		}
+
+		return shareFields;
+	}
+
+
 	public static List<Schema.SObjectField> getBooleanFields(String objectApiName) {
 		List<Schema.SObjectField> booleanFields = new List<Schema.SObjectField>();
 		

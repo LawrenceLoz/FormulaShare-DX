@@ -33,9 +33,11 @@ import isDefaultTeamShareWithEnabled from '@salesforce/apex/FormulaShareRuleDeta
 import supportsUsersWithFieldMatch from '@salesforce/apex/FormulaShareLwcAvailabilityController.supportsUsersWithFieldMatch';
 import getUserFieldMatchOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getUserFieldMatchOptions';
 import supportsTeamSharing from '@salesforce/apex/FormulaShareLwcAvailabilityController.supportsTeamSharing';
+import isTerritorySharingSupported from '@salesforce/apex/FormulaShareRuleDetailController.isTerritorySharingSupported';
 import getActiveTeamMappings from '@salesforce/apex/FormulaShareLwcAvailabilityController.getActiveTeamMappings';
 import getTeamFieldOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamFieldOptions';
 import getTeamObjectLabel from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamObjectLabel';
+import getAccountLeadShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getAccountLeadShareFieldOptions';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
@@ -89,8 +91,14 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             if (value === 'Users' && this.userSharingMode !== 'specified') {
                 this.userSharingMode = 'specified';
             }
+            // Sync territory group type sub-dropdown when loading an existing rule;
+            // always keep _shareWith as the radio option value so the radio stays selected
+            if (value === 'Territories of Account / Lead' || value === 'Territories and Sub of Account / Lead') {
+                this.territoryGroupType = value;
+                this._shareWith = 'Territories of Account / Lead';
+            }
             this.updateShareFieldTypeOptions();
-            this.updateshareWithFlags();            
+            this.updateshareWithFlags();
         }
     }
     _shareWith;
@@ -342,6 +350,11 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         return this._shareWith === 'Users';
     }
 
+    // Show standard field/containing-type section when neither Teams nor Territories is selected
+    get showStandardFieldSection() {
+        return !this.shareWithFlags.teams && !this.shareWithFlags.territoriesOfAccountLead;
+    }
+
     get shareWithOptions() {
         console.log('shareWithOptions getter called - supportsUsersWithFieldMatchFlag:', this.supportsUsersWithFieldMatchFlag);
         var optionsList = [
@@ -376,6 +389,10 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
         if(this.teamSharingSupported) {
             optionsList.push( { label: 'Teams', value: 'Teams' } );
+        }
+
+        if(this.territorySharingSupported) {
+            optionsList.push( { label: 'Territories of Account / Lead', value: 'Territories of Account / Lead' } );
         }
 
         // Note: "Users with Matching Field Value" is now handled via toggle when Users is selected
@@ -481,6 +498,36 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         } else if(error) {
             console.log('Error detecting supportsTeamSharing ', error);
         }
+    }
+
+    // Detect availability of Territories of Account / Lead share-with option (ETM)
+    territorySharingSupported = false;
+    @wire(isTerritorySharingSupported)
+    wiredIsTerritorySharingSupported({ data, error }) {
+        if (data !== undefined) {
+            this.territorySharingSupported = data === true;
+            this.updateShareWithOptions();
+        } else if (error) {
+            console.log('Error detecting isTerritorySharingSupported ', error);
+        }
+    }
+
+    // Territory group type sub-dropdown state — value is the full shareWith picklist value
+    territoryGroupType = 'Territories of Account / Lead';
+
+    get territoryTypeOptions() {
+        return [
+            { label: 'Territory', value: 'Territories of Account / Lead' },
+            { label: 'Territory and Subordinates', value: 'Territories and Sub of Account / Lead' }
+        ];
+    }
+
+    handleTerritoryTypeChange(event) {
+        this.territoryGroupType = event.detail.value;
+        // Keep _shareWith as the radio option value so the radio button stays selected;
+        // dispatch the full sub-type value (Territory vs Territory and Subordinates) to the parent
+        this.dispatchEvent(new CustomEvent('sharewithchange', { detail: this.territoryGroupType }));
+        this.setNoMatchBehaviourOptions();
     }
 
     // ---- Wire: Active Team Mappings for embedded team mapping selector ---- //
@@ -656,6 +703,19 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
 
+    @track territoryFieldOptions;
+    @wire(getAccountLeadShareFieldOptions, { objectApiName: '$_objectWithShareField' })
+    wiredAccountLeadFieldOptions({ data, error }) {
+        if (data) {
+            this.territoryFieldOptions = data.map(obj => ({
+                label: obj.fieldLabel + ' (' + obj.fieldApiName + ')',
+                value: obj.fieldApiName
+            }));
+        } else if (error) {
+            console.log('Error getting account/lead fields', error);
+        }
+    }
+
     @track fieldOptions;
     shareFieldOptions;
     fieldsMap = new Map();
@@ -730,7 +790,9 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             , 'Managers of Users'
             , 'Users and Manager Subordinates'
             , 'Default Account Teams of Users'
-            , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
+            , 'Default Opportunity Teams of Users'
+            , 'Territories of Account / Lead'
+            , 'Territories and Sub of Account / Lead'].includes(this.shareWith)) {
             //console.log('setting to full list ',this.fullFieldList);
             this.fieldOptions = this.fullFieldList;
         }
@@ -768,6 +830,13 @@ export default class FormulaShareRuleDetailField extends LightningElement {
 
                 this.shareFieldTypeOptions = [
                     { label: 'Id of User', value: 'Id' }
+                ];
+                this.fieldTypeIsReadOnly = true;
+                break;
+            case 'Territories of Account / Lead':
+            case 'Territories and Sub of Account / Lead':
+                this.shareFieldTypeOptions = [
+                    { label: 'Id of Account or Lead', value: 'Id' }
                 ];
                 this.fieldTypeIsReadOnly = true;
                 break;
@@ -835,6 +904,10 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 break;
             case 'Teams':
                 this.shareWithFlags.teams = true;
+                break;
+            case 'Territories of Account / Lead':
+            case 'Territories and Sub of Account / Lead':
+                this.shareWithFlags.territoriesOfAccountLead = true;
                 break;
             default:
         }
@@ -929,6 +1002,10 @@ export default class FormulaShareRuleDetailField extends LightningElement {
             case 'Roles and Internal Subordinates':
             case 'Roles, Internal and Portal Subordinates':
                 this.userRoleOrGroup = 'Role'
+                break;
+            case 'Territories of Account / Lead':
+            case 'Territories and Sub of Account / Lead':
+                this.userRoleOrGroup = 'Territory';
                 break;
             default:
         }
@@ -1047,8 +1124,8 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         }
 
         // Or if field and fields map populated but no match, show error
-        // Skip this check when Teams is selected - the team mapping component manages its own field list
-        else if(this._shareField && this.fieldsMap && this.fieldsMap.size > 0 && !this.shareWithFlags.teams) {
+        // Skip this check when Teams or Territories is selected - they use separate field lists
+        else if(this._shareField && this.fieldsMap && this.fieldsMap.size > 0 && !this.shareWithFlags.teams && !this.shareWithFlags.territoriesOfAccountLead) {
             this.fieldNotAvailableForSharingError(this._shareField);
         }
     }
@@ -1077,13 +1154,15 @@ export default class FormulaShareRuleDetailField extends LightningElement {
         if(this.shareWith === 'Users' && this.userSharingMode === 'matching') {
             this._shareFieldType = 'Name';
         }
-        // For other user-related sharing, type should always be Id
-        else if(this.shareWith && 
+        // For other user-related sharing and territory sharing, type should always be Id
+        else if(this.shareWith &&
             ['Users'
             , 'Managers of Users'
             , 'Users and Manager Subordinates'
             , 'Default Account Teams of Users'
-            , 'Default Opportunity Teams of Users'].includes(this.shareWith)) {
+            , 'Default Opportunity Teams of Users'
+            , 'Territories of Account / Lead'
+            , 'Territories and Sub of Account / Lead'].includes(this.shareWith)) {
             this._shareFieldType = 'Id';
         }
 

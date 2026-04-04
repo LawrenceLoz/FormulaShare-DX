@@ -160,6 +160,42 @@ public with sharing class FormulaShareRuleDetailController {
     }
 
 
+    @AuraEnabled(cacheable=true)
+    public static List<ShareFieldOption> getAccountLeadShareFieldOptions(String objectApiName){
+        List<Schema.SObjectField> shareFieldTypes = FormulaShareUtilities.getAccountLeadShareFields(objectApiName);
+
+        List<ShareFieldOption> sfoList = new List<ShareFieldOption>();
+        for(Schema.SObjectField field : shareFieldTypes){
+            Schema.DescribeFieldResult fieldDesc = field.getDescribe();
+            ShareFieldOption sfo = new ShareFieldOption();
+            sfo.fieldApiName = fieldDesc.getName();
+            sfo.fieldLabel = fieldDesc.getLabel();
+            sfo.formula = fieldDesc.getCalculatedFormula();
+
+            switch on String.valueOf(fieldDesc.getType()) {
+                when 'STRING' {
+                    sfo.type = sfo.formula != null ? 'Formula' : 'Text';
+                }
+                when 'PICKLIST' {
+                    sfo.type = 'Picklist';
+                }
+                when 'REFERENCE' {
+                    sfo.type = 'Id';
+                }
+            }
+
+            Schema.DisplayType fieldType = fieldDesc.getType();
+            if(fieldType == Schema.DisplayType.REFERENCE) {
+                sfo.isIdType = true;
+            }
+            sfoList.add(sfo);
+        }
+
+        sfoList.sort();
+        return sfoList;
+    }
+
+
     // Returns true if Default Acc/Opp Team share-with options should be shown:
     // either the active settings has the "Default Acc and Opp Teams as Share With" checkbox enabled,
     // or at least one rule in the org already uses one of these options
@@ -204,6 +240,16 @@ public with sharing class FormulaShareRuleDetailController {
         }
         else return false;
     }
+    // Territory sharing will be possible if this version supports it and Territory2 object exists (ETM enabled)
+    @AuraEnabled(cacheable=true)
+    public static Boolean isTerritorySharingSupported() {
+        if(new FormulaShareInjectionService().versionSupportsTerritorySharing()) {
+            Schema.DescribeSObjectResult t2Desc = FormulaShareUtilities.describe('Territory2');
+            return t2Desc != null;
+        }
+        else return false;
+    }
+
     // Opportunity Team and Default Opp Team sharing will be possible if Opportunity Team Member exists
     @AuraEnabled(cacheable=true)
     public static Boolean isOpportunityTeamSharingSupported() {

@@ -65,6 +65,16 @@
                 <default>false</default>
                 <label>Teams</label>
             </value>
+            <value>
+                <fullName>Territories of Account / Lead</fullName>
+                <default>false</default>
+                <label>Territories of Account / Lead</label>
+            </value>
+            <value>
+                <fullName>Territories and Sub of Account / Lead</fullName>
+                <default>false</default>
+                <label>Territories and Sub of Account / Lead</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

@@ -116,6 +116,10 @@ public with sharing class FormulaShareInjectionService {
     return false;
   }
 
+  public Boolean versionSupportsTerritorySharing() {
+    return false;
+  }
+
   public FormulaShareTeamMappingService getTeamMappingService() {
     return new FormulaShareTeamMappingService();
   }
