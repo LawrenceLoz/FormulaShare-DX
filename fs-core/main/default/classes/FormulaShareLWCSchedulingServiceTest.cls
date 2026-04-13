@@ -36,15 +36,77 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
   static void testGetCurrentlyScheduledCron_NoJobScheduled() {
     // GIVEN - No job scheduled
     Test.startTest();
-    
+
     // WHEN - Get the scheduled job info
-    FormulaShareLWCSchedulingService.ScheduledJobInfo jobInfo = 
+    FormulaShareLWCSchedulingService.ScheduledJobInfo jobInfo =
         FormulaShareLWCSchedulingService.getCurrentlyScheduledCron();
-    
+
     Test.stopTest();
-    
+
     // THEN - Verify null is returned
     System.assertEquals(null, jobInfo, 'Should return null when no job is scheduled');
+  }
+
+
+  @IsTest
+  static void testGetCurrentDateTime() {
+    Datetime before = Datetime.now();
+    Datetime result = FormulaShareLWCSchedulingService.getCurrentDateTime();
+    Datetime after = Datetime.now();
+
+    System.assertNotEquals(null, result, 'getCurrentDateTime should return a non-null Datetime');
+    System.assert(result >= before && result <= after, 'getCurrentDateTime should return a recent Datetime');
+  }
+
+
+  @IsTest
+  static void testScheduleJob_succeeds() {
+    String cronExp = '0 0 9 ? * * *';
+    String jobName = 'Test FS Schedule Job';
+
+    Test.startTest();
+    Boolean result = FormulaShareLWCSchedulingService.scheduleJob(cronExp, jobName);
+    Test.stopTest();
+
+    System.assert(result, 'scheduleJob should return true on success');
+  }
+
+
+  @IsTest
+  static void testScheduleJob_failsOnInvalidCron() {
+    Test.startTest();
+    Boolean result = FormulaShareLWCSchedulingService.scheduleJob('INVALID_CRON', 'Bad Job');
+    Test.stopTest();
+
+    System.assert(!result, 'scheduleJob should return false when an exception is thrown');
+  }
+
+
+  @IsTest
+  static void testDeleteScheduledJob_succeeds() {
+    String cronExp = '0 0 10 ? * * *';
+    String jobName = 'Test FS Delete Schedule Job';
+    FormulaShareProcessSchedulable scheduler = new FormulaShareProcessSchedulable();
+    // System.schedule() returns the CronTriggerId directly
+    Id cronTriggerId = System.schedule(jobName, cronExp, scheduler);
+
+    Test.startTest();
+    Boolean result = FormulaShareLWCSchedulingService.deleteScheduledJob(cronTriggerId);
+    Test.stopTest();
+
+    System.assert(result, 'deleteScheduledJob should return true on success');
+  }
+
+
+  @IsTest
+  static void testDeleteScheduledJob_failsOnInvalidId() {
+    Id fakeId = fflib_IDGenerator.generate(CronTrigger.SObjectType);
+
+    Test.startTest();
+    Boolean result = FormulaShareLWCSchedulingService.deleteScheduledJob(fakeId);
+    Test.stopTest();
+
+    System.assert(!result, 'deleteScheduledJob should return false when job does not exist');
   }
 
 }

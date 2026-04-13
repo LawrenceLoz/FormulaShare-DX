@@ -116,4 +116,97 @@ public with sharing class FormulaShareRulesSelectorTest {
         }
     }
 
+
+    @IsTest
+    public static void testSelectObjectsWithRulesNoSecurity() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            // enforceSecurity = false branch — queries without SECURITY_ENFORCED
+            Map<String,String> result = selector.selectObjectsWithRules(false);
+            // Result may be empty if no rules configured; just verify no exception
+            System.assertNotEquals(null, result, 'selectObjectsWithRules(false) should return a non-null map');
+        }
+    }
+
+
+    @IsTest
+    public static void testGetRulesSharingObjectByStringDirect() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // getRulesSharingObject(String) — direct query path
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            List<FormulaShareRule> rules = selector.getRulesSharingObject('FormulaShare_Log__c');
+
+            List<FormulaShare_Rule__mdt> rulesByQuery = [
+                SELECT Id FROM FormulaShare_Rule__mdt
+                WHERE Object_Shared__r.QualifiedApiName = 'FormulaShare_Log__c'];
+
+            System.assertEquals(rulesByQuery.size(), rules.size(),
+                'getRulesSharingObject(String) should return the same count as direct SOQL');
+        }
+    }
+
+
+    @IsTest
+    public static void testGetSpecificRulesSharingObject() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // getSpecificRulesSharingObject — pass an empty ruleNames set so it returns empty
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            Map<String,Object> bindParams = new Map<String,Object>{
+                'objectName' => 'FormulaShare_Log__c',
+                'ruleNames' => new Set<String>()
+            };
+            List<FormulaShareRule> rules = selector.getSpecificRulesSharingObject(bindParams);
+            System.assertNotEquals(null, rules, 'Result should be a non-null list');
+            System.assertEquals(0, rules.size(), 'Empty ruleNames set should return empty list');
+        }
+    }
+
+
+    @IsTest
+    public static void testGetRulesExceptSpecificRulesSharingObject() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            // getRulesExceptSpecificRulesSharingObject — exclude a non-existent name so all rules pass through
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            Map<String,Object> bindParams = new Map<String,Object>{
+                'objectName' => 'FormulaShare_Log__c',
+                'ruleNames' => new Set<String>{ 'NonExistentRule__x' }
+            };
+            List<FormulaShareRule> rules = selector.getRulesExceptSpecificRulesSharingObject(bindParams);
+            System.assertNotEquals(null, rules, 'Result should be a non-null list');
+        }
+    }
+
+
+    @IsTest
+    public static void testGetRulesWithSharingReason() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
+            Map<String,Object> bindParams = new Map<String,Object>{
+                'reasonName' => 'NonExistentReason__c',
+                'thisRuleName' => 'Self'
+            };
+            List<FormulaShare_Rule__mdt> result = selector.getRulesWithSharingReason(bindParams);
+            System.assertNotEquals(null, result, 'Result should be a non-null list');
+            System.assertEquals(0, result.size(), 'No rules expected for a non-existent sharing reason');
+        }
+    }
+
+
+    @IsTest
+    public static void testIsStandardAndCrossObjectActivationDisabled() {
+
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            FormulaShareRulesSelector selector = new FormulaShareRulesSelector();
+            System.assertEquals(false, selector.isStandardActivationDisabled(),
+                'Base class should return false for isStandardActivationDisabled');
+            System.assertEquals(false, selector.isCrossObjectActivationDisabled(),
+                'Base class should return false for isCrossObjectActivationDisabled');
+        }
+    }
+
 }
