@@ -68,6 +68,10 @@ public with sharing class FormulaShareInjectionService {
     return new FormulaShareRegularJobs();
   }
 
+  public FormulaShareProcessedShareEventHandler getProcessedShareEventHandler() {
+    return new FormulaShareProcessedShareEventHandler();
+  }
+
   public FormulaShareProcessedRecordShare getProcessedRecordShare() {
     return new FormulaShareProcessedRecordShare();
   }

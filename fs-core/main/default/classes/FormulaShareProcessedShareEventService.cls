@@ -19,7 +19,7 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
-public inherited sharing class FormulaShareProcessedShareEventService {
+public virtual inherited sharing class FormulaShareProcessedShareEventService {
 
     // Metrics type names defined below.
     // Typically we would expect each rule to have at most one metrics record for the following:
@@ -51,7 +51,16 @@ public inherited sharing class FormulaShareProcessedShareEventService {
         System.debug('pseList: '+ pseList);
         context = eventContext;
         uow = FormulaShareApplication.unitOfWork.newInstance(new FormulaShareUnitOfWorkDML());
-        process(pseList);
+        // Core only processes share events (Event_Type__c = 'Share' or blank for backwards compatibility)
+        List<FormulaShare_Processed_Share_Event__e> shareEvents = new List<FormulaShare_Processed_Share_Event__e>();
+        for (FormulaShare_Processed_Share_Event__e pse : pseList) {
+            if (String.isBlank(pse.Event_Type__c) || pse.Event_Type__c == 'Share') {
+                shareEvents.add(pse);
+            }
+        }
+        if (!shareEvents.isEmpty()) {
+            process(shareEvents);
+        }
         uow.commitWork();   // Commit all DML
     }
 

@@ -99,32 +99,35 @@ export default class FormulaShareRuleEdit extends LightningElement {
             if(!this.waitingForGroupsSync) {
                 return;
             }
-            
+
             const payload = response.data.payload;
-            
+
             // Find property names (accounting for namespace)
-            let prefixPropName, statusPropName, errorPropName;
+            let typePropName, prefixPropName, successfulPropName, errorPropName;
             for(let [key, value] of Object.entries(payload)) {
-                if(key.endsWith('Prefix__c')) {
+                if(key.endsWith('Type__c')) {
+                    typePropName = key;
+                }
+                else if(key.endsWith('Prefix__c')) {
                     prefixPropName = key;
                 }
-                else if(key.endsWith('Status__c')) {
-                    statusPropName = key;
+                else if(key.endsWith('Successful__c')) {
+                    successfulPropName = key;
                 }
-                else if(key.endsWith('Error_Message__c')) {
+                else if(key.endsWith('Error__c')) {
                     errorPropName = key;
                 }
             }
-            
-            // Only process events for user field groups (FSUSR_ prefix)
-            if(payload[prefixPropName] !== 'FSUSR_') {
+
+            // Only process GroupsUpdate events for user field groups (FSUSR_ prefix)
+            if(payload[typePropName] !== 'GroupsUpdate' || payload[prefixPropName] !== 'FSUSR_') {
                 return;
             }
-            
+
             this.processingEdit = false;
             this.waitingForGroupsSync = false;
-            
-            if(payload[statusPropName] === 'Success') {
+
+            if(payload[successfulPropName] === true) {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'FormulaShare Rule updated and user groups synchronized',
@@ -145,8 +148,8 @@ export default class FormulaShareRuleEdit extends LightningElement {
                 this.closeModal();
             }
         };
-        
-        subscribe('/event/'+prefix+'FormulaShare_Groups_Update__e', -1, messageCallback).then(response => {
+
+        subscribe('/event/'+prefix+'FormulaShare_Setup_DML__e', -1, messageCallback).then(response => {
             //console.log('Successfully subscribed to groups update events');
         });
     }
