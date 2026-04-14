@@ -320,55 +320,9 @@ public with sharing class FormulaShareRuleTest {
     }
 
 
-    @IsTest
-    public static void shareEqualToRule_account_returnsTrue_whenAllMatch() {
-
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareRule rule = FormulaShareRuleFactory.getAccountRule();
-
-            // Build an in-memory AccountShare with matching access levels
-            AccountShare share = new AccountShare();
-            share.AccountAccessLevel = 'Edit';
-            share.CaseAccessLevel = 'ReadWrite';
-            share.OpportunityAccessLevel = 'ControlledByParent';
-
-            Boolean result = rule.shareEqualToRule(Account.SObjectType, share, 'Edit', true);
-            System.assert(result, 'Account share with matching access levels should be equal to rule');
-        }
-    }
-
-
-    @IsTest
-    public static void shareEqualToRule_account_returnsFalse_whenCaseMismatch() {
-
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareRule rule = FormulaShareRuleFactory.getAccountRule();
-
-            AccountShare share = new AccountShare();
-            share.AccountAccessLevel = 'Edit';
-            share.CaseAccessLevel = 'None';  // mismatch
-            share.OpportunityAccessLevel = 'ControlledByParent';
-
-            Boolean result = rule.shareEqualToRule(Account.SObjectType, share, 'Edit', true);
-            System.assert(!result, 'Account share with case access mismatch should not be equal to rule');
-        }
-    }
-
-
-    @IsTest
-    public static void getShareWithRuleDefaults_account_setsRelatedAccess() {
-
-        System.runAs(FormulaShareTestUtils.getAdmin()) {
-            FormulaShareRule rule = FormulaShareRuleFactory.getAccountRule();
-
-            Id fakeRecordId = fflib_IDGenerator.generate(Account.SObjectType);
-            Id fakeUserId = fflib_IDGenerator.generate(User.SObjectType);
-
-            // contactIsControlledByAccount = true skips ContactAccessLevel (which can't be set to 'None')
-            SObject share = rule.getShareWithRuleDefaults(Account.SObjectType, fakeRecordId, fakeUserId, 'Edit', true);
-
-            System.assertNotEquals(null, share, 'getShareWithRuleDefaults should return a non-null share for Account');
-            System.assertEquals('ReadWrite', (String) share.get('CaseAccessLevel'), 'CaseAccessLevel should be set from rule');
-        }
-    }
+    // Note: Account-specific paths in shareEqualToRule, shareEqualOrMorePermissiveThanRule, and
+    // getShareWithRuleDefaults (CaseAccessLevel, OpportunityAccessLevel, ContactAccessLevel) cannot
+    // be tested here without directly instantiating AccountShare, which creates a packager dependency
+    // on Account sharing. These paths are covered by integration tests in orgs where Account OWD
+    // is not Public Read/Write.
 }
