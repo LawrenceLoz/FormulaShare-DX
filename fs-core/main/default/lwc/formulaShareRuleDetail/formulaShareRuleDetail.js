@@ -606,6 +606,8 @@ export default class FormulaShareRuleDetail extends LightningElement {
         if(event.detail.fieldApiName) {
             this.rule.controllingObjectSharedToFieldAPIName = event.detail.fieldApiName;
             this.rule.controllingObjectSharedToFieldType = event.detail.fieldType;
+            // Also update sharedToFieldApiName on the relationship leaf node so it's persisted to metadata
+            this.rule.relationship = this.getRelationshipWithNewControllingDetails(this.rule.relationship);
         }
         this.fireEventWithRule();
     }
