@@ -6,6 +6,7 @@ import getNamespacePrefix from '@salesforce/apex/FormulaShareLWCUtilities.getNam
 
 
 export default class FormulaShareRuleCreate extends LightningElement {
+    @api sharedObjectApiName;
     ruleDetails;
     @track processing = false;
     @track showGroupsSyncDialog = false;

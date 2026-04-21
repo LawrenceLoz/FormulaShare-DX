@@ -39,6 +39,22 @@ export default class FormulaShareRuleDetail extends LightningElement {
     _ruleId;
 
     @api isEdit;
+
+    @api
+    get sharedObjectApiName() {
+        return this._sharedObjectApiName;
+    }
+    set sharedObjectApiName(value) {
+        this._sharedObjectApiName = value;
+        // Pre-populate the shared object on a new rule (no ruleId)
+        if (value && !this._ruleId) {
+            this.rule = { objectSharedAPIName: value };
+            this._pendingPreselection = true;
+        }
+    }
+    _sharedObjectApiName;
+    _pendingPreselection = false;
+
     @track sharedObjectDetail;
 
     @api
@@ -155,6 +171,14 @@ export default class FormulaShareRuleDetail extends LightningElement {
         this.dispatchEvent(evt);
 
         this.rule.objectSharedAPIName = this.sharedObjectDetail.objectApiName;
+
+        // If opened with a preselected object (new rule from object row action),
+        // run the same initialisation that a manual object selection would trigger
+        if(this._pendingPreselection) {
+            this._pendingPreselection = false;
+            this.handleSharedObjectChange(event);
+            return;
+        }
 
         this.fireEventWithRule();
     }

@@ -23,6 +23,14 @@
     </c-formula-share-rule-edit>
   </template>
 
+  <template if:true={openCreateModal}>
+    <c-formula-share-rule-create
+      shared-object-api-name={createModalObjectApiName}
+      onclose={closeCreateModal}
+    >
+    </c-formula-share-rule-create>
+  </template>
+
   <template if:true={openApplyModal}>
     <c-formula-share-apply-rules-to-record
       object-api-name={applyModalObjectApiName}

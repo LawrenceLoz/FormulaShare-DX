@@ -273,6 +273,10 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     const isParentRow = row.isParentRow;
     if (isParentRow) {
       const objectLabel = row.objectLabel || "Object";
+      actions.push({
+        label: "New Rule",
+        name: "newRule"
+      });
       if (this.supportsRelated) {
         actions.push({
           label: "Apply Rules to a Record",
@@ -361,6 +365,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
         break;
       case "viewlogs":
         this.openLogsReport(row);
+        break;
+      case "newRule":
+        this.openNewRuleModal(row);
         break;
       case "applyRulesToRecord":
         this.openApplyRulesModal(row, false);
@@ -494,6 +501,8 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
 
   @track openModal;
   @track rowRuleId;
+  @track openCreateModal = false;
+  @track createModalObjectApiName = null;
   @track openApplyModal = false;
   @track applyModalObjectApiName = null;
   @track applyModalObjectLabel = null;
@@ -562,5 +571,15 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
     this.openApplyModal = false;
     this.applyModalObjectApiName = null;
     this.applyModalPreselectedRules = null;
+  }
+
+  openNewRuleModal(row) {
+    this.createModalObjectApiName = row.objectApiName;
+    this.openCreateModal = true;
+  }
+
+  closeCreateModal() {
+    this.openCreateModal = false;
+    this.createModalObjectApiName = null;
   }
 }
