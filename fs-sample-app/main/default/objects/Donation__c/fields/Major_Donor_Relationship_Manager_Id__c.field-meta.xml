@@ -5,7 +5,7 @@
     <externalId>false</externalId>
     <formula>IF(Major_Donation_true_if_over_500__c, Programme_to_Support__r.Major_Donor_Relationship_Manager__c, &#39;&#39;)</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-    <inlineHelpText>Populated to share with Major Donor Manager for Programme only when donation is over £500</inlineHelpText>
+    <inlineHelpText>Populated to share with Major Donor Manager for Programme only when donation is over 500</inlineHelpText>
     <label>Major Donor Relationship Manager Id</label>
     <required>false</required>
     <trackTrending>false</trackTrending>
