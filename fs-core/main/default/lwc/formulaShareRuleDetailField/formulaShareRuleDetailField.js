@@ -38,6 +38,7 @@ import getActiveTeamMappings from '@salesforce/apex/FormulaShareLwcAvailabilityC
 import getTeamFieldOptions from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamFieldOptions';
 import getTeamObjectLabel from '@salesforce/apex/FormulaShareLwcAvailabilityController.getTeamObjectLabel';
 import getAccountLeadShareFieldOptions from '@salesforce/apex/FormulaShareRuleDetailController.getAccountLeadShareFieldOptions';
+import getObjectRemovalStrategy from '@salesforce/apex/FormulaShareRuleDetailController.getObjectRemovalStrategy';
 
 export default class FormulaShareRuleDetailField extends LightningElement {
 
@@ -225,6 +226,45 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     // ─── End sharing conditions toggle ────────────────────────────────────────
     // ---- Team mapping API properties (passed from ruleDetail) ---- //
     @api sharedObjectApiName;
+    @api isCustom;
+    @api sharingRemovalStrategy;
+
+    @wire(getObjectRemovalStrategy, { objectApiName: '$sharedObjectApiName' })
+    objectRemovalStrategy;
+
+    get objectDefaultStrategyLabel() {
+        if (this.objectRemovalStrategy && this.objectRemovalStrategy.data) {
+            return this.objectRemovalStrategy.data;
+        }
+        return null;
+    }
+
+    get sharingRemovalStrategyOptions() {
+        const defaultLabel = this.objectDefaultStrategyLabel
+            ? 'Use Object Default (' + this.objectDefaultStrategyLabel + ')'
+            : 'Use Object Default';
+        return [
+            { label: defaultLabel, value: '' },
+            { label: 'Override to Fully Managed', value: 'Fully Managed' },
+            { label: 'Override to Create Only', value: 'Create Only' }
+        ];
+    }
+
+    get sharingRemovalStrategyValue() {
+        return this.sharingRemovalStrategy || '';
+    }
+
+    handleSharingRemovalStrategyChange(event) {
+        const value = event.detail.value || null;
+        this.dispatchEvent(new CustomEvent('sharingremovalstrategychange', {
+            detail: value
+        }));
+    }
+
+    sharingRemovalInfo = false;
+    toggleSharingRemovalInfo() {
+        this.sharingRemovalInfo = !this.sharingRemovalInfo;
+    }
 
     @api
     get selectedTeamMapping() {
@@ -300,6 +340,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     rolesLink;
     publicGroupsLink;
     queuesLink;
+    objectSettingsLink;
     connectedCallback() {
         Promise.all([getLightningDomain(), getNamespacePrefix()])
             .then(([domainName, nsPrefix]) => {
@@ -308,6 +349,7 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                 this.publicGroupsLink = domainName + '/lightning/setup/PublicGroups/home';
                 this.queuesLink = domainName + '/lightning/setup/Queues/home';
                 this.teamConfigSetupLink = domainName + '/lightning/n/' + nsPrefix + 'FormulaShare_Setup?c__page=team-and-user-groups';
+                this.objectSettingsLink = domainName + '/lightning/n/' + nsPrefix + 'FormulaShare_Setup?c__page=object-settings';
             });
     }
 

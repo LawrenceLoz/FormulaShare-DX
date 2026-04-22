@@ -92,6 +92,8 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             'Fallback_Md_Match_Field_Mismatch__c',
             'Fallback_Share_To_Field_Mismatch__c',
 
+            'Sharing_Removal_Strategy__c',
+
             'Filter__c'
         };
         return fieldNames;

@@ -276,10 +276,8 @@ public inherited sharing class FormulaShareService {
       // Get set of records w/ sharing which is no longer valid (based on mapToDelete)
       Set<Id> existingSharesInvalidSet = getInvalidIdSet();
 
-      // Clear deletion map if removal of standard sharing is not permitted
-      if (!isShareRemovalAllowed()) {
-        mapToDelete.clear();
-      }
+      // Clear deletion map entries where removal is not permitted
+      filterMapToDeleteByRemovalStrategy();
 
       // Add indication whether each record w/ sharing to INSERT was shared already
       augmentWithExistingSharing(mapToInsert, existingSharesValidSet);
@@ -555,8 +553,8 @@ public inherited sharing class FormulaShareService {
         incrementShareMetrics(rule);
       }
 
-      // If we're not permitted to remove sharing
-      if (!isShareRemovalAllowed()) {
+      // If we're not permitted to remove sharing for this rule
+      if (!isShareRemovalAllowedForRule(rule)) {
         // ...keep if all access levels for the share are the same or higher than the rule
         if (
           rule.shareEqualOrMorePermissiveThanRule(
@@ -783,7 +781,7 @@ public inherited sharing class FormulaShareService {
     removeExistingShares = false;
   }
 
-  private Boolean isShareRemovalAllowed() {
+  private Boolean isShareRemovalAllowedForObject() {
     FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(
       type
     );
@@ -794,6 +792,78 @@ public inherited sharing class FormulaShareService {
         objUtils.removeSharesForObject()
     );
     return removeExistingShares && objUtils.removeSharesForObject();
+  }
+
+  @TestVisible
+  private void filterMapToDeleteByRemovalStrategy() {
+    // If share removal globally disabled (e.g. trigger safety), clear all
+    if (!removeExistingShares) {
+      mapToDelete.clear();
+      return;
+    }
+
+    // Check whether any rule has a rule-level override
+    Boolean anyRuleHasOverride = false;
+    for (FormulaShareRule rule : rules) {
+      if (rule.sharingRemovalStrategy != null) {
+        anyRuleHasOverride = true;
+        break;
+      }
+    }
+
+    // Fast path: no rule-level overrides, use existing object-level check
+    if (!anyRuleHasOverride) {
+      if (!isShareRemovalAllowedForObject()) {
+        mapToDelete.clear();
+      }
+      return;
+    }
+
+    // Rule-level overrides exist: filter per entry (custom objects only)
+    if (type.getDescribe().isCustom()) {
+      // Build map of sharing reason to rule for lookup
+      Map<String, FormulaShareRule> reasonToRule = new Map<String, FormulaShareRule>();
+      for (FormulaShareRule rule : rules) {
+        if (rule.sharingReason != null) {
+          reasonToRule.put(rule.sharingReason, rule);
+        }
+      }
+
+      List<String> keysToRemove = new List<String>();
+      for (String shareKey : mapToDelete.keySet()) {
+        ShareDetail sd = mapToDelete.get(shareKey);
+        String rowCause = (String) sd.shareRecord.get('RowCause');
+        FormulaShareRule matchedRule = reasonToRule.get(rowCause);
+
+        // Determine effective strategy for this share's rule
+        Boolean removalAllowedForEntry = matchedRule != null
+          ? isShareRemovalAllowedForRule(matchedRule)
+          : isShareRemovalAllowedForObject();
+
+        if (!removalAllowedForEntry) {
+          keysToRemove.add(shareKey);
+        }
+      }
+      for (String key : keysToRemove) {
+        mapToDelete.remove(key);
+      }
+    } else {
+      // Standard objects: no rule-level override supported, use object-level
+      if (!isShareRemovalAllowedForObject()) {
+        mapToDelete.clear();
+      }
+    }
+  }
+
+  private Boolean isShareRemovalAllowedForRule(FormulaShareRule rule) {
+    if (!removeExistingShares) {
+      return false;
+    }
+    // If rule has no override, fall back to object-level setting
+    if (rule.sharingRemovalStrategy == null) {
+      return isShareRemovalAllowedForObject();
+    }
+    return rule.sharingRemovalStrategy == 'Fully Managed';
   }
 
   public inherited sharing class ShareDetail {

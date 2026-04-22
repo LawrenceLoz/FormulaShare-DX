@@ -112,6 +112,10 @@ public virtual inherited sharing class FormulaShareRule {
   @AuraEnabled
   public String fallbackShareToFieldMismatch;
 
+  // Rule-level override of object sharing removal strategy (null = use object default)
+  @AuraEnabled
+  public String sharingRemovalStrategy;
+
   // Optional filter condition on the controlling object (shared object for standard rules)
   // Stored/displayed in the Share With section as "Only When"
   @AuraEnabled
@@ -227,6 +231,8 @@ public virtual inherited sharing class FormulaShareRule {
       'Log Error';
     fallbackMdMatchFieldMismatch = rule.Fallback_Md_Match_Field_Mismatch__c;
     fallbackShareToFieldMismatch = rule.Fallback_Share_To_Field_Mismatch__c;
+
+    sharingRemovalStrategy = rule.Sharing_Removal_Strategy__c;
 
     // Filter condition for the shared (level 0) object - for standard rules this IS the controlling object.
     // sharedObjectFilter* properties always hold the level-0 (shared object) filter.

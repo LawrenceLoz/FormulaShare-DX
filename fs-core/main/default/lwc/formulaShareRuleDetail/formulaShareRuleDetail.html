@@ -123,7 +123,10 @@
                     conditions-panel-open={showConditionsPanel}
                     onfilterchange={handleFilterChange}
                     onteammappingchange={handleTeamMappingChange}
-                    onteamfieldchange={handleTeamFieldChange}>
+                    onteamfieldchange={handleTeamFieldChange}
+                    is-custom={sharedObjectDetail.isCustom}
+                    sharing-removal-strategy={rule.sharingRemovalStrategy}
+                    onsharingremovalstrategychange={handleSharingRemovalStrategyChange}>
 
                     <!-- Conditions panel: slotted above advanced settings -->
                     <div slot="conditions">

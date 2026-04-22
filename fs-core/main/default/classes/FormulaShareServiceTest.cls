@@ -294,7 +294,7 @@ public with sharing class FormulaShareServiceTest {
         System.runAs(FormulaShareTestUtils.getAdmin()) {
             FormulaShare_Log__c log = new FormulaShare_Log__c();
             insert log;
-            
+
             Schema.SObjectType ContactType = Schema.getGlobalDescribe().get('Contact');
             FormulaShareService fsService = FormulaShareService.construct(ContactType);
 
@@ -307,6 +307,144 @@ public with sharing class FormulaShareServiceTest {
 
             // Check that no records included in the deletion map
             system.assert(fsService.getSharesToDelete().isEmpty());
+        }
+    }
+
+
+    // -------------------- Tests for rule-level Sharing Removal Strategy override -------------------------
+
+    // Helper: build a minimal FormulaShareRule with a specific sharing reason and removal strategy
+    private static FormulaShareRule buildRuleForRemovalTest(String sharingReason, String sharingRemovalStrategy) {
+        FormulaShareRule rule = new FormulaShareRule();
+        rule.developerName = 'Test_Rule';
+        rule.active = true;
+        rule.shareWith = 'Roles';
+        rule.accessLevel = 'Read';
+        rule.sharingReason = sharingReason;
+        rule.sharingRemovalStrategy = sharingRemovalStrategy;
+        rule.objectSharedAPIName = 'FormulaShare_Log__c';
+        return rule;
+    }
+
+    // Helper: populate mapToDelete directly on the service with a share tagged to a given row cause
+    private static void addShareToDeleteMap(FormulaShareService fsService, String rowCause, String shareKey) {
+        FormulaShare_Log__Share share = new FormulaShare_Log__Share();
+        share.AccessLevel = 'Read';
+        share.ParentId = UserInfo.getUserId();
+        share.UserOrGroupId = UserInfo.getUserId();
+        share.RowCause = rowCause;
+
+        FormulaShareService.ShareDetail sd = new FormulaShareService.ShareDetail();
+        sd.shareRecord = share;
+        sd.type = FormulaShare_Log__c.SObjectType;
+        fsService.mapToDelete.put(shareKey, sd);
+        fsService.existingShareKeys.add(shareKey);
+    }
+
+    @IsTest
+    public static void testFilterMapToDelete_noOverride_customObject_keepsDeletions() {
+        // Custom objects default to Fully Managed -- shares in mapToDelete should remain for deletion
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareRule rule = buildRuleForRemovalTest(reason, null);  // null = use object default (Fully Managed)
+            FormulaShareService fsService = FormulaShareService.construct(fsLogType, new List<FormulaShareRule>{rule});
+            addShareToDeleteMap(fsService, reason, 'testKey001' + reason);
+
+            Test.startTest();
+            fsService.filterMapToDeleteByRemovalStrategy();
+            Test.stopTest();
+
+            // Object default is Fully Managed -- share should remain in deletion map
+            System.assertEquals(1, fsService.getSharesToDelete().size(),
+                'Share should be queued for deletion when object default is Fully Managed and no rule override');
+        }
+    }
+
+    @IsTest
+    public static void testFilterMapToDelete_createOnlyOverride_removesFromDeletionMap() {
+        // Rule explicitly set to Create Only -- shares for that rule should NOT be deleted
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareRule rule = buildRuleForRemovalTest(reason, 'Create Only');
+            FormulaShareService fsService = FormulaShareService.construct(fsLogType, new List<FormulaShareRule>{rule});
+            addShareToDeleteMap(fsService, reason, 'testKey002' + reason);
+
+            Test.startTest();
+            fsService.filterMapToDeleteByRemovalStrategy();
+            Test.stopTest();
+
+            // Rule override is Create Only -- share should be removed from deletion map
+            System.assert(fsService.getSharesToDelete().isEmpty(),
+                'Share should not be queued for deletion when rule override is Create Only');
+        }
+    }
+
+    @IsTest
+    public static void testFilterMapToDelete_fullyManagedOverride_keepsDeletions() {
+        // Rule explicitly set to Fully Managed -- shares should still be queued for deletion
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareRule rule = buildRuleForRemovalTest(reason, 'Fully Managed');
+            FormulaShareService fsService = FormulaShareService.construct(fsLogType, new List<FormulaShareRule>{rule});
+            addShareToDeleteMap(fsService, reason, 'testKey003' + reason);
+
+            Test.startTest();
+            fsService.filterMapToDeleteByRemovalStrategy();
+            Test.stopTest();
+
+            // Rule override is Fully Managed -- share should remain in deletion map
+            System.assertEquals(1, fsService.getSharesToDelete().size(),
+                'Share should be queued for deletion when rule override is Fully Managed');
+        }
+    }
+
+    @IsTest
+    public static void testFilterMapToDelete_mixedOverrides_respectsPerRuleStrategy() {
+        // Two rules: one Create Only, one Fully Managed -- each share should follow its rule
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            String reason2 = FormulaShareTestUtils.recordLogRowCause;
+
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareRule ruleCreateOnly = buildRuleForRemovalTest(reason, 'Create Only');
+            FormulaShareRule ruleFullyManaged = buildRuleForRemovalTest(reason2, 'Fully Managed');
+            ruleFullyManaged.developerName = 'Test_Rule_2';
+            FormulaShareService fsService = FormulaShareService.construct(fsLogType,
+                new List<FormulaShareRule>{ruleCreateOnly, ruleFullyManaged});
+
+            addShareToDeleteMap(fsService, reason,  'testKey004' + reason);
+            addShareToDeleteMap(fsService, reason2, 'testKey004' + reason2);
+
+            Test.startTest();
+            fsService.filterMapToDeleteByRemovalStrategy();
+            Test.stopTest();
+
+            List<SObject> sharesToDelete = fsService.getSharesToDelete();
+
+            // Only the Fully Managed rule's share should remain in deletion map
+            System.assertEquals(1, sharesToDelete.size(),
+                'Only the Fully Managed rule share should be queued for deletion');
+            System.assertEquals(reason2, (String) sharesToDelete[0].get('RowCause'),
+                'The share queued for deletion should be from the Fully Managed rule');
+        }
+    }
+
+    @IsTest
+    public static void testFilterMapToDelete_disableShareRemoval_clearsAll() {
+        // When share removal is globally disabled (e.g. trigger safety), all deletions cleared regardless of rule override
+        System.runAs(FormulaShareTestUtils.getAdmin()) {
+            Schema.SObjectType fsLogType = FormulaShare_Log__c.SObjectType;
+            FormulaShareRule rule = buildRuleForRemovalTest(reason, 'Fully Managed');
+            FormulaShareService fsService = FormulaShareService.construct(fsLogType, new List<FormulaShareRule>{rule});
+            fsService.disableShareRemoval();
+            addShareToDeleteMap(fsService, reason, 'testKey005' + reason);
+
+            Test.startTest();
+            fsService.filterMapToDeleteByRemovalStrategy();
+            Test.stopTest();
+
+            // Global removal disabled -- nothing should be deleted even with Fully Managed rule
+            System.assert(fsService.getSharesToDelete().isEmpty(),
+                'No shares should be queued for deletion when share removal is globally disabled');
         }
     }
 

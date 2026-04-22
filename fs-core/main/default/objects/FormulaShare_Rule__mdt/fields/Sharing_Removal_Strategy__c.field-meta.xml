@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sharing_Removal_Strategy__c</fullName>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Sharing Removal Strategy</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Fully Managed</fullName>
+                <default>false</default>
+                <label>Fully Managed</label>
+            </value>
+            <value>
+                <fullName>Create Only</fullName>
+                <default>false</default>
+                <label>Create Only</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

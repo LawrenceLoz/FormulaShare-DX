@@ -301,6 +301,19 @@ public with sharing class FormulaShareRuleDetailController {
         return concatString;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static String getObjectRemovalStrategy(String objectApiName) {
+        if(objectApiName == null) {
+            return null;
+        }
+        Schema.SObjectType objType = FormulaShareUtilities.getSObjectTypeFromName(objectApiName);
+        if(objType == null || !objType.getDescribe().isCustom()) {
+            return null;
+        }
+        FormulaShareSObjectUtilities objUtils = new FormulaShareSObjectUtilities(objType);
+        return objUtils.removeSharesForObject() ? 'Fully Managed' : 'Create Only';
+    }
+
     public inherited sharing class ShareableObject {
         @AuraEnabled
         public String objectApiName {get;set;}

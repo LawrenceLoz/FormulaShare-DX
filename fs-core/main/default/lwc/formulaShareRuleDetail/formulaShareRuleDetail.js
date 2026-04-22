@@ -350,7 +350,12 @@ export default class FormulaShareRuleDetail extends LightningElement {
     handleMismatchFieldChange(event) {
         this.rule[event.detail.fieldName] = event.detail.value;
 //        console.log('***Set property: '+event.detail.fieldName+' to: '+event.detail.value);
-        
+
+        this.fireEventWithRule();
+    }
+
+    handleSharingRemovalStrategyChange(event) {
+        this.rule.sharingRemovalStrategy = event.detail;
         this.fireEventWithRule();
     }
 
