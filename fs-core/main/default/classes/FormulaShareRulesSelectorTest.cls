@@ -66,8 +66,8 @@ public with sharing class FormulaShareRulesSelectorTest {
 
             // We won't know and can't guarantee rules exist or not, so verify for both cases
             List<FormulaShare_Rule__mdt> rulesByQuery = [
-                SELECT Id FROM FormulaShare_Rule__mdt 
-                WHERE Object_Shared__c != null];
+                SELECT Id FROM FormulaShare_Rule__mdt
+                WHERE Object_Shared__c != null WITH USER_MODE];
 
             System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the total number of rules in the org');
         }
@@ -83,8 +83,8 @@ public with sharing class FormulaShareRulesSelectorTest {
 
             // We won't know and can't guarantee rules exist or not, so verify for both cases
             List<FormulaShare_Rule__mdt> rulesByQuery = [
-                SELECT Id FROM FormulaShare_Rule__mdt 
-                WHERE Object_Shared__c != null];
+                SELECT Id FROM FormulaShare_Rule__mdt
+                WHERE Object_Shared__c != null WITH USER_MODE];
 
             System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the total number of rules in the org');
         }

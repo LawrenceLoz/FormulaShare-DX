@@ -19,10 +19,13 @@
 *CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 
+// EntityDefinition is a Tooling API object — WITH USER_MODE is not supported on Tooling API queries.
+// WITH SECURITY_ENFORCED is the correct enforcement clause here; USER_MODE would cause a QueryException at runtime.
+@SuppressWarnings('PMD.ApexSOQLInjection')
 public inherited sharing class FormulaShareEntityDefinitionSelector {
 
-    // fflib selector pattern isn't used because it fails due to the lack of a 
-    // CreatedDate on EntityDefinition. The basic query below is sufficient 
+    // fflib selector pattern isn't used because it fails due to the lack of a
+    // CreatedDate on EntityDefinition. The basic query below is sufficient
     // since EntityDefinition does not support FLS and sharing
 
     public static FormulaShareEntityDefinitionSelector construct() {

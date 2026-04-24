@@ -153,7 +153,7 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
             SELECT Id, DeveloperName FROM Group
             WHERE DeveloperName IN :groupNames
             AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')
-            WITH SECURITY_ENFORCED]) {
+            WITH USER_MODE]) {
 
             groups.put(grp.DeveloperName.toLowerCase(), grp.Id);
         }

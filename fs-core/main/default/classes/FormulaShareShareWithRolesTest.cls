@@ -24,7 +24,7 @@ public with sharing class FormulaShareShareWithRolesTest {
 
 
     private static UserRole getValidRole() {
-        UserRole existingRole = [SELECT Id, DeveloperName FROM UserRole WHERE DeveloperName = 'Test_Role' LIMIT 1][0];
+        UserRole existingRole = [SELECT Id, DeveloperName FROM UserRole WHERE DeveloperName = 'Test_Role' WITH USER_MODE LIMIT 1][0];
         return existingRole;
     }
     
@@ -53,9 +53,9 @@ public with sharing class FormulaShareShareWithRolesTest {
     }
 
     private static Group getGroupFromRole(Id roleId) {
-        return [SELECT Id, RelatedId, Type 
-                FROM Group 
-                WHERE RelatedId = :roleId AND Type = 'Role' LIMIT 1];
+        return [SELECT Id, RelatedId, Type
+                FROM Group
+                WHERE RelatedId = :roleId AND Type = 'Role' WITH USER_MODE LIMIT 1];
     }
 
     // ------------------ Tests for rules sharing based on Name ------------------ //

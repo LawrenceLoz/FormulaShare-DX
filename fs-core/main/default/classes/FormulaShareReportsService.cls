@@ -88,7 +88,7 @@ public inherited sharing class FormulaShareReportsService {
                 SELECT Id, DeveloperName 
                 FROM Report 
                 WHERE DeveloperName IN :reportNames
-                WITH SECURITY_ENFORCED];
+                WITH USER_MODE];
             for(Report r : fsReports) {
                 reportIdsMap.put(r.DeveloperName, r.Id);
             }

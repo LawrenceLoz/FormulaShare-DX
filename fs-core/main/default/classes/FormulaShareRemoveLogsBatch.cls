@@ -35,7 +35,7 @@ public inherited sharing class FormulaShareRemoveLogsBatch implements Database.B
         List<FormulaShare_Record_Log__c> logs = (List<FormulaShare_Record_Log__c>) scope;
         Schema.SObjectType logsType = FormulaShare_Record_Log__c.sObjectType;
         if(logsType.getDescribe().isAccessible() && logsType.getDescribe().isDeletable()) {
-            delete logs;
+            Database.delete(logs, AccessLevel.USER_MODE);
         }
     }
 

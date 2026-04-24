@@ -66,6 +66,7 @@ public virtual inherited sharing class FormulaShareRemoveSharesSelector {
         return [     //NOPMD - Query is on custom metadata and results only used in apex so security check not required
             SELECT Id, Retain_Sharing_After_Record_Changes__c, Override_Batch_Size__c, Sequence__c, Standard_Object_to_Remove_Sharing__r.QualifiedApiName
             FROM FormulaShare_Std_Object_to_Remove_Shares__mdt
+            LIMIT 200
         ];
     }
 

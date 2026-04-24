@@ -26,7 +26,7 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
     System.assertNotEquals(null, jobInfo.nextFireTime, 'Should have next fire time');
     
     // Verify user info
-    User currentUser = [SELECT Name, Profile.Name FROM User WHERE Id = :UserInfo.getUserId()];
+    User currentUser = [SELECT Name, Profile.Name FROM User WHERE Id = :UserInfo.getUserId() WITH USER_MODE];
     System.assertEquals(currentUser.Name, jobInfo.usersName, 'Should return current user name');
     System.assertEquals(currentUser.Profile.Name, jobInfo.usersProfile, 'Should return current user profile');
     System.assertEquals(UserInfo.getUserId(), jobInfo.usersId, 'Should return current user ID');

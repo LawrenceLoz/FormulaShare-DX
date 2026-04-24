@@ -530,10 +530,6 @@ public inherited sharing class FormulaShareService {
     // Check whether we have any shares for this record already
     String shareKey = getShareKey(recordId, sharedTo, rule);
 
-    system.debug('*** searching with this Id: ' + shareKey);
-    system.debug('*** full map keys: ' + mapToDelete.keySet());
-    system.debug('*** full keyset: ' + existingShareKeys);
-
     // If we have a share already for this record, entity and reason...
     if (mapToDelete.containsKey(shareKey)) {
       ShareDetail sd = mapToDelete.get(shareKey);
@@ -646,7 +642,6 @@ public inherited sharing class FormulaShareService {
     }
     // Or, if sharing at this level doesn't exist now (and we haven't already identified sharing is needed), create sharing at this level
     else if (!existingShareKeys.contains(shareKey)) {
-      System.debug('/// creating new share based on rule');
       populateMapNewShare(
         recordId,
         sharedTo,

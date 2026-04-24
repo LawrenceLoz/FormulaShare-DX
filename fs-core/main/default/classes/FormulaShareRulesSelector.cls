@@ -196,7 +196,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     public List<FormulaShareRule> getAllRulesWithSecurityEnforced() {
         String condition = 'Object_Shared__c != null';
         String query = getQueryWithCondition(condition);
-        query += ' WITH SECURITY_ENFORCED';   // Returns for display/changes in setup component, so enforce security
+        query += ' WITH USER_MODE';   // Returns for display/changes in setup component, so enforce security
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
         List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
@@ -221,7 +221,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
             // When called from context which influences the UI (provides picklist options for targeted jobs), enforce security
             if(enforceSecurity) {
-                query += ' WITH SECURITY_ENFORCED';
+                query += ' WITH USER_MODE';
             }
 
             List<FormulaShare_Rule__mdt> rules = Database.query(query);

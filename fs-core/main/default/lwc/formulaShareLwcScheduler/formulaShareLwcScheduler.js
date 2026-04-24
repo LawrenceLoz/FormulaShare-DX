@@ -267,7 +267,6 @@ export default class LwcScheduler extends LightningElement {
           this.stopLoading(500);
         } else {
           this.stopLoading(100);
-          console.log("we were unable to delete this job");
         }
       })
       .catch(error => {

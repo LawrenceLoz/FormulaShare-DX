@@ -75,13 +75,14 @@ public virtual inherited sharing class FormulaShareSObjectShares {
   }
 
   // To remove sharing identified by FormulaShareService as no longer being required
+  @SuppressWarnings('PMD.ApexCRUDViolation') // isDeletable() is the explicit CRUD check; delete only reached when permission confirmed
   public virtual void deleteShares(List<SObject> shares) {
     // Check that object can be deleted by current or requesting user (or bypass if this is a test run)
     if (type.getDescribe().isDeletable() == true) {
       system.debug('DML shares to be deleted ' + shares);
 
       // Batch operates on a single object and all shares will be of this type (access checked above)
-      delete shares; //NOPMD (false apexcrudviolation)
+      delete shares;
     } else {
       throw new FormulaShareException(
         'Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object'

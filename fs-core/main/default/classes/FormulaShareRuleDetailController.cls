@@ -226,7 +226,7 @@ public with sharing class FormulaShareRuleDetailController {
         List<Group> mgrGroupList = [
             SELECT Id from Group
             WHERE Type = 'Manager'
-            WITH SECURITY_ENFORCED
+            WITH USER_MODE
             LIMIT 1];
         return !mgrGroupList.isEmpty();
     }

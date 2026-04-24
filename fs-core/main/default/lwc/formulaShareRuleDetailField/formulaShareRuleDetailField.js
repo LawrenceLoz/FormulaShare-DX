@@ -398,7 +398,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
     get shareWithOptions() {
-        console.log('shareWithOptions getter called - supportsUsersWithFieldMatchFlag:', this.supportsUsersWithFieldMatchFlag);
         var optionsList = [
             { label: 'Users', value: 'Users' },
             { label: 'Roles', value: 'Roles' },
@@ -446,7 +445,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     updateShareWithOptions() {
         // This method is now a no-op since shareWithOptions is a getter
         // Kept for backwards compatibility with calls from wire adapters
-        console.log('updateShareWithOptions called (now using getter)');
     }
 
     managerSharingSupported;
@@ -503,7 +501,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     @wire(supportsUsersWithFieldMatch)
     wiredSupportsUsersWithFieldMatch(value) {
         const { data, error } = value;
-        console.log('Wire adapter called - data:', data, 'error:', error);
         if(data !== undefined) {
             this.supportsUsersWithFieldMatchFlag = data === true;
             this.updateShareWithOptions();
@@ -517,7 +514,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                                 value: o.fieldApiName
                             };
                         });
-                        console.log('User field match options loaded:', this.userFieldMatchOptions.length);
                     })
                     .catch((e) => {
                         // eslint-disable-next-line no-console
@@ -806,7 +802,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
     }
 
     refreshUserFields() {
-        console.log('refreshing user fields');
         this.loadingUserFields = true;
         getUserFieldMatchOptions()
             .then((opts) => {
@@ -817,7 +812,6 @@ export default class FormulaShareRuleDetailField extends LightningElement {
                     };
                 });
                 this.loadingUserFields = false;
-                console.log('User field match options refreshed:', this.userFieldMatchOptions.length);
             })
             .catch((e) => {
                 this.loadingUserFields = false;

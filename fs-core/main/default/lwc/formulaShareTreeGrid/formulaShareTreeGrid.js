@@ -31,15 +31,13 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
 
     processData() {
         if (!this._treeData || !Array.isArray(this._treeData)) {
-            console.warn('Invalid or missing tree data');
             this.data = [];
             return;
         }
-        
+
         const processedData = [];
         this._treeData.forEach(item => {
             if (!item[this.keyField]) {
-                console.warn(`Row missing ${this.keyField} field:`, item);
                 return;
             }
             
@@ -62,4 +60,4 @@ export default class FormulaShareTreeGrid extends LightningDatatable {
         this.data = processedData;
     }
 
-} 
+}

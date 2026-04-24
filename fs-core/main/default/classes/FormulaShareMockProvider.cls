@@ -86,13 +86,13 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
         }
 
         else if(stubbedMethodName == 'getSharesToInsert') {
-            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
+            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers' WITH USER_MODE][0].Id;
             List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Edit');
             return shares;
         }
 
         else if(stubbedMethodName == 'getSharesToDelete') {
-            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers'][0].Id;
+            Id groupId = [SELECT Id FROM Group WHERE DeveloperName = 'AllInternalUsers' WITH USER_MODE][0].Id;
             List<FormulaShare_Log__Share> shares = FormulaShareTestDataFactory.getSharesForBatchLog(userId, new List<Id>{groupId}, 'Read');
             return shares;
         }
@@ -147,7 +147,8 @@ public inherited sharing class FormulaShareMockProvider implements System.StubPr
                     + 'FROM '
                     + prefix + ' FormulaShare_Logs__r '
                 + ') FROM '
-                + prefix + 'FormulaShare_Log__c';
+                + prefix + 'FormulaShare_Log__c'
+                + ' WITH USER_MODE';
             List<SObject> records = Database.query(queryString);
             return records;
         }

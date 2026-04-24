@@ -43,6 +43,7 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 		update securityDecision.getRecords();
 	}
 
+	@SuppressWarnings('PMD.ApexCRUDViolation') // isDeletable() is the explicit CRUD check; delete only reached when permission confirmed
 	public void dmlDelete(List<SObject> objList) {
 		if(objList.isEmpty()) {
 			return;
@@ -52,7 +53,7 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 
 			// If mulitple types in uow, fflibs will split these and call dmlDelete by object
 			// so we only need to check one record to know the type
-			delete objList;  //NOPMD (false apexcrudviolation)
+			delete objList;
 		}
 	}
 

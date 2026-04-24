@@ -58,7 +58,7 @@ public with sharing class FormulaShareLWCSchedulingService {
       List<User> uList = [
         SELECT Name, Profile.Name FROM User 
         WHERE Id = :asyncApexJobs[0].CronTrigger.OwnerId 
-        WITH SECURITY_ENFORCED
+        WITH USER_MODE
         LIMIT 1];
     
       // If running user doesn't have permissions list could be empty
