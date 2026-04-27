@@ -41,7 +41,7 @@ public with sharing class FormulaShareServiceBulkTest {
     @TestSetup
     public static void setup() {
         FormulaShareTestUtils.setupAdmin();
-    
+
         // Insert 3 user roles
         List<UserRole> rolesForTest = new List<UserRole>();
         for(Integer i=0; i<3; i++) {

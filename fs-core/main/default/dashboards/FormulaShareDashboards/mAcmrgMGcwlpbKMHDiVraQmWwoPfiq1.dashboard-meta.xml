@@ -22,11 +22,12 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Total Shared Records</header>
-                <report>FormulaShareDashboardReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
+                <report>FormulaShareReports/Dashboard_Total_Shares_by_Rule_Date_keZ</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
                 <sortBy>RowLabelAscending</sortBy>
+                <sortLegendValues>false</sortLegendValues>
                 <title>All records shared by rules on this date</title>
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
@@ -51,7 +52,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareDashboardReports/Dashboard_Rules_Sharing_Records_6cQ</report>
+                <report>FormulaShareReports/Dashboard_Rules_Sharing_Records_6cQ</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -75,7 +76,7 @@
                 <indicatorHighColor>#00716B</indicatorHighColor>
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
-                <report>FormulaShareDashboardReports/Dashboard_All_Rules_NPn</report>
+                <report>FormulaShareReports/Dashboard_All_Rules_NPn</report>
                 <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
@@ -107,11 +108,12 @@
                 </groupingSortProperties>
                 <header>Last Full Batch Run</header>
                 <legendPosition>Right</legendPosition>
-                <report>FormulaShareDashboardReports/Dashboard_Batch_Performance_av7</report>
+                <report>FormulaShareReports/Dashboard_Batch_Performance_av7</report>
                 <showPercentage>false</showPercentage>
                 <showTotal>true</showTotal>
                 <showValues>true</showValues>
                 <sortBy>RowLabelAscending</sortBy>
+                <sortLegendValues>false</sortLegendValues>
                 <title>Time taken to process each object</title>
                 <useReportChart>false</useReportChart>
             </dashboardComponent>
@@ -132,11 +134,12 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Batch Jobs</header>
-                <report>FormulaShareDashboardReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
+                <report>FormulaShareReports/Dashboard_New_Sharing_by_Date_Batch_jEj</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
                 <sortBy>RowLabelAscending</sortBy>
+                <sortLegendValues>false</sortLegendValues>
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
             <rowIndex>9</rowIndex>
@@ -156,11 +159,12 @@
                 <expandOthers>false</expandOthers>
                 <groupingSortProperties/>
                 <header>Sharing Applied by Triggers &amp; Flow</header>
-                <report>FormulaShareDashboardReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
+                <report>FormulaShareReports/Dashboard_New_Shares_by_Date_Trigger_irT</report>
                 <showPercentage>false</showPercentage>
                 <showPicturesOnCharts>false</showPicturesOnCharts>
                 <showValues>false</showValues>
                 <sortBy>RowLabelAscending</sortBy>
+                <sortLegendValues>false</sortLegendValues>
                 <useReportChart>true</useReportChart>
             </dashboardComponent>
             <rowIndex>9</rowIndex>
@@ -190,6 +194,7 @@
                         <sortOrder>1</sortOrder>
                     </flexTableSortInfo>
                     <hideChatterPhotos>true</hideChatterPhotos>
+                    <useReportTableSetting>false</useReportTableSetting>
                 </flexComponentProperties>
                 <footer>Logs indicate records contain a value in the share to field of a rule, but valid sharing can&apos;t be applied</footer>
                 <groupingSortProperties>
@@ -199,7 +204,7 @@
                     </groupingSorts>
                 </groupingSortProperties>
                 <header>Record Share Errors</header>
-                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareReports/Dashboard_Record_Share_Errors_8tM</report>
                 <title>Shows errors logged over the last 7 days</title>
             </dashboardComponent>
             <rowIndex>11</rowIndex>
@@ -278,10 +283,11 @@
                         <sortOrder>2</sortOrder>
                     </flexTableSortInfo>
                     <hideChatterPhotos>true</hideChatterPhotos>
+                    <useReportTableSetting>false</useReportTableSetting>
                 </flexComponentProperties>
                 <groupingSortProperties/>
                 <header>Record Share Error Details</header>
-                <report>FormulaShareDashboardReports/Dashboard_Record_Share_Errors_8tM</report>
+                <report>FormulaShareReports/Dashboard_Record_Share_Errors_8tM</report>
             </dashboardComponent>
             <rowIndex>18</rowIndex>
             <rowSpan>10</rowSpan>
@@ -291,8 +297,8 @@
     </dashboardGridLayout>
     <dashboardType>SpecifiedUser</dashboardType>
     <isGridLayout>true</isGridLayout>
-    <owner>test-acbyv4ocgqyx@example.com</owner>
-    <runningUser>test-acbyv4ocgqyx@example.com</runningUser>
+    <owner>test-pkclbyvp4ijn@example.com</owner>
+    <runningUser>test-pkclbyvp4ijn@example.com</runningUser>
     <textColor>#000000</textColor>
     <title>FormulaShare Summary</title>
     <titleColor>#000000</titleColor>

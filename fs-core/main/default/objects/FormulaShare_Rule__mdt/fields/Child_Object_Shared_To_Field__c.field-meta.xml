@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Child_Object_Shared_To_Field__c</fullName>
-    <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>If sharing is based on the contents of a field in an object related directly to the shared object, indicates the field which contains the user, role or group that the shared object should be shared with</inlineHelpText>
     <label>Related Object 1 Shared To Field</label>

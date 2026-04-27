@@ -241,6 +241,9 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
         }
         
         // Build map of groups to populate details on processed records
+        // Group is queried without USER_MODE: resolves group labels for logging only — never used to gate sharing.
+        // Result is never surfaced to the user. USER_MODE risks QueryException for portal users.
+        //NOPMD
         Map<Id,Group> groupsMap = new Map<Id,Group>();
         if(!groupIdList.isEmpty()) {
             groupsMap = new Map<Id,Group>([SELECT Id, DeveloperName, Type FROM Group WHERE Id IN :groupIdList]);

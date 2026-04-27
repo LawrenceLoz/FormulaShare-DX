@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Standard_Object_to_Remove_Sharing__c</fullName>
-    <externalId>false</externalId>
+    <description>API Name relates to legacy usage of this field - both standard and custom objects can be selected and settings are now controlled by other fields on these custom metadata records</description>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <label>Object</label>
-    <description>API Name relates to legacy usage of this field - both standard and custom objects can be selected and settings are now controlled by other fields on these custom metadata records</description>
     <referenceTo>EntityDefinition</referenceTo>
     <relationshipLabel>FormulaShare Object Settings</relationshipLabel>
     <relationshipName>FormulaShare_Std_Objcts_to_Remove_Shares</relationshipName>

@@ -149,11 +149,16 @@ public abstract inherited sharing class FormulaShareShareWithPrefixedGroups
     private static Map<String, Id> getGroupsFromNames(Set<String> groupNames) {
         Map<String, Id> groups = new Map<String, Id>();
 
+        // Group is queried without USER_MODE: this query resolves internal group IDs used to construct share records.
+        // The result is never surfaced to the user — it is used only to determine which sharing to apply.
+        // Running in user context risks QueryException for users without "View Setup and Configuration" (e.g. portal users),
+        // which would silently prevent sharing from being applied when triggered by those users.
+        //NOPMD
         for (Group grp : [
             SELECT Id, DeveloperName FROM Group
             WHERE DeveloperName IN :groupNames
             AND (Type = 'Regular' OR Type = 'Queue' OR Type = 'Organization')
-            WITH USER_MODE]) {
+            ]) {
 
             groups.put(grp.DeveloperName.toLowerCase(), grp.Id);
         }

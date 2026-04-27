@@ -4,6 +4,8 @@
     <description>Advanced sharing for admins. Configure rules to dynamically share records based on related data</description>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>FormulaShare</label>
     <logo>FormulaShare_App_Images/FormulaShare_Classic_App_Logo.jpg</logo>
     <tabs>FormulaShare_Rules_VF</tabs>

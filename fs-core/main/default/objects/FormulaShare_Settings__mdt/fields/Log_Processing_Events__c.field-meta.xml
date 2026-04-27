@@ -3,7 +3,6 @@
     <fullName>Log_Processing_Events__c</fullName>
     <defaultValue>&apos;All Sharing Updates&apos;</defaultValue>
     <description>If enabled, log records will be created in the FormulaShare Record Log and Processed Record Share objects to track the details of rule operations</description>
-    <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <label>Log Processing Events</label>
     <required>false</required>

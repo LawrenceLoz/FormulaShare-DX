@@ -3,7 +3,7 @@
     <fullName>User_Field_For_Matching__c</fullName>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>API name of the User field used to match against the record&#39;s selected Record Field. Supported types: Text, Lookup, or Formula returning Text/Id.</inlineHelpText>
+    <inlineHelpText>API name of the User field used to match against the record&apos;s selected Record Field. Supported types: Text, Lookup, or Formula returning Text/Id.</inlineHelpText>
     <label>User Field for Matching</label>
     <length>255</length>
     <required>false</required>

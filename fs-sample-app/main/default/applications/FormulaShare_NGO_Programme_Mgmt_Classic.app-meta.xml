@@ -3,6 +3,8 @@
     <defaultLandingTab>FormulaShare_Rules_VF</defaultLandingTab>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>FormulaShare NGO Programme Management</label>
     <tabs>FormulaShare_Rules_VF</tabs>
     <tabs>Donation__c</tabs>

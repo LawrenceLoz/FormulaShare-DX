@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Child_Object_Lookup_Field__c</fullName>
-    <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>If sharing is based on a child object (or an object related to this child object), indicates the field on the child object which is a lookup to the object to be shared</inlineHelpText>
     <label>Related Object 1 Lookup to Shared Object</label>

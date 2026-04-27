@@ -69,11 +69,16 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
             Map<String,Id> roleGroupIds = new Map<String,Id>();
 
             // We need two queries here because it's not possible to traverse to Related.DeveloperName (only Related.Name works oddly)
-            for(Group grp : [SELECT Id, RelatedId, Type 
-                FROM Group 
+            // Group is queried without USER_MODE: this query resolves internal role-group IDs used to construct share records.
+            // The result is never surfaced to the user — it is used only to determine which sharing to apply.
+            // Running in user context risks QueryException for users without "View Setup and Configuration" (e.g. portal users),
+            // which would silently prevent sharing from being applied when triggered by those users.
+            //NOPMD
+            for(Group grp : [SELECT Id, RelatedId, Type
+                FROM Group
                 WHERE (RelatedId IN :queryIdSet OR RelatedId IN :roleNamesToIdsMap.values())
                 AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal' OR Type = 'RoleAndSubordinates')
-                WITH USER_MODE]) {
+                ]) {
 
                 String shortRelatedToId = FormulaShareIdUtilities.get15CharacterId(grp.RelatedId);
                 String key = shortRelatedToId + grp.Type;

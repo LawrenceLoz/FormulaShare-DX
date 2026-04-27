@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Major_Donation_true_if_over_500__c</fullName>
-    <deprecated>false</deprecated>
-    <externalId>false</externalId>
     <formula>Amount__c &gt; 500</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Major Donation? (true if over £500)</label>

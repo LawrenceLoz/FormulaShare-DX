@@ -5,7 +5,6 @@ public with sharing class FormulaShareE2EBatchTest {
     @TestSetup
     public static void setup() {
 
-        // Create admin user to run tests
         FormulaShareTestUtils.setupAdmin();
 
         List<UserRole> roles = FormulaShareTestDataFactory.getRoles(2);

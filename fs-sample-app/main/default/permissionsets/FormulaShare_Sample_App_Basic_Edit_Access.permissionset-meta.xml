@@ -8,6 +8,7 @@
         <application>FormulaShare_NGO_Programme_Mgmt_Classic</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <description>Edit, Create and View All access to main sample app objects. Edit and Create only on Donations (records shared to all internal users via criteria-based sharing)</description>
     <fieldPermissions>
         <editable>true</editable>
         <field>Country__c.Finance_Manager_Role__c</field>
@@ -100,7 +101,6 @@
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>FormulaShare Sample App Basic Edit Access</label>
-    <description>Edit, Create and View All access to main sample app objects. Edit and Create only on Donations (records shared to all internal users via criteria-based sharing)</description>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
@@ -108,6 +108,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Country__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -117,6 +118,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Donation__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -126,6 +128,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Programme__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -135,6 +138,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Theme__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <tabSettings>

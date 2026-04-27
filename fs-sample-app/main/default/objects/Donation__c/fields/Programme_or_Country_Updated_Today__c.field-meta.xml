@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Programme_or_Country_Updated_Today__c</fullName>
-    <externalId>false</externalId>
     <formula>Programme_to_Support__r.LastModifiedDate &gt; NOW()-(20/1440) || Programme_to_Support__r.Country__r.LastModifiedDate &gt; NOW()-(20/1440)</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Programme or Country Updated Last 20 Min</label>

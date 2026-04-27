@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Shared_To_Field_Type__c</fullName>
-    <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>&quot;Shared To Field&quot; can contain either the 15 or 18 digit record id of the user, group or role to find the right users (select &quot;Id&quot; if so), or can contain the relevant Role Name or Group Name (select &quot;Name&quot; if this is the case)</inlineHelpText>
     <label>Shared To Field Type</label>

@@ -64,10 +64,10 @@ public with sharing class FormulaShareRulesSelectorTest {
             FormulaShareRulesSelector selector = new FormulaShareInjectionService().getRulesSelector();
             List<FormulaShareRule> rules = selector.getAllRules();
 
-            // We won't know and can't guarantee rules exist or not, so verify for both cases
+            // getAllRules() runs without security enforcement (batch/telemetry use only), so verification query matches
             List<FormulaShare_Rule__mdt> rulesByQuery = [
                 SELECT Id FROM FormulaShare_Rule__mdt
-                WHERE Object_Shared__c != null WITH USER_MODE];
+                WHERE Object_Shared__c != null];
 
             System.assertEquals(rulesByQuery.size(), rules.size(), 'Method should return the total number of rules in the org');
         }

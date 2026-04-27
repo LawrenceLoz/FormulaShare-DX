@@ -24,4 +24,4 @@ export default class FormulaShareScheduleFullBatch extends NavigationMixin(Light
     handleClose() {
         this.dispatchEvent(new CustomEvent('close'));
     }
-} 
+}
