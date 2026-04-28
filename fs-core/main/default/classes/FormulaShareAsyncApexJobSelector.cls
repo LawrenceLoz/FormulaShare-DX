@@ -1,5 +1,10 @@
 public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SObjectSelector {
 
+    // AsyncApexJob is a setup object — WITH USER_MODE throws QueryException for users lacking "View Setup and Configuration".
+    public FormulaShareAsyncApexJobSelector() {
+        super(false, DataAccess.SYSTEM_MODE);
+    }
+
     private List<String> finishedReasons = new List<String> {
         'Aborted', 'Completed', 'Failed'
     };
@@ -77,7 +82,7 @@ public inherited sharing class FormulaShareAsyncApexJobSelector extends fflib_SO
         String query = newQueryFactory()
             .setCondition('Status IN :processingAndInQueueReasons AND ApexClass.Name = :className')
             .toSOQL();
-        
+
         List<AsyncApexJob> jobs = (List<AsyncApexJob>) Database.query(query);
         return jobs.size();
     }

@@ -25,11 +25,8 @@ public inherited sharing class FormulaShareRuleInBatchSelector extends fflib_SOb
 
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
 
-    public FormulaShareRuleInBatchSelector(Boolean enforceObjectAndFieldSecurity) {
-        super(false // Do not include FieldSet fields
-            , enforceObjectAndFieldSecurity // Enforce field security if requested
-            , enforceObjectAndFieldSecurity // Enforce object security if requested
-            );
+    public FormulaShareRuleInBatchSelector() {
+        super(false, DataAccess.USER_MODE);
     }
 
     public List<Schema.SObjectField> getSObjectFieldList() {

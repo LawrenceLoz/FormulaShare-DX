@@ -192,11 +192,8 @@ public inherited sharing class FormulaShareService {
     Schema.SObjectField idField = fieldMap.get('Id');
     fieldsSet.add(idField);
 
-    // Configure to disable object and field security for tests (can't guarantee permissions of running user)
-    Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
-
     FormulaShareSObjectsSelector selector = new FormulaShareInjectionService()
-      .getSObjectsSelector(enforceObjectAndFieldSecurity, type);
+      .getSObjectsSelector(true, type);
     selector.setFields(fieldsSet);
     Database.QueryLocator ql = selector.selectAllLocator();
 
@@ -327,7 +324,6 @@ public inherited sharing class FormulaShareService {
     // Get object's share type, initialise selector and build string of parent Ids to query
     SObjectType shareObjectType = FormulaShareUtilities.getShareObject(type);
     FormulaShareSObjectSharesSelector sharesSelector = new FormulaShareSObjectSharesSelector(
-      true,
       shareObjectType,
       type
     );

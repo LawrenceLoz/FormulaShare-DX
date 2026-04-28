@@ -21,6 +21,10 @@
 
 public inherited sharing class FormulaShareBatchLogsSelector extends fflib_SObjectSelector {
 
+    public FormulaShareBatchLogsSelector() {
+        super(false, DataAccess.USER_MODE);
+    }
+
     public Schema.SObjectType getSObjectType() {
         return FormulaShare_Log__c.sObjectType;
     }

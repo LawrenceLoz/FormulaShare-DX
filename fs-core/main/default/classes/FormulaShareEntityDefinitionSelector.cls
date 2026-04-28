@@ -20,7 +20,7 @@
 **/
 
 // EntityDefinition is a Tooling API object — WITH USER_MODE is not supported on Tooling API queries.
-// WITH SECURITY_ENFORCED is the correct enforcement clause here; USER_MODE would cause a QueryException at runtime.
+// WITH SYSTEM_MODE is used here; Summer '26 removes WITH SYSTEM_MODE and USER_MODE is unsupported on Tooling API objects.
 @SuppressWarnings('PMD.ApexSOQLInjection')
 public inherited sharing class FormulaShareEntityDefinitionSelector {
 
@@ -40,7 +40,7 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
             , DetailUrl
             FROM EntityDefinition
             WHERE DurableId IN :objectEntityIds
-            WITH SECURITY_ENFORCED];
+            WITH SYSTEM_MODE];
 
         return entities;
     }
@@ -51,7 +51,7 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
                 , IsApexTriggerable, IsCustomizable, IsLayoutable
             FROM EntityDefinition
             WHERE QualifiedApiName IN :objectApiNames
-            WITH SECURITY_ENFORCED];
+            WITH SYSTEM_MODE];
 
         return entities;
     }
@@ -64,7 +64,7 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
             WHERE IsCustomSetting = FALSE
             AND IsApexTriggerable = TRUE
             AND IsCustomizable = TRUE
-            WITH SECURITY_ENFORCED
+            WITH SYSTEM_MODE
             ORDER BY Label];
         
         return entities;
@@ -75,7 +75,7 @@ public inherited sharing class FormulaShareEntityDefinitionSelector {
         FROM EntityDefinition
                           WHERE QualifiedApiName LIKE '%__mdt'
                           AND (NOT QualifiedApiName LIKE 'sdfs__FormulaShare%')
-        WITH SECURITY_ENFORCED
+        WITH SYSTEM_MODE
         ORDER BY Label];
         return entities;
     }

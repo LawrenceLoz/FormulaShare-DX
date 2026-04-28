@@ -111,7 +111,7 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
 
                 // For standard objects, query for all shares and add keys & ids to sets
                 List<SObject> sharesList;
-                FormulaShareSObjectSharesSelector sharesSelector = new FormulaShareSObjectSharesSelector(true, shareObjectType, type);
+                FormulaShareSObjectSharesSelector sharesSelector = new FormulaShareSObjectSharesSelector(shareObjectType, type);
                 if(!type.getDescribe().isCustom()) {
                     sharesList = sharesSelector.selectByParentIds(parentIdsString);
                 }
@@ -246,7 +246,7 @@ public virtual inherited sharing class FormulaShareProcessedRecordShare {
         //NOPMD
         Map<Id,Group> groupsMap = new Map<Id,Group>();
         if(!groupIdList.isEmpty()) {
-            groupsMap = new Map<Id,Group>([SELECT Id, DeveloperName, Type FROM Group WHERE Id IN :groupIdList]);
+            groupsMap = new Map<Id,Group>([SELECT Id, DeveloperName, Type FROM Group WHERE Id IN :groupIdList WITH SYSTEM_MODE]);
         }
 
         return groupsMap;

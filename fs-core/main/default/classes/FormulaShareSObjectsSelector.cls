@@ -31,11 +31,8 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
     // and that may not be filterable in SOQL (e.g. long text area fields).
     protected Set<String> selectOnlyFieldStrings = new Set<String>();
 
-    public FormulaShareSObjectsSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type) {
-        super(false // Do not include FieldSet fields
-            , enforceObjectAndFieldSecurity // Enforce field security if requested
-            , enforceObjectAndFieldSecurity // Enforce object security if requested
-            );
+    public FormulaShareSObjectsSelector(Schema.SObjectType type) {
+        super(false, DataAccess.USER_MODE);
         this.type = type;
     }
 

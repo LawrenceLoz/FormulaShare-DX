@@ -21,6 +21,10 @@
 
 public inherited sharing class FormulaShareMetricsSelector extends fflib_SObjectSelector {
 
+    public FormulaShareMetricsSelector() {
+        super(false, DataAccess.USER_MODE);
+    }
+
     public static FormulaShareMetricsSelector mock;
     public static FormulaShareMetricsSelector thisSelector;
     public static FormulaShareMetricsSelector construct() {

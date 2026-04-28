@@ -64,7 +64,7 @@ public virtual inherited sharing class FormulaShareSObjectShares {
       // delete shares if there is no sharing of any level to be applied
 
       // Batch operates on a single object and all shares will be of this type (access checked above)
-      insert shares; //NOPMD (false apexcrudviolation)
+      insert as user shares;
 
       system.debug('DML inserted shares ' + shares);
     } else {
@@ -82,7 +82,7 @@ public virtual inherited sharing class FormulaShareSObjectShares {
       system.debug('DML shares to be deleted ' + shares);
 
       // Batch operates on a single object and all shares will be of this type (access checked above)
-      delete shares;
+      delete as user shares;
     } else {
       throw new FormulaShareException(
         'Share delete failed - share object not deleteable for running user. Ensure object supports sharing and that batch running user has Modify All permission for the object'

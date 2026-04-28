@@ -26,11 +26,8 @@ public inherited sharing class FormulaShareSObjectSharesSelector extends fflib_S
     public String parentIdFieldName;
     public List<Schema.SObjectField> fields = new List<Schema.SObjectField>();
 
-    public FormulaShareSObjectSharesSelector(Boolean enforceObjectAndFieldSecurity, Schema.SObjectType type, Schema.SObjectType parentType) {
-        super(false // Do not include FieldSet fields
-            , enforceObjectAndFieldSecurity // Enforce field security if requested
-            , enforceObjectAndFieldSecurity // Enforce object security if requested
-            );
+    public FormulaShareSObjectSharesSelector(Schema.SObjectType type, Schema.SObjectType parentType) {
+        super(false, DataAccess.USER_MODE);
         this.type = type;
         this.parentType = parentType;
 

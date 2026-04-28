@@ -25,10 +25,8 @@ public inherited sharing class FormulaShareSObjectsRetrievalShared {
     List<FormulaShareRule> rules,
     Set<Id> sharedObjIdSet
   ) {
-    // Configure to disable object and field security for tests (can't guarantee permissions of running user)
-    Boolean enforceObjectAndFieldSecurity = Test.isRunningTest() ? false : true;
     FormulaShareSObjectsSelector sharedObjectSelector = new FormulaShareInjectionService()
-      .getSObjectsSelector(enforceObjectAndFieldSecurity, type);
+      .getSObjectsSelector(true, type);
 
     // Populate all details for query of shared object
     for (FormulaShareRule rule : rules) {

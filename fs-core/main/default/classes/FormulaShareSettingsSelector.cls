@@ -131,7 +131,7 @@ public inherited sharing class FormulaShareSettingsSelector {
     private List<FormulaShare_Settings__mdt> selectActiveSettingsNoCache() {
         List<String> fields = getSObjectFieldList();
         String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ','))
-            + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true';
+            + ' FROM FormulaShare_Settings__mdt WHERE Active__c = true WITH SYSTEM_MODE';
         List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }
@@ -139,8 +139,8 @@ public inherited sharing class FormulaShareSettingsSelector {
     // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     private List<FormulaShare_Settings__mdt> selectDefaultSettings() {
         List<String> fields = getSObjectFieldList();
-        String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ',')) 
-            + ' FROM FormulaShare_Settings__mdt WHERE DeveloperName = \'Default\' LIMIT 1';
+        String query = 'SELECT ' + String.escapeSingleQuotes(String.join(fields, ','))
+            + ' FROM FormulaShare_Settings__mdt WHERE DeveloperName = \'Default\' WITH SYSTEM_MODE LIMIT 1';
         List<FormulaShare_Settings__mdt> settings = (List<FormulaShare_Settings__mdt>) Database.query(query);
         return settings;
     }

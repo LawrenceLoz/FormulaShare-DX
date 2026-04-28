@@ -27,7 +27,7 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 		// Strip inaccessible fields (true parameter requests object checks as well - exception if no object access)
 		SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.CREATABLE, objList, true);
 		System.debug('Fields removed by stripInaccessible: '+securityDecision.getRemovedFields());
-		insert securityDecision.getRecords();
+		insert as user securityDecision.getRecords();
 
 		// Assign ids back to objects to enable fflibs to resolve relationships
 		Integer i = 0;
@@ -40,7 +40,7 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 	public void dmlUpdate(List<SObject> objList) {
 		SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE, objList, true);
 		System.debug('Fields removed by stripInaccessible: '+securityDecision.getRemovedFields());
-		update securityDecision.getRecords();
+		update as user securityDecision.getRecords();
 	}
 
 	@SuppressWarnings('PMD.ApexCRUDViolation') // isDeletable() is the explicit CRUD check; delete only reached when permission confirmed
@@ -53,7 +53,7 @@ public inherited sharing class FormulaShareUnitOfWorkDML implements fflib_SObjec
 
 			// If mulitple types in uow, fflibs will split these and call dmlDelete by object
 			// so we only need to check one record to know the type
-			delete objList;
+			delete as user objList;
 		}
 	}
 

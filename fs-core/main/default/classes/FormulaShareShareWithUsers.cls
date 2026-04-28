@@ -85,11 +85,14 @@ public inherited sharing class FormulaShareShareWithUsers extends FormulaShareSh
 
 
 	private static Set<Id> getActiveUsers(Set<Id> userQueryIdSet) {
+		// User is queried without USER_MODE: traversal to Profile.UserLicense is disallowed under USER_MODE
+		// for users lacking "View Setup and Configuration". Result is used only internally to filter sharing targets.
 		Map<Id,User> activeUserMap = new Map<Id,User>(
-			[SELECT Id FROM User 
-			WHERE Id IN :userQueryIdSet 
+			[SELECT Id FROM User
+			WHERE Id IN :userQueryIdSet
 			AND IsActive = TRUE
-			AND Profile.UserLicense.Name NOT IN ('Customer Community','Customer Community Login')]
+			AND Profile.UserLicense.Name NOT IN ('Customer Community','Customer Community Login')
+			WITH SYSTEM_MODE]
 		);
 		return activeUserMap.keySet();
 	}    

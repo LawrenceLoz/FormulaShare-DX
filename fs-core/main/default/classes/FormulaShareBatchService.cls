@@ -257,7 +257,7 @@ public virtual inherited sharing class FormulaShareBatchService {
 			for(FormulaShareRule rule : rulesForType) {
 				ruleNames.add(rule.developerName);
 			}
-			List<FormulaShare_Rule_in_Batch__c> ribList = new FormulaShareRuleInBatchSelector(true).getLogsForRules(ruleNames);
+			List<FormulaShare_Rule_in_Batch__c> ribList = new FormulaShareRuleInBatchSelector().getLogsForRules(ruleNames);
 			Map<String,FormulaShare_Rule_in_Batch__c> ribMap = new Map<String,FormulaShare_Rule_in_Batch__c>();
 			for(FormulaShare_Rule_in_Batch__c rib : ribList) {
 				ribMap.put(rib.FormulaShare_Rule_Name__c, rib);

@@ -1,5 +1,10 @@
 public inherited sharing class FormulaShareApexClassSelector extends fflib_SObjectSelector {
 
+    // ApexClass is a setup object — WITH USER_MODE throws QueryException for users lacking "View Setup and Configuration".
+    public FormulaShareApexClassSelector() {
+        super(false, DataAccess.SYSTEM_MODE);
+    }
+
     public Schema.SObjectType getSObjectType() {
         return ApexClass.SObjectType;
     }

@@ -124,10 +124,10 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
         else {
             String condition = 'Object_Shared__r.QualifiedApiName = \'' + objectName + '\'';
-            String query = getQueryWithCondition(condition);
+            String query = getQueryWithCondition(condition) + ' WITH SYSTEM_MODE';
             rules = Database.query(query);
         }
-        
+
 		// Create list of all jobs with relevant details for assessing scope
 		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
 
@@ -140,7 +140,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public List<FormulaShareRule> getRulesSharingObject(String objectName) {
         String condition = 'Object_Shared__r.QualifiedApiName = \'' + String.escapeSingleQuotes(objectName) + '\'';
-        String query = getQueryWithCondition(condition);
+        String query = getQueryWithCondition(condition) + ' WITH SYSTEM_MODE';
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
 		List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
@@ -182,7 +182,7 @@ public virtual inherited sharing class FormulaShareRulesSelector {
     // calculated as part of batch job and written to telemetry feature parameters
     public List<FormulaShareRule> getAllRules() {
         String condition = 'Object_Shared__c != null';
-        String query = getQueryWithCondition(condition);
+        String query = getQueryWithCondition(condition) + ' WITH SYSTEM_MODE';
         List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
         List<FormulaShareRule> rulesToReturn = mapMetadataRulesToWrapper(rules);
@@ -223,6 +223,9 @@ public virtual inherited sharing class FormulaShareRulesSelector {
             if(enforceSecurity) {
                 query += ' WITH USER_MODE';
             }
+            else {
+                query += ' WITH SYSTEM_MODE';
+            }
 
             List<FormulaShare_Rule__mdt> rules = Database.query(query);
 
@@ -237,8 +240,8 @@ public virtual inherited sharing class FormulaShareRulesSelector {
 
     // Custom metadata query results only used in apex assessment and not surfaced to users, so no need to enforce security
     public FormulaShareRule getSpecificRule(Id ruleId) {
-        String condition = 'Id = \'' + ruleId + '\' LIMIT 1';
-        String query = getQueryWithCondition(condition);
+        String condition = 'Id = \'' + ruleId + '\'';
+        String query = getQueryWithCondition(condition) + ' WITH SYSTEM_MODE LIMIT 1';
         System.debug('specific rule query: '+ query);
         List<FormulaShare_Rule__mdt> ruleInList = Database.query(query);
         FormulaShareRule ruleToReturn;

@@ -78,7 +78,7 @@ public inherited sharing class FormulaShareShareWithRoles extends FormulaShareSh
                 FROM Group
                 WHERE (RelatedId IN :queryIdSet OR RelatedId IN :roleNamesToIdsMap.values())
                 AND (Type = 'Role' OR Type = 'RoleAndSubordinatesInternal' OR Type = 'RoleAndSubordinates')
-                ]) {
+                WITH SYSTEM_MODE]) {
 
                 String shortRelatedToId = FormulaShareIdUtilities.get15CharacterId(grp.RelatedId);
                 String key = shortRelatedToId + grp.Type;

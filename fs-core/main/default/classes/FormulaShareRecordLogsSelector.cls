@@ -21,7 +21,7 @@
 
 public inherited sharing class FormulaShareRecordLogsSelector extends fflib_SObjectSelector {
     public FormulaShareRecordLogsSelector() {
-
+        super(false, DataAccess.USER_MODE);
     }
 
     public Schema.SObjectType getSObjectType() {

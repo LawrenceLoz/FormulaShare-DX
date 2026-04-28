@@ -20,7 +20,7 @@
 **/
 
 // FieldDefinition is a Tooling API object — WITH USER_MODE is not supported on Tooling API queries.
-// WITH SECURITY_ENFORCED is the correct enforcement clause here; USER_MODE would cause a QueryException at runtime.
+// WITH SYSTEM_MODE is used here; Summer '26 removes WITH SYSTEM_MODE and USER_MODE is unsupported on Tooling API objects.
 @SuppressWarnings('PMD.ApexSOQLInjection')
 public inherited sharing class FormulaShareFieldDefinitionSelector {
 
@@ -38,7 +38,7 @@ public inherited sharing class FormulaShareFieldDefinitionSelector {
             , DurableId
             FROM FieldDefinition
             WHERE DurableId IN :fieldEntityIds
-            WITH SECURITY_ENFORCED];
+            WITH SYSTEM_MODE];
 
         return fields;
     }
