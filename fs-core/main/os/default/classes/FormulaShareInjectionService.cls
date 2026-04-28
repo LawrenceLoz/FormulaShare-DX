@@ -54,10 +54,7 @@ public with sharing class FormulaShareInjectionService {
     Boolean enforceObjectAndFieldSecurity,
     Schema.SObjectType type
   ) {
-    return new FormulaShareSObjectsSelector(
-      enforceObjectAndFieldSecurity,
-      type
-    );
+    return new FormulaShareSObjectsSelector(type);
   }
 
   public FormulaShareRecursionService getRecursionService() {
