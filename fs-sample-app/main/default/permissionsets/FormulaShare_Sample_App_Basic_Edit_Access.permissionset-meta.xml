@@ -100,6 +100,10 @@
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>LightningExperienceUser</name>
+    </userPermissions>
     <label>FormulaShare Sample App Basic Edit Access</label>
     <objectPermissions>
         <allowCreate>true</allowCreate>
