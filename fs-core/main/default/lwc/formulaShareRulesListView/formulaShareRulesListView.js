@@ -285,8 +285,7 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
       }
       actions.push({
         label: "Recalculate All Sharing on " + objectLabel,
-        name: "recalculate",
-        disabled: row.recalculateNotSupported
+        name: "recalculate"
       });
     } else {
       actions.push({
@@ -510,12 +509,14 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
   @track openRecalcConfirmModal = false;
   @track recalcConfirmObjectLabel = null;
   @track recalcBatchLogsUrl = null;
+  @track recalcIsTargetedOnly = false;
   namespacePrefix = "";
   recalcRow = null;
 
   openRecalcConfirm(row) {
     this.recalcRow = row;
     this.recalcConfirmObjectLabel = row.objectLabel || "Object";
+    this.recalcIsTargetedOnly = row.recalculateIsTargetedOnly || false;
     const logObject =
       (this.namespacePrefix || "sdfs__") + "FormulaShare_Log__c";
     this.recalcBatchLogsUrl =

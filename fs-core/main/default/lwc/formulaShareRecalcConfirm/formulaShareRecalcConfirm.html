@@ -22,13 +22,28 @@
           </h2>
         </header>
         <div class="slds-modal__content slds-p-around_medium">
+          <template if:true={isTargetedOnly}>
+            <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small" role="alert">
+              <span class="slds-assistive-text">Warning</span>
+              <lightning-icon
+                icon-name="utility:warning"
+                alternative-text="Warning"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              <h2>
+                This object is configured to use Targeted Calculation Jobs Only in Object Settings.
+                This configuration is often used for objects with large data volumes where full recalculation could take a long time, so do consider this before submitting the job.
+              </h2>
+            </div>
+          </template>
           <p class="slds-m-bottom_small">
-            This will submit a batch job to recalculate sharing for&nbsp;<strong>every record</strong> of 
+            This will submit a batch job to recalculate sharing for&nbsp;<strong>every record</strong> of
             this object type. If record volumes are large, this could take some time to process. After submitting,
             track progress of the recalculation in&nbsp;<a href={batchLogsUrl} target="_blank">FormulaShare Batch Logs</a>.
           </p>
           <p class="slds-m-bottom_small">
-            To recalculate sharing for a single record only, use&nbsp;<strong>Apply Rules to a Record</strong> from 
+            To recalculate sharing for a single record only, use&nbsp;<strong>Apply Rules to a Record</strong> from
             the same actions menu.
           </p>
           <p>

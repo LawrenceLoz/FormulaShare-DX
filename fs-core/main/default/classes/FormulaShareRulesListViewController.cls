@@ -212,15 +212,15 @@ public with sharing class FormulaShareRulesListViewController {
 
     Datetime timeNow = DateTime.now();
 
-    // Get object which can only be calculated by targeted jobs (these don't allow Recalculate Sharing option)
+    // Get objects configured for targeted calculation jobs only (recalculate button shows a warning for these)
     FormulaShareRemoveSharesSelector selector = new FormulaShareInjectionService()
       .getRemoveSharesSelector();
-    Set<String> objectsNotSupportingRecalculate = selector.getObjectsWhereFullBatchUnsupported();
+    Set<String> objectsWithTargetedJobsOnly = selector.getObjectsWhereFullBatchUnsupported();
 
     for (String objectName : objectsWithRulesMap.keySet()) {
       ObjectRulesWrapper orw = new ObjectRulesWrapper();
       orw.refreshTime = timeNow;
-      orw.recalculateNotSupported = objectsNotSupportingRecalculate.contains(
+      orw.recalculateIsTargetedOnly = objectsWithTargetedJobsOnly.contains(
         objectName
       );
       List<RuleWrapper> rwList = objectsWithRulesMap.get(objectName);
@@ -292,7 +292,7 @@ public with sharing class FormulaShareRulesListViewController {
     @AuraEnabled
     public Datetime refreshTime { get; set; }
     @AuraEnabled
-    public Boolean recalculateNotSupported { get; set; }
+    public Boolean recalculateIsTargetedOnly { get; set; }
     @AuraEnabled
     public String objectLabel { get; set; }
 
