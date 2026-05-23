@@ -318,8 +318,6 @@ public virtual inherited sharing class FormulaShareBatchService {
 			updateLogAfterMetricsFail(fsLogs, e);
 			atLeastOneMetricsUpdateFailed = true;
 		}
-
-		listViewUpdate();
 	}
 
 

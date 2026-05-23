@@ -43,7 +43,15 @@ public inherited sharing class FormulaShareTestUtils {
         //  - Access AsyncApexJob object
         //  - Access standard share objects, e.g. ContactShare
         String profileName = useAdminProfile ? 'System Administrator' : 'Minimum Access - Salesforce';
-        Profile p = [SELECT Id, Name FROM Profile WHERE Name = :profileName];
+        List<Profile> pList = [SELECT Id, Name FROM Profile WHERE Name = :profileName];
+        Profile p;
+        if (!pList.isEmpty()) {
+            p = pList[0];
+        }
+        else {
+            // Fallback to standard system admin if needed - applies in patch orgs only
+            p = [SELECT Id, Name FROM Profile WHERE Name = 'System Administrator'];
+        }
 
 		//username global uniqueness is still enforced in tests 
 		//make sure we get something unique to avoid issues with parallel tests

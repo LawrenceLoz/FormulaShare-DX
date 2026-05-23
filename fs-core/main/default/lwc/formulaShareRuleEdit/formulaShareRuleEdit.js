@@ -90,9 +90,10 @@ export default class FormulaShareRuleEdit extends LightningElement {
 
         subscribe('/event/'+prefix+'FormulaShare_Rule_DML__e', -1, messageCallback).then(response => {
             //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+            this.ruleDMLSubscription = response;
         });
     }
-    
+
     subscribeToGroupsUpdateEvents(prefix) {
         const messageCallback = (response) => {
             // Only process if we're waiting for groups sync
@@ -151,7 +152,17 @@ export default class FormulaShareRuleEdit extends LightningElement {
 
         subscribe('/event/'+prefix+'FormulaShare_Setup_DML__e', -1, messageCallback).then(response => {
             //console.log('Successfully subscribed to groups update events');
+            this.setupDMLSubscription = response;
         });
+    }
+
+    disconnectedCallback() {
+        if(this.ruleDMLSubscription) {
+            unsubscribe(this.ruleDMLSubscription);
+        }
+        if(this.setupDMLSubscription) {
+            unsubscribe(this.setupDMLSubscription);
+        }
     }
 
     // Don't allow save to be enabled if it's prevented

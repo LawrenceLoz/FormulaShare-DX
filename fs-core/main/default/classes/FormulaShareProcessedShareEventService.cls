@@ -185,13 +185,6 @@ public virtual inherited sharing class FormulaShareProcessedShareEventService {
         // Query for and update, or create new metrics records
         Map<String,FormulaShareMetrics.Increment> increments = setMetricsProcessedRecords(prs.wrappedRecordShares);
 
-        // Fire event to update rules list view
-        List<String> objectLabels = new List<String>();
-        for(String objectName : eventsByType.keySet()) {
-            FormulaShareUtilities.describe(objectName).getLabel();
-        }
-        fireRulesListUpdateEvent(objectLabels);
-
         return increments;
     }
 

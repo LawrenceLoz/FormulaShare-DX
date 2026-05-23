@@ -1,7 +1,7 @@
 import { LightningElement, track, wire } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { refreshApex } from "@salesforce/apex";
-import { subscribe } from "lightning/empApi";
+import { subscribe, unsubscribe } from "lightning/empApi";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import getTreeGridData from "@salesforce/apex/FormulaShareRulesListViewController.getTreeGridData";
 import recalculateSharing from "@salesforce/apex/FormulaShareRulesListViewController.recalculateSharing";
@@ -229,8 +229,9 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
           "/event/" + prefix + "FormulaShare_List_Update__e",
           -1,
           listUpdateCallback
-        ).then(() => {
+        ).then((response) => {
           //console.log('Successfully subscribed to : ', JSON.stringify(response.channel));
+          this.listUpdateSubscription = response;
         });
 
         // Scubscribe to dml events (raised by on rule create/edit)
@@ -255,13 +256,23 @@ export default class TreeGrid extends NavigationMixin(LightningElement) {
           "/event/" + prefix + "FormulaShare_Rule_DML__e",
           -1,
           dmlUpdateCallback
-        ).then(() => {
+        ).then((response) => {
           //console.log('List component subscribed to : ', JSON.stringify(response.channel));
+          this.ruleDMLSubscription = response;
         });
       })
       .catch((error) => {
         this.showError(error, "Error getting namespace prefix");
       });
+  }
+
+  disconnectedCallback() {
+    if(this.listUpdateSubscription) {
+      unsubscribe(this.listUpdateSubscription);
+    }
+    if(this.ruleDMLSubscription) {
+      unsubscribe(this.ruleDMLSubscription);
+    }
   }
 
   supportsRelated = false;

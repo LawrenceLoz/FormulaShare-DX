@@ -273,8 +273,9 @@ public with sharing class FormulaShareRuleDetailController {
         Schema.SOBjectField field = FormulaShareUtilities.getSObjectFieldFromName(fieldApiName, type);
         Set<Schema.SOBjectField> fieldSet = new Set<Schema.SOBjectField>{field};
 
-        // Call selector method to retrieve sample data, and concatenate to a single string
-		FormulaShareSObjectsSelector soSelector = new FormulaShareInjectionService().getSObjectsSelector(true, type);
+        // Call selector method to retrieve sample data, and concatenate to a single string.
+        // Uses FormulaShareSObjectsSelectorUI (USER_MODE) so FLS is enforced for the admin user.
+        FormulaShareSObjectsSelectorUI soSelector = new FormulaShareSObjectsSelectorUI(type);
         soSelector.setFields(fieldSet);
         List<String> sampleList;
         try {

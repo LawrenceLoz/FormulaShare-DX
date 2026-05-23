@@ -31,8 +31,11 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
     // and that may not be filterable in SOQL (e.g. long text area fields).
     protected Set<String> selectOnlyFieldStrings = new Set<String>();
 
+    // Runs in SYSTEM_MODE: this selector is used exclusively by background automation
+    // (trigger pipeline, batch jobs) which must query rule-referenced fields regardless
+    // of the running user's FLS. UI-facing queries use FormulaShareSObjectsSelectorUI instead.
     public FormulaShareSObjectsSelector(Schema.SObjectType type) {
-        super(false, DataAccess.USER_MODE);
+        super(false, DataAccess.SYSTEM_MODE);
         this.type = type;
     }
 
@@ -133,29 +136,6 @@ public virtual inherited sharing class FormulaShareSObjectsSelector extends ffli
         return queriedRecords;
     }
 
-
-    // Returns values for first few records with non-blank field values
-    public List<String> selectSampleData(Integer queryLimit) {
-        fields.addAll(fieldsSet);
-
-        Schema.SObjectField queryField = fields[0];
-        String queryFieldName = queryField.getDescribe().getName();
-
-        fflib_QueryFactory sampleQueryFactory = newQueryFactory();
-        List<SObject> results = Database.query(
-            sampleQueryFactory
-            .setCondition(queryFieldName + ' != null')
-            .setLimit(queryLimit)
-            .toSOQL()
-        );
-
-        List<String> returnList = new List<String>();
-        for(SObject so : results) {
-            String value = String.valueOf(so.get(queryFieldName));
-            returnList.add(value);
-        }
-        return returnList;
-    }
 
 
 }
