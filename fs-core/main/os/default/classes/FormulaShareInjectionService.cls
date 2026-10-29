@@ -65,6 +65,11 @@ public with sharing class FormulaShareInjectionService {
     return new FormulaShareRegularJobs();
   }
 
+  // Groups sync isn't available in the open-source version
+  public Schedulable getGroupsSyncSchedulable() {
+    return null;
+  }
+
   public FormulaShareProcessedShareEventHandler getProcessedShareEventHandler() {
     return new FormulaShareProcessedShareEventHandler();
   }

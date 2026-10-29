@@ -21,7 +21,7 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
 
       // WHEN - Get the scheduled job info
       FormulaShareLWCSchedulingService.ScheduledJobInfo jobInfo =
-          FormulaShareLWCSchedulingService.getCurrentlyScheduledCron();
+          FormulaShareLWCSchedulingService.getCurrentlyScheduledCron(null);
 
       Test.stopTest();
 
@@ -47,7 +47,7 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
 
     // WHEN - Get the scheduled job info
     FormulaShareLWCSchedulingService.ScheduledJobInfo jobInfo =
-        FormulaShareLWCSchedulingService.getCurrentlyScheduledCron();
+        FormulaShareLWCSchedulingService.getCurrentlyScheduledCron(null);
 
     Test.stopTest();
 
@@ -73,7 +73,7 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
     String jobName = 'Test FS Schedule Job';
 
     Test.startTest();
-    Boolean result = FormulaShareLWCSchedulingService.scheduleJob(cronExp, jobName);
+    Boolean result = FormulaShareLWCSchedulingService.scheduleJob(cronExp, jobName, null);
     Test.stopTest();
 
     System.assert(result, 'scheduleJob should return true on success');
@@ -83,7 +83,7 @@ public with sharing class FormulaShareLWCSchedulingServiceTest {
   @IsTest
   static void testScheduleJob_failsOnInvalidCron() {
     Test.startTest();
-    Boolean result = FormulaShareLWCSchedulingService.scheduleJob('INVALID_CRON', 'Bad Job');
+    Boolean result = FormulaShareLWCSchedulingService.scheduleJob('INVALID_CRON', 'Bad Job', null);
     Test.stopTest();
 
     System.assert(!result, 'scheduleJob should return false when an exception is thrown');

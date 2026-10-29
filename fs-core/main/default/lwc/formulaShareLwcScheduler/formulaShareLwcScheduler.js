@@ -1,11 +1,15 @@
-import { LightningElement, track } from "lwc";
+import { LightningElement, api, track } from "lwc";
 import getCurrentlyScheduledCron from "@salesforce/apex/FormulaShareLWCSchedulingService.getCurrentlyScheduledCron";
 import scheduleJob from "@salesforce/apex/FormulaShareLWCSchedulingService.scheduleJob";
 import deleteScheduledJob from "@salesforce/apex/FormulaShareLWCSchedulingService.deleteScheduledJob";
 import LOCALE from "@salesforce/i18n/locale";
 
 export default class LwcScheduler extends LightningElement {
-  cronJobName = "FormulaShare Full Recalculation";
+  // Defaults schedule the full recalculation. Set job-type="groupsSync" (with a suitable job name and
+  // time label) to schedule FormulaShare groups synchronisation instead
+  @api jobType;
+  @api cronJobName = "FormulaShare Full Recalculation";
+  @api timeLabel = "Full Recalculation Starts At";
   
   // Currently scheduled job details
   @track currentCronAsTime;
@@ -69,7 +73,7 @@ export default class LwcScheduler extends LightningElement {
    */
 
   getScheduledCron() {
-    getCurrentlyScheduledCron()
+    getCurrentlyScheduledCron({ jobType: this.jobType })
       .then(result => {
         if (!result) {
           this.state = "schedule";
@@ -209,7 +213,8 @@ export default class LwcScheduler extends LightningElement {
             // Only schedule new job if delete was successful
             return scheduleJob({
               cronString: this.selectedCronString,
-              cronJobName: this.cronJobName
+              cronJobName: this.cronJobName,
+              jobType: this.jobType
             });
           } else {
             throw new Error('Failed to delete existing job');
@@ -233,7 +238,8 @@ export default class LwcScheduler extends LightningElement {
     else {
       scheduleJob({
         cronString: this.selectedCronString,
-        cronJobName: this.cronJobName
+        cronJobName: this.cronJobName,
+        jobType: this.jobType
       })
         .then(result => {
           if (result) {

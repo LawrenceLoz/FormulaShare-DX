@@ -42,11 +42,16 @@ public with sharing class FormulaShareLWCSchedulingService {
     return Datetime.now();
   }
 
+  // Job types supported by the scheduler component. Blank is treated as the full recalculation
+  public static final String JOB_TYPE_GROUPS_SYNC = 'groupsSync';
+
   @AuraEnabled
-  public static ScheduledJobInfo getCurrentlyScheduledCron() {
+  public static ScheduledJobInfo getCurrentlyScheduledCron(String jobType) {
 
     // Return both FormulaShareSchedulableSubmitter and FormulaShareProcessSchedulable in case wrong class is scheduled
-    List<String> classNames = new List<String>{'FormulaShareProcessSchedulable', 'FormulaShareSchedulableSubmitter'};
+    List<String> classNames = jobType == JOB_TYPE_GROUPS_SYNC
+      ? new List<String>{'FormulaShareGroupsSyncSchedulable'}
+      : new List<String>{'FormulaShareProcessSchedulable', 'FormulaShareSchedulableSubmitter'};
     List<AsyncApexJob> asyncApexJobs = new FormulaShareAsyncApexJobSelector().getScheduledJobsWithCronTriggerFields(classNames);
 
     // Construct ScheduledJobInfo from AsyncApexJob if one exists
@@ -95,9 +100,15 @@ public with sharing class FormulaShareLWCSchedulingService {
   }
 
   @AuraEnabled
-  public static Boolean scheduleJob(String cronString, String cronJobName) {
+  public static Boolean scheduleJob(String cronString, String cronJobName, String jobType) {
     try {
-      FormulaShareProcessSchedulable scheduler = new FormulaShareProcessSchedulable();
+      // Groups sync schedulable is provided by the app layer (null where groups sync isn't available)
+      Schedulable scheduler = jobType == JOB_TYPE_GROUPS_SYNC
+        ? new FormulaShareInjectionService().getGroupsSyncSchedulable()
+        : new FormulaShareProcessSchedulable();
+      if (scheduler == null) {
+        return false;
+      }
       System.schedule(cronJobName, cronString, scheduler);
       return true;
     } catch (Exception e) {
